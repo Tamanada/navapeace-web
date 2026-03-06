@@ -398,7 +398,13 @@
   </div>
 
   <script>
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Safe Supabase init
+    let sbClient = null;
+    try {
+      sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch(e) {
+      console.warn('Supabase init failed:', e.message);
+    }
 
     document.getElementById('peaceForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -407,17 +413,18 @@
       btn.disabled = true;
 
       const country = document.getElementById('country').value;
-      const age     = parseInt(document.getElementById('age').value, 10);
-      const gender  = document.getElementById('gender').value;
+      const age     = parseInt(document.getElementById('age').value, 10) || null;
+      const gender  = document.getElementById('gender').value || null;
 
-      try {
-        const { error } = await supabase
-          .from('peace_votes')
-          .insert({ country, age, gender });
-
-        if (error) console.warn('Supabase insert error:', error.message);
-      } catch (err) {
-        console.warn('Supabase unavailable:', err.message);
+      if (sbClient) {
+        try {
+          const { error } = await sbClient
+            .from('peace_votes')
+            .insert({ country, age, gender });
+          if (error) console.warn('Supabase insert error:', error.message);
+        } catch (err) {
+          console.warn('Supabase unavailable:', err.message);
+        }
       }
 
       // Always redirect to the map
