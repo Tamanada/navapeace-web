@@ -400,7 +400,16 @@
   </div>
 
   <script>
-    // Safe Supabase init
+    // ── Vérification vote du jour (localStorage) ──────────────────
+    const TODAY = new Date().toISOString().split('T')[0]; // "2026-03-06"
+    const STORAGE_KEY = 'nava_peace_voted';
+
+    if (localStorage.getItem(STORAGE_KEY) === TODAY) {
+      // Déjà voté aujourd'hui → carte directement
+      window.location.replace('map.html');
+    }
+
+    // ── Safe Supabase init ────────────────────────────────────────
     let sbClient = null;
     try {
       sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -429,7 +438,10 @@
         }
       }
 
-      // Always redirect to the map
+      // Enregistrer le vote du jour
+      localStorage.setItem(STORAGE_KEY, TODAY);
+
+      // Toujours rediriger vers la carte
       window.location.href = 'map.html';
     });
   </script>
