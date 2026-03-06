@@ -163,6 +163,23 @@
       height: 32px;
       background: rgba(255,255,255,0.25);
     }
+
+    /* ── PERSONAL STREAK ── */
+    .personal-strip {
+      font-size: 10px;
+      letter-spacing: 2.5px;
+      color: rgba(255,255,255,0.7);
+      text-transform: uppercase;
+      margin-top: -8px;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+
+    .personal-strip span {
+      color: #fff;
+      font-size: 13px;
+      font-weight: 400;
+    }
   </style>
 </head>
 <body>
@@ -195,6 +212,11 @@
       <span class="num" id="cnt-timer" style="font-size:17px;letter-spacing:1.5px;">0D 00:00:00</span>
       <span class="lbl">SINCE LAUNCH</span>
     </div>
+  </div>
+
+  <!-- PERSONAL STREAK -->
+  <div class="personal-strip" id="personal-strip" style="display:none">
+    YOU HAVE CHOSEN PEACE <span id="personal-days">0</span> DAY(S) IN A ROW
   </div>
 
   <!-- MAP -->
@@ -533,6 +555,15 @@
 
     wordSeries.data.setAll(wordData);
   }
+
+  // ── Affichage du compteur de jours personnels ────────────────────
+  (function() {
+    const days = parseInt(localStorage.getItem('nava_peace_days') || '0', 10);
+    if (days > 0) {
+      document.getElementById('personal-days').textContent = days;
+      document.getElementById('personal-strip').style.display = 'block';
+    }
+  })();
 
   initTimer();
   initMap();

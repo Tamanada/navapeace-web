@@ -438,8 +438,10 @@
         }
       }
 
-      // Enregistrer le vote du jour
+      // Enregistrer le vote du jour + incrémenter le compteur de jours
       localStorage.setItem(STORAGE_KEY, TODAY);
+      const prevDays = parseInt(localStorage.getItem('nava_peace_days') || '0', 10);
+      localStorage.setItem('nava_peace_days', prevDays + 1);
 
       // Toujours rediriger vers la carte
       window.location.href = 'map.html';
