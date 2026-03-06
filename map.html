@@ -67,6 +67,8 @@
       display: flex;
       gap: 28px;
       margin-bottom: 16px;
+      flex-wrap: nowrap;
+      justify-content: center;
     }
 
     .counter-item {
@@ -97,6 +99,21 @@
       background: rgba(255,255,255,0.3);
       height: 40px;
       align-self: center;
+    }
+
+    /* ── MOBILE : grille 2×2 ── */
+    @media (max-width: 540px) {
+      .counter-strip {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px 24px;
+        margin-bottom: 14px;
+      }
+      .counter-sep { display: none; }
+      .counter-item .num { font-size: 22px; }
+      #cnt-timer { font-size: 15px !important; letter-spacing: 1px !important; }
+      .counter-item .lbl { font-size: 8px; letter-spacing: 1.5px; }
+      .personal-strip { font-size: 9px; letter-spacing: 1.5px; }
     }
 
     /* ── MAP CARD ── */
