@@ -415,16 +415,13 @@
           .from('peace_votes')
           .insert({ country, age, gender });
 
-        if (error) throw error;
-
-        // Redirect to the map after successful submission
-        window.location.href = 'map.html';
+        if (error) console.warn('Supabase insert error:', error.message);
       } catch (err) {
-        console.error(err);
-        btn.textContent = 'JOIN THE PEACE MAP';
-        btn.disabled = false;
-        alert('Something went wrong. Please try again.');
+        console.warn('Supabase unavailable:', err.message);
       }
+
+      // Always redirect to the map
+      window.location.href = 'map.html';
     });
   </script>
 </body>
