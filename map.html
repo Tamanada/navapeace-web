@@ -171,24 +171,29 @@
   <div class="header">
     <img src="logo.png" alt="NAVA PEACE" />
     <h1>NAVA PEACE</h1>
-    <p class="tagline">Today Humanity choose Peace</p>
+    <p class="tagline">TODAY HUMANITY CHOOSE PEACE</p>
   </div>
 
   <!-- COUNTER -->
   <div class="counter-strip">
     <div class="counter-item">
-      <span class="num" id="cnt-people">2 847</span>
-      <span class="lbl">Voices of Peace</span>
+      <span class="num" id="cnt-people">—</span>
+      <span class="lbl">VOICES OF PEACE</span>
     </div>
     <div class="counter-sep"></div>
     <div class="counter-item">
-      <span class="num" id="cnt-countries">134</span>
-      <span class="lbl">Countries</span>
+      <span class="num" id="cnt-countries">—</span>
+      <span class="lbl">COUNTRIES</span>
     </div>
     <div class="counter-sep"></div>
     <div class="counter-item">
-      <span class="num" id="cnt-today">+38</span>
-      <span class="lbl">Today</span>
+      <span class="num" id="cnt-today">—</span>
+      <span class="lbl">TODAY</span>
+    </div>
+    <div class="counter-sep"></div>
+    <div class="counter-item">
+      <span class="num" id="cnt-timer" style="font-size:17px;letter-spacing:1.5px;">0D 00:00:00</span>
+      <span class="lbl">SINCE LAUNCH</span>
     </div>
   </div>
 
@@ -297,6 +302,21 @@
     {country:"Portugal",user_count:57,lat:39.4,lng:-8.2},
   ];
 
+  // ── Chronomètre depuis le lancement ─────────────────────────────
+  function initTimer() {
+    const LAUNCH = new Date('2026-03-06T00:00:00Z');
+    function tick() {
+      const diff = Math.max(0, Date.now() - LAUNCH.getTime());
+      const days = Math.floor(diff / 86400000);
+      const h    = Math.floor((diff % 86400000) / 3600000).toString().padStart(2,'0');
+      const m    = Math.floor((diff % 3600000)  / 60000).toString().padStart(2,'0');
+      const s    = Math.floor((diff % 60000)    / 1000).toString().padStart(2,'0');
+      document.getElementById('cnt-timer').textContent = `${days}D ${h}:${m}:${s}`;
+    }
+    tick();
+    setInterval(tick, 1000);
+  }
+
   // ── Initialisation Supabase & chargement des données ────────────
   async function loadPeaceData() {
     const isConfigured = SUPABASE_URL && !SUPABASE_URL.includes('XXXXXXX');
@@ -304,19 +324,26 @@
     if (isConfigured) {
       try {
         const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Tous les votes
         const { data, error } = await sb
           .from('peace_votes')
-          .select('country')
+          .select('country, created_at')
           .not('country', 'is', null);
 
         if (error) throw error;
+
+        // Votes d'aujourd'hui
+        const todayStr = new Date().toISOString().split('T')[0];
+        const todayCount = data.filter(r => r.created_at && r.created_at.startsWith(todayStr)).length;
+        document.getElementById('cnt-today').textContent = '+' + todayCount.toLocaleString('fr-FR');
 
         // Agréger par pays
         const counts = {};
         data.forEach(r => { counts[r.country] = (counts[r.country] || 0) + 1; });
 
         const rows = Object.entries(counts).map(([country, count]) => {
-          const coords = COUNTRY_COORDS[country] || {lat:0,lng:0};
+          const coords = COUNTRY_COORDS[country] || {lat:0,lon:0};
           return { country, user_count: count, lat: coords.lat, lng: coords.lon };
         }).filter(r => r.lat !== 0);
 
@@ -507,6 +534,7 @@
     wordSeries.data.setAll(wordData);
   }
 
+  initTimer();
   initMap();
   </script>
 
