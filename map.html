@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NAVA PEACE – Peace Map</title>
+  <link href="https://fonts.cdnfonts.com/css/nasalization" rel="stylesheet" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase_config.js"></script>
+
+  <!-- amCharts 5 -->
+  <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/map.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nasalization', Arial, sans-serif;
+      background: radial-gradient(ellipse at 50% 30%, #6DD5F5 0%, #3AACDF 45%, #1E8EC4 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 28px 16px 0;
+      color: #fff;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .header img {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+      filter: drop-shadow(0 3px 10px rgba(255,255,255,0.4));
+      margin-bottom: 10px;
+    }
+
+    .header h1 {
+      font-size: 22px;
+      font-weight: 400;
+      letter-spacing: 5px;
+      text-shadow: 0 1px 16px rgba(255,255,255,0.4);
+    }
+
+    .header .tagline {
+      font-size: 10px;
+      letter-spacing: 2.5px;
+      color: #F0EDE4;
+      opacity: 0.8;
+      margin-top: 4px;
+    }
+
+    /* ── COUNTER STRIP ── */
+    .counter-strip {
+      display: flex;
+      gap: 28px;
+      margin-bottom: 16px;
+    }
+
+    .counter-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .counter-item .num {
+      font-size: 26px;
+      font-weight: 400;
+      letter-spacing: 2px;
+      color: #fff;
+      text-shadow: 0 0 20px rgba(255,255,255,0.5);
+    }
+
+    .counter-item .lbl {
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: #F0EDE4;
+      opacity: 0.7;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .counter-sep {
+      width: 1px;
+      background: rgba(255,255,255,0.3);
+      height: 40px;
+      align-self: center;
+    }
+
+    /* ── MAP CARD ── */
+    .map-card {
+      width: 100%;
+      max-width: 900px;
+      background: rgba(247,247,241,0.12);
+      border: 1.5px solid rgba(255,255,255,0.4);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(20,80,130,0.2);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      flex-shrink: 0;
+    }
+
+    #chartdiv {
+      width: 100%;
+      height: 420px;
+    }
+
+    /* ── SOCIALS ── */
+    .socials-bar {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 32px;
+      padding: 22px 0 28px;
+      margin-top: auto;
+    }
+
+    .social-link {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      color: rgba(255,255,255,0.75);
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .social-link:hover {
+      color: #fff;
+      transform: translateY(-3px);
+    }
+
+    .social-link svg {
+      width: 26px;
+      height: 26px;
+      fill: currentColor;
+    }
+
+    .social-link span {
+      font-size: 8.5px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      opacity: 0.8;
+    }
+
+    .social-divider {
+      width: 1px;
+      height: 32px;
+      background: rgba(255,255,255,0.25);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <img src="logo.png" alt="NAVA PEACE" />
+    <h1>NAVA PEACE</h1>
+    <p class="tagline">Today Humanity choose Peace</p>
+  </div>
+
+  <!-- COUNTER -->
+  <div class="counter-strip">
+    <div class="counter-item">
+      <span class="num" id="cnt-people">2 847</span>
+      <span class="lbl">Voices of Peace</span>
+    </div>
+    <div class="counter-sep"></div>
+    <div class="counter-item">
+      <span class="num" id="cnt-countries">134</span>
+      <span class="lbl">Countries</span>
+    </div>
+    <div class="counter-sep"></div>
+    <div class="counter-item">
+      <span class="num" id="cnt-today">+38</span>
+      <span class="lbl">Today</span>
+    </div>
+  </div>
+
+  <!-- MAP -->
+  <div class="map-card">
+    <div id="chartdiv"></div>
+  </div>
+
+  <!-- SOCIALS -->
+  <div class="socials-bar">
+
+    <!-- X (Twitter) -->
+    <a href="https://x.com/NAVAPEACEWORLD" target="_blank" class="social-link" aria-label="X">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.261 5.632 5.903-5.632Zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+      </svg>
+      <span>X</span>
+    </a>
+
+    <div class="social-divider"></div>
+
+    <!-- Instagram -->
+    <a href="https://www.instagram.com/invites/contact/?utm_source=ig_contact_invite&utm_medium=copy_link&utm_content=10kin9m4" target="_blank" class="social-link" aria-label="Instagram">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.334 3.608 1.308.975.975 1.246 2.242 1.308 3.608.058 1.265.069 1.645.069 4.85s-.011 3.585-.069 4.85c-.062 1.366-.333 2.633-1.308 3.608-.975.975-2.242 1.246-3.608 1.308-1.265.058-1.645.069-4.85.069s-3.585-.011-4.85-.069c-1.366-.062-2.633-.333-3.608-1.308-.975-.975-1.246-2.242-1.308-3.608C2.175 15.585 2.163 15.205 2.163 12s.012-3.584.07-4.85c.062-1.366.333-2.633 1.308-3.608.975-.975 2.242-1.246 3.608-1.308C8.416 2.175 8.796 2.163 12 2.163Zm0-2.163C8.741 0 8.332.014 7.052.072 5.197.157 3.355.673 1.946 2.082.537 3.491.021 5.333 0 7.188-.014 8.468 0 8.877 0 12s-.014 3.532.072 4.812c.157 1.855.673 3.697 2.082 5.106C3.491 23.327 5.333 23.843 7.188 24c1.28.086 1.689.072 4.812.072s3.532.014 4.812-.072c1.855-.157 3.697-.673 5.106-2.082C23.327 20.509 23.843 18.667 24 16.812c.086-1.28.072-1.689.072-4.812s.014-3.532-.072-4.812c-.157-1.855-.673-3.697-2.082-5.106C20.509.673 18.667.157 16.812 0 15.532-.014 15.123 0 12 0Zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324ZM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881Z"/>
+      </svg>
+      <span>Instagram</span>
+    </a>
+
+
+  </div>
+
+  <script>
+  // ── Coordonnées approximatives par pays ─────────────────────────
+  const COUNTRY_COORDS = {
+    "Afghanistan":{lat:33.9,lon:67.7},"Albania":{lat:41.2,lon:20.2},"Algeria":{lat:28.0,lon:1.7},
+    "Angola":{lat:-11.2,lon:17.9},"Argentina":{lat:-38.4,lon:-63.6},"Armenia":{lat:40.1,lon:45.0},
+    "Australia":{lat:-25.3,lon:133.8},"Austria":{lat:47.5,lon:14.6},"Azerbaijan":{lat:40.1,lon:47.6},
+    "Bangladesh":{lat:23.7,lon:90.4},"Belarus":{lat:53.7,lon:27.9},"Belgium":{lat:50.5,lon:4.5},
+    "Benin":{lat:9.3,lon:2.3},"Bolivia":{lat:-16.3,lon:-63.6},"Bosnia and Herzegovina":{lat:44.2,lon:17.7},
+    "Brazil":{lat:-14.2,lon:-51.9},"Bulgaria":{lat:42.7,lon:25.5},"Burkina Faso":{lat:12.4,lon:-1.6},
+    "Cambodia":{lat:12.6,lon:104.9},"Cameroon":{lat:3.8,lon:11.5},"Canada":{lat:56.1,lon:-106.3},
+    "Chile":{lat:-35.7,lon:-71.5},"China":{lat:35.9,lon:104.2},"Colombia":{lat:4.6,lon:-74.3},
+    "Congo (Kinshasa)":{lat:-4.0,lon:21.8},"Costa Rica":{lat:9.7,lon:-83.8},"Croatia":{lat:45.1,lon:15.2},
+    "Cuba":{lat:21.5,lon:-79.0},"Czech Republic":{lat:49.8,lon:15.5},"Denmark":{lat:56.3,lon:9.5},
+    "Dominican Republic":{lat:18.7,lon:-70.2},"Ecuador":{lat:-1.8,lon:-78.2},"Egypt":{lat:26.8,lon:30.8},
+    "El Salvador":{lat:13.8,lon:-88.9},"Estonia":{lat:58.6,lon:25.0},"Ethiopia":{lat:9.1,lon:40.5},
+    "Finland":{lat:61.9,lon:25.7},"France":{lat:46.2,lon:2.2},"Gabon":{lat:-0.8,lon:11.6},
+    "Germany":{lat:51.2,lon:10.4},"Ghana":{lat:7.9,lon:-1.0},"Greece":{lat:39.1,lon:21.8},
+    "Guatemala":{lat:15.8,lon:-90.2},"Guinea":{lat:11.0,lon:-10.9},"Haiti":{lat:19.0,lon:-72.3},
+    "Honduras":{lat:15.2,lon:-86.2},"Hungary":{lat:47.2,lon:19.5},"Iceland":{lat:64.9,lon:-18.5},
+    "India":{lat:20.6,lon:78.9},"Indonesia":{lat:-0.8,lon:113.9},"Iran":{lat:32.4,lon:53.7},
+    "Iraq":{lat:33.2,lon:43.7},"Ireland":{lat:53.4,lon:-8.2},"Israel":{lat:31.0,lon:34.9},
+    "Italy":{lat:41.9,lon:12.6},"Jamaica":{lat:18.1,lon:-77.3},"Japan":{lat:36.2,lon:138.3},
+    "Jordan":{lat:30.6,lon:36.2},"Kazakhstan":{lat:48.0,lon:66.9},"Kenya":{lat:-0.0,lon:37.9},
+    "Kuwait":{lat:29.3,lon:47.5},"Laos":{lat:19.9,lon:102.5},"Latvia":{lat:56.9,lon:24.6},
+    "Lebanon":{lat:33.9,lon:35.9},"Libya":{lat:26.3,lon:17.2},"Lithuania":{lat:55.2,lon:23.9},
+    "Luxembourg":{lat:49.8,lon:6.1},"Madagascar":{lat:-18.8,lon:46.9},"Malawi":{lat:-13.3,lon:34.3},
+    "Malaysia":{lat:4.2,lon:101.9},"Mali":{lat:17.6,lon:-2.0},"Malta":{lat:35.9,lon:14.4},
+    "Mauritania":{lat:21.0,lon:-10.9},"Mexico":{lat:23.6,lon:-102.6},"Moldova":{lat:47.4,lon:28.4},
+    "Mongolia":{lat:46.9,lon:103.8},"Montenegro":{lat:42.7,lon:19.4},"Morocco":{lat:31.8,lon:-7.1},
+    "Mozambique":{lat:-18.7,lon:35.5},"Myanmar":{lat:16.9,lon:96.1},"Namibia":{lat:-22.0,lon:17.1},
+    "Nepal":{lat:28.4,lon:84.1},"Netherlands":{lat:52.1,lon:5.3},"New Zealand":{lat:-40.9,lon:174.9},
+    "Nicaragua":{lat:12.9,lon:-85.2},"Niger":{lat:17.6,lon:8.1},"Nigeria":{lat:9.1,lon:8.7},
+    "North Korea":{lat:40.3,lon:127.5},"Norway":{lat:60.5,lon:8.5},"Oman":{lat:21.5,lon:55.9},
+    "Pakistan":{lat:30.4,lon:69.3},"Palestine":{lat:31.9,lon:35.2},"Panama":{lat:8.5,lon:-80.8},
+    "Paraguay":{lat:-23.4,lon:-58.4},"Peru":{lat:-9.2,lon:-75.0},"Philippines":{lat:12.9,lon:121.8},
+    "Poland":{lat:51.9,lon:19.1},"Portugal":{lat:39.4,lon:-8.2},"Qatar":{lat:25.4,lon:51.2},
+    "Romania":{lat:45.9,lon:24.9},"Russia":{lat:61.5,lon:105.3},"Rwanda":{lat:-1.9,lon:29.9},
+    "Saudi Arabia":{lat:23.9,lon:45.1},"Senegal":{lat:14.5,lon:-14.5},"Serbia":{lat:44.0,lon:21.0},
+    "Singapore":{lat:1.4,lon:103.8},"Slovakia":{lat:48.7,lon:19.7},"Slovenia":{lat:46.2,lon:14.8},
+    "Somalia":{lat:5.2,lon:46.2},"South Africa":{lat:-30.6,lon:22.9},"South Korea":{lat:35.9,lon:127.8},
+    "South Sudan":{lat:6.9,lon:31.3},"Spain":{lat:40.5,lon:-3.7},"Sri Lanka":{lat:7.9,lon:80.8},
+    "Sudan":{lat:12.9,lon:30.2},"Suriname":{lat:3.9,lon:-56.0},"Sweden":{lat:60.1,lon:18.6},
+    "Switzerland":{lat:46.8,lon:8.2},"Syria":{lat:34.8,lon:38.9},"Taiwan":{lat:23.7,lon:121.0},
+    "Tanzania":{lat:-6.4,lon:34.9},"Thailand":{lat:15.9,lon:100.9},"Togo":{lat:8.6,lon:0.8},
+    "Tunisia":{lat:33.9,lon:9.5},"Turkey":{lat:38.9,lon:35.2},"Uganda":{lat:1.4,lon:32.3},
+    "Ukraine":{lat:48.4,lon:31.2},"United Arab Emirates":{lat:23.4,lon:53.8},
+    "United Kingdom":{lat:55.4,lon:-3.4},"United States":{lat:37.1,lon:-95.7},
+    "Uruguay":{lat:-32.5,lon:-55.8},"Uzbekistan":{lat:41.4,lon:64.6},"Venezuela":{lat:6.4,lon:-66.6},
+    "Vietnam":{lat:14.1,lon:108.3},"Yemen":{lat:15.6,lon:48.5},"Zambia":{lat:-13.1,lon:27.8},
+    "Zimbabwe":{lat:-19.0,lon:29.2}
+  };
+
+  // ── Données mock (affichées si Supabase non configuré) ──────────
+  const MOCK_DATA = [
+    {country:"France",user_count:312,lat:46.2,lng:2.2},
+    {country:"United States",user_count:487,lat:37.1,lng:-95.7},
+    {country:"Brazil",user_count:198,lat:-14.2,lng:-51.9},
+    {country:"India",user_count:263,lat:20.6,lng:78.9},
+    {country:"Germany",user_count:154,lat:51.2,lng:10.4},
+    {country:"Japan",user_count:142,lat:36.2,lng:138.3},
+    {country:"South Africa",user_count:87,lat:-30.6,lng:22.9},
+    {country:"Australia",user_count:119,lat:-25.3,lng:133.8},
+    {country:"Canada",user_count:167,lat:56.1,lng:-106.3},
+    {country:"United Kingdom",user_count:201,lat:55.4,lng:-3.4},
+    {country:"Italy",user_count:110,lat:41.9,lng:12.6},
+    {country:"Spain",user_count:98,lat:40.5,lng:-3.7},
+    {country:"Netherlands",user_count:88,lat:52.1,lng:5.3},
+    {country:"Nigeria",user_count:93,lat:9.1,lng:8.7},
+    {country:"South Korea",user_count:72,lat:35.9,lng:127.8},
+    {country:"Philippines",user_count:82,lat:12.9,lng:121.8},
+    {country:"Colombia",user_count:67,lat:4.6,lng:-74.3},
+    {country:"Sweden",user_count:66,lat:60.1,lng:18.6},
+    {country:"Morocco",user_count:61,lat:31.8,lng:-7.1},
+    {country:"Portugal",user_count:57,lat:39.4,lng:-8.2},
+  ];
+
+  // ── Initialisation Supabase & chargement des données ────────────
+  async function loadPeaceData() {
+    const isConfigured = SUPABASE_URL && !SUPABASE_URL.includes('XXXXXXX');
+
+    if (isConfigured) {
+      try {
+        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { data, error } = await sb
+          .from('peace_votes')
+          .select('country')
+          .not('country', 'is', null);
+
+        if (error) throw error;
+
+        // Agréger par pays
+        const counts = {};
+        data.forEach(r => { counts[r.country] = (counts[r.country] || 0) + 1; });
+
+        const rows = Object.entries(counts).map(([country, count]) => {
+          const coords = COUNTRY_COORDS[country] || {lat:0,lng:0};
+          return { country, user_count: count, lat: coords.lat, lng: coords.lon };
+        }).filter(r => r.lat !== 0);
+
+        return rows.length > 0 ? rows : MOCK_DATA;
+      } catch(e) {
+        console.warn('Supabase non disponible, données mock utilisées.', e);
+        return MOCK_DATA;
+      }
+    }
+    return MOCK_DATA;
+  }
+
+  // ── Rendu amCharts 5 ────────────────────────────────────────────
+  async function initMap() {
+    const peaceData = await loadPeaceData();
+
+    // Mettre à jour les compteurs
+    const total = peaceData.reduce((s, r) => s + r.user_count, 0);
+    document.getElementById('cnt-people').textContent = total.toLocaleString('fr-FR');
+    document.getElementById('cnt-countries').textContent = peaceData.length;
+
+    const root = am5.Root.new("chartdiv");
+    root.setThemes([am5themes_Animated.new(root)]);
+
+    const chart = root.container.children.push(
+      am5map.MapChart.new(root, {
+        projection: am5map.geoNaturalEarth1(),
+        panX: "translateX",
+        panY: "translateY",
+        wheelY: "zoom"
+      })
+    );
+
+    // Pays polygons
+    const polygonSeries = chart.series.push(
+      am5map.MapPolygonSeries.new(root, {
+        geoJSON: am5geodata_worldLow,
+        exclude: ["AQ"]
+      })
+    );
+    polygonSeries.mapPolygons.template.setAll({
+      fill: am5.color(0xFFFFFF),
+      fillOpacity: 0.18,
+      stroke: am5.color(0xFFFFFF),
+      strokeOpacity: 0.35,
+      strokeWidth: 0.6,
+      tooltipText: "{name}",
+      interactive: true
+    });
+    polygonSeries.mapPolygons.template.states.create("hover", {
+      fillOpacity: 0.38,
+      fill: am5.color(0xF0EDE4)
+    });
+
+    // Bulles pulsantes
+    const maxVal = Math.max(...peaceData.map(d => d.user_count));
+    const bubbleSeries = chart.series.push(
+      am5map.MapPointSeries.new(root, {
+        latitudeField: "lat",
+        longitudeField: "lng"
+      })
+    );
+
+    bubbleSeries.bullets.push((root, series, dataItem) => {
+      const d = dataItem.dataContext;
+      const radius = 5 + ((d.user_count / maxVal) * 17);
+      const container = am5.Container.new(root, {});
+
+      const pulse = container.children.push(am5.Circle.new(root, {
+        radius: radius + 4, fill: am5.color(0xFFFFFF), fillOpacity: 0,
+        stroke: am5.color(0xFFFFFF), strokeOpacity: 0.6, strokeWidth: 1.5
+      }));
+      pulse.animate({ key:"radius", from:radius+2, to:radius+14, duration:1800, loops:Infinity, easing:am5.ease.out(am5.ease.cubic) });
+      pulse.animate({ key:"strokeOpacity", from:0.6, to:0, duration:1800, loops:Infinity, easing:am5.ease.out(am5.ease.cubic) });
+
+      container.children.push(am5.Circle.new(root, {
+        radius,
+        fill: am5.color(0xFFFFFF), fillOpacity: 0.85,
+        stroke: am5.color(0xF0EDE4), strokeWidth: 1.5,
+        tooltipText: `[bold]{country}[/]\n{user_count} voices`,
+        cursorOverStyle: "pointer"
+      }));
+
+      return am5.Bullet.new(root, { sprite: container });
+    });
+
+    bubbleSeries.data.setAll(peaceData);
+
+    // ── Mots PAIX dans les océans ────────────────────────────────
+    // [word, lat, lng, connectLat, connectLng]
+    // Positionnés dans les zones océaniques, reliés au pays proche
+    const OCEAN_WORDS = [
+      // Océan Atlantique Nord
+      { word: "PAIX",       lat: 44,   lng: -42,  cLat: 46.2,  cLng: 2.2   }, // Français → France
+      { word: "Frieden",    lat: 64,   lng: -26,  cLat: 51.2,  cLng: 10.4  }, // Allemand → Allemagne
+      { word: "Vrede",      lat: 56,   lng: -18,  cLat: 52.1,  cLng: 5.3   }, // Néerlandais → Pays-Bas
+      // Océan Atlantique Sud
+      { word: "PAZ",        lat: 6,    lng: -30,  cLat: 4.6,   cLng: -74.3 }, // Espagnol → Colombie
+      { word: "Paz",        lat: -32,  lng: -22,  cLat: -14.2, cLng: -51.9 }, // Portugais → Brésil
+      // Océan Pacifique Nord
+      { word: "PEACE",      lat: 24,   lng: -148, cLat: 37.1,  cLng: -95.7 }, // Anglais → USA
+      { word: "평화",        lat: 42,   lng: 158,  cLat: 35.9,  cLng: 127.8 }, // Coréen → Corée du Sud
+      { word: "平和",        lat: 28,   lng: 165,  cLat: 36.2,  cLng: 138.3 }, // Japonais → Japon
+      // Océan Pacifique Sud
+      { word: "和平",        lat: -8,   lng: 170,  cLat: 35.9,  cLng: 104.2 }, // Chinois → Chine
+      { word: "Damai",      lat: -18,  lng: 148,  cLat: -0.8,  cLng: 113.9 }, // Indonésien → Indonésie
+      // Océan Indien
+      { word: "سلام",        lat: -14,  lng: 68,   cLat: 23.9,  cLng: 45.1  }, // Arabe → Arabie Saoudite
+      { word: "शांति",       lat: -28,  lng: 80,   cLat: 20.6,  cLng: 78.9  }, // Hindi → Inde
+      { word: "Amani",      lat: -38,  lng: 58,   cLat: -0.0,  cLng: 37.9  }, // Swahili → Kenya
+      // Océan Arctique
+      { word: "Мир",        lat: 79,   lng: 38,   cLat: 61.5,  cLng: 105.3 }, // Russe → Russie
+      // Méditerranée / Mer Rouge
+      { word: "Pace",       lat: 34,   lng: 14,   cLat: 41.9,  cLng: 12.6  }, // Italien → Italie
+      { word: "שָׁלוֹם",     lat: 26,   lng: 36,   cLat: 31.0,  cLng: 34.9  }, // Hébreu → Israël
+    ];
+
+    // Série de lignes pointillées
+    const lineSeries = chart.series.push(am5map.MapLineSeries.new(root, {}));
+    lineSeries.mapLines.template.setAll({
+      stroke: am5.color(0xFFFFFF),
+      strokeOpacity: 0.22,
+      strokeWidth: 0.8,
+      strokeDasharray: [4, 6]
+    });
+
+    // Série de textes dans les océans
+    const wordSeries = chart.series.push(
+      am5map.MapPointSeries.new(root, {
+        latitudeField: "lat",
+        longitudeField: "lng"
+      })
+    );
+
+    wordSeries.bullets.push((root, series, dataItem) => {
+      const d = dataItem.dataContext;
+      const container = am5.Container.new(root, {});
+
+      // Halo derrière le texte
+      container.children.push(am5.Label.new(root, {
+        text: d.word,
+        fill: am5.color(0xFFFFFF),
+        fillOpacity: 0.06,
+        fontSize: 13,
+        fontFamily: "'Nasalization', Arial, sans-serif",
+        fontWeight: "400",
+        letterSpacing: 3,
+        textAlign: "center",
+        centerX: am5.percent(50),
+        centerY: am5.percent(50),
+        dx: 1, dy: 1,
+        blur: 8
+      }));
+
+      // Texte principal
+      container.children.push(am5.Label.new(root, {
+        text: d.word,
+        fill: am5.color(0xFFFFFF),
+        fillOpacity: 0.45,
+        fontSize: 13,
+        fontFamily: "'Nasalization', Arial, sans-serif",
+        fontWeight: "400",
+        letterSpacing: 3,
+        textAlign: "center",
+        centerX: am5.percent(50),
+        centerY: am5.percent(50),
+      }));
+
+      return am5.Bullet.new(root, { sprite: container });
+    });
+
+    // Ajouter les mots et leurs lignes de connexion
+    const wordData = [];
+    OCEAN_WORDS.forEach(w => {
+      wordData.push({ lat: w.lat, lng: w.lng, word: w.word });
+
+      lineSeries.data.push({
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [w.lng,  w.lat],
+            [w.cLng, w.cLat]
+          ]
+        }
+      });
+    });
+
+    wordSeries.data.setAll(wordData);
+  }
+
+  initMap();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NAVA PEACE Registration</title>
+  <link href="https://fonts.cdnfonts.com/css/nasalization" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase_config.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Nasalization', Arial, sans-serif;
+      background: radial-gradient(ellipse at 50% 30%, #6DD5F5 0%, #3AACDF 45%, #1E8EC4 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+    }
+
+.card {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 420px;
+      background: rgba(247, 247, 241, 0.18); /* Dove White tinted glass */
+      border: 1.5px solid rgba(255, 255, 255, 0.55);
+      border-radius: 28px;
+      padding: 36px 32px 32px;
+      box-shadow:
+        0 8px 40px rgba(30, 100, 160, 0.18),
+        0 0 0 1px rgba(255,255,255,0.1) inset;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .logo-ring {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+    }
+
+    .logo-ring img {
+      width: 150px;
+      height: 150px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 12px rgba(255,255,255,0.35));
+    }
+
+    h1 {
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 26px;
+      font-weight: 400;
+      letter-spacing: 4px;
+      text-align: center;
+      color: #FFFFFF;
+      text-shadow: 0 1px 18px rgba(255,255,255,0.45);
+      margin-bottom: 6px;
+    }
+
+    .tagline {
+      text-align: center;
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: #F0EDE4; /* Halo/Soft White */
+      opacity: 0.85;
+      margin-bottom: 28px;
+    }
+
+    .divider {
+      width: 48px;
+      height: 1.5px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
+      margin: 0 auto 28px;
+    }
+
+    label {
+      display: block;
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 10px;
+      letter-spacing: 2.5px;
+      color: #F0EDE4;
+      opacity: 0.75;
+      margin-bottom: 7px;
+      margin-top: 18px;
+      text-transform: uppercase;
+    }
+
+    label:first-of-type {
+      margin-top: 0;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 13px 16px;
+      border-radius: 14px;
+      border: 1.5px solid rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.14);
+      color: #FFFFFF;
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      -webkit-appearance: none;
+    }
+
+    input::placeholder {
+      color: rgba(240, 237, 228, 0.45);
+      font-size: 13px;
+    }
+
+    input:focus, select:focus {
+      border-color: rgba(255, 255, 255, 0.75);
+      background: rgba(255, 255, 255, 0.22);
+    }
+
+    select option {
+      background: #2E9FCC;
+      color: #FFFFFF;
+    }
+
+    button {
+      margin-top: 28px;
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.88) 0%, #E7E1D4 100%);
+      color: #1A6E96;
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(255,255,255,0.25);
+      transition: opacity 0.2s, transform 0.15s;
+    }
+
+    button:hover {
+      opacity: 0.93;
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .footer-note {
+      text-align: center;
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 9.5px;
+      letter-spacing: 1.5px;
+      color: #F7F7F1;
+      opacity: 0.45;
+      margin-top: 22px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <!-- Logo colombe -->
+    <div class="logo-ring">
+      <img src="logo.png" alt="NAVA PEACE Logo" />
+    </div>
+
+    <h1>NAVA PEACE</h1>
+    <p class="tagline">Today Humanity choose Peace</p>
+    <div class="divider"></div>
+
+    <form id="peaceForm">
+
+      <label for="country">Country</label>
+      <select id="country" name="entry.1234567890" required>
+        <option value="">Select your country</option>
+        <option>Afghanistan</option>
+        <option>Albania</option>
+        <option>Algeria</option>
+        <option>Andorra</option>
+        <option>Angola</option>
+        <option>Antigua and Barbuda</option>
+        <option>Argentina</option>
+        <option>Armenia</option>
+        <option>Australia</option>
+        <option>Austria</option>
+        <option>Azerbaijan</option>
+        <option>Bahamas</option>
+        <option>Bahrain</option>
+        <option>Bangladesh</option>
+        <option>Barbados</option>
+        <option>Belarus</option>
+        <option>Belgium</option>
+        <option>Belize</option>
+        <option>Benin</option>
+        <option>Bhutan</option>
+        <option>Bolivia</option>
+        <option>Bosnia and Herzegovina</option>
+        <option>Botswana</option>
+        <option>Brazil</option>
+        <option>Brunei</option>
+        <option>Bulgaria</option>
+        <option>Burkina Faso</option>
+        <option>Burundi</option>
+        <option>Cabo Verde</option>
+        <option>Cambodia</option>
+        <option>Cameroon</option>
+        <option>Canada</option>
+        <option>Central African Republic</option>
+        <option>Chad</option>
+        <option>Chile</option>
+        <option>China</option>
+        <option>Colombia</option>
+        <option>Comoros</option>
+        <option>Congo (Brazzaville)</option>
+        <option>Congo (Kinshasa)</option>
+        <option>Costa Rica</option>
+        <option>Croatia</option>
+        <option>Cuba</option>
+        <option>Cyprus</option>
+        <option>Czech Republic</option>
+        <option>Denmark</option>
+        <option>Djibouti</option>
+        <option>Dominica</option>
+        <option>Dominican Republic</option>
+        <option>Ecuador</option>
+        <option>Egypt</option>
+        <option>El Salvador</option>
+        <option>Equatorial Guinea</option>
+        <option>Eritrea</option>
+        <option>Estonia</option>
+        <option>Eswatini</option>
+        <option>Ethiopia</option>
+        <option>Fiji</option>
+        <option>Finland</option>
+        <option>France</option>
+        <option>Gabon</option>
+        <option>Gambia</option>
+        <option>Georgia</option>
+        <option>Germany</option>
+        <option>Ghana</option>
+        <option>Greece</option>
+        <option>Grenada</option>
+        <option>Guatemala</option>
+        <option>Guinea</option>
+        <option>Guinea-Bissau</option>
+        <option>Guyana</option>
+        <option>Haiti</option>
+        <option>Honduras</option>
+        <option>Hungary</option>
+        <option>Iceland</option>
+        <option>India</option>
+        <option>Indonesia</option>
+        <option>Iran</option>
+        <option>Iraq</option>
+        <option>Ireland</option>
+        <option>Israel</option>
+        <option>Italy</option>
+        <option>Jamaica</option>
+        <option>Japan</option>
+        <option>Jordan</option>
+        <option>Kazakhstan</option>
+        <option>Kenya</option>
+        <option>Kiribati</option>
+        <option>Kuwait</option>
+        <option>Kyrgyzstan</option>
+        <option>Laos</option>
+        <option>Latvia</option>
+        <option>Lebanon</option>
+        <option>Lesotho</option>
+        <option>Liberia</option>
+        <option>Libya</option>
+        <option>Liechtenstein</option>
+        <option>Lithuania</option>
+        <option>Luxembourg</option>
+        <option>Madagascar</option>
+        <option>Malawi</option>
+        <option>Malaysia</option>
+        <option>Maldives</option>
+        <option>Mali</option>
+        <option>Malta</option>
+        <option>Marshall Islands</option>
+        <option>Mauritania</option>
+        <option>Mauritius</option>
+        <option>Mexico</option>
+        <option>Micronesia</option>
+        <option>Moldova</option>
+        <option>Monaco</option>
+        <option>Mongolia</option>
+        <option>Montenegro</option>
+        <option>Morocco</option>
+        <option>Mozambique</option>
+        <option>Myanmar</option>
+        <option>Namibia</option>
+        <option>Nauru</option>
+        <option>Nepal</option>
+        <option>Netherlands</option>
+        <option>New Zealand</option>
+        <option>Nicaragua</option>
+        <option>Niger</option>
+        <option>Nigeria</option>
+        <option>North Korea</option>
+        <option>North Macedonia</option>
+        <option>Norway</option>
+        <option>Oman</option>
+        <option>Pakistan</option>
+        <option>Palau</option>
+        <option>Palestine</option>
+        <option>Panama</option>
+        <option>Papua New Guinea</option>
+        <option>Paraguay</option>
+        <option>Peru</option>
+        <option>Philippines</option>
+        <option>Poland</option>
+        <option>Portugal</option>
+        <option>Qatar</option>
+        <option>Romania</option>
+        <option>Russia</option>
+        <option>Rwanda</option>
+        <option>Saint Kitts and Nevis</option>
+        <option>Saint Lucia</option>
+        <option>Saint Vincent and the Grenadines</option>
+        <option>Samoa</option>
+        <option>San Marino</option>
+        <option>Sao Tome and Principe</option>
+        <option>Saudi Arabia</option>
+        <option>Senegal</option>
+        <option>Serbia</option>
+        <option>Seychelles</option>
+        <option>Sierra Leone</option>
+        <option>Singapore</option>
+        <option>Slovakia</option>
+        <option>Slovenia</option>
+        <option>Solomon Islands</option>
+        <option>Somalia</option>
+        <option>South Africa</option>
+        <option>South Korea</option>
+        <option>South Sudan</option>
+        <option>Spain</option>
+        <option>Sri Lanka</option>
+        <option>Sudan</option>
+        <option>Suriname</option>
+        <option>Sweden</option>
+        <option>Switzerland</option>
+        <option>Syria</option>
+        <option>Taiwan</option>
+        <option>Tajikistan</option>
+        <option>Tanzania</option>
+        <option>Thailand</option>
+        <option>Timor-Leste</option>
+        <option>Togo</option>
+        <option>Tonga</option>
+        <option>Trinidad and Tobago</option>
+        <option>Tunisia</option>
+        <option>Turkey</option>
+        <option>Turkmenistan</option>
+        <option>Tuvalu</option>
+        <option>Uganda</option>
+        <option>Ukraine</option>
+        <option>United Arab Emirates</option>
+        <option>United Kingdom</option>
+        <option>United States</option>
+        <option>Uruguay</option>
+        <option>Uzbekistan</option>
+        <option>Vanuatu</option>
+        <option>Vatican City</option>
+        <option>Venezuela</option>
+        <option>Vietnam</option>
+        <option>Yemen</option>
+        <option>Zambia</option>
+        <option>Zimbabwe</option>
+      </select>
+
+      <label for="age">Age</label>
+      <input type="number" id="age" name="entry.2345678901" placeholder="Enter your age" required>
+
+      <label for="gender">Gender</label>
+      <select id="gender" name="entry.3456789012" required>
+        <option value="">Select</option>
+        <option>Male</option>
+        <option>Female</option>
+        <option>Other</option>
+        <option>Prefer not to say</option>
+      </select>
+
+      <button type="submit">Join the Peace Map</button>
+    </form>
+
+    <p class="footer-note">Your light matters &nbsp;·&nbsp; navapeace.org</p>
+  </div>
+
+  <script>
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    document.getElementById('peaceForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      btn.textContent = '...';
+      btn.disabled = true;
+
+      const country = document.getElementById('country').value;
+      const age     = parseInt(document.getElementById('age').value, 10);
+      const gender  = document.getElementById('gender').value;
+
+      try {
+        const { error } = await supabase
+          .from('peace_votes')
+          .insert({ country, age, gender });
+
+        if (error) throw error;
+
+        // Redirect to the map after successful submission
+        window.location.href = 'map.html';
+      } catch (err) {
+        console.error(err);
+        btn.textContent = 'JOIN THE PEACE MAP';
+        btn.disabled = false;
+        alert('Something went wrong. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>
