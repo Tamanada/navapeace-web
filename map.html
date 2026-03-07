@@ -276,7 +276,9 @@
     </div>
     <div class="counter-sep"></div>
     <div class="counter-item">
-      <span class="num" id="cnt-timer" style="font-size:28px;letter-spacing:1.5px;">0D 00:00:00</span>
+      <span class="num" id="cnt-days" style="font-size:42px;letter-spacing:2px;">0</span>
+      <span class="lbl" style="font-size:11px;letter-spacing:2px;margin-bottom:2px;">DAYS</span>
+      <span class="num" id="cnt-timer" style="font-size:22px;letter-spacing:2px;">00:00:00</span>
       <span class="lbl">SINCE LAUNCH</span>
     </div>
   </div>
@@ -416,7 +418,8 @@
       const h    = Math.floor((diff % 86400000) / 3600000).toString().padStart(2,'0');
       const m    = Math.floor((diff % 3600000)  / 60000).toString().padStart(2,'0');
       const s    = Math.floor((diff % 60000)    / 1000).toString().padStart(2,'0');
-      document.getElementById('cnt-timer').textContent = `${days}D ${h}:${m}:${s}`;
+      document.getElementById('cnt-days').textContent  = days;
+      document.getElementById('cnt-timer').textContent = `${h}:${m}:${s}`;
     }
     tick();
     setInterval(tick, 1000);
