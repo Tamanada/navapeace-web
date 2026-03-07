@@ -118,18 +118,35 @@
       border-radius: 50%;
       border: none;
       background: rgba(255,255,255,0.9);
-      color: #1A6E96;
+      color: rgba(255,255,255,0.85);
       font-family: 'Nasalization', Arial, sans-serif;
-      font-size: 18px;
-      letter-spacing: 3px;
-      text-transform: uppercase;
+      font-size: 52px;
+      letter-spacing: 0;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       box-shadow:
         0 0 0 12px rgba(255,255,255,0.15),
         0 0 0 24px rgba(255,255,255,0.07),
         0 8px 40px rgba(255,255,255,0.3);
       transition: transform 0.15s, box-shadow 0.3s;
       outline: none;
+    }
+
+    .peace-btn .btn-logo {
+      width: 115px;
+      height: 115px;
+      object-fit: contain;
+      pointer-events: none;
+      filter: drop-shadow(0 2px 10px rgba(30,100,160,0.25));
+      transition: opacity 0.4s;
+    }
+
+    .peace-btn .btn-status {
+      font-size: 52px;
+      line-height: 1;
+      pointer-events: none;
     }
 
     .peace-btn:hover:not(:disabled) {
@@ -166,12 +183,16 @@
 
     /* DONE state */
     .peace-btn:disabled {
-      background: rgba(255,255,255,0.3);
-      color: rgba(255,255,255,0.6);
+      background: rgba(255,255,255,0.25);
+      color: rgba(255,255,255,0.7);
       cursor: default;
       box-shadow:
         0 0 0 12px rgba(255,255,255,0.07),
         0 4px 20px rgba(255,255,255,0.1);
+    }
+
+    .peace-btn:disabled .btn-logo {
+      opacity: 0.35;
     }
 
     .peace-btn:disabled::before,
@@ -277,7 +298,7 @@
 
     <!-- BUTTON -->
     <button class="peace-btn" id="peaceBtn" onclick="choosePeace()">
-      I WANT<br>PEACE
+      <img src="logo.png" alt="NAVA PEACE" class="btn-logo" id="btnLogo" />
     </button>
 
     <!-- DONE MESSAGE -->
@@ -342,7 +363,7 @@
     function setDone() {
       const btn = document.getElementById('peaceBtn');
       btn.disabled = true;
-      btn.innerHTML = '✓';
+      btn.innerHTML = '<img src="logo.png" alt="✓" class="btn-logo" style="opacity:0.35"/><span class="btn-status" style="position:absolute;font-size:42px;">✓</span>';
       document.getElementById('doneMsg').style.display = 'block';
     }
 
@@ -350,7 +371,7 @@
     async function choosePeace() {
       const btn = document.getElementById('peaceBtn');
       btn.disabled = true;
-      btn.innerHTML = '...';
+      btn.innerHTML = '<span class="btn-status" style="color:#3AACDF;font-size:36px;">···</span>';
 
       if (sb) {
         try {
