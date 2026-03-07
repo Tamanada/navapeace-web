@@ -426,7 +426,15 @@
       window.location.replace('map.html');
     }
 
-    // ── Generate unique referral code ──────────────────────────────
+    // ── Permanent device UID (persists across sessions, used for code recovery) ──
+    function genUID() {
+      return 'u_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 9);
+    }
+    if (!localStorage.getItem('nava_peace_uid')) {
+      localStorage.setItem('nava_peace_uid', genUID());
+    }
+
+    // ── Stable referral code (generated once, recovered from Supabase via UID) ──
     function genRefCode() {
       return Math.random().toString(36).slice(2, 10).toUpperCase();
     }
@@ -453,12 +461,13 @@
       const gender       = document.getElementById('gender').value || null;
       const referralCode = localStorage.getItem('nava_peace_ref_code') || genRefCode();
       const referredBy   = localStorage.getItem('nava_peace_referred_by') || null;
+      const userUid      = localStorage.getItem('nava_peace_uid') || genUID();
 
       if (sbClient) {
         try {
           const { error } = await sbClient
             .from('peace_votes')
-            .insert({ country, age, gender, referral_code: referralCode, referred_by: referredBy });
+            .insert({ country, age, gender, referral_code: referralCode, referred_by: referredBy, user_uid: userUid });
           if (error) console.warn('Supabase insert error:', error.message);
         } catch (err) {
           console.warn('Supabase unavailable:', err.message);

@@ -905,11 +905,32 @@
   loadMyDoves();
 
   // ── INVITE FRIENDS ───────────────────────────────────────────────
-  (function initInvite() {
-    const BASE    = 'https://nava-peace.app';
-    let refCode   = localStorage.getItem('nava_peace_ref_code');
+  async function initInvite() {
+    const BASE  = 'https://nava-peace.app';
+    let refCode = localStorage.getItem('nava_peace_ref_code');
 
-    // Generate one if missing (existing users without registration flow)
+    // ── Try to recover code from Supabase via permanent device UID ──
+    if (!refCode) {
+      const uid = localStorage.getItem('nava_peace_uid');
+      if (uid) {
+        try {
+          const sbR = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          const { data } = await sbR
+            .from('peace_votes')
+            .select('referral_code')
+            .eq('user_uid', uid)
+            .not('referral_code', 'is', null)
+            .limit(1)
+            .maybeSingle();
+          if (data && data.referral_code) {
+            refCode = data.referral_code;
+            localStorage.setItem('nava_peace_ref_code', refCode);
+          }
+        } catch(e) { console.warn('Code recovery failed:', e); }
+      }
+    }
+
+    // ── Last resort: generate a new code (user who never voted yet) ──
     if (!refCode) {
       refCode = Math.random().toString(36).slice(2, 10).toUpperCase();
       localStorage.setItem('nava_peace_ref_code', refCode);
@@ -936,7 +957,9 @@
 
     // Load peace points
     loadPeacePoints(refCode);
-  })();
+  }
+
+  initInvite();
 
   function copyLink() {
     const link = 'https://nava-peace.app/?ref=' + localStorage.getItem('nava_peace_ref_code');
