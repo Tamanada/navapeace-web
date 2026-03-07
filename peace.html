@@ -410,28 +410,22 @@
       btn.disabled = true;
       btn.innerHTML = '<span class="btn-status" style="color:#3AACDF;font-size:36px;">···</span>';
 
-      if (sb) {
-        try {
-          await sb.from('peace_actions').insert({ country });
-        } catch(e) { console.warn('Supabase error', e); }
-      }
-
       localStorage.setItem(PEACE_KEY, TODAY);
       setDone();
       loadCounters(); // refresh counters
     }
 
-    // ── Charger les compteurs ───────────────────────────────────────
+    // ── Charger les compteurs depuis peace_votes ────────────────────
     async function loadCounters() {
       if (!sb) return;
       try {
         const { data: all } = await sb
-          .from('peace_actions')
+          .from('peace_votes')
           .select('created_at');
 
         if (!all) return;
 
-        const total    = all.length;
+        const total      = all.length;
         const todayCount = all.filter(r => r.created_at && r.created_at.startsWith(TODAY)).length;
 
         document.getElementById('cnt-total').textContent = total.toLocaleString('fr-FR');
