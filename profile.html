@@ -499,6 +499,59 @@
       margin: 0 12px;
     }
 
+    /* ── DOVE POPOVER ── */
+    .dove-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      background: rgba(10,50,90,0.4);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeOvr 0.2s ease both;
+    }
+    .dove-overlay.open { display: flex; }
+    @keyframes fadeOvr {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    .dove-popup {
+      background: rgba(30,100,160,0.92);
+      border: 1.5px solid rgba(255,255,255,0.45);
+      border-radius: 24px;
+      padding: 28px 24px 24px;
+      max-width: 310px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 14px 55px rgba(10,40,100,0.55);
+      animation: popInD 0.25s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    @keyframes popInD {
+      from { opacity: 0; transform: scale(0.85); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    .dove-popup-icon  { font-size: 40px; display: block; margin-bottom: 8px; filter: drop-shadow(0 0 12px rgba(255,255,255,0.5)); }
+    .dove-popup-title { font-size: 11px; letter-spacing: 4px; color: rgba(255,255,255,0.5); text-transform: uppercase; margin-bottom: 4px; }
+    .dove-popup-total { font-size: 58px; letter-spacing: 2px; color: #fff; text-shadow: 0 0 28px rgba(255,255,255,0.5); display: block; line-height: 1; margin-bottom: 18px; }
+
+    /* stacked bar */
+    .dove-bar-wrap  { width: 100%; margin-bottom: 10px; }
+    .dove-bar-track { width: 100%; height: 14px; border-radius: 7px; background: rgba(255,255,255,0.1); overflow: hidden; display: flex; }
+    .dove-bar-own   { height: 100%; background: rgba(255,255,255,0.9); border-radius: 7px 0 0 7px; transition: width 0.8s ease; }
+    .dove-bar-ref   { height: 100%; background: rgba(255,255,255,0.4); border-radius: 0 7px 7px 0; transition: width 0.8s ease; }
+    .dove-bar-legend { display: flex; justify-content: space-between; margin-top: 8px; }
+    .dove-bar-legend span { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.45); }
+
+    .dove-popup-desc { font-size: 12px; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); line-height: 1.9; text-transform: uppercase; margin-top: 14px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 14px; }
+    .dove-popup-close { display: block; margin: 18px auto 0; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; color: rgba(255,255,255,0.75); font-family: 'Nasalization', Arial, sans-serif; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; padding: 8px 22px; cursor: pointer; transition: background 0.2s; }
+    .dove-popup-close:hover { background: rgba(255,255,255,0.25); }
+
+    /* make dove card feel tappable */
+    .dove-card-inner { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+
     /* ── BOTTOM NAV ── */
     .bottom-nav {
       position: fixed;
@@ -575,7 +628,7 @@
   <!-- MY DOVES -->
   <div class="card">
     <p class="section-title">MY DOVES</p>
-    <div class="dove-card-inner">
+    <div class="dove-card-inner" onclick="openDovePopup()">
       <span class="dove-icon">🕊</span>
       <span class="dove-total" id="dove-total">—</span>
       <span class="dove-label">TOTAL DOVES</span>
@@ -643,6 +696,33 @@
     <p class="section-title">GENDER DISTRIBUTION</p>
     <div class="gender-row" id="gender-pills">
       <p class="no-data">LOADING...</p>
+    </div>
+  </div>
+
+  <!-- DOVE POPOVER -->
+  <div class="dove-overlay" id="doveOverlay" onclick="closeDovePopup(event)">
+    <div class="dove-popup">
+      <span class="dove-popup-icon">🕊</span>
+      <p class="dove-popup-title">MY DOVES</p>
+      <span class="dove-popup-total" id="pop-dove-total">—</span>
+
+      <div class="dove-bar-wrap">
+        <div class="dove-bar-track">
+          <div class="dove-bar-own" id="pop-bar-own" style="width:0%"></div>
+          <div class="dove-bar-ref" id="pop-bar-ref" style="width:0%"></div>
+        </div>
+        <div class="dove-bar-legend">
+          <span>🕊 <span id="pop-leg-own">0</span> OWN ACTIONS</span>
+          <span><span id="pop-leg-ref">0</span> REFERRAL 🕊</span>
+        </div>
+      </div>
+
+      <p class="dove-popup-desc">
+        Each day you choose peace<br>= <strong style="color:#fff;">+1 Dove</strong><br><br>
+        Each friend's daily action<br>= <strong style="color:#fff;">+1 Dove</strong> for you<br><br>
+        Doves are your peace impact score.
+      </p>
+      <button class="dove-popup-close" onclick="closeDovePopup()">CLOSE</button>
     </div>
   </div>
 
@@ -890,6 +970,35 @@
       document.getElementById('ref-points').textContent  = ptsCount;
       document.getElementById('ref-friends').textContent = friendsCount;
     } catch(e) { console.warn('Peace points error', e); }
+  }
+
+  // ── Dove popover ──────────────────────────────────────────────────
+  function openDovePopup() {
+    const own   = parseInt(document.getElementById('dove-own').textContent)   || 0;
+    const ref   = parseInt(document.getElementById('dove-ref').textContent)   || 0;
+    const total = own + ref;
+
+    document.getElementById('pop-dove-total').textContent = total;
+    document.getElementById('pop-leg-own').textContent    = own;
+    document.getElementById('pop-leg-ref').textContent    = ref;
+
+    const ownPct = total > 0 ? Math.round(own / total * 100) : 0;
+    const refPct = total > 0 ? 100 - ownPct : 0;
+    // small delay so animation plays after popup opens
+    setTimeout(() => {
+      document.getElementById('pop-bar-own').style.width = ownPct + '%';
+      document.getElementById('pop-bar-ref').style.width = refPct + '%';
+    }, 80);
+
+    document.getElementById('doveOverlay').classList.add('open');
+  }
+
+  function closeDovePopup(e) {
+    if (!e || e.target === document.getElementById('doveOverlay')) {
+      document.getElementById('pop-bar-own').style.width = '0%';
+      document.getElementById('pop-bar-ref').style.width = '0%';
+      document.getElementById('doveOverlay').classList.remove('open');
+    }
   }
   </script>
 </body>
