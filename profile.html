@@ -604,6 +604,134 @@
 
     .nav-item.active { color: #fff; }
     .nav-item svg { width: 26px; height: 26px; fill: currentColor; }
+
+    /* ── IDENTITY CARD ── */
+    .pseudo-display {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 14px;
+      padding: 14px 18px;
+      margin-bottom: 14px;
+    }
+    .pseudo-icon { font-size: 22px; line-height: 1; }
+    .pseudo-name {
+      font-size: 14px;
+      letter-spacing: 1.5px;
+      color: #fff;
+      flex: 1;
+      text-transform: uppercase;
+      word-break: break-all;
+    }
+    .pseudo-tag {
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.4);
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 3px 8px;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .pseudo-edit-area { margin-bottom: 10px; }
+    .pseudo-input {
+      width: 100%;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 12px;
+      color: #fff;
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 14px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 10px 14px;
+      outline: none;
+      margin-bottom: 10px;
+      transition: border-color 0.2s;
+      box-sizing: border-box;
+    }
+    .pseudo-input::placeholder { color: rgba(255,255,255,0.3); text-transform: none; }
+    .pseudo-input:focus { border-color: rgba(255,255,255,0.6); }
+    .pseudo-btn-row { display: flex; gap: 10px; }
+    .pseudo-btn-row .save-btn { flex: 1; margin: 0; }
+    .pseudo-btn-row .edit-btn { padding: 12px 16px; }
+
+    /* ── PEACE MESSAGE CARD ── */
+    .peace-textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 14px;
+      color: #fff;
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 13px;
+      letter-spacing: 1.5px;
+      padding: 14px 16px;
+      resize: none;
+      height: 100px;
+      outline: none;
+      transition: border-color 0.2s;
+      box-sizing: border-box;
+      line-height: 1.7;
+    }
+    .peace-textarea::placeholder { color: rgba(255,255,255,0.3); }
+    .peace-textarea:focus { border-color: rgba(255,255,255,0.6); }
+    .char-count {
+      text-align: right;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.35);
+      margin: 4px 0 14px;
+    }
+    .share-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding: 0 2px;
+    }
+    .share-lbl {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.65);
+    }
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 27px;
+      flex-shrink: 0;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 27px;
+      transition: 0.3s;
+    }
+    .toggle-slider:before {
+      content: '';
+      position: absolute;
+      height: 21px; width: 21px;
+      left: 3px; bottom: 3px;
+      background: rgba(255,255,255,0.8);
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+    .toggle-switch input:checked + .toggle-slider {
+      background: rgba(80,210,130,0.55);
+      border-color: rgba(80,210,130,0.4);
+    }
+    .toggle-switch input:checked + .toggle-slider:before {
+      transform: translateX(23px);
+      background: #fff;
+    }
   </style>
 </head>
 <body>
@@ -645,6 +773,44 @@
       </div>
       <button class="save-btn" onclick="saveProfile()" data-i18n="save_btn">SAVE</button>
     </div>
+  </div>
+
+  <!-- MY IDENTITY -->
+  <div class="card">
+    <p class="section-title" data-i18n="section_identity">MY IDENTITY</p>
+    <div class="pseudo-display">
+      <span class="pseudo-icon">🕊</span>
+      <span class="pseudo-name" id="pseudo-name">...</span>
+      <span class="pseudo-tag" id="pseudo-tag" data-i18n="pseudo_auto_tag">AUTO</span>
+    </div>
+    <div class="pseudo-edit-area" id="pseudo-edit-area" style="display:none">
+      <input id="pseudo-input" type="text" class="pseudo-input" maxlength="30"
+             data-i18n-ph="pseudo_placeholder" />
+      <div class="pseudo-btn-row">
+        <button class="save-btn" onclick="savePseudo()" data-i18n="save_btn">SAVE</button>
+        <button class="edit-btn" onclick="cancelPseudo()" data-i18n="cancel_btn">CANCEL</button>
+      </div>
+    </div>
+    <button class="edit-btn" id="pseudo-change-btn" onclick="startEditPseudo()"
+            data-i18n="pseudo_change_btn">CHANGE</button>
+  </div>
+
+  <!-- MY PEACE MESSAGE -->
+  <div class="card">
+    <p class="section-title" data-i18n="section_message">MY PEACE MESSAGE</p>
+    <textarea id="peace-message-input" class="peace-textarea" maxlength="200"
+              data-i18n-ph="msg_placeholder"
+              oninput="updateCharCount()"></textarea>
+    <p class="char-count"><span id="char-count">0</span>/200</p>
+    <div class="share-row">
+      <span class="share-lbl" data-i18n="share_lbl">Share publicly</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="share-toggle" />
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <button class="save-btn" id="message-save-btn" onclick="saveMessage()"
+            data-i18n="msg_save_btn">SAVE MESSAGE</button>
   </div>
 
   <!-- MY DOVES -->
@@ -853,6 +1019,97 @@
   }
 
   renderMyProfile();
+
+  // ── IDENTITY (Pseudonym) ──────────────────────────────────────────
+  const PSEUDO_ADJ  = ['Serene','Bright','Gentle','Calm','Pure','Warm','Kind','Free','Bold','Clear','Swift','Still','Deep','True','Wise'];
+  const PSEUDO_NOUN = ['Dove','Heart','Soul','Light','Spirit','Wing','Hope','Dream','Star','Wave','Peace','River','Ocean','Forest','Flame'];
+
+  function generatePseudo() {
+    const adj  = PSEUDO_ADJ [Math.floor(Math.random() * PSEUDO_ADJ.length)];
+    const noun = PSEUDO_NOUN[Math.floor(Math.random() * PSEUDO_NOUN.length)];
+    const num  = Math.floor(Math.random() * 9000) + 1000;
+    return adj + noun + num;
+  }
+
+  function loadPseudo() {
+    let pseudo = localStorage.getItem('nava_peace_pseudo');
+    if (!pseudo) {
+      pseudo = generatePseudo();
+      localStorage.setItem('nava_peace_pseudo', pseudo);
+      localStorage.setItem('nava_peace_pseudo_auto', '1');
+    }
+    document.getElementById('pseudo-name').textContent = pseudo;
+    const isAuto = localStorage.getItem('nava_peace_pseudo_auto') === '1';
+    document.getElementById('pseudo-tag').style.display = isAuto ? '' : 'none';
+  }
+
+  function startEditPseudo() {
+    const current = localStorage.getItem('nava_peace_pseudo') || '';
+    document.getElementById('pseudo-input').value = current;
+    document.getElementById('pseudo-edit-area').style.display = 'block';
+    document.getElementById('pseudo-change-btn').style.display = 'none';
+    document.getElementById('pseudo-input').focus();
+  }
+
+  function cancelPseudo() {
+    document.getElementById('pseudo-edit-area').style.display = 'none';
+    document.getElementById('pseudo-change-btn').style.display = '';
+  }
+
+  async function savePseudo() {
+    let val = document.getElementById('pseudo-input').value.trim().toUpperCase().slice(0, 30);
+    if (!val) return;
+    localStorage.setItem('nava_peace_pseudo', val);
+    localStorage.setItem('nava_peace_pseudo_auto', '0');
+    document.getElementById('pseudo-name').textContent = val;
+    document.getElementById('pseudo-tag').style.display = 'none';
+    cancelPseudo();
+    await syncMessage();
+  }
+
+  // ── PEACE MESSAGE ─────────────────────────────────────────────────
+  function loadMessage() {
+    const msg    = localStorage.getItem('nava_peace_message') || '';
+    const shared = localStorage.getItem('nava_peace_share_msg') === '1';
+    document.getElementById('peace-message-input').value = msg;
+    document.getElementById('share-toggle').checked = shared;
+    updateCharCount();
+  }
+
+  function updateCharCount() {
+    const len = document.getElementById('peace-message-input').value.length;
+    document.getElementById('char-count').textContent = len;
+  }
+
+  async function saveMessage() {
+    const msg    = document.getElementById('peace-message-input').value.trim();
+    const shared = document.getElementById('share-toggle').checked;
+    localStorage.setItem('nava_peace_message',   msg);
+    localStorage.setItem('nava_peace_share_msg', shared ? '1' : '0');
+    const btn = document.getElementById('message-save-btn');
+    btn.textContent = t('msg_saved_lbl');
+    btn.disabled = true;
+    await syncMessage();
+    setTimeout(() => { btn.textContent = t('msg_save_btn'); btn.disabled = false; }, 2000);
+  }
+
+  async function syncMessage() {
+    const uid    = localStorage.getItem('nava_peace_uid');
+    const pseudo = localStorage.getItem('nava_peace_pseudo') || generatePseudo();
+    const msg    = localStorage.getItem('nava_peace_message') || '';
+    const shared = localStorage.getItem('nava_peace_share_msg') === '1';
+    if (!uid) return;
+    try {
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      await sb.from('peace_messages').upsert(
+        { user_uid: uid, pseudo, message: msg, share_msg: shared, updated_at: new Date().toISOString() },
+        { onConflict: 'user_uid' }
+      );
+    } catch(e) { console.warn('Message sync error', e); }
+  }
+
+  loadPseudo();
+  loadMessage();
 
   // ── Age groups ───────────────────────────────────────────────────
   const AGE_GROUPS = [

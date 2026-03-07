@@ -348,6 +348,77 @@
 
     .popover-close:hover { background: rgba(255,255,255,0.25); }
 
+    /* ── PEACE MESSAGES FEED ── */
+    .messages-section {
+      width: 100%;
+      max-width: 900px;
+      margin: 20px 0 0;
+      padding: 0 0 8px;
+    }
+    .messages-title {
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+      text-align: center;
+      margin-bottom: 14px;
+    }
+    .messages-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 340px;
+      overflow-y: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .messages-list::-webkit-scrollbar { display: none; }
+    .msg-card {
+      background: rgba(247,247,241,0.10);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 16px;
+      padding: 13px 18px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      animation: msgFadeIn 0.3s ease both;
+    }
+    @keyframes msgFadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .msg-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .msg-pseudo {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.75);
+      text-transform: uppercase;
+      flex: 1;
+    }
+    .msg-date {
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.3);
+    }
+    .msg-text {
+      font-size: 13px;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.88);
+      line-height: 1.7;
+      font-family: 'Nasalization', Arial, sans-serif;
+    }
+    .msgs-no-data {
+      text-align: center;
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.35);
+      padding: 10px 0;
+    }
+
     /* ── PERSONAL STREAK ── */
     .personal-strip {
       font-size: 14px;
@@ -408,6 +479,14 @@
   <!-- MAP -->
   <div class="map-card">
     <div id="chartdiv"></div>
+  </div>
+
+  <!-- PEACE MESSAGES FEED -->
+  <div class="messages-section" id="messages-section">
+    <p class="messages-title" data-i18n="peace_msg_title">PEACE MESSAGES</p>
+    <div class="messages-list" id="messages-list">
+      <p class="msgs-no-data" id="msgs-loading">…</p>
+    </div>
   </div>
 
   <!-- SOCIALS -->
@@ -900,6 +979,56 @@
       document.getElementById('popoverOverlay').classList.remove('open');
     }
   }
+
+  // ── PEACE MESSAGES FEED ──────────────────────────────────────────
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  async function loadPeaceMessages() {
+    const list    = document.getElementById('messages-list');
+    const loading = document.getElementById('msgs-loading');
+    try {
+      const isConfigured = SUPABASE_URL && !SUPABASE_URL.includes('XXXXXXX');
+      if (!isConfigured) { list.innerHTML = ''; return; }
+
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const { data, error } = await sb
+        .from('peace_messages')
+        .select('pseudo, message, updated_at')
+        .eq('share_msg', true)
+        .not('message', 'is', null)
+        .neq('message', '')
+        .order('updated_at', { ascending: false })
+        .limit(20);
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        list.innerHTML = `<p class="msgs-no-data">${t('no_msgs_yet')}</p>`;
+        return;
+      }
+
+      list.innerHTML = data.map((m, i) => {
+        const d       = new Date(m.updated_at);
+        const dateStr = d.toLocaleDateString([], { day: '2-digit', month: 'short', year: '2-digit' });
+        return `<div class="msg-card" style="animation-delay:${i * 0.05}s">
+          <div class="msg-header">
+            <span class="msg-pseudo">🕊 ${escapeHtml(m.pseudo)}</span>
+            <span class="msg-date">${dateStr}</span>
+          </div>
+          <p class="msg-text">${escapeHtml(m.message)}</p>
+        </div>`;
+      }).join('');
+    } catch(e) {
+      console.warn('Peace messages load error', e);
+      if (loading) loading.remove();
+    }
+  }
+
+  loadPeaceMessages();
   </script>
 
 </body>
