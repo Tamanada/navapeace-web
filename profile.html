@@ -164,6 +164,77 @@
       color: rgba(255,255,255,0.6);
     }
 
+    /* ── DOVE COUNTER ── */
+    .dove-card-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dove-icon {
+      font-size: 44px;
+      line-height: 1;
+      filter: drop-shadow(0 0 14px rgba(255,255,255,0.5));
+      margin-bottom: 4px;
+    }
+
+    .dove-total {
+      font-size: 72px;
+      letter-spacing: 2px;
+      color: #fff;
+      text-shadow: 0 0 30px rgba(255,255,255,0.5);
+      line-height: 1;
+    }
+
+    .dove-label {
+      font-size: 12px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 14px;
+    }
+
+    .dove-breakdown {
+      display: flex;
+      gap: 0;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      border-top: 1px solid rgba(255,255,255,0.15);
+      padding-top: 16px;
+    }
+
+    .dove-part {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      flex: 1;
+    }
+
+    .dove-part .num {
+      font-size: 26px;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .dove-part .lbl {
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      text-align: center;
+    }
+
+    .dove-divider {
+      width: 1px;
+      height: 44px;
+      background: rgba(255,255,255,0.18);
+      flex-shrink: 0;
+      margin: 0 10px;
+    }
+
     /* ── YOUR PROFILE ── */
     .my-profile {
       display: flex;
@@ -501,6 +572,27 @@
     </div>
   </div>
 
+  <!-- MY DOVES -->
+  <div class="card">
+    <p class="section-title">MY DOVES</p>
+    <div class="dove-card-inner">
+      <span class="dove-icon">🕊</span>
+      <span class="dove-total" id="dove-total">—</span>
+      <span class="dove-label">TOTAL DOVES</span>
+      <div class="dove-breakdown">
+        <div class="dove-part">
+          <span class="num" id="dove-own">—</span>
+          <span class="lbl">OWN<br>ACTIONS</span>
+        </div>
+        <div class="dove-divider"></div>
+        <div class="dove-part">
+          <span class="num" id="dove-ref">—</span>
+          <span class="lbl">REFERRAL<br>DOVES</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- INVITE FRIENDS -->
   <div class="card" id="invite-card">
     <p class="section-title">INVITE FRIENDS</p>
@@ -531,7 +623,7 @@
         <div class="points-divider"></div>
         <div class="points-col">
           <span class="points-num" id="ref-points">—</span>
-          <span class="points-lbl">PEACE POINTS</span>
+          <span class="points-lbl">DOVES</span>
           <span class="referrals-lbl">FROM THEIR ACTIONS</span>
         </div>
       </div>
@@ -706,6 +798,31 @@
   }
 
   loadStats();
+
+  // ── MY DOVES ─────────────────────────────────────────────────────
+  async function loadMyDoves() {
+    const ownActions = parseInt(localStorage.getItem('nava_peace_days') || '0', 10);
+    const refCode    = localStorage.getItem('nava_peace_ref_code');
+
+    let referralDoves = 0;
+    try {
+      if (refCode) {
+        const sb2 = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { data } = await sb2
+          .from('referral_points')
+          .select('id')
+          .eq('referral_code', refCode);
+        referralDoves = data ? data.length : 0;
+      }
+    } catch(e) { console.warn('Dove load error', e); }
+
+    const total = ownActions + referralDoves;
+    document.getElementById('dove-total').textContent = total;
+    document.getElementById('dove-own').textContent   = ownActions;
+    document.getElementById('dove-ref').textContent   = referralDoves;
+  }
+
+  loadMyDoves();
 
   // ── INVITE FRIENDS ───────────────────────────────────────────────
   (function initInvite() {
