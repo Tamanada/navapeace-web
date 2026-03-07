@@ -235,6 +235,105 @@
     /* add bottom padding so content doesn't hide behind nav */
     body { padding-bottom: 90px; }
 
+    /* ── TOOLTIP POPOVER ── */
+    .info-trigger {
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .info-trigger .lbl {
+      border-bottom: 1px dashed rgba(255,255,255,0.35);
+      padding-bottom: 1px;
+    }
+
+    .popover-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      background: rgba(10,50,90,0.35);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeOverlay 0.2s ease both;
+    }
+
+    .popover-overlay.open { display: flex; }
+
+    @keyframes fadeOverlay {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .popover-box {
+      background: rgba(30,100,160,0.88);
+      border: 1.5px solid rgba(255,255,255,0.45);
+      border-radius: 22px;
+      padding: 28px 28px 24px;
+      max-width: 320px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 12px 50px rgba(10,40,100,0.5);
+      animation: popIn 0.25s cubic-bezier(.34,1.56,.64,1) both;
+      position: relative;
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.85); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .popover-icon {
+      font-size: 36px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .popover-title {
+      font-size: 13px;
+      letter-spacing: 4px;
+      color: rgba(255,255,255,0.55);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .popover-num {
+      font-size: 52px;
+      letter-spacing: 2px;
+      color: #fff;
+      text-shadow: 0 0 24px rgba(255,255,255,0.5);
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .popover-text {
+      font-size: 13px;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.8);
+      line-height: 1.9;
+      text-transform: uppercase;
+    }
+
+    .popover-close {
+      display: block;
+      margin: 20px auto 0;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 20px;
+      color: rgba(255,255,255,0.75);
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: 8px 22px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .popover-close:hover { background: rgba(255,255,255,0.25); }
+
     /* ── PERSONAL STREAK ── */
     .personal-strip {
       font-size: 14px;
@@ -264,7 +363,7 @@
 
   <!-- COUNTER -->
   <div class="counter-strip">
-    <div class="counter-item">
+    <div class="counter-item info-trigger" onclick="openPopover()">
       <span class="num" id="cnt-people">—</span>
       <span class="lbl">PEACE LOVERS</span>
     </div>
@@ -319,6 +418,23 @@
     </a>
 
 
+  </div>
+
+  <!-- PEACE LOVERS POPOVER -->
+  <div class="popover-overlay" id="popoverOverlay" onclick="closePopover(event)">
+    <div class="popover-box">
+      <span class="popover-icon">🕊</span>
+      <p class="popover-title">PEACE LOVERS</p>
+      <span class="popover-num" id="pop-num">—</span>
+      <p class="popover-text">
+        People around the world<br>
+        who have joined NAVA PEACE<br>
+        and chosen peace at least once.<br><br>
+        Every action counts.<br>
+        Together, we make peace real.
+      </p>
+      <button class="popover-close" onclick="closePopover()">CLOSE</button>
+    </div>
   </div>
 
   <!-- BOTTOM NAV -->
@@ -657,6 +773,20 @@
 
   initTimer();
   initMap();
+
+  // ── Peace Lovers popover ─────────────────────────────────────────
+  function openPopover() {
+    const num = document.getElementById('cnt-people').textContent;
+    document.getElementById('pop-num').textContent = num;
+    document.getElementById('popoverOverlay').classList.add('open');
+  }
+
+  function closePopover(e) {
+    // Close if clicking the overlay background or the button
+    if (!e || e.target === document.getElementById('popoverOverlay') || e.currentTarget === document.querySelector('.popover-close')) {
+      document.getElementById('popoverOverlay').classList.remove('open');
+    }
+  }
   </script>
 
 </body>
