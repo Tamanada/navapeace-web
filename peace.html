@@ -410,6 +410,14 @@
       btn.disabled = true;
       btn.innerHTML = '<span class="btn-status" style="color:#3AACDF;font-size:36px;">···</span>';
 
+      // Reward referrer: insert 1 point in referral_points
+      const referredBy = localStorage.getItem('nava_peace_referred_by');
+      if (sb && referredBy) {
+        try {
+          await sb.from('referral_points').insert({ referral_code: referredBy });
+        } catch(e) { console.warn('Referral point error', e); }
+      }
+
       localStorage.setItem(PEACE_KEY, TODAY);
       setDone();
       loadCounters(); // refresh counters

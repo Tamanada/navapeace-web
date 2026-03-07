@@ -409,6 +409,14 @@
   </div>
 
   <script>
+    // ── Capture referral code from URL (?ref=XXXX) ─────────────────
+    (function() {
+      const ref = new URLSearchParams(window.location.search).get('ref');
+      if (ref && ref.length <= 12) {
+        localStorage.setItem('nava_peace_referred_by', ref.toUpperCase());
+      }
+    })();
+
     // ── Vérification vote du jour (localStorage) ──────────────────
     const TODAY = new Date().toISOString().split('T')[0]; // "2026-03-06"
     const STORAGE_KEY = 'nava_peace_voted';
@@ -416,6 +424,14 @@
     if (localStorage.getItem(STORAGE_KEY) === TODAY) {
       // Déjà voté aujourd'hui → carte directement
       window.location.replace('map.html');
+    }
+
+    // ── Generate unique referral code ──────────────────────────────
+    function genRefCode() {
+      return Math.random().toString(36).slice(2, 10).toUpperCase();
+    }
+    if (!localStorage.getItem('nava_peace_ref_code')) {
+      localStorage.setItem('nava_peace_ref_code', genRefCode());
     }
 
     // ── Safe Supabase init ────────────────────────────────────────
@@ -432,15 +448,17 @@
       btn.textContent = '...';
       btn.disabled = true;
 
-      const country = document.getElementById('country').value;
-      const age     = parseInt(document.getElementById('age').value, 10) || null;
-      const gender  = document.getElementById('gender').value || null;
+      const country      = document.getElementById('country').value;
+      const age          = parseInt(document.getElementById('age').value, 10) || null;
+      const gender       = document.getElementById('gender').value || null;
+      const referralCode = localStorage.getItem('nava_peace_ref_code') || genRefCode();
+      const referredBy   = localStorage.getItem('nava_peace_referred_by') || null;
 
       if (sbClient) {
         try {
           const { error } = await sbClient
             .from('peace_votes')
-            .insert({ country, age, gender });
+            .insert({ country, age, gender, referral_code: referralCode, referred_by: referredBy });
           if (error) console.warn('Supabase insert error:', error.message);
         } catch (err) {
           console.warn('Supabase unavailable:', err.message);

@@ -17,6 +17,7 @@
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase_config.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     *, *::before, *::after {
       box-sizing: border-box; margin: 0; padding: 0;
@@ -292,6 +293,117 @@
 
     .save-btn:hover { opacity: 0.88; }
 
+    /* ── INVITE FRIENDS ── */
+    .invite-link-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-bottom: 20px;
+    }
+
+    .invite-link-row span {
+      flex: 1;
+      font-size: 12px;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.85);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .copy-btn {
+      background: rgba(255,255,255,0.9);
+      border: none;
+      border-radius: 8px;
+      color: #1A6E96;
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: opacity 0.2s;
+    }
+
+    .copy-btn:hover { opacity: 0.85; }
+
+    .qr-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .qr-wrap > div {
+      border-radius: 12px;
+      overflow: hidden;
+      padding: 10px;
+      background: #fff;
+    }
+
+    .share-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .share-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 16px;
+      border-radius: 20px;
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: #fff;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+
+    .share-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+    .share-btn.wa  { background: #25D366; }
+    .share-btn.tg  { background: #229ED9; }
+    .share-btn.tw  { background: #000; }
+    .share-btn.sms { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.35); }
+
+    .points-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      border-top: 1px solid rgba(255,255,255,0.2);
+      padding-top: 18px;
+    }
+
+    .points-num {
+      font-size: 48px;
+      letter-spacing: 2px;
+      color: #fff;
+      text-shadow: 0 0 20px rgba(255,255,255,0.4);
+    }
+
+    .points-lbl {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+    }
+
+    .referrals-lbl {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.4);
+      margin-top: 2px;
+    }
+
     /* ── BOTTOM NAV ── */
     .bottom-nav {
       position: fixed;
@@ -362,6 +474,33 @@
         </select>
       </div>
       <button class="save-btn" onclick="saveProfile()">SAVE</button>
+    </div>
+  </div>
+
+  <!-- INVITE FRIENDS -->
+  <div class="card" id="invite-card">
+    <p class="section-title">INVITE FRIENDS</p>
+
+    <div class="invite-link-row">
+      <span id="ref-link-display">GENERATING LINK...</span>
+      <button class="copy-btn" onclick="copyLink()">COPY</button>
+    </div>
+
+    <div class="qr-wrap">
+      <div id="qrcode"></div>
+    </div>
+
+    <div class="share-row">
+      <a class="share-btn wa" id="share-wa" href="#" target="_blank">🕊 WHATSAPP</a>
+      <a class="share-btn tg" id="share-tg" href="#" target="_blank">🕊 TELEGRAM</a>
+      <a class="share-btn tw" id="share-tw" href="#" target="_blank">🕊 X</a>
+      <a class="share-btn sms" id="share-sms" href="#">🕊 SMS</a>
+    </div>
+
+    <div class="points-box">
+      <span class="points-num" id="ref-points">—</span>
+      <span class="points-lbl">PEACE POINTS</span>
+      <span class="referrals-lbl" id="ref-count">FROM YOUR REFERRALS</span>
     </div>
   </div>
 
@@ -533,6 +672,66 @@
   }
 
   loadStats();
+
+  // ── INVITE FRIENDS ───────────────────────────────────────────────
+  (function initInvite() {
+    const BASE    = 'https://nava-peace.app';
+    let refCode   = localStorage.getItem('nava_peace_ref_code');
+
+    // Generate one if missing (existing users without registration flow)
+    if (!refCode) {
+      refCode = Math.random().toString(36).slice(2, 10).toUpperCase();
+      localStorage.setItem('nava_peace_ref_code', refCode);
+    }
+
+    const inviteURL = BASE + '/?ref=' + refCode;
+    const msg       = encodeURIComponent('🕊 I choose PEACE every day. Join me: ' + inviteURL);
+
+    // Show link
+    document.getElementById('ref-link-display').textContent = inviteURL;
+
+    // QR code
+    new QRCode(document.getElementById('qrcode'), {
+      text: inviteURL, width: 140, height: 140,
+      colorDark: '#1A6E96', colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+
+    // Share links
+    document.getElementById('share-wa').href  = 'https://wa.me/?text=' + msg;
+    document.getElementById('share-tg').href  = 'https://t.me/share/url?url=' + encodeURIComponent(inviteURL) + '&text=' + encodeURIComponent('🕊 I choose PEACE every day. Join me!');
+    document.getElementById('share-tw').href  = 'https://x.com/intent/tweet?text=' + msg;
+    document.getElementById('share-sms').href = 'sms:?body=' + msg;
+
+    // Load peace points
+    loadPeacePoints(refCode);
+  })();
+
+  function copyLink() {
+    const link = 'https://nava-peace.app/?ref=' + localStorage.getItem('nava_peace_ref_code');
+    navigator.clipboard.writeText(link).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = '✓ COPIED';
+      setTimeout(() => btn.textContent = 'COPY', 2000);
+    });
+  }
+
+  async function loadPeacePoints(refCode) {
+    if (!refCode) return;
+    try {
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const { data, error } = await sb
+        .from('referral_points')
+        .select('id', { count: 'exact' })
+        .eq('referral_code', refCode);
+      if (!error) {
+        const pts = data ? data.length : 0;
+        document.getElementById('ref-points').textContent = pts;
+        document.getElementById('ref-count').textContent  =
+          pts === 1 ? 'FROM 1 REFERRAL ACTION' : 'FROM ' + pts + ' REFERRAL ACTIONS';
+      }
+    } catch(e) { console.warn('Peace points error', e); }
+  }
   </script>
 </body>
 </html>
