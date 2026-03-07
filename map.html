@@ -363,17 +363,17 @@
 
   <!-- COUNTER -->
   <div class="counter-strip">
-    <div class="counter-item info-trigger" onclick="openPopover()">
+    <div class="counter-item info-trigger" onclick="openPopover('people')">
       <span class="num" id="cnt-people">—</span>
       <span class="lbl">PEACE LOVERS</span>
     </div>
     <div class="counter-sep"></div>
-    <div class="counter-item">
+    <div class="counter-item info-trigger" onclick="openPopover('countries')">
       <span class="num" id="cnt-countries">—</span>
       <span class="lbl">COUNTRIES</span>
     </div>
     <div class="counter-sep"></div>
-    <div class="counter-item">
+    <div class="counter-item info-trigger" onclick="openPopover('today')">
       <span class="num" id="cnt-today">—</span>
       <span class="lbl">GLOBAL ACTIONS TODAY</span>
     </div>
@@ -420,19 +420,13 @@
 
   </div>
 
-  <!-- PEACE LOVERS POPOVER -->
+  <!-- COUNTER POPOVER -->
   <div class="popover-overlay" id="popoverOverlay" onclick="closePopover(event)">
     <div class="popover-box">
-      <span class="popover-icon">🕊</span>
-      <p class="popover-title">PEACE LOVERS</p>
+      <span class="popover-icon" id="pop-icon">🕊</span>
+      <p class="popover-title" id="pop-title">—</p>
       <span class="popover-num" id="pop-num">—</span>
-      <p class="popover-text">
-        People around the world<br>
-        who have joined NAVA PEACE<br>
-        and chosen peace at least once.<br><br>
-        Every action counts.<br>
-        Together, we make peace real.
-      </p>
+      <p class="popover-text" id="pop-text"></p>
       <button class="popover-close" onclick="closePopover()">CLOSE</button>
     </div>
   </div>
@@ -774,16 +768,40 @@
   initTimer();
   initMap();
 
-  // ── Peace Lovers popover ─────────────────────────────────────────
-  function openPopover() {
-    const num = document.getElementById('cnt-people').textContent;
-    document.getElementById('pop-num').textContent = num;
+  // ── Counter popovers ─────────────────────────────────────────────
+  const POPOVER_DATA = {
+    people: {
+      icon:  '🕊',
+      title: 'PEACE LOVERS',
+      numId: 'cnt-people',
+      text:  'People around the world<br>who have joined NAVA PEACE<br>and chosen peace at least once.<br><br>Every voice matters.<br>Together, we make peace real.'
+    },
+    countries: {
+      icon:  '🌍',
+      title: 'COUNTRIES',
+      numId: 'cnt-countries',
+      text:  'Nations represented<br>in the NAVA PEACE movement.<br><br>Peace knows no borders.<br>Every country that joins<br>brings us closer to a peaceful world.'
+    },
+    today: {
+      icon:  '✨',
+      title: 'GLOBAL ACTIONS TODAY',
+      numId: 'cnt-today',
+      text:  'Peace actions taken today<br>across the globe.<br><br>Each day is a new opportunity.<br>Every click is a real commitment<br>to choosing peace.'
+    }
+  };
+
+  function openPopover(type) {
+    const d = POPOVER_DATA[type];
+    if (!d) return;
+    document.getElementById('pop-icon').textContent  = d.icon;
+    document.getElementById('pop-title').textContent = d.title;
+    document.getElementById('pop-num').textContent   = document.getElementById(d.numId).textContent;
+    document.getElementById('pop-text').innerHTML    = d.text;
     document.getElementById('popoverOverlay').classList.add('open');
   }
 
   function closePopover(e) {
-    // Close if clicking the overlay background or the button
-    if (!e || e.target === document.getElementById('popoverOverlay') || e.currentTarget === document.querySelector('.popover-close')) {
+    if (!e || e.target === document.getElementById('popoverOverlay')) {
       document.getElementById('popoverOverlay').classList.remove('open');
     }
   }
