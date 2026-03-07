@@ -17,6 +17,7 @@
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase_config.js"></script>
+  <script src="lang.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -185,14 +186,14 @@
     </div>
 
     <h1>NAVA PEACE</h1>
-    <p class="tagline">TODAY HUMANITY CHOOSE PEACE</p>
+    <p class="tagline" data-i18n="tagline">TODAY HUMANITY CHOOSE PEACE</p>
     <div class="divider"></div>
 
     <form id="peaceForm">
 
-      <label for="country">Country</label>
+      <label for="country" data-i18n="lbl_country">Country</label>
       <select id="country" name="entry.1234567890" required>
-        <option value="">Select your country</option>
+        <option value="" data-i18n="ph_country">Select your country</option>
         <option>Afghanistan</option>
         <option>Albania</option>
         <option>Algeria</option>
@@ -390,22 +391,22 @@
         <option>Zimbabwe</option>
       </select>
 
-      <label for="age">Age</label>
-      <input type="number" id="age" name="entry.2345678901" placeholder="Enter your age" required>
+      <label for="age" data-i18n="lbl_age">Age</label>
+      <input type="number" id="age" name="entry.2345678901" placeholder="Enter your age" data-i18n-ph="ph_age" required>
 
-      <label for="gender">Gender</label>
+      <label for="gender" data-i18n="lbl_gender">Gender</label>
       <select id="gender" name="entry.3456789012" required>
-        <option value="">Select</option>
-        <option>Male</option>
-        <option>Female</option>
-        <option>Other</option>
-        <option>Prefer not to say</option>
+        <option value="" data-i18n="ph_gender">Select</option>
+        <option data-i18n="gender_male">Male</option>
+        <option data-i18n="gender_female">Female</option>
+        <option data-i18n="gender_other">Other</option>
+        <option data-i18n="gender_pns">Prefer not to say</option>
       </select>
 
-      <button type="submit">JOIN THE PEACE MAP</button>
+      <button type="submit" data-i18n="btn_join">JOIN THE PEACE MAP</button>
     </form>
 
-    <p class="footer-note">BE THE CHANGE YOU WANT TO SEE IN THE WORLD &nbsp;·&nbsp; WWW.NAVA-PEACE.APP</p>
+    <p class="footer-note"><span data-i18n="footer_note">BE THE CHANGE YOU WANT TO SEE IN THE WORLD</span> &nbsp;·&nbsp; WWW.NAVA-PEACE.APP</p>
   </div>
 
   <script>

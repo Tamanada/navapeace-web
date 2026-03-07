@@ -15,6 +15,7 @@
       src: url('nasalization.woff') format('woff');
     }
   </style>
+  <script src="lang.js"></script>
   <style>
     *, *::before, *::after {
       box-sizing: border-box; margin: 0; padding: 0;
@@ -351,12 +352,12 @@
   <div class="header">
     <img src="logo.png" alt="NAVA PEACE" />
     <h1>NAVA PEACE</h1>
-    <p class="tagline">ABOUT THE MOVEMENT</p>
+    <p class="tagline" data-i18n="about_tagline">ABOUT THE MOVEMENT</p>
   </div>
 
   <!-- MISSION -->
   <div class="card">
-    <p class="section-label">Our Mission</p>
+    <p class="section-label" data-i18n="mission_lbl">Our Mission</p>
     <p class="mission-text">
       NAVA PEACE is a global daily movement.<br>
       Every day, people from every country<br>
@@ -364,48 +365,45 @@
       <strong>To choose peace.</strong>
     </p>
     <div class="mission-divider"></div>
-    <p class="mission-text" style="font-size:13px; opacity:0.75;">
-      Our goal is to demonstrate — in real time,<br>
-      on a living world map — that humanity<br>
-      chooses peace. Not as a dream.<br>
-      As a daily act.
+    <p class="mission-text" style="font-size:13px; opacity:0.75;" data-i18n="mission_p2">
+      Our goal is to demonstrate in real time, on a living world map, that humanity chooses peace. Not as a dream. As a daily act.
     </p>
   </div>
 
   <!-- HOW IT WORKS -->
   <div class="card">
-    <p class="section-label">How It Works</p>
+    <p class="section-label" data-i18n="how_lbl">How It Works</p>
     <div class="steps">
 
       <div class="step">
         <div class="step-num">1</div>
         <div class="step-body">
-          <p class="step-title">Register</p>
-          <p class="step-desc">Join once. Share your country, age and gender. No account, no password, no email — your privacy is protected.</p>
+          <p class="step-title" data-i18n="step1_title">Register</p>
+          <p class="step-desc" data-i18n="step1_desc">Join once. Share your country, age and gender. No account, no password, no email — your privacy is protected.</p>
         </div>
       </div>
 
       <div class="step">
         <div class="step-num">2</div>
         <div class="step-body">
-          <p class="step-title">Choose Peace Every Day</p>
-          <p class="step-desc">Return each day and press the button. Your voice is counted on the global map. Every click is a real commitment.</p>
+          <p class="step-title" data-i18n="step2_title">Choose Peace Every Day</p>
+          <p class="step-desc" data-i18n="step2_desc">Return each day and press the button. Your voice is counted on the global map. Every click is a real commitment.</p>
         </div>
       </div>
 
       <div class="step">
         <div class="step-num">3</div>
         <div class="step-body">
-          <p class="step-title">Invite Friends</p>
-          <p class="step-desc">Receive a unique personal code. Share it via WhatsApp, Telegram, Instagram or SMS. Every friend who joins expands the movement.</p>
+          <p class="step-title" data-i18n="step3_title">Invite Friends</p>
+          <p class="step-desc" data-i18n="step3_desc">Receive a unique personal code. Share it via WhatsApp, Telegram, Instagram or SMS. Every friend who joins expands the movement.</p>
         </div>
       </div>
 
       <div class="step">
         <div class="step-num">4</div>
         <div class="step-body">
-          <p class="step-title">Earn Doves</p>
-          <p class="step-desc">Your peace impact grows daily. Earn a Dove for every day you act, and another for each day a friend you invited acts.</p>
+          <p class="step-title" data-i18n="step4_title">Earn Doves</p>
+          <p class="step-desc" data-i18n="step4_desc">Your peace impact grows daily. Earn a Dove for every day you act, and another for each day a friend you invited acts.</p>
         </div>
       </div>
 
@@ -414,11 +412,11 @@
 
   <!-- THE DOVE -->
   <div class="card">
-    <p class="section-label">The Dove</p>
+    <p class="section-label" data-i18n="dove_lbl">The Dove</p>
     <div class="dove-center">
       <div class="dove-emoji">🕊</div>
-      <p class="dove-title">Your Peace Score</p>
-      <p class="dove-desc">
+      <p class="dove-title" data-i18n="dove_score">Your Peace Score</p>
+      <p class="dove-desc" data-i18n-html="dove_desc">
         The Dove is NAVA PEACE's symbol of individual impact.
         It rewards consistency and inspires others to join.
         Every Dove represents a real act of peace —
@@ -428,14 +426,14 @@
       <div class="dove-formula">
         <div class="dove-col">
           <span class="val">🕊</span>
-          <span class="lbl">+1 Dove<br>Per Day<br>You Act</span>
+          <span class="lbl" data-i18n-html="dove_per_day">+1 Dove<br>Per Day<br>You Act</span>
         </div>
         <div class="dove-plus">+</div>
         <div class="dove-sep"></div>
         <div class="dove-plus">+</div>
         <div class="dove-col">
           <span class="val">🕊</span>
-          <span class="lbl">+1 Dove<br>Per Friend's<br>Daily Action</span>
+          <span class="lbl" data-i18n-html="dove_per_friend">+1 Dove<br>Per Friend's<br>Daily Action</span>
         </div>
       </div>
     </div>
@@ -443,7 +441,7 @@
 
   <!-- PRINCIPLES -->
   <div class="card">
-    <p class="section-label">Our Principles</p>
+    <p class="section-label" data-i18n="principles_lbl">Our Principles</p>
     <div class="principles">
 
       <!-- Anonymous -->
@@ -452,8 +450,8 @@
           <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
         </div>
         <div class="principle-body">
-          <p class="principle-name">Anonymous</p>
-          <p class="principle-text">No name, no email. We only collect your country, age and gender to understand who chooses peace.</p>
+          <p class="principle-name" data-i18n="p_anon_name">Anonymous</p>
+          <p class="principle-text" data-i18n="p_anon_text">No name, no email. We only collect your country, age and gender to understand who chooses peace.</p>
         </div>
       </div>
 
@@ -463,8 +461,8 @@
           <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
         </div>
         <div class="principle-body">
-          <p class="principle-name">Universal</p>
-          <p class="principle-text">Open to every human being on Earth, from every country, culture and background.</p>
+          <p class="principle-name" data-i18n="p_univ_name">Universal</p>
+          <p class="principle-text" data-i18n="p_univ_text">Open to every human being on Earth, from every country, culture and background.</p>
         </div>
       </div>
 
@@ -474,8 +472,8 @@
           <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
         </div>
         <div class="principle-body">
-          <p class="principle-name">Daily</p>
-          <p class="principle-text">Peace is not a single act. Returning each day is what makes the movement real and powerful.</p>
+          <p class="principle-name" data-i18n="p_daily_name">Daily</p>
+          <p class="principle-text" data-i18n="p_daily_text">Peace is not a single act. Returning each day is what makes the movement real and powerful.</p>
         </div>
       </div>
 
@@ -485,8 +483,8 @@
           <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
         </div>
         <div class="principle-body">
-          <p class="principle-name">Free</p>
-          <p class="principle-text">Always free. No subscriptions, no ads, no monetization. This is a movement, not a product.</p>
+          <p class="principle-name" data-i18n="p_free_name">Free</p>
+          <p class="principle-text" data-i18n="p_free_text">Always free. No subscriptions, no ads, no monetization. This is a movement, not a product.</p>
         </div>
       </div>
 
@@ -496,8 +494,8 @@
           <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
         </div>
         <div class="principle-body">
-          <p class="principle-name">Transparent</p>
-          <p class="principle-text">All data is public and visible on the live world map. No hidden numbers, no manipulation.</p>
+          <p class="principle-name" data-i18n="p_trans_name">Transparent</p>
+          <p class="principle-text" data-i18n="p_trans_text">All data is public and visible on the live world map. No hidden numbers, no manipulation.</p>
         </div>
       </div>
 
@@ -505,25 +503,25 @@
   </div>
 
   <!-- CTA -->
-  <a href="index.html" class="cta-btn">🕊 &nbsp; Join the Peace Map</a>
+  <a href="index.html" class="cta-btn" data-i18n="cta_btn">🕊 &nbsp; Join the Peace Map</a>
 
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
     <a href="peace.html" class="nav-item">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="12" y1="3" x2="12" y2="21" stroke="currentColor" stroke-width="1.8"/><line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>
-      <span>PEACE</span>
+      <span data-i18n="nav_peace">PEACE</span>
     </a>
     <a href="map.html" class="nav-item">
       <svg viewBox="0 0 24 24"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
-      <span>MAP</span>
+      <span data-i18n="nav_map">MAP</span>
     </a>
     <a href="profile.html" class="nav-item">
       <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
-      <span>PROFILE</span>
+      <span data-i18n="nav_profile">PROFILE</span>
     </a>
     <a href="about.html" class="nav-item active">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="12" y1="11" x2="12" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="7.5" r="1.2" fill="currentColor"/></svg>
-      <span>ABOUT</span>
+      <span data-i18n="nav_about">ABOUT</span>
     </a>
   </nav>
 

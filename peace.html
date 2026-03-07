@@ -17,6 +17,7 @@
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase_config.js"></script>
+  <script src="lang.js"></script>
   <style>
     *, *::before, *::after {
       box-sizing: border-box; margin: 0; padding: 0;
@@ -324,10 +325,10 @@
 
     <!-- MESSAGE -->
     <div class="message">
-      <span class="msg-for">TODAY, FOR ME,</span>
-      <span class="msg-for">FOR YOU, FOR US,</span>
-      <span class="msg-want">I WANT PEACE</span>
-      <span class="msg-for">AROUND THE WORLD</span>
+      <span class="msg-for" data-i18n="msg_for1">TODAY, FOR ME,</span>
+      <span class="msg-for" data-i18n="msg_for2">FOR YOU, FOR US,</span>
+      <span class="msg-want" data-i18n="msg_want">I WANT PEACE</span>
+      <span class="msg-for" data-i18n="msg_for3">AROUND THE WORLD</span>
     </div>
 
     <!-- BUTTON -->
@@ -337,9 +338,9 @@
 
     <!-- DONE MESSAGE -->
     <div class="done-msg" id="doneMsg">
-      <span class="done-thank">THANK YOU PEACE LOVER</span>
-      <span class="done-sub">YOU HAVE CHOSEN PEACE TODAY</span>
-      <span class="done-timer-label">NEXT ACTION IN</span>
+      <span class="done-thank" data-i18n="done_thank">THANK YOU PEACE LOVER</span>
+      <span class="done-sub" data-i18n="done_sub">YOU HAVE CHOSEN PEACE TODAY</span>
+      <span class="done-timer-label" data-i18n="done_timer_label">NEXT ACTION IN</span>
       <span class="done-timer" id="countdown">00:00:00</span>
     </div>
 
@@ -347,12 +348,12 @@
     <div class="counters">
       <div class="cnt-item">
         <span class="cnt-num" id="cnt-today">—</span>
-        <span class="cnt-lbl">TODAY</span>
+        <span class="cnt-lbl" data-i18n="cnt_today_lbl">TODAY</span>
       </div>
       <div class="cnt-sep"></div>
       <div class="cnt-item">
         <span class="cnt-num" id="cnt-total">—</span>
-        <span class="cnt-lbl">TOTAL ACTIONS</span>
+        <span class="cnt-lbl" data-i18n="cnt_total_lbl">TOTAL ACTIONS</span>
       </div>
     </div>
 
@@ -362,19 +363,19 @@
   <nav class="bottom-nav">
     <a href="peace.html" class="nav-item active">
       <svg viewBox="0 0 24 24"><path d="M11 2C6.48 2 2 6.48 2 11s4.48 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 16c-3.86 0-7-3.14-7-7s3.14-7 7-7 7 3.14 7 7-3.14 7-7 7zm-1-9h2v5h-2zm0-4h2v2h-2z"/><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="12" y1="3" x2="12" y2="21" stroke="currentColor" stroke-width="1.5"/><line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>
-      <span>PEACE</span>
+      <span data-i18n="nav_peace">PEACE</span>
     </a>
     <a href="map.html" class="nav-item">
       <svg viewBox="0 0 24 24"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
-      <span>MAP</span>
+      <span data-i18n="nav_map">MAP</span>
     </a>
     <a href="profile.html" class="nav-item">
       <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
-      <span>PROFILE</span>
+      <span data-i18n="nav_profile">PROFILE</span>
     </a>
     <a href="about.html" class="nav-item">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="12" y1="11" x2="12" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="7.5" r="1.2" fill="currentColor"/></svg>
-      <span>ABOUT</span>
+      <span data-i18n="nav_about">ABOUT</span>
     </a>
   </nav>
 
