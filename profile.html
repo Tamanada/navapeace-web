@@ -404,6 +404,30 @@
       margin-top: 2px;
     }
 
+    .points-row-dual {
+      display: flex;
+      gap: 0;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
+    .points-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .points-divider {
+      width: 1px;
+      height: 70px;
+      background: rgba(255,255,255,0.2);
+      flex-shrink: 0;
+      margin: 0 12px;
+    }
+
     /* ── BOTTOM NAV ── */
     .bottom-nav {
       position: fixed;
@@ -498,9 +522,19 @@
     </div>
 
     <div class="points-box">
-      <span class="points-num" id="ref-points">—</span>
-      <span class="points-lbl">PEACE POINTS</span>
-      <span class="referrals-lbl" id="ref-count">FROM YOUR REFERRALS</span>
+      <div class="points-row-dual">
+        <div class="points-col">
+          <span class="points-num" id="ref-friends">—</span>
+          <span class="points-lbl">FRIENDS</span>
+          <span class="referrals-lbl">INVITED</span>
+        </div>
+        <div class="points-divider"></div>
+        <div class="points-col">
+          <span class="points-num" id="ref-points">—</span>
+          <span class="points-lbl">PEACE POINTS</span>
+          <span class="referrals-lbl">FROM THEIR ACTIONS</span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -720,16 +754,24 @@
     if (!refCode) return;
     try {
       const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      const { data, error } = await sb
+
+      // Peace points = rows in referral_points for this referrer
+      const { data: pts } = await sb
         .from('referral_points')
-        .select('id', { count: 'exact' })
+        .select('id')
         .eq('referral_code', refCode);
-      if (!error) {
-        const pts = data ? data.length : 0;
-        document.getElementById('ref-points').textContent = pts;
-        document.getElementById('ref-count').textContent  =
-          pts === 1 ? 'FROM 1 REFERRAL ACTION' : 'FROM ' + pts + ' REFERRAL ACTIONS';
-      }
+
+      // Referred users = rows in peace_votes where referred_by = refCode
+      const { data: friends } = await sb
+        .from('peace_votes')
+        .select('id')
+        .eq('referred_by', refCode);
+
+      const ptsCount     = pts     ? pts.length     : 0;
+      const friendsCount = friends ? friends.length : 0;
+
+      document.getElementById('ref-points').textContent  = ptsCount;
+      document.getElementById('ref-friends').textContent = friendsCount;
     } catch(e) { console.warn('Peace points error', e); }
   }
   </script>
