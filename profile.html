@@ -201,6 +201,97 @@
       padding: 10px 0;
     }
 
+    /* ── EDIT ── */
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .card-header .section-title { margin-bottom: 0; }
+
+    .edit-btn {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 20px;
+      color: rgba(255,255,255,0.75);
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .edit-btn:hover { background: rgba(255,255,255,0.25); }
+
+    .edit-form {
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.2);
+      padding-top: 20px;
+    }
+
+    .edit-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .edit-field label {
+      font-size: 10px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .edit-field input,
+    .edit-field select {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 10px;
+      color: #fff;
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 15px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 10px 14px;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.2s;
+    }
+
+    .edit-field input::placeholder { color: rgba(255,255,255,0.3); }
+    .edit-field input:focus,
+    .edit-field select:focus { border-color: rgba(255,255,255,0.65); }
+
+    .edit-field select option {
+      background: #1E8EC4;
+      color: #fff;
+    }
+
+    .save-btn {
+      background: rgba(255,255,255,0.9);
+      border: none;
+      border-radius: 12px;
+      color: #1A6E96;
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 13px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: 12px;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: opacity 0.2s;
+    }
+
+    .save-btn:hover { opacity: 0.88; }
+
     /* ── BOTTOM NAV ── */
     .bottom-nav {
       position: fixed;
@@ -244,9 +335,34 @@
 
   <!-- YOUR PROFILE -->
   <div class="card" id="my-card">
-    <p class="section-title">YOUR PROFILE</p>
+    <div class="card-header">
+      <p class="section-title">YOUR PROFILE</p>
+      <button class="edit-btn" onclick="toggleEdit()">EDIT</button>
+    </div>
     <div class="my-profile" id="my-profile">
       <p class="no-data">VOTE FIRST TO SEE YOUR PROFILE</p>
+    </div>
+
+    <!-- EDIT FORM -->
+    <div class="edit-form" id="edit-form">
+      <div class="edit-field">
+        <label>COUNTRY (2-letter code)</label>
+        <input id="edit-country" type="text" maxlength="2" placeholder="FR" />
+      </div>
+      <div class="edit-field">
+        <label>AGE</label>
+        <input id="edit-age" type="number" min="1" max="120" placeholder="25" />
+      </div>
+      <div class="edit-field">
+        <label>GENDER</label>
+        <select id="edit-gender">
+          <option value="">— SELECT —</option>
+          <option value="male">MALE</option>
+          <option value="female">FEMALE</option>
+          <option value="other">OTHER</option>
+        </select>
+      </div>
+      <button class="save-btn" onclick="saveProfile()">SAVE</button>
     </div>
   </div>
 
@@ -284,26 +400,58 @@
 
   <script>
   // ── Your personal profile (localStorage) ────────────────────────
-  (function() {
+  function renderMyProfile() {
     const country  = localStorage.getItem('nava_peace_country');
     const age      = localStorage.getItem('nava_peace_age');
     const gender   = localStorage.getItem('nava_peace_gender');
     const days     = localStorage.getItem('nava_peace_days');
 
-    if (!country && !age) return;
-
     const container = document.getElementById('my-profile');
     container.innerHTML = '';
 
+    if (!country && !age) {
+      container.innerHTML = '<p class="no-data">VOTE FIRST TO SEE YOUR PROFILE</p>';
+      return;
+    }
+
     if (country) container.innerHTML += `
-      <div class="my-badge"><div class="val">${country}</div><div class="key">COUNTRY</div></div>`;
-    if (age && age !== 'null')  container.innerHTML += `
+      <div class="my-badge"><div class="val">${country.toUpperCase()}</div><div class="key">COUNTRY</div></div>`;
+    if (age && age !== 'null') container.innerHTML += `
       <div class="my-badge"><div class="val">${age}</div><div class="key">AGE</div></div>`;
     if (gender && gender !== 'null') container.innerHTML += `
       <div class="my-badge"><div class="val">${gender.toUpperCase()}</div><div class="key">GENDER</div></div>`;
     if (days) container.innerHTML += `
       <div class="my-badge"><div class="val">${days}</div><div class="key">DAYS</div></div>`;
-  })();
+  }
+
+  function toggleEdit() {
+    const form = document.getElementById('edit-form');
+    const open = form.style.display === 'flex';
+    if (!open) {
+      // Pre-fill with current values
+      document.getElementById('edit-country').value = (localStorage.getItem('nava_peace_country') || '').toUpperCase();
+      document.getElementById('edit-age').value     = localStorage.getItem('nava_peace_age') || '';
+      document.getElementById('edit-gender').value  = localStorage.getItem('nava_peace_gender') || '';
+    }
+    form.style.display = open ? 'none' : 'flex';
+    document.querySelector('.edit-btn').textContent = open ? 'EDIT' : 'CANCEL';
+  }
+
+  function saveProfile() {
+    const country = document.getElementById('edit-country').value.trim().toUpperCase();
+    const age     = document.getElementById('edit-age').value.trim();
+    const gender  = document.getElementById('edit-gender').value;
+
+    if (country) localStorage.setItem('nava_peace_country', country);
+    if (age)     localStorage.setItem('nava_peace_age', age);
+    if (gender)  localStorage.setItem('nava_peace_gender', gender);
+
+    renderMyProfile();
+    document.getElementById('edit-form').style.display = 'none';
+    document.querySelector('.edit-btn').textContent = 'EDIT';
+  }
+
+  renderMyProfile();
 
   // ── Age groups ───────────────────────────────────────────────────
   const AGE_GROUPS = [
