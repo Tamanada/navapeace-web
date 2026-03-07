@@ -501,25 +501,33 @@
       </div>`).join('');
   }
 
+  function normalizeGender(g) {
+    const v = (g || '').toLowerCase().trim();
+    if (v === 'male'   || v === 'm' || v === 'homme') return 'MALE';
+    if (v === 'female' || v === 'f' || v === 'femme') return 'FEMALE';
+    return null; // ignore anything else
+  }
+
   function renderGender(data) {
-    const withGender = data.filter(r => r.gender);
     const container = document.getElementById('gender-pills');
-    if (withGender.length === 0) {
+    const groups = { MALE: 0, FEMALE: 0 };
+
+    data.forEach(r => {
+      const n = normalizeGender(r.gender);
+      if (n) groups[n]++;
+    });
+
+    const total = groups.MALE + groups.FEMALE;
+    if (total === 0) {
       container.innerHTML = '<p class="no-data">NO GENDER DATA YET</p>'; return;
     }
 
-    const groups = {};
-    withGender.forEach(r => {
-      const g = r.gender.toUpperCase();
-      groups[g] = (groups[g] || 0) + 1;
-    });
-    const total = withGender.length;
-
     container.innerHTML = Object.entries(groups)
-      .sort((a,b) => b[1]-a[1])
+      .filter(([, count]) => count > 0)
+      .sort((a, b) => b[1] - a[1])
       .map(([label, count]) => `
         <div class="gender-pill">
-          <span class="pct">${Math.round(count/total*100)}%</span>
+          <span class="pct">${Math.round(count / total * 100)}%</span>
           <span class="lbl">${label}</span>
         </div>`).join('');
   }
