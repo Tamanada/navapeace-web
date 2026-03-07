@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NAVA PEACE – Profile</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="apple-touch-icon" href="favicon.png" />
+  <style>
+    @font-face {
+      font-family: 'Nasalization';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('nasalization.woff') format('woff');
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase_config.js"></script>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box; margin: 0; padding: 0;
+      font-family: 'Nasalization', Arial, sans-serif;
+    }
+
+    body {
+      font-family: 'Nasalization', Arial, sans-serif;
+      background: radial-gradient(ellipse at 50% 30%, #6DD5F5 0%, #3AACDF 45%, #1E8EC4 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 28px 16px 110px;
+      color: #fff;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .header img {
+      width: 72px; height: 72px;
+      object-fit: contain;
+      filter: drop-shadow(0 3px 10px rgba(255,255,255,0.4));
+      margin-bottom: 10px;
+    }
+
+    .header h1 {
+      font-size: 36px;
+      font-weight: 400;
+      letter-spacing: 7px;
+      text-shadow: 0 1px 16px rgba(255,255,255,0.4);
+    }
+
+    .header .tagline {
+      font-size: 16px;
+      letter-spacing: 3.5px;
+      color: #F0EDE4;
+      opacity: 0.8;
+      margin-top: 4px;
+    }
+
+    /* ── SECTION CARD ── */
+    .card {
+      width: 100%;
+      max-width: 600px;
+      background: rgba(247,247,241,0.12);
+      border: 1.5px solid rgba(255,255,255,0.35);
+      border-radius: 24px;
+      padding: 24px 28px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 8px 40px rgba(20,80,130,0.2);
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    /* ── BARS ── */
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .bar-label {
+      font-size: 12px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.75);
+      width: 70px;
+      flex-shrink: 0;
+      text-align: right;
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 22px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 11px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: rgba(255,255,255,0.75);
+      border-radius: 11px;
+      transition: width 1s ease;
+      width: 0%;
+    }
+
+    .bar-count {
+      font-size: 14px;
+      letter-spacing: 1px;
+      color: #fff;
+      width: 36px;
+      flex-shrink: 0;
+      text-align: left;
+    }
+
+    /* ── GENDER PILLS ── */
+    .gender-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .gender-pill {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 16px;
+      padding: 14px 20px;
+      min-width: 110px;
+    }
+
+    .gender-pill .pct {
+      font-size: 28px;
+      letter-spacing: 1px;
+      color: #fff;
+    }
+
+    .gender-pill .lbl {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.6);
+    }
+
+    /* ── YOUR PROFILE ── */
+    .my-profile {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .my-badge {
+      background: rgba(255,255,255,0.15);
+      border: 1.5px solid rgba(255,255,255,0.4);
+      border-radius: 14px;
+      padding: 12px 20px;
+      text-align: center;
+    }
+
+    .my-badge .val {
+      font-size: 24px;
+      letter-spacing: 1px;
+      color: #fff;
+    }
+
+    .my-badge .key {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+      margin-top: 4px;
+    }
+
+    .no-data {
+      text-align: center;
+      font-size: 13px;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.45);
+      padding: 10px 0;
+    }
+
+    /* ── BOTTOM NAV ── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background: rgba(20, 90, 140, 0.82);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,0.2);
+      padding: 10px 0 24px;
+      z-index: 200;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      text-decoration: none;
+      color: rgba(255,255,255,0.45);
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .nav-item.active { color: #fff; }
+    .nav-item svg { width: 26px; height: 26px; fill: currentColor; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <img src="logo.png" alt="NAVA PEACE" />
+    <h1>NAVA PEACE</h1>
+    <p class="tagline">COMMUNITY PROFILE</p>
+  </div>
+
+  <!-- YOUR PROFILE -->
+  <div class="card" id="my-card">
+    <p class="section-title">YOUR PROFILE</p>
+    <div class="my-profile" id="my-profile">
+      <p class="no-data">VOTE FIRST TO SEE YOUR PROFILE</p>
+    </div>
+  </div>
+
+  <!-- AGE DISTRIBUTION -->
+  <div class="card">
+    <p class="section-title">AGE DISTRIBUTION</p>
+    <div id="age-bars">
+      <p class="no-data">LOADING...</p>
+    </div>
+  </div>
+
+  <!-- GENDER DISTRIBUTION -->
+  <div class="card">
+    <p class="section-title">GENDER DISTRIBUTION</p>
+    <div class="gender-row" id="gender-pills">
+      <p class="no-data">LOADING...</p>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      <span>HOME</span>
+    </a>
+    <a href="map.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
+      <span>MAP</span>
+    </a>
+    <a href="profile.html" class="nav-item active">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+      <span>PROFILE</span>
+    </a>
+  </nav>
+
+  <script>
+  // ── Your personal profile (localStorage) ────────────────────────
+  (function() {
+    const country  = localStorage.getItem('nava_peace_country');
+    const age      = localStorage.getItem('nava_peace_age');
+    const gender   = localStorage.getItem('nava_peace_gender');
+    const days     = localStorage.getItem('nava_peace_days');
+
+    if (!country && !age) return;
+
+    const container = document.getElementById('my-profile');
+    container.innerHTML = '';
+
+    if (country) container.innerHTML += `
+      <div class="my-badge"><div class="val">${country}</div><div class="key">COUNTRY</div></div>`;
+    if (age && age !== 'null')  container.innerHTML += `
+      <div class="my-badge"><div class="val">${age}</div><div class="key">AGE</div></div>`;
+    if (gender && gender !== 'null') container.innerHTML += `
+      <div class="my-badge"><div class="val">${gender.toUpperCase()}</div><div class="key">GENDER</div></div>`;
+    if (days) container.innerHTML += `
+      <div class="my-badge"><div class="val">${days}</div><div class="key">DAYS</div></div>`;
+  })();
+
+  // ── Age groups ───────────────────────────────────────────────────
+  const AGE_GROUPS = [
+    { label: '≤17',   min: 0,   max: 17  },
+    { label: '18-24', min: 18,  max: 24  },
+    { label: '25-34', min: 25,  max: 34  },
+    { label: '35-49', min: 35,  max: 49  },
+    { label: '50-64', min: 50,  max: 64  },
+    { label: '65+',   min: 65,  max: 999 },
+  ];
+
+  // ── Load from Supabase ───────────────────────────────────────────
+  async function loadStats() {
+    let data = [];
+    try {
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const { data: rows, error } = await sb
+        .from('peace_votes')
+        .select('age, gender')
+        .not('country', 'is', null);
+      if (!error && rows) data = rows;
+    } catch(e) { console.warn('Supabase error', e); }
+
+    renderAge(data);
+    renderGender(data);
+  }
+
+  function renderAge(data) {
+    const withAge = data.filter(r => r.age && r.age > 0);
+    const container = document.getElementById('age-bars');
+    if (withAge.length === 0) {
+      container.innerHTML = '<p class="no-data">NO AGE DATA YET</p>'; return;
+    }
+
+    const counts = AGE_GROUPS.map(g => ({
+      label: g.label,
+      count: withAge.filter(r => r.age >= g.min && r.age <= g.max).length
+    }));
+    const max = Math.max(...counts.map(c => c.count), 1);
+
+    container.innerHTML = counts.map(c => `
+      <div class="bar-row">
+        <span class="bar-label">${c.label}</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${Math.round(c.count/max*100)}%"></div>
+        </div>
+        <span class="bar-count">${c.count}</span>
+      </div>`).join('');
+  }
+
+  function renderGender(data) {
+    const withGender = data.filter(r => r.gender);
+    const container = document.getElementById('gender-pills');
+    if (withGender.length === 0) {
+      container.innerHTML = '<p class="no-data">NO GENDER DATA YET</p>'; return;
+    }
+
+    const groups = {};
+    withGender.forEach(r => {
+      const g = r.gender.toUpperCase();
+      groups[g] = (groups[g] || 0) + 1;
+    });
+    const total = withGender.length;
+
+    container.innerHTML = Object.entries(groups)
+      .sort((a,b) => b[1]-a[1])
+      .map(([label, count]) => `
+        <div class="gender-pill">
+          <span class="pct">${Math.round(count/total*100)}%</span>
+          <span class="lbl">${label}</span>
+        </div>`).join('');
+  }
+
+  loadStats();
+  </script>
+</body>
+</html>
