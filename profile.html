@@ -619,7 +619,7 @@
   <div class="card" id="my-card">
     <div class="card-header">
       <p class="section-title" data-i18n="section_profile">YOUR PROFILE</p>
-      <button class="edit-btn" onclick="toggleEdit()">EDIT</button>
+      <button class="edit-btn" onclick="toggleEdit()" data-i18n="edit_btn">EDIT</button>
     </div>
     <div class="my-profile" id="my-profile">
       <p class="no-data">VOTE FIRST TO SEE YOUR PROFILE</p>
@@ -628,22 +628,22 @@
     <!-- EDIT FORM -->
     <div class="edit-form" id="edit-form">
       <div class="edit-field">
-        <label>COUNTRY (2-letter code)</label>
+        <label data-i18n="lbl_edit_country">COUNTRY (2-LETTER CODE)</label>
         <input id="edit-country" type="text" maxlength="2" placeholder="FR" />
       </div>
       <div class="edit-field">
-        <label>AGE</label>
+        <label data-i18n="lbl_age">AGE</label>
         <input id="edit-age" type="number" min="1" max="120" placeholder="25" />
       </div>
       <div class="edit-field">
-        <label>GENDER</label>
+        <label data-i18n="lbl_gender">GENDER</label>
         <select id="edit-gender">
-          <option value="">— SELECT —</option>
-          <option value="male">MALE</option>
-          <option value="female">FEMALE</option>
+          <option value="" data-i18n="lbl_select">— SELECT —</option>
+          <option value="male" data-i18n="gender_male">MALE</option>
+          <option value="female" data-i18n="gender_female">FEMALE</option>
         </select>
       </div>
-      <button class="save-btn" onclick="saveProfile()">SAVE</button>
+      <button class="save-btn" onclick="saveProfile()" data-i18n="save_btn">SAVE</button>
     </div>
   </div>
 
@@ -756,7 +756,7 @@
   <div class="dove-overlay" id="doveOverlay" onclick="closeDovePopup(event)">
     <div class="dove-popup">
       <span class="dove-popup-icon">🕊</span>
-      <p class="dove-popup-title">MY DOVES</p>
+      <p class="dove-popup-title" data-i18n="popup_my_doves">MY DOVES</p>
       <span class="dove-popup-total" id="pop-dove-total">—</span>
 
       <div class="dove-bar-wrap">
@@ -765,8 +765,8 @@
           <div class="dove-bar-ref" id="pop-bar-ref" style="width:0%"></div>
         </div>
         <div class="dove-bar-legend">
-          <span>🕊 <span id="pop-leg-own">0</span> OWN ACTIONS</span>
-          <span><span id="pop-leg-ref">0</span> REFERRAL 🕊</span>
+          <span>🕊 <span id="pop-leg-own">0</span> <span data-i18n="popup_own_lbl">OWN ACTIONS</span></span>
+          <span><span id="pop-leg-ref">0</span> <span data-i18n="popup_ref_lbl">REFERRAL</span> 🕊</span>
         </div>
       </div>
 
@@ -775,7 +775,7 @@
         Each friend's daily action<br>= <strong style="color:#fff;">+1 Dove</strong> for you<br><br>
         Doves are your peace impact score.
       </p>
-      <button class="dove-popup-close" onclick="closeDovePopup()">CLOSE</button>
+      <button class="dove-popup-close" onclick="closeDovePopup()" data-i18n="close_btn">CLOSE</button>
     </div>
   </div>
 
@@ -811,18 +811,18 @@
     container.innerHTML = '';
 
     if (!country && !age) {
-      container.innerHTML = '<p class="no-data">VOTE FIRST TO SEE YOUR PROFILE</p>';
+      container.innerHTML = `<p class="no-data">${t('no_data_profile')}</p>`;
       return;
     }
 
     if (country) container.innerHTML += `
-      <div class="my-badge"><div class="val">${country.toUpperCase()}</div><div class="key">COUNTRY</div></div>`;
+      <div class="my-badge"><div class="val">${country.toUpperCase()}</div><div class="key">${t('lbl_country_badge')}</div></div>`;
     if (age && age !== 'null') container.innerHTML += `
-      <div class="my-badge"><div class="val">${age}</div><div class="key">AGE</div></div>`;
+      <div class="my-badge"><div class="val">${age}</div><div class="key">${t('lbl_age_badge')}</div></div>`;
     if (gender && gender !== 'null') container.innerHTML += `
-      <div class="my-badge"><div class="val">${gender.toUpperCase()}</div><div class="key">GENDER</div></div>`;
+      <div class="my-badge"><div class="val">${gender.toUpperCase()}</div><div class="key">${t('lbl_gender_badge')}</div></div>`;
     if (days) container.innerHTML += `
-      <div class="my-badge"><div class="val">${days}</div><div class="key">DAYS</div></div>`;
+      <div class="my-badge"><div class="val">${days}</div><div class="key">${t('lbl_days_badge')}</div></div>`;
   }
 
   function toggleEdit() {
@@ -835,7 +835,7 @@
       document.getElementById('edit-gender').value  = localStorage.getItem('nava_peace_gender') || '';
     }
     form.style.display = open ? 'none' : 'flex';
-    document.querySelector('.edit-btn').textContent = open ? 'EDIT' : 'CANCEL';
+    document.querySelector('.edit-btn').textContent = open ? t('edit_btn') : t('cancel_btn');
   }
 
   function saveProfile() {
@@ -849,7 +849,7 @@
 
     renderMyProfile();
     document.getElementById('edit-form').style.display = 'none';
-    document.querySelector('.edit-btn').textContent = 'EDIT';
+    document.querySelector('.edit-btn').textContent = t('edit_btn');
   }
 
   renderMyProfile();
@@ -1022,8 +1022,8 @@
     const link = 'https://nava-peace.app/?ref=' + localStorage.getItem('nava_peace_ref_code');
     navigator.clipboard.writeText(link).then(() => {
       const btn = document.querySelector('.copy-btn');
-      btn.textContent = '✓ COPIED';
-      setTimeout(() => btn.textContent = 'COPY', 2000);
+      btn.textContent = t('copied_lbl');
+      setTimeout(() => btn.textContent = t('copy_btn'), 2000);
     });
   }
 
