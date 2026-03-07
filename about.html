@@ -250,16 +250,23 @@
     }
 
     .principle-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 12px;
+      width: 50px;
+      height: 50px;
+      border-radius: 16px;
       background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.25);
+      border: 1px solid rgba(255,255,255,0.28);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 17px;
       flex-shrink: 0;
+    }
+
+    .principle-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: rgba(255,255,255,0.9);
     }
 
     .principle-body {}
@@ -439,40 +446,55 @@
     <p class="section-label">Our Principles</p>
     <div class="principles">
 
+      <!-- Anonymous -->
       <div class="principle">
-        <div class="principle-icon">🔒</div>
+        <div class="principle-icon">
+          <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+        </div>
         <div class="principle-body">
           <p class="principle-name">Anonymous</p>
           <p class="principle-text">No name, no email. We only collect your country, age and gender to understand who chooses peace.</p>
         </div>
       </div>
 
+      <!-- Universal -->
       <div class="principle">
-        <div class="principle-icon">🌍</div>
+        <div class="principle-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        </div>
         <div class="principle-body">
           <p class="principle-name">Universal</p>
           <p class="principle-text">Open to every human being on Earth, from every country, culture and background.</p>
         </div>
       </div>
 
+      <!-- Daily -->
       <div class="principle">
-        <div class="principle-icon">📅</div>
+        <div class="principle-icon">
+          <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+        </div>
         <div class="principle-body">
           <p class="principle-name">Daily</p>
           <p class="principle-text">Peace is not a single act. Returning each day is what makes the movement real and powerful.</p>
         </div>
       </div>
 
+      <!-- Free -->
       <div class="principle">
-        <div class="principle-icon">✨</div>
+        <div class="principle-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        </div>
         <div class="principle-body">
           <p class="principle-name">Free</p>
           <p class="principle-text">Always free. No subscriptions, no ads, no monetization. This is a movement, not a product.</p>
         </div>
       </div>
 
+      <!-- Transparent -->
       <div class="principle">
-        <div class="principle-icon">📡</div>
+        <div class="principle-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+        </div>
         <div class="principle-body">
           <p class="principle-name">Transparent</p>
           <p class="principle-text">All data is public and visible on the live world map. No hidden numbers, no manipulation.</p>
