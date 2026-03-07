@@ -203,11 +203,31 @@
     /* ── DONE MESSAGE ── */
     .done-msg {
       display: none;
-      font-size: 12px;
-      letter-spacing: 2px;
-      color: rgba(255,255,255,0.65);
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
       text-transform: uppercase;
-      line-height: 1.7;
+      text-align: center;
+      animation: fadeInUp 0.6s ease both;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .done-thank {
+      font-size: 20px;
+      letter-spacing: 4px;
+      color: #FFFFFF;
+      text-shadow: 0 0 24px rgba(255,255,255,0.6);
+    }
+
+    .done-sub {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.8;
     }
 
     /* ── COUNTERS ── */
@@ -302,10 +322,10 @@
     </button>
 
     <!-- DONE MESSAGE -->
-    <p class="done-msg" id="doneMsg">
-      YOU HAVE CHOSEN PEACE TODAY<br>
-      COME BACK TOMORROW
-    </p>
+    <div class="done-msg" id="doneMsg">
+      <span class="done-thank">THANK YOU PEACE LOVER</span>
+      <span class="done-sub">YOU HAVE CHOSEN PEACE TODAY<br>COME BACK TOMORROW</span>
+    </div>
 
     <!-- COUNTERS -->
     <div class="counters">
@@ -364,7 +384,7 @@
       const btn = document.getElementById('peaceBtn');
       btn.disabled = true;
       btn.innerHTML = '<img src="logo.png" alt="✓" class="btn-logo" style="opacity:0.35"/><span class="btn-status" style="position:absolute;font-size:42px;">✓</span>';
-      document.getElementById('doneMsg').style.display = 'block';
+      document.getElementById('doneMsg').style.display = 'flex';
     }
 
     // ── Clic sur le bouton ──────────────────────────────────────────
