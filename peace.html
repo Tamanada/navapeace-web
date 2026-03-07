@@ -76,17 +76,38 @@
 
     /* ── MESSAGE ── */
     .message {
-      font-size: 16px;
-      letter-spacing: 2.5px;
-      line-height: 1.8;
-      color: #F0EDE4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      text-align: center;
       text-transform: uppercase;
     }
 
-    .message em {
-      font-style: normal;
-      color: #fff;
-      font-size: 18px;
+    .msg-today {
+      font-size: 13px;
+      letter-spacing: 4px;
+      color: rgba(240,237,228,0.55);
+    }
+
+    .msg-for {
+      font-size: 16px;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.75);
+    }
+
+    .msg-want {
+      font-size: 36px;
+      letter-spacing: 7px;
+      color: #FFFFFF;
+      text-shadow: 0 1px 20px rgba(255,255,255,0.5);
+      line-height: 1.1;
+    }
+
+    .msg-world {
+      font-size: 16px;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.75);
     }
 
     /* ── PEACE BUTTON ── */
@@ -247,12 +268,12 @@
   <div class="card">
 
     <!-- MESSAGE -->
-    <p class="message">
-      TODAY, FOR ME, FOR YOU,<br>
-      FOR US,<br>
-      <em>I WANT PEACE</em><br>
-      AROUND THE WORLD
-    </p>
+    <div class="message">
+      <span class="msg-today">TODAY</span>
+      <span class="msg-for">FOR ME · FOR YOU · FOR US</span>
+      <span class="msg-want">I WANT<br>PEACE</span>
+      <span class="msg-world">AROUND THE WORLD</span>
+    </div>
 
     <!-- BUTTON -->
     <button class="peace-btn" id="peaceBtn" onclick="choosePeace()">
