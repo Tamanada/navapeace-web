@@ -370,7 +370,7 @@
     <div class="counter-sep"></div>
     <div class="counter-item info-trigger" onclick="openPopover('countries')">
       <span class="num" id="cnt-countries">—</span>
-      <span class="lbl">COUNTRIES</span>
+      <span class="lbl" style="font-size:10px;letter-spacing:1.5px;">COUNTRIES REPRESENTED</span>
     </div>
     <div class="counter-sep"></div>
     <div class="counter-item info-trigger" onclick="openPopover('today')">
@@ -778,9 +778,42 @@
     },
     countries: {
       icon:  '🌍',
-      title: 'COUNTRIES',
+      title: 'COUNTRIES REPRESENTED',
       numId: 'cnt-countries',
-      text:  'Nations represented<br>in the NAVA PEACE movement.<br><br>Peace knows no borders.<br>Every country that joins<br>brings us closer to a peaceful world.'
+      buildContent: (num) => {
+        const WORLD  = 195;
+        const count  = parseInt(num) || 0;
+        const pct    = count ? Math.round(count / WORLD * 100) : 0;
+        const circ   = +(Math.PI * 2 * 50).toFixed(1);
+        const offset = +(circ * (1 - pct / 100)).toFixed(1);
+        return `
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin:10px 0 14px;">
+            <svg viewBox="0 0 120 120" width="118" height="118">
+              <circle cx="60" cy="60" r="50" fill="none"
+                stroke="rgba(255,255,255,0.15)" stroke-width="11"/>
+              <circle cx="60" cy="60" r="50" fill="none"
+                stroke="#fff" stroke-width="11"
+                stroke-dasharray="${circ}"
+                stroke-dashoffset="${offset}"
+                stroke-linecap="round"
+                transform="rotate(-90 60 60)"/>
+              <text x="60" y="54" text-anchor="middle" fill="#fff"
+                font-size="22" font-family="Nasalization,Arial,sans-serif">${pct}%</text>
+              <text x="60" y="73" text-anchor="middle"
+                fill="rgba(255,255,255,0.5)" font-size="9"
+                font-family="Nasalization,Arial,sans-serif"
+                letter-spacing="2">OF THE WORLD</text>
+            </svg>
+            <p style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.5);
+              text-transform:uppercase;">${count} of ${WORLD} nations</p>
+          </div>
+          <p style="font-size:12px;letter-spacing:1.5px;color:rgba(255,255,255,0.75);
+            line-height:1.9;text-transform:uppercase;">
+            Peace knows no borders.<br>
+            Every country that joins<br>
+            brings us closer to a peaceful world.
+          </p>`;
+      }
     },
     today: {
       icon:  '✨',
@@ -793,10 +826,11 @@
   function openPopover(type) {
     const d = POPOVER_DATA[type];
     if (!d) return;
+    const num = document.getElementById(d.numId).textContent;
     document.getElementById('pop-icon').textContent  = d.icon;
     document.getElementById('pop-title').textContent = d.title;
-    document.getElementById('pop-num').textContent   = document.getElementById(d.numId).textContent;
-    document.getElementById('pop-text').innerHTML    = d.text;
+    document.getElementById('pop-num').textContent   = num;
+    document.getElementById('pop-text').innerHTML    = d.buildContent ? d.buildContent(num) : d.text;
     document.getElementById('popoverOverlay').classList.add('open');
   }
 
