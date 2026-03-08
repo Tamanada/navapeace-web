@@ -123,6 +123,9 @@ const NAVA_TRANSLATIONS = {
     pop_countries_of:   '{count} of {total} nations',
     pop_countries_text: 'Peace knows no borders.\nEvery country that joins\nbrings us closer to a peaceful world.',
     pop_today_text:     'Peace actions taken today\nacross the globe.\n\nEach day is a new opportunity.\nEvery click is a real commitment\nto choosing peace.',
+    referrals_title:    'MY REFERRALS',
+    referrals_see_btn:  'SEE REFERRALS',
+    referrals_empty:    'No referrals yet.\nShare your link to grow\nthe peace movement!',
   },
 
   fr: {
@@ -237,6 +240,9 @@ const NAVA_TRANSLATIONS = {
     pop_countries_of:   '{count} sur {total} nations',
     pop_countries_text: "La paix ne connaît pas de frontières.\nChaque pays qui rejoint le mouvement\nnous rapproche d'un monde pacifique.",
     pop_today_text:     "Actions de paix effectuées aujourd'hui\nà travers le monde.\n\nChaque jour est une nouvelle opportunité.\nChaque clic est un engagement réel\npour choisir la paix.",
+    referrals_title:    'MES FILLEULS',
+    referrals_see_btn:  'VOIR MES FILLEULS',
+    referrals_empty:    "Aucun filleul pour l'instant.\nPartagez votre lien pour\nfaire grandir le mouvement!",
   },
 
   es: {
@@ -351,6 +357,9 @@ const NAVA_TRANSLATIONS = {
     pop_countries_of:   '{count} de {total} naciones',
     pop_countries_text: 'La paz no conoce fronteras.\nCada país que se une\nnos acerca a un mundo en paz.',
     pop_today_text:     'Acciones de paz realizadas hoy\nen todo el mundo.\n\nCada día es una nueva oportunidad.\nCada clic es un compromiso real\nde elegir la paz.',
+    referrals_title:    'MIS REFERIDOS',
+    referrals_see_btn:  'VER REFERIDOS',
+    referrals_empty:    'Sin referidos aún.\nComparte tu enlace para\nhacer crecer el movimiento.',
   },
 
   pt: {
@@ -465,6 +474,9 @@ const NAVA_TRANSLATIONS = {
     pop_countries_of:   '{count} de {total} nações',
     pop_countries_text: 'A paz não conhece fronteiras.\nCada país que se une\nnos aproxima de um mundo em paz.',
     pop_today_text:     'Ações de paz realizadas hoje\nem todo o mundo.\n\nCada dia é uma nova oportunidade.\nCada clique é um compromisso real\nde escolher a paz.',
+    referrals_title:    'MEUS INDICADOS',
+    referrals_see_btn:  'VER INDICADOS',
+    referrals_empty:    'Nenhum indicado ainda.\nCompartilhe seu link para\nfazer crescer o movimento.',
   },
 
   de: {
@@ -579,6 +591,9 @@ const NAVA_TRANSLATIONS = {
     pop_countries_of:   '{count} von {total} Nationen',
     pop_countries_text: 'Frieden kennt keine Grenzen.\nJedes Land, das beitritt,\nbringt uns einem friedlichen Welt näher.',
     pop_today_text:     'Friedensaktionen heute\nauf der ganzen Welt.\n\nJeder Tag ist eine neue Chance.\nJeder Klick ist ein echtes Bekenntnis\nzum Frieden.',
+    referrals_title:    'MEINE EMPFEHLUNGEN',
+    referrals_see_btn:  'EMPFEHLUNGEN SEHEN',
+    referrals_empty:    'Noch keine Empfehlungen.\nTeile deinen Link um\ndie Bewegung zu vergrößern.',
   },
 
   ar: {
@@ -693,6 +708,9 @@ const NAVA_TRANSLATIONS = {
     pop_countries_of:   '{count} من {total} دولة',
     pop_countries_text: 'السلام لا يعرف الحدود.\nكل دولة تنضم\nتقربنا من عالم سلمي.',
     pop_today_text:     'أفعال السلام اليوم\nحول العالم.\n\nكل يوم فرصة جديدة.\nكل نقرة التزام حقيقي\nباختيار السلام.',
+    referrals_title:    'إحالاتي',
+    referrals_see_btn:  'عرض الإحالات',
+    referrals_empty:    'لا إحالات حتى الآن.\nشارك رابطك لتنمية\nحركة السلام!',
   },
 
   zh: {
@@ -807,6 +825,9 @@ const NAVA_TRANSLATIONS = {
     pop_countries_of:   '{total}个国家中的{count}个',
     pop_countries_text: '和平不知国界。\n每一个加入的国家\n都使我们更接近和平世界。',
     pop_today_text:     '今天全球的和平行动。\n\n每天都是新的机会。\n每次点击都是对\n选择和平的真实承诺。',
+    referrals_title:    '我的推荐人',
+    referrals_see_btn:  '查看推荐人',
+    referrals_empty:    '暂无推荐人。\n分享您的链接\n以扩大和平运动！',
   },
 
   ru: {
@@ -921,6 +942,9 @@ const NAVA_TRANSLATIONS = {
     pop_countries_of:   '{count} из {total} стран',
     pop_countries_text: 'Мир не знает границ.\nКаждая страна, которая присоединяется,\nприближает нас к мирному миру.',
     pop_today_text:     'Мирные действия сегодня\nпо всему миру.\n\nКаждый день — новая возможность.\nКаждый клик — настоящее обязательство\nвыбирать мир.',
+    referrals_title:    'МОИ РЕФЕРАЛЫ',
+    referrals_see_btn:  'СМОТРЕТЬ РЕФЕРАЛЫ',
+    referrals_empty:    'Рефералов пока нет.\nПоделитесь ссылкой\nчтобы расширить движение.',
   },
 
   th: {
@@ -1035,6 +1059,9 @@ const NAVA_TRANSLATIONS = {
     pop_countries_of:   '{count} จาก {total} ประเทศ',
     pop_countries_text: 'สันติภาพไม่รู้จักพรมแดน\nทุกประเทศที่เข้าร่วม\nทำให้เราใกล้ชิดสู่โลกที่สงบสุขมากขึ้น',
     pop_today_text:     'การกระทำสันติภาพวันนี้\nทั่วทั้งโลก\n\nทุกวันคือโอกาสใหม่\nการคลิกทุกครั้งคือคำมั่นสัญญาที่แท้จริง\nในการเลือกสันติภาพ',
+    referrals_title:    'ผู้ที่ฉันแนะนำ',
+    referrals_see_btn:  'ดูการแนะนำ',
+    referrals_empty:    'ยังไม่มีผู้ที่คุณแนะนำ\nแบ่งปันลิงก์ของคุณเพื่อ\nขยายขบวนการสันติภาพ',
   },
 
   ja: {
@@ -1149,6 +1176,9 @@ const NAVA_TRANSLATIONS = {
     pop_countries_of:   '{total}か国中{count}か国',
     pop_countries_text: '平和は国境を知りません。\n参加する国が増えるたびに\n平和な世界に近づきます。',
     pop_today_text:     '今日の世界中の平和アクション。\n\n毎日は新しいチャンスです。\nクリックのたびに\n平和を選ぶ本物の約束になります。',
+    referrals_title:    '私の紹介者',
+    referrals_see_btn:  '紹介者を見る',
+    referrals_empty:    'まだ紹介者がいません。\nリンクを共有して\n平和ムーブメントを広げよう！',
   },
 
   my: {
@@ -1263,6 +1293,9 @@ const NAVA_TRANSLATIONS = {
     pop_countries_of:   '{total} နိုင်ငံ၏ {count} နိုင်ငံ',
     pop_countries_text: 'ငြိမ်းချမ်းရေးသည် နယ်နိမိတ်မသိ\nပါဝင်သောနိုင်ငံတိုင်း\nငြိမ်းချမ်းသောကမ္ဘာဆီ ပိုမိုနီးစပ်လာသည်',
     pop_today_text:     'ယနေ့ ကမ္ဘာတစ်ဝှမ်းတွင်\nငြိမ်းချမ်းရေးလုပ်ဆောင်မှုများ\n\nနေ့တိုင်းသည် အခွင့်အလမ်းအသစ်ဖြစ်သည်\nကလစ်တိုင်းသည် ငြိမ်းချမ်းရေးကို ရွေးချယ်ရန်\nစစ်မှန်သောကတိကဝတ်ဖြစ်သည်',
+    referrals_title:    'ကျွန်ုပ်ရည်ညွှန်းသူများ',
+    referrals_see_btn:  'ရည်ညွှန်းသူများ ကြည့်ပါ',
+    referrals_empty:    'ရည်ညွှန်းသူ မရှိသေးပါ\nသင့်လင့်ကို မျှဝေ၍\nငြိမ်းချမ်းရေးလှုပ်ရှားမှုကို ချဲ့ပါ',
   },
 
   hi: {
@@ -1377,6 +1410,9 @@ const NAVA_TRANSLATIONS = {
     pop_countries_of:   '{total} देशों में से {count}',
     pop_countries_text: 'शांति कोई सीमा नहीं जानती।\nजुड़ने वाला हर देश\nहमें एक शांतिपूर्ण दुनिया के करीब लाता है।',
     pop_today_text:     'आज पूरी दुनिया में\nशांति कार्रवाइयाँ की गईं।\n\nहर दिन एक नया अवसर है।\nहर क्लिक शांति चुनने की\nएक वास्तविक प्रतिबद्धता है।',
+    referrals_title:    'मेरे रेफ़रल',
+    referrals_see_btn:  'रेफ़रल देखें',
+    referrals_empty:    'अभी कोई रेफ़रल नहीं।\nअपना लिंक साझा करें\nआंदोलन बढ़ाने के लिए।',
   },
 
 };
