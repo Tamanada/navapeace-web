@@ -474,9 +474,7 @@
   </div>
 
   <!-- PERSONAL STREAK -->
-  <div class="personal-strip" id="personal-strip" style="display:none">
-    YOU HAVE CHOSEN PEACE <span id="personal-days">0</span> DAY(S) IN A ROW
-  </div>
+  <div class="personal-strip" id="personal-strip" style="display:none"></div>
 
   <!-- MAP -->
   <div class="map-card">
@@ -525,7 +523,7 @@
       <p class="popover-title" id="pop-title">—</p>
       <span class="popover-num" id="pop-num">—</span>
       <p class="popover-text" id="pop-text"></p>
-      <button class="popover-close" onclick="closePopover()">CLOSE</button>
+      <button class="popover-close" data-i18n="close_btn" onclick="closePopover()">CLOSE</button>
     </div>
   </div>
 
@@ -862,8 +860,9 @@
   (function() {
     const days = parseInt(localStorage.getItem('nava_peace_days') || '0', 10);
     if (days > 0) {
-      document.getElementById('personal-days').textContent = days;
-      document.getElementById('personal-strip').style.display = 'block';
+      const strip = document.getElementById('personal-strip');
+      strip.innerHTML = tParam('personal_streak', { days: `<span>${days}</span>` });
+      strip.style.display = 'block';
     }
   })();
 
@@ -874,7 +873,7 @@
   const POPOVER_DATA = {
     people: {
       icon:  '🕊',
-      title: 'PEACE LOVERS',
+      get title() { return t('lbl_peace_lovers'); },
       numId: 'cnt-people',
       buildContent: (num) => {
         const WORLD   = 8_200_000_000;
@@ -909,18 +908,17 @@
               ${dotsSvg}
             </svg>
             <p style="font-size:10px;letter-spacing:1.5px;color:rgba(255,255,255,0.35);text-transform:uppercase;">
-              Each dot = ${perDotM}M people
+              ${tParam('pop_dot_label', { perDotM })}
             </p>
           </div>
           <p style="font-size:12px;letter-spacing:1.5px;color:rgba(255,255,255,0.75);line-height:1.9;text-transform:uppercase;">
-            Out of 8.2 billion people on Earth.<br><br>
-            Every great movement<br>starts with a spark. 🕊
+            ${t('pop_people_text').replace(/\n/g, '<br>')}
           </p>`;
       }
     },
     countries: {
       icon:  '🌍',
-      title: 'COUNTRIES REPRESENTED',
+      get title() { return t('lbl_countries'); },
       numId: 'cnt-countries',
       buildContent: (num) => {
         const WORLD  = 195;
@@ -944,24 +942,22 @@
               <text x="60" y="73" text-anchor="middle"
                 fill="rgba(255,255,255,0.5)" font-size="9"
                 font-family="Nasalization,Arial,sans-serif"
-                letter-spacing="2">OF THE WORLD</text>
+                letter-spacing="2">${t('pop_of_world')}</text>
             </svg>
             <p style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.5);
-              text-transform:uppercase;">${count} of ${WORLD} nations</p>
+              text-transform:uppercase;">${tParam('pop_countries_of', { count, total: WORLD })}</p>
           </div>
           <p style="font-size:12px;letter-spacing:1.5px;color:rgba(255,255,255,0.75);
             line-height:1.9;text-transform:uppercase;">
-            Peace knows no borders.<br>
-            Every country that joins<br>
-            brings us closer to a peaceful world.
+            ${t('pop_countries_text').replace(/\n/g, '<br>')}
           </p>`;
       }
     },
     today: {
       icon:  '✨',
-      title: 'GLOBAL ACTIONS TODAY',
+      get title() { return t('lbl_today_map'); },
       numId: 'cnt-today',
-      text:  'Peace actions taken today<br>across the globe.<br><br>Each day is a new opportunity.<br>Every click is a real commitment<br>to choosing peace.'
+      get text() { return t('pop_today_text').replace(/\n/g, '<br>'); }
     }
   };
 

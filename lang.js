@@ -114,6 +114,14 @@ const NAVA_TRANSLATIONS = {
     p_trans_name:       'Transparent',
     p_trans_text:       'All data is public and visible on the live world map. No hidden numbers, no manipulation.',
     cta_btn:            '🕊  Join the Peace Map',
+    // Map popovers & streak
+    personal_streak:    'YOU HAVE CHOSEN PEACE {days} DAY(S) IN A ROW',
+    pop_dot_label:      'Each dot = {perDotM}M people',
+    pop_people_text:    'Out of 8.2 billion people on Earth.\n\nEvery great movement\nstarts with a spark. 🕊',
+    pop_of_world:       'OF THE WORLD',
+    pop_countries_of:   '{count} of {total} nations',
+    pop_countries_text: 'Peace knows no borders.\nEvery country that joins\nbrings us closer to a peaceful world.',
+    pop_today_text:     'Peace actions taken today\nacross the globe.\n\nEach day is a new opportunity.\nEvery click is a real commitment\nto choosing peace.',
   },
 
   fr: {
@@ -219,6 +227,14 @@ const NAVA_TRANSLATIONS = {
     p_trans_name:       'Transparent',
     p_trans_text:       'Toutes les données sont publiques et visibles sur la carte mondiale. Aucun chiffre caché, aucune manipulation.',
     cta_btn:            '🕊  Rejoindre la Carte de la Paix',
+    // Popovers carte & série
+    personal_streak:    "VOUS AVEZ CHOISI LA PAIX {days} JOUR(S) D'AFFILÉE",
+    pop_dot_label:      'Chaque point = {perDotM}M personnes',
+    pop_people_text:    "Sur 8,2 milliards de personnes sur Terre.\n\nChaque grand mouvement\ncommence par une étincelle. 🕊",
+    pop_of_world:       'DU MONDE',
+    pop_countries_of:   '{count} sur {total} nations',
+    pop_countries_text: "La paix ne connaît pas de frontières.\nChaque pays qui rejoint le mouvement\nnous rapproche d'un monde pacifique.",
+    pop_today_text:     "Actions de paix effectuées aujourd'hui\nà travers le monde.\n\nChaque jour est une nouvelle opportunité.\nChaque clic est un engagement réel\npour choisir la paix.",
   },
 
   es: {
@@ -324,6 +340,14 @@ const NAVA_TRANSLATIONS = {
     p_trans_name:       'Transparente',
     p_trans_text:       'Todos los datos son públicos y visibles en el mapa mundial en vivo. Sin números ocultos, sin manipulación.',
     cta_btn:            '🕊  Unirse al Mapa de la Paz',
+    // Popovers mapa & racha
+    personal_streak:    'HAS ELEGIDO LA PAZ {days} DÍA(S) SEGUIDO(S)',
+    pop_dot_label:      'Cada punto = {perDotM}M personas',
+    pop_people_text:    'De 8,2 mil millones de personas en la Tierra.\n\nCada gran movimiento\ncomienza con una chispa. 🕊',
+    pop_of_world:       'DEL MUNDO',
+    pop_countries_of:   '{count} de {total} naciones',
+    pop_countries_text: 'La paz no conoce fronteras.\nCada país que se une\nnos acerca a un mundo en paz.',
+    pop_today_text:     'Acciones de paz realizadas hoy\nen todo el mundo.\n\nCada día es una nueva oportunidad.\nCada clic es un compromiso real\nde elegir la paz.',
   },
 
   pt: {
@@ -429,6 +453,14 @@ const NAVA_TRANSLATIONS = {
     p_trans_name:       'Transparente',
     p_trans_text:       'Todos os dados são públicos e visíveis no mapa mundial ao vivo. Sem números ocultos, sem manipulação.',
     cta_btn:            '🕊  Entrar no Mapa da Paz',
+    // Popovers mapa & sequência
+    personal_streak:    'VOCÊ ESCOLHEU A PAZ {days} DIA(S) SEGUIDO(S)',
+    pop_dot_label:      'Cada ponto = {perDotM}M pessoas',
+    pop_people_text:    'De 8,2 bilhões de pessoas na Terra.\n\nCada grande movimento\ncomeça com uma faísca. 🕊',
+    pop_of_world:       'DO MUNDO',
+    pop_countries_of:   '{count} de {total} nações',
+    pop_countries_text: 'A paz não conhece fronteiras.\nCada país que se une\nnos aproxima de um mundo em paz.',
+    pop_today_text:     'Ações de paz realizadas hoje\nem todo o mundo.\n\nCada dia é uma nova oportunidade.\nCada clique é um compromisso real\nde escolher a paz.',
   },
 
   de: {
@@ -534,6 +566,14 @@ const NAVA_TRANSLATIONS = {
     p_trans_name:       'Transparent',
     p_trans_text:       'Alle Daten sind öffentlich und auf der Live-Weltkarte sichtbar. Keine versteckten Zahlen, keine Manipulation.',
     cta_btn:            '🕊  Der Friedenskarte Beitreten',
+    // Karten-Popovers & Serie
+    personal_streak:    'DU HAST {days} TAG(E) IN FOLGE FRIEDEN GEWÄHLT',
+    pop_dot_label:      'Jeder Punkt = {perDotM}M Menschen',
+    pop_people_text:    'Von 8,2 Milliarden Menschen auf der Erde.\n\nJede große Bewegung\nbeginnt mit einem Funken. 🕊',
+    pop_of_world:       'DER WELT',
+    pop_countries_of:   '{count} von {total} Nationen',
+    pop_countries_text: 'Frieden kennt keine Grenzen.\nJedes Land, das beitritt,\nbringt uns einem friedlichen Welt näher.',
+    pop_today_text:     'Friedensaktionen heute\nauf der ganzen Welt.\n\nJeder Tag ist eine neue Chance.\nJeder Klick ist ein echtes Bekenntnis\nzum Frieden.',
   },
 
   ar: {
@@ -639,6 +679,14 @@ const NAVA_TRANSLATIONS = {
     p_trans_name:       'شفاف',
     p_trans_text:       'جميع البيانات عامة ومرئية على الخريطة العالمية المباشرة. لا أرقام مخفية، لا تلاعب.',
     cta_btn:            '🕊  انضم إلى خريطة السلام',
+    // نوافذ الخريطة والتسلسل
+    personal_streak:    'اخترت السلام {days} يوم/أيام متتالية',
+    pop_dot_label:      'كل نقطة = {perDotM}م شخص',
+    pop_people_text:    'من أصل 8.2 مليار شخص على الأرض.\n\nكل حركة عظيمة\nتبدأ بشرارة. 🕊',
+    pop_of_world:       'من العالم',
+    pop_countries_of:   '{count} من {total} دولة',
+    pop_countries_text: 'السلام لا يعرف الحدود.\nكل دولة تنضم\nتقربنا من عالم سلمي.',
+    pop_today_text:     'أفعال السلام اليوم\nحول العالم.\n\nكل يوم فرصة جديدة.\nكل نقرة التزام حقيقي\nباختيار السلام.',
   },
 
   zh: {
@@ -744,6 +792,14 @@ const NAVA_TRANSLATIONS = {
     p_trans_name:       '透明',
     p_trans_text:       '所有数据公开，可在实时世界地图上看到。没有隐藏数字，没有操纵。',
     cta_btn:            '🕊  加入和平地图',
+    // 地图弹窗和连续记录
+    personal_streak:    '您已连续{days}天选择和平',
+    pop_dot_label:      '每个点 = {perDotM}百万人',
+    pop_people_text:    '地球上82亿人中的一部分。\n\n每一个伟大运动\n都从一个火花开始。🕊',
+    pop_of_world:       '全球占比',
+    pop_countries_of:   '{total}个国家中的{count}个',
+    pop_countries_text: '和平不知国界。\n每一个加入的国家\n都使我们更接近和平世界。',
+    pop_today_text:     '今天全球的和平行动。\n\n每天都是新的机会。\n每次点击都是对\n选择和平的真实承诺。',
   },
 
   ru: {
@@ -849,6 +905,14 @@ const NAVA_TRANSLATIONS = {
     p_trans_name:       'Прозрачно',
     p_trans_text:       'Все данные публичны и видны на живой карте мира. Никаких скрытых цифр, никаких манипуляций.',
     cta_btn:            '🕊  Присоединиться к Карте Мира',
+    // Всплывающие окна карты и серия
+    personal_streak:    'ВЫ ВЫБИРАЕТЕ МИР {days} ДЕНЬ(ДНЕЙ) ПОДРЯД',
+    pop_dot_label:      'Каждая точка = {perDotM}М человек',
+    pop_people_text:    'Из 8,2 миллиарда людей на Земле.\n\nКаждое великое движение\nначинается с искры. 🕊',
+    pop_of_world:       'ОТ МИРА',
+    pop_countries_of:   '{count} из {total} стран',
+    pop_countries_text: 'Мир не знает границ.\nКаждая страна, которая присоединяется,\nприближает нас к мирному миру.',
+    pop_today_text:     'Мирные действия сегодня\nпо всему миру.\n\nКаждый день — новая возможность.\nКаждый клик — настоящее обязательство\nвыбирать мир.',
   },
 
 };
@@ -877,6 +941,16 @@ function t(key) {
   const lang = localStorage.getItem('nava_peace_lang') || 'en';
   const strings = NAVA_TRANSLATIONS[lang] || NAVA_TRANSLATIONS.en;
   return strings[key] !== undefined ? strings[key] : (NAVA_TRANSLATIONS.en[key] || key);
+}
+
+function tParam(key, params) {
+  let str = t(key);
+  if (params) {
+    Object.entries(params).forEach(([k, v]) => {
+      str = str.replace(new RegExp('\\{' + k + '\\}', 'g'), String(v));
+    });
+  }
+  return str;
 }
 
 function applyLang(lang) {
