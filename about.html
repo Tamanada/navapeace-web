@@ -94,12 +94,17 @@
       line-height: 2;
       color: rgba(255,255,255,0.92);
       text-transform: uppercase;
-      text-align: center;
+      text-align: justify;
     }
 
     .mission-text strong {
       color: #fff;
       font-weight: 700;
+      display: block;
+      text-align: center;
+      font-size: 22px;
+      letter-spacing: 3px;
+      margin-top: 12px;
     }
 
     .mission-divider {
@@ -294,6 +299,30 @@
       line-height: 1.6;
     }
 
+    /* ── SKIP BUTTON ── */
+    #skip-about {
+      position: fixed;
+      top: 18px;
+      right: 16px;
+      z-index: 500;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: rgba(255,255,255,0.85);
+      font-size: 20px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: background 0.2s;
+    }
+    #skip-about:hover { background: rgba(255,255,255,0.28); }
+
     /* ── CTA ── */
     .cta-btn {
       display: block;
@@ -354,6 +383,9 @@
 </head>
 <body>
 
+  <!-- SKIP BUTTON -->
+  <button id="skip-about" onclick="skipAbout()">×</button>
+
   <!-- HEADER -->
   <div class="header">
     <img src="logo.png" alt="NAVA PEACE" />
@@ -371,7 +403,7 @@
       <strong>To choose peace.</strong>
     </p>
     <div class="mission-divider"></div>
-    <p class="mission-text" style="font-size:13px; opacity:0.75;" data-i18n="mission_p2">
+    <p class="mission-text" style="font-size:13px; opacity:0.75; text-align:center;" data-i18n="mission_p2">
       Our goal is to demonstrate in real time, on a living world map, that humanity chooses peace. Not as a dream. As a daily act.
     </p>
   </div>
@@ -509,7 +541,7 @@
   </div>
 
   <!-- CTA -->
-  <a href="index.html?join=1" class="cta-btn" data-i18n="cta_btn">🕊 &nbsp; Join the Peace Map</a>
+  <a href="index.html?join=1" class="cta-btn" data-i18n="cta_btn" onclick="localStorage.setItem('nava_peace_seen_about','1')">🕊 &nbsp; Join the Peace Map</a>
 
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
@@ -530,6 +562,13 @@
       <span data-i18n="nav_about">ABOUT</span>
     </a>
   </nav>
+
+  <script>
+    function skipAbout() {
+      localStorage.setItem('nava_peace_seen_about', '1');
+      window.location.href = 'index.html?join=1';
+    }
+  </script>
 
 </body>
 </html>

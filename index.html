@@ -520,9 +520,9 @@
       }, 2300);
 
     } else {
-      // Nouvel utilisateur : rediriger vers about.html sauf si ?join=1
+      // Nouvel utilisateur : rediriger vers about.html sauf si ?join=1 ou déjà vu
       const params = new URLSearchParams(window.location.search);
-      if (!params.get('join')) {
+      if (!params.get('join') && !localStorage.getItem('nava_peace_seen_about')) {
         window.location.replace('about.html');
       }
     }
