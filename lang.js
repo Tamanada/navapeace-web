@@ -1417,6 +1417,17 @@ const NAVA_TRANSLATIONS = {
 
 };
 
+// ── Immediately detect + store language ──────────────────────────────
+// Runs synchronously so that t() works correctly in inline page scripts
+// that execute before DOMContentLoaded (which is when applyLang() runs).
+(function () {
+  if (!localStorage.getItem('nava_peace_lang')) {
+    const browser = (navigator.language || 'en').split('-')[0].toLowerCase();
+    localStorage.setItem('nava_peace_lang',
+      NAVA_TRANSLATIONS[browser] ? browser : 'en');
+  }
+})();
+
 // ── Language detection & application ─────────────────────────────────
 
 const LANG_META = {
@@ -1607,6 +1618,15 @@ document.addEventListener('click', (e) => {
     }
     #scroll-top-btn:hover { background: rgba(255,255,255,0.3); }
     #scroll-top-btn svg { width: 20px; height: 20px; fill: currentColor; }
+
+    /* ── COMPLEX SCRIPTS: reset letter-spacing (Thai, Japanese, Burmese, Hindi) ── */
+    html:lang(th) *, html:lang(th) *::before, html:lang(th) *::after,
+    html:lang(ja) *, html:lang(ja) *::before, html:lang(ja) *::after,
+    html:lang(my) *, html:lang(my) *::before, html:lang(my) *::after,
+    html:lang(hi) *, html:lang(hi) *::before, html:lang(hi) *::after {
+      letter-spacing: 0 !important;
+      word-spacing: 0 !important;
+    }
   `;
   document.head.appendChild(style);
 })();
