@@ -518,6 +518,13 @@
         overlay.classList.add('hiding');
         setTimeout(() => window.location.replace(nextPage), 450);
       }, 2300);
+
+    } else {
+      // Nouvel utilisateur : rediriger vers about.html sauf si ?join=1
+      const params = new URLSearchParams(window.location.search);
+      if (!params.get('join')) {
+        window.location.replace('about.html');
+      }
     }
 
     // ── Permanent device UID (persists across sessions, used for code recovery) ──
