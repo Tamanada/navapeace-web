@@ -114,6 +114,7 @@ const NAVA_TRANSLATIONS = {
     p_trans_name:       'Transparent',
     p_trans_text:       'All data is public and visible on the live world map. No hidden numbers, no manipulation.',
     cta_btn:            '🕊  Join the Peace Map',
+    welcome_back:       'WELCOME BACK, PEACE LOVER',
     // Map popovers & streak
     personal_streak:    'YOU HAVE CHOSEN PEACE {days} DAY(S) IN A ROW',
     pop_dot_label:      'Each dot = {perDotM}M people',
@@ -227,6 +228,7 @@ const NAVA_TRANSLATIONS = {
     p_trans_name:       'Transparent',
     p_trans_text:       'Toutes les données sont publiques et visibles sur la carte mondiale. Aucun chiffre caché, aucune manipulation.',
     cta_btn:            '🕊  Rejoindre la Carte de la Paix',
+    welcome_back:       "BON RETOUR, AMOUREUX DE LA PAIX",
     // Popovers carte & série
     personal_streak:    "VOUS AVEZ CHOISI LA PAIX {days} JOUR(S) D'AFFILÉE",
     pop_dot_label:      'Chaque point = {perDotM}M personnes',
@@ -340,6 +342,7 @@ const NAVA_TRANSLATIONS = {
     p_trans_name:       'Transparente',
     p_trans_text:       'Todos los datos son públicos y visibles en el mapa mundial en vivo. Sin números ocultos, sin manipulación.',
     cta_btn:            '🕊  Unirse al Mapa de la Paz',
+    welcome_back:       'BIENVENIDO DE VUELTA, AMANTE DE LA PAZ',
     // Popovers mapa & racha
     personal_streak:    'HAS ELEGIDO LA PAZ {days} DÍA(S) SEGUIDO(S)',
     pop_dot_label:      'Cada punto = {perDotM}M personas',
@@ -453,6 +456,7 @@ const NAVA_TRANSLATIONS = {
     p_trans_name:       'Transparente',
     p_trans_text:       'Todos os dados são públicos e visíveis no mapa mundial ao vivo. Sem números ocultos, sem manipulação.',
     cta_btn:            '🕊  Entrar no Mapa da Paz',
+    welcome_back:       'BEM-VINDO DE VOLTA, AMANTE DA PAZ',
     // Popovers mapa & sequência
     personal_streak:    'VOCÊ ESCOLHEU A PAZ {days} DIA(S) SEGUIDO(S)',
     pop_dot_label:      'Cada ponto = {perDotM}M pessoas',
@@ -566,6 +570,7 @@ const NAVA_TRANSLATIONS = {
     p_trans_name:       'Transparent',
     p_trans_text:       'Alle Daten sind öffentlich und auf der Live-Weltkarte sichtbar. Keine versteckten Zahlen, keine Manipulation.',
     cta_btn:            '🕊  Der Friedenskarte Beitreten',
+    welcome_back:       'WILLKOMMEN ZURÜCK, FRIEDENSLIEBENDER',
     // Karten-Popovers & Serie
     personal_streak:    'DU HAST {days} TAG(E) IN FOLGE FRIEDEN GEWÄHLT',
     pop_dot_label:      'Jeder Punkt = {perDotM}M Menschen',
@@ -679,6 +684,7 @@ const NAVA_TRANSLATIONS = {
     p_trans_name:       'شفاف',
     p_trans_text:       'جميع البيانات عامة ومرئية على الخريطة العالمية المباشرة. لا أرقام مخفية، لا تلاعب.',
     cta_btn:            '🕊  انضم إلى خريطة السلام',
+    welcome_back:       'مرحباً بعودتك، يا محب السلام',
     // نوافذ الخريطة والتسلسل
     personal_streak:    'اخترت السلام {days} يوم/أيام متتالية',
     pop_dot_label:      'كل نقطة = {perDotM}م شخص',
@@ -792,6 +798,7 @@ const NAVA_TRANSLATIONS = {
     p_trans_name:       '透明',
     p_trans_text:       '所有数据公开，可在实时世界地图上看到。没有隐藏数字，没有操纵。',
     cta_btn:            '🕊  加入和平地图',
+    welcome_back:       '欢迎回来，和平爱好者',
     // 地图弹窗和连续记录
     personal_streak:    '您已连续{days}天选择和平',
     pop_dot_label:      '每个点 = {perDotM}百万人',
@@ -905,6 +912,7 @@ const NAVA_TRANSLATIONS = {
     p_trans_name:       'Прозрачно',
     p_trans_text:       'Все данные публичны и видны на живой карте мира. Никаких скрытых цифр, никаких манипуляций.',
     cta_btn:            '🕊  Присоединиться к Карте Мира',
+    welcome_back:       'ДОБРО ПОЖАЛОВАТЬ ОБРАТНО, ЛЮБИТЕЛЬ МИРА',
     // Всплывающие окна карты и серия
     personal_streak:    'ВЫ ВЫБИРАЕТЕ МИР {days} ДЕНЬ(ДНЕЙ) ПОДРЯД',
     pop_dot_label:      'Каждая точка = {perDotM}М человек',

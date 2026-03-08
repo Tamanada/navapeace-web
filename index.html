@@ -137,6 +137,17 @@
       background: rgba(255, 255, 255, 0.22);
     }
 
+    /* Age + Genre côte à côte */
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .row-2 label {
+      margin-top: 0;
+    }
+
     select option {
       background: #2E9FCC;
       color: #FFFFFF;
@@ -178,9 +189,71 @@
       opacity: 0.45;
       margin-top: 22px;
     }
+
+    /* ── WELCOME BACK OVERLAY ── */
+    #welcome-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      background: radial-gradient(ellipse at 50% 30%, #6DD5F5 0%, #3AACDF 45%, #1E8EC4 100%);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 22px;
+    }
+
+    @keyframes wbLogoIn {
+      from { opacity: 0; transform: scale(0.55); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    @keyframes wbTitleIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes wbMsgIn {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes wbOverlayOut {
+      from { opacity: 1; }
+      to   { opacity: 0; }
+    }
+
+    #wb-logo  {
+      width: 110px; height: 110px; object-fit: contain;
+      filter: drop-shadow(0 4px 28px rgba(255,255,255,0.55));
+      opacity: 0;
+      animation: wbLogoIn 0.7s cubic-bezier(.34,1.56,.64,1) 0.15s forwards;
+    }
+    #wb-title {
+      font-size: 30px; font-weight: 400; letter-spacing: 7px;
+      color: #fff; text-shadow: 0 2px 20px rgba(255,255,255,0.35);
+      opacity: 0;
+      animation: wbTitleIn 0.5s ease 0.55s forwards;
+    }
+    #wb-msg {
+      font-size: 14px; letter-spacing: 3px;
+      color: rgba(255,255,255,0.8); text-transform: uppercase;
+      text-align: center; max-width: 280px; line-height: 1.6;
+      opacity: 0;
+      animation: wbMsgIn 0.5s ease 0.9s forwards;
+    }
+    #welcome-overlay.hiding {
+      animation: wbOverlayOut 0.45s ease both;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
+
+  <!-- WELCOME BACK OVERLAY -->
+  <div id="welcome-overlay">
+    <img id="wb-logo" src="logo.png" alt="NAVA PEACE" />
+    <h1 id="wb-title">NAVA PEACE</h1>
+    <p id="wb-msg"></p>
+  </div>
+
   <div class="card">
     <!-- Logo colombe -->
     <div class="logo-ring">
@@ -393,17 +466,22 @@
         <option>Zimbabwe</option>
       </select>
 
-      <label for="age" data-i18n="lbl_age">Age</label>
-      <input type="number" id="age" name="entry.2345678901" placeholder="Enter your age" data-i18n-ph="ph_age" required>
-
-      <label for="gender" data-i18n="lbl_gender">Gender</label>
-      <select id="gender" name="entry.3456789012" required>
-        <option value="" data-i18n="ph_gender">Select</option>
-        <option data-i18n="gender_male">Male</option>
-        <option data-i18n="gender_female">Female</option>
-        <option data-i18n="gender_other">Other</option>
-        <option data-i18n="gender_pns">Prefer not to say</option>
-      </select>
+      <div class="row-2">
+        <div>
+          <label for="age" data-i18n="lbl_age">Age</label>
+          <input type="number" id="age" name="entry.2345678901" placeholder="Enter your age" data-i18n-ph="ph_age" required>
+        </div>
+        <div>
+          <label for="gender" data-i18n="lbl_gender">Gender</label>
+          <select id="gender" name="entry.3456789012" required>
+            <option value="" data-i18n="ph_gender">Select</option>
+            <option data-i18n="gender_male">Male</option>
+            <option data-i18n="gender_female">Female</option>
+            <option data-i18n="gender_other">Other</option>
+            <option data-i18n="gender_pns">Prefer not to say</option>
+          </select>
+        </div>
+      </div>
 
       <button type="submit" data-i18n="btn_join">JOIN THE PEACE MAP</button>
     </form>
@@ -420,13 +498,26 @@
       }
     })();
 
-    // ── Vérification vote du jour (localStorage) ──────────────────
-    const TODAY = new Date().toISOString().split('T')[0]; // "2026-03-06"
-    const STORAGE_KEY = 'nava_peace_voted';
+    // ── Welcome back animation + redirection utilisateur existant ──
+    const TODAY        = new Date().toISOString().split('T')[0];
+    const STORAGE_KEY  = 'nava_peace_voted';
+    const votedToday   = localStorage.getItem(STORAGE_KEY) === TODAY;
+    const isReturning  = !!localStorage.getItem('nava_peace_country'); // set after 1st vote
 
-    if (localStorage.getItem(STORAGE_KEY) === TODAY) {
-      // Déjà voté aujourd'hui → carte directement
-      window.location.replace('map.html');
+    if (isReturning) {
+      // Destination selon si déjà voté aujourd'hui
+      const nextPage = votedToday ? 'map.html' : 'peace.html';
+
+      // Afficher l'overlay de bienvenue
+      const overlay = document.getElementById('welcome-overlay');
+      overlay.style.display = 'flex';
+      document.getElementById('wb-msg').textContent = t('welcome_back');
+
+      // Après 2.3s → fade out → redirect
+      setTimeout(() => {
+        overlay.classList.add('hiding');
+        setTimeout(() => window.location.replace(nextPage), 450);
+      }, 2300);
     }
 
     // ── Permanent device UID (persists across sessions, used for code recovery) ──
