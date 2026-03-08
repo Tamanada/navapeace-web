@@ -1079,6 +1079,38 @@ document.addEventListener('click', (e) => {
     }
     .lang-opt:hover { background: rgba(255,255,255,0.12); color: #fff; }
     .lang-opt.active { color: #fff; background: rgba(255,255,255,0.15); }
+
+    /* ── SCROLL TO TOP BUTTON ── */
+    #scroll-top-btn {
+      position: fixed;
+      bottom: 96px;
+      right: 14px;
+      z-index: 400;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.35);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 4px 16px rgba(10,40,100,0.2);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease, background 0.2s;
+      pointer-events: none;
+    }
+    #scroll-top-btn.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    #scroll-top-btn:hover { background: rgba(255,255,255,0.3); }
+    #scroll-top-btn svg { width: 20px; height: 20px; fill: currentColor; }
   `;
   document.head.appendChild(style);
 })();
@@ -1103,6 +1135,18 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
   `;
   document.body.appendChild(switcher);
+
+  // ── Scroll-to-top button (appears after 300px scroll) ────────────
+  const scrollBtn = document.createElement('button');
+  scrollBtn.id = 'scroll-top-btn';
+  scrollBtn.setAttribute('aria-label', 'Scroll to top');
+  scrollBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>`;
+  scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  document.body.appendChild(scrollBtn);
+
+  window.addEventListener('scroll', () => {
+    scrollBtn.classList.toggle('visible', window.scrollY > 300);
+  }, { passive: true });
 
   // Apply detected/stored language
   applyLang(currentLang);
