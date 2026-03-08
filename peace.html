@@ -182,6 +182,22 @@
       100% { inset: -40px; opacity: 0; }
     }
 
+    /* ── PRESS HINT ── */
+    .press-hint {
+      font-size: 11px;
+      letter-spacing: 4px;
+      color: rgba(255,255,255,0.6);
+      text-transform: uppercase;
+      text-align: center;
+      animation: hintPulse 2.2s ease-in-out infinite;
+      margin-top: -8px;
+    }
+
+    @keyframes hintPulse {
+      0%, 100% { opacity: 0.45; transform: translateY(0); }
+      50%       { opacity: 0.9;  transform: translateY(-4px); }
+    }
+
     /* DONE state */
     .peace-btn:disabled {
       background: rgba(255,255,255,0.25);
@@ -336,6 +352,9 @@
       <img src="logo.png" alt="NAVA PEACE" class="btn-logo" id="btnLogo" />
     </button>
 
+    <!-- PRESS HINT -->
+    <p class="press-hint" id="pressHint" data-i18n="press_hint">PRESS TO CHOOSE PEACE</p>
+
     <!-- DONE MESSAGE -->
     <div class="done-msg" id="doneMsg">
       <span class="done-thank" data-i18n="done_thank">THANK YOU PEACE LOVER</span>
@@ -405,6 +424,8 @@
       const btn = document.getElementById('peaceBtn');
       btn.disabled = true;
       btn.innerHTML = '<img src="logo.png" alt="✓" class="btn-logo" style="opacity:0.35"/><span class="btn-status" style="position:absolute;font-size:42px;">✓</span>';
+      const hint = document.getElementById('pressHint');
+      if (hint) hint.style.display = 'none';
       document.getElementById('doneMsg').style.display = 'flex';
       startCountdown();
     }

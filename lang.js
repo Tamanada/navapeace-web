@@ -126,6 +126,7 @@ const NAVA_TRANSLATIONS = {
     referrals_title:    'MY REFERRALS',
     referrals_see_btn:  'SEE REFERRALS',
     referrals_empty:    'No referrals yet.\nShare your link to grow\nthe peace movement!',
+    press_hint:          'PRESS TO CHOOSE PEACE',
   },
 
   fr: {
@@ -243,6 +244,7 @@ const NAVA_TRANSLATIONS = {
     referrals_title:    'MES FILLEULS',
     referrals_see_btn:  'VOIR MES FILLEULS',
     referrals_empty:    "Aucun filleul pour l'instant.\nPartagez votre lien pour\nfaire grandir le mouvement!",
+    press_hint:          'APPUYEZ POUR CHOISIR LA PAIX',
   },
 
   es: {
@@ -360,6 +362,7 @@ const NAVA_TRANSLATIONS = {
     referrals_title:    'MIS REFERIDOS',
     referrals_see_btn:  'VER REFERIDOS',
     referrals_empty:    'Sin referidos aún.\nComparte tu enlace para\nhacer crecer el movimiento.',
+    press_hint:          'PRESIONA PARA ELEGIR LA PAZ',
   },
 
   pt: {
@@ -477,6 +480,7 @@ const NAVA_TRANSLATIONS = {
     referrals_title:    'MEUS INDICADOS',
     referrals_see_btn:  'VER INDICADOS',
     referrals_empty:    'Nenhum indicado ainda.\nCompartilhe seu link para\nfazer crescer o movimento.',
+    press_hint:          'PRESSIONE PARA ESCOLHER A PAZ',
   },
 
   de: {
@@ -594,6 +598,7 @@ const NAVA_TRANSLATIONS = {
     referrals_title:    'MEINE EMPFEHLUNGEN',
     referrals_see_btn:  'EMPFEHLUNGEN SEHEN',
     referrals_empty:    'Noch keine Empfehlungen.\nTeile deinen Link um\ndie Bewegung zu vergrößern.',
+    press_hint:          'DRÜCKEN FÜR DEN FRIEDEN',
   },
 
   ar: {
@@ -711,6 +716,7 @@ const NAVA_TRANSLATIONS = {
     referrals_title:    'إحالاتي',
     referrals_see_btn:  'عرض الإحالات',
     referrals_empty:    'لا إحالات حتى الآن.\nشارك رابطك لتنمية\nحركة السلام!',
+    press_hint:          'اضغط لاختيار السلام',
   },
 
   zh: {
@@ -828,6 +834,7 @@ const NAVA_TRANSLATIONS = {
     referrals_title:    '我的推荐人',
     referrals_see_btn:  '查看推荐人',
     referrals_empty:    '暂无推荐人。\n分享您的链接\n以扩大和平运动！',
+    press_hint:          '按下选择和平',
   },
 
   ru: {
@@ -945,6 +952,7 @@ const NAVA_TRANSLATIONS = {
     referrals_title:    'МОИ РЕФЕРАЛЫ',
     referrals_see_btn:  'СМОТРЕТЬ РЕФЕРАЛЫ',
     referrals_empty:    'Рефералов пока нет.\nПоделитесь ссылкой\nчтобы расширить движение.',
+    press_hint:          'НАЖМИТЕ ЧТОБЫ ВЫБРАТЬ МИР',
   },
 
   th: {
@@ -1062,6 +1070,7 @@ const NAVA_TRANSLATIONS = {
     referrals_title:    'ผู้ที่ฉันแนะนำ',
     referrals_see_btn:  'ดูการแนะนำ',
     referrals_empty:    'ยังไม่มีผู้ที่คุณแนะนำ\nแบ่งปันลิงก์ของคุณเพื่อ\nขยายขบวนการสันติภาพ',
+    press_hint:          'กดเพื่อเลือกสันติภาพ',
   },
 
   ja: {
@@ -1179,6 +1188,7 @@ const NAVA_TRANSLATIONS = {
     referrals_title:    '私の紹介者',
     referrals_see_btn:  '紹介者を見る',
     referrals_empty:    'まだ紹介者がいません。\nリンクを共有して\n平和ムーブメントを広げよう！',
+    press_hint:          '平和を選ぶためにタップ',
   },
 
   my: {
@@ -1296,6 +1306,7 @@ const NAVA_TRANSLATIONS = {
     referrals_title:    'ကျွန်ုပ်ရည်ညွှန်းသူများ',
     referrals_see_btn:  'ရည်ညွှန်းသူများ ကြည့်ပါ',
     referrals_empty:    'ရည်ညွှန်းသူ မရှိသေးပါ\nသင့်လင့်ကို မျှဝေ၍\nငြိမ်းချမ်းရေးလှုပ်ရှားမှုကို ချဲ့ပါ',
+    press_hint:          'ငြိမ်းချမ်းရေးရွေးရန် နှိပ်ပါ',
   },
 
   hi: {
@@ -1413,6 +1424,7 @@ const NAVA_TRANSLATIONS = {
     referrals_title:    'मेरे रेफ़रल',
     referrals_see_btn:  'रेफ़रल देखें',
     referrals_empty:    'अभी कोई रेफ़रल नहीं।\nअपना लिंक साझा करें\nआंदोलन बढ़ाने के लिए।',
+    press_hint:          'शांति चुनने के लिए दबाएं',
   },
 
 };
