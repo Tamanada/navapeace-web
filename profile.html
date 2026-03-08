@@ -1533,10 +1533,10 @@
     try {
       const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-      // Unique referred users with their country
+      // Unique referred users
       const { data: friends } = await sb
         .from('peace_votes')
-        .select('user_uid, country')
+        .select('user_uid')
         .eq('referred_by', refCode);
 
       // Count dove-actions per referred user
@@ -1564,11 +1564,11 @@
       });
 
       list.innerHTML = unique.map(f => {
-        const doves   = dovesPerUser[f.user_uid] || 0;
-        const country = (f.country || '—').toUpperCase();
+        const doves  = dovesPerUser[f.user_uid] || 0;
+        const pseudo = '🕊 ' + (f.user_uid || '').replace(/[^a-z0-9]/gi, '').slice(-6).toUpperCase();
         return `
           <div class="ref-row">
-            <span class="ref-row-country">🌍 ${country}</span>
+            <span class="ref-row-country">${pseudo}</span>
             <span class="ref-row-doves">${doves} 🕊</span>
           </div>`;
       }).join('');

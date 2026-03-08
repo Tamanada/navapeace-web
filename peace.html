@@ -142,6 +142,22 @@
       pointer-events: none;
       filter: drop-shadow(0 2px 10px rgba(30,100,160,0.25));
       transition: opacity 0.4s;
+      opacity: 0.22;
+      position: absolute;
+    }
+
+    /* ── BUTTON HINT TEXT ── */
+    .btn-hint {
+      position: absolute;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #1A5F82;
+      text-align: center;
+      line-height: 2.1;
+      text-transform: uppercase;
+      pointer-events: none;
+      z-index: 2;
     }
 
     .peace-btn .btn-status {
@@ -180,22 +196,6 @@
     @keyframes ring-pulse {
       0%   { inset: -6px;  opacity: 0.7; }
       100% { inset: -40px; opacity: 0; }
-    }
-
-    /* ── PRESS HINT ── */
-    .press-hint {
-      font-size: 11px;
-      letter-spacing: 4px;
-      color: rgba(255,255,255,0.6);
-      text-transform: uppercase;
-      text-align: center;
-      animation: hintPulse 2.2s ease-in-out infinite;
-      margin-top: -8px;
-    }
-
-    @keyframes hintPulse {
-      0%, 100% { opacity: 0.45; transform: translateY(0); }
-      50%       { opacity: 0.9;  transform: translateY(-4px); }
     }
 
     /* DONE state */
@@ -350,10 +350,8 @@
     <!-- BUTTON -->
     <button class="peace-btn" id="peaceBtn" onclick="choosePeace()">
       <img src="logo.png" alt="NAVA PEACE" class="btn-logo" id="btnLogo" />
+      <span class="btn-hint" id="btnHint" data-i18n-html="press_hint">PRESS<br>TO CHOOSE<br>PEACE</span>
     </button>
-
-    <!-- PRESS HINT -->
-    <p class="press-hint" id="pressHint" data-i18n="press_hint">PRESS TO CHOOSE PEACE</p>
 
     <!-- DONE MESSAGE -->
     <div class="done-msg" id="doneMsg">
@@ -423,9 +421,7 @@
     function setDone() {
       const btn = document.getElementById('peaceBtn');
       btn.disabled = true;
-      btn.innerHTML = '<img src="logo.png" alt="✓" class="btn-logo" style="opacity:0.35"/><span class="btn-status" style="position:absolute;font-size:42px;">✓</span>';
-      const hint = document.getElementById('pressHint');
-      if (hint) hint.style.display = 'none';
+      btn.innerHTML = '<img src="logo.png" alt="✓" class="btn-logo" style="opacity:0.35;position:absolute;"/><span class="btn-status" style="position:absolute;font-size:42px;">✓</span>';
       document.getElementById('doneMsg').style.display = 'flex';
       startCountdown();
     }
