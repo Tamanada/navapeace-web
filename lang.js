@@ -127,6 +127,9 @@ const NAVA_TRANSLATIONS = {
     referrals_see_btn:  'SEE REFERRALS',
     referrals_empty:    'No referrals yet.\nShare your link to grow\nthe peace movement!',
     press_hint:          'PRESS\nTO CHOOSE\nPEACE',
+    remind_btn:          '🔔 REMIND',
+    remind_sent:         '✓ SENT',
+    reminder_banner:     'A friend invites you to choose peace today!',
   },
 
   fr: {
@@ -245,6 +248,9 @@ const NAVA_TRANSLATIONS = {
     referrals_see_btn:  'VOIR MES FILLEULS',
     referrals_empty:    "Aucun filleul pour l'instant.\nPartagez votre lien pour\nfaire grandir le mouvement!",
     press_hint:          'APPUYEZ\nPOUR CHOISIR\nLA PAIX',
+    remind_btn:          '🔔 RAPPEL',
+    remind_sent:         '✓ ENVOYÉ',
+    reminder_banner:     "Un ami t'invite à choisir la paix aujourd'hui !",
   },
 
   es: {
@@ -363,6 +369,9 @@ const NAVA_TRANSLATIONS = {
     referrals_see_btn:  'VER REFERIDOS',
     referrals_empty:    'Sin referidos aún.\nComparte tu enlace para\nhacer crecer el movimiento.',
     press_hint:          'PRESIONA\nPARA ELEGIR\nLA PAZ',
+    remind_btn:          '🔔 RECORDAR',
+    remind_sent:         '✓ ENVIADO',
+    reminder_banner:     '¡Un amigo te invita a elegir la paz hoy!',
   },
 
   pt: {
@@ -481,6 +490,9 @@ const NAVA_TRANSLATIONS = {
     referrals_see_btn:  'VER INDICADOS',
     referrals_empty:    'Nenhum indicado ainda.\nCompartilhe seu link para\nfazer crescer o movimento.',
     press_hint:          'PRESSIONE\nPARA ESCOLHER\nA PAZ',
+    remind_btn:          '🔔 LEMBRAR',
+    remind_sent:         '✓ ENVIADO',
+    reminder_banner:     'Um amigo te convida a escolher a paz hoje!',
   },
 
   de: {
@@ -599,6 +611,9 @@ const NAVA_TRANSLATIONS = {
     referrals_see_btn:  'EMPFEHLUNGEN SEHEN',
     referrals_empty:    'Noch keine Empfehlungen.\nTeile deinen Link um\ndie Bewegung zu vergrößern.',
     press_hint:          'DRÜCKEN\nFÜR DEN\nFRIEDEN',
+    remind_btn:          '🔔 ERINNERN',
+    remind_sent:         '✓ GESENDET',
+    reminder_banner:     'Ein Freund lädt dich ein, heute Frieden zu wählen!',
   },
 
   ar: {
@@ -717,6 +732,9 @@ const NAVA_TRANSLATIONS = {
     referrals_see_btn:  'عرض الإحالات',
     referrals_empty:    'لا إحالات حتى الآن.\nشارك رابطك لتنمية\nحركة السلام!',
     press_hint:          'اضغط\nلاختيار\nالسلام',
+    remind_btn:          '🔔 تذكير',
+    remind_sent:         '✓ أُرسل',
+    reminder_banner:     'صديق يدعوك لاختيار السلام اليوم!',
   },
 
   zh: {
@@ -835,6 +853,9 @@ const NAVA_TRANSLATIONS = {
     referrals_see_btn:  '查看推荐人',
     referrals_empty:    '暂无推荐人。\n分享您的链接\n以扩大和平运动！',
     press_hint:          '按下\n选择\n和平',
+    remind_btn:          '🔔 提醒',
+    remind_sent:         '✓ 已发送',
+    reminder_banner:     '朋友邀请你今天选择和平！',
   },
 
   ru: {
@@ -953,6 +974,9 @@ const NAVA_TRANSLATIONS = {
     referrals_see_btn:  'СМОТРЕТЬ РЕФЕРАЛЫ',
     referrals_empty:    'Рефералов пока нет.\nПоделитесь ссылкой\nчтобы расширить движение.',
     press_hint:          'НАЖМИТЕ\nЧТОБЫ ВЫБРАТЬ\nМИР',
+    remind_btn:          '🔔 НАПОМНИТЬ',
+    remind_sent:         '✓ ОТПРАВЛЕНО',
+    reminder_banner:     'Друг приглашает тебя выбрать мир сегодня!',
   },
 
   th: {
@@ -1071,6 +1095,9 @@ const NAVA_TRANSLATIONS = {
     referrals_see_btn:  'ดูการแนะนำ',
     referrals_empty:    'ยังไม่มีผู้ที่คุณแนะนำ\nแบ่งปันลิงก์ของคุณเพื่อ\nขยายขบวนการสันติภาพ',
     press_hint:          'กด\nเพื่อเลือก\nสันติภาพ',
+    remind_btn:          '🔔 เตือน',
+    remind_sent:         '✓ ส่งแล้ว',
+    reminder_banner:     'เพื่อนเชิญให้คุณเลือกสันติภาพวันนี้!',
   },
 
   ja: {
@@ -1189,6 +1216,9 @@ const NAVA_TRANSLATIONS = {
     referrals_see_btn:  '紹介者を見る',
     referrals_empty:    'まだ紹介者がいません。\nリンクを共有して\n平和ムーブメントを広げよう！',
     press_hint:          'タップして\n平和を\n選ぼう',
+    remind_btn:          '🔔 リマインド',
+    remind_sent:         '✓ 送信済み',
+    reminder_banner:     '友人が今日平和を選ぶよう招待しています！',
   },
 
   my: {
@@ -1307,6 +1337,9 @@ const NAVA_TRANSLATIONS = {
     referrals_see_btn:  'ရည်ညွှန်းသူများ ကြည့်ပါ',
     referrals_empty:    'ရည်ညွှန်းသူ မရှိသေးပါ\nသင့်လင့်ကို မျှဝေ၍\nငြိမ်းချမ်းရေးလှုပ်ရှားမှုကို ချဲ့ပါ',
     press_hint:          'ငြိမ်းချမ်းရေး\nရွေးရန်\nနှိပ်ပါ',
+    remind_btn:          '🔔 သတိပေးပါ',
+    remind_sent:         '✓ ပို့ပြီး',
+    reminder_banner:     'သူငယ်ချင်းတစ်ယောက် ယနေ့ ငြိမ်းချမ်းရေးရွေးရန် ဖိတ်ခေါ်သည်!',
   },
 
   hi: {
@@ -1425,6 +1458,9 @@ const NAVA_TRANSLATIONS = {
     referrals_see_btn:  'रेफ़रल देखें',
     referrals_empty:    'अभी कोई रेफ़रल नहीं।\nअपना लिंक साझा करें\nआंदोलन बढ़ाने के लिए।',
     press_hint:          'दबाएं\nशांति\nचुनें',
+    remind_btn:          '🔔 याद दिलाएं',
+    remind_sent:         '✓ भेजा',
+    reminder_banner:     'एक दोस्त आज शांति चुनने के लिए आमंत्रित करता है!',
   },
 
 };

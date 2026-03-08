@@ -198,6 +198,43 @@
       100% { inset: -40px; opacity: 0; }
     }
 
+    /* ── NOTIFICATION BANNER ── */
+    #notif-banner {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 400;
+      background: linear-gradient(135deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.12) 100%);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,255,255,0.3);
+      padding: 14px 52px 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: bannerSlideIn 0.4s ease both;
+    }
+    @keyframes bannerSlideIn {
+      from { transform: translateY(-100%); opacity: 0; }
+      to   { transform: translateY(0);     opacity: 1; }
+    }
+    #notif-banner .notif-icon { font-size: 22px; flex-shrink: 0; }
+    #notif-banner .notif-text {
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      color: #fff;
+      text-transform: uppercase;
+      line-height: 1.6;
+      flex: 1;
+    }
+    #notif-banner .notif-close {
+      position: absolute;
+      top: 10px; right: 14px;
+      background: none; border: none;
+      color: rgba(255,255,255,0.7);
+      font-size: 20px; cursor: pointer;
+      line-height: 1;
+    }
+
     /* DONE state */
     .peace-btn:disabled {
       background: rgba(255,255,255,0.25);
@@ -329,6 +366,13 @@
   </style>
 </head>
 <body>
+
+  <!-- NOTIFICATION BANNER (hidden by default) -->
+  <div id="notif-banner" style="display:none;">
+    <span class="notif-icon">🕊</span>
+    <span class="notif-text" id="notif-text"></span>
+    <button class="notif-close" onclick="dismissNotif()">×</button>
+  </div>
 
   <!-- HEADER -->
   <div class="header">
@@ -483,8 +527,47 @@
       setInterval(tick, 1000);
     }
 
+    // ── NOTIFICATION BANNER ────────────────────────────────────────────
+    async function checkNotifications() {
+      const myUid = localStorage.getItem('nava_peace_uid');
+      if (!myUid || !sb) return;
+      try {
+        const { data } = await sb
+          .from('notifications')
+          .select('id')
+          .eq('to_user_uid', myUid)
+          .eq('read', false)
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (!data || data.length === 0) return;
+
+        // Show banner
+        document.getElementById('notif-text').textContent = t('reminder_banner');
+        document.getElementById('notif-banner').style.display = 'flex';
+
+        // Mark all as read
+        await sb
+          .from('notifications')
+          .update({ read: true })
+          .eq('to_user_uid', myUid)
+          .eq('read', false);
+
+      } catch(e) { console.warn('Notifications check error', e); }
+    }
+
+    function dismissNotif() {
+      const banner = document.getElementById('notif-banner');
+      banner.style.animation = 'none';
+      banner.style.opacity = '0';
+      banner.style.transform = 'translateY(-100%)';
+      banner.style.transition = 'opacity 0.3s, transform 0.3s';
+      setTimeout(() => { banner.style.display = 'none'; }, 300);
+    }
+
     checkDone();
     loadCounters();
+    checkNotifications();
   </script>
 
 </body>

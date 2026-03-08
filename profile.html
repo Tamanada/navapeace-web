@@ -831,6 +831,22 @@
       line-height: 2;
       padding: 20px 0;
     }
+    .ref-remind-btn {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 8px;
+      color: rgba(255,255,255,0.75);
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 9px;
+      letter-spacing: 1px;
+      padding: 5px 8px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.2s, color 0.2s;
+      text-transform: uppercase;
+    }
+    .ref-remind-btn:hover:not(:disabled) { background: rgba(255,255,255,0.22); }
+    .ref-remind-btn:disabled { opacity: 0.45; cursor: default; }
   </style>
 </head>
 <body>
@@ -1566,10 +1582,16 @@
       list.innerHTML = unique.map(f => {
         const doves  = dovesPerUser[f.user_uid] || 0;
         const pseudo = '🕊 ' + (f.user_uid || '').replace(/[^a-z0-9]/gi, '').slice(-6).toUpperCase();
+        const cooldownKey = 'nava_remind_' + f.user_uid;
+        const lastSent = parseInt(localStorage.getItem(cooldownKey) || '0', 10);
+        const canRemind = Date.now() - lastSent > 86400000; // 24h cooldown
+        const btnLabel = canRemind ? t('remind_btn') : t('remind_sent');
         return `
           <div class="ref-row">
             <span class="ref-row-country">${pseudo}</span>
             <span class="ref-row-doves">${doves} 🕊</span>
+            <button class="ref-remind-btn" ${canRemind ? '' : 'disabled'}
+              onclick="sendReminder('${f.user_uid}', this)">${btnLabel}</button>
           </div>`;
       }).join('');
 
@@ -1582,6 +1604,30 @@
   function closeReferralsPopup(e) {
     if (!e || e.target === document.getElementById('refOverlay')) {
       document.getElementById('refOverlay').classList.remove('open');
+    }
+  }
+
+  // ── SEND REMINDER NOTIFICATION ─────────────────────────────────────
+  async function sendReminder(toUid, btn) {
+    if (!toUid || btn.disabled) return;
+    btn.disabled = true;
+    btn.textContent = '···';
+
+    const myUid = localStorage.getItem('nava_peace_uid') || '';
+    try {
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      await sb.from('notifications').insert({
+        to_user_uid:   toUid,
+        from_user_uid: myUid,
+        type:          'reminder',
+        read:          false
+      });
+      localStorage.setItem('nava_remind_' + toUid, Date.now().toString());
+      btn.textContent = t('remind_sent');
+    } catch(e) {
+      console.warn('Reminder error', e);
+      btn.textContent = t('remind_btn');
+      btn.disabled = false;
     }
   }
   </script>
