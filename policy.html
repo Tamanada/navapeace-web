@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NAVA PEACE – Terms & Community Policy</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://nava-peace.app/policy.html" />
+  <meta property="og:title" content="NAVA PEACE – Terms & Community Policy" />
+  <meta property="og:description" content="Community guidelines and terms of use for NAVA PEACE." />
+  <meta property="og:image" content="https://nava-peace.app/logo.png" />
+  <script src="lang.js"></script>
+  <style>
+    @font-face {
+      font-family:'Nasalization'; font-style:normal; font-weight:400; font-display:swap;
+      src:url('nasalization.woff') format('woff');
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --bg-grad: radial-gradient(ellipse at 50% 30%, #6DD5F5 0%, #3AACDF 45%, #1E8EC4 100%);
+      --glass-bg: rgba(247,247,241,0.13);
+      --glass-border: rgba(255,255,255,0.38);
+      --glass-blur: blur(18px);
+      --header-bg: rgba(15,75,125,0.88);
+      --white: #ffffff;
+      --w80: rgba(255,255,255,0.80);
+      --w60: rgba(255,255,255,0.60);
+      --w40: rgba(255,255,255,0.40);
+      --accent: #ffffff;
+      --font: 'Nasalization', Arial, sans-serif;
+      --radius: 18px;
+      --shadow: 0 8px 40px rgba(20,80,130,0.22);
+    }
+    html{scroll-behavior:smooth;}
+    body{font-family:var(--font);background:var(--bg-grad);background-attachment:fixed;min-height:100vh;color:var(--white);}
+    a{color:inherit;text-decoration:none;}
+
+    /* NAV */
+    .bottom-nav{
+      position:fixed;bottom:0;left:0;right:0;z-index:100;
+      display:flex;justify-content:space-around;align-items:center;
+      background:var(--header-bg);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+      border-top:1px solid var(--glass-border);padding:6px 0 max(6px,env(safe-area-inset-bottom));
+      height:60px;
+    }
+    .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--w60);transition:color 0.2s;font-size:9px;letter-spacing:2px;text-transform:uppercase;}
+    .nav-item svg{width:24px;height:24px;fill:currentColor;}
+    .nav-item.active,.nav-item:hover{color:var(--white);}
+
+    /* HEADER */
+    .page-header{
+      background:var(--header-bg);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+      border-bottom:1px solid var(--glass-border);
+      padding:18px 24px;text-align:center;
+    }
+    .page-header h1{font-size:13px;letter-spacing:6px;text-transform:uppercase;}
+    .page-header p{font-size:9px;letter-spacing:3px;color:var(--w60);margin-top:4px;}
+
+    /* LAYOUT */
+    .page-wrap{max-width:800px;margin:0 auto;padding:32px 20px 100px;}
+
+    /* TOC */
+    .toc{
+      background:var(--glass-bg);border:1.5px solid var(--glass-border);
+      border-radius:var(--radius);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+      padding:24px 28px;margin-bottom:32px;box-shadow:var(--shadow);
+    }
+    .toc-title{font-size:9px;letter-spacing:4px;color:var(--w60);margin-bottom:16px;text-transform:uppercase;}
+    .toc a{display:block;font-size:10px;letter-spacing:2px;color:var(--w80);padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.07);transition:color 0.2s;text-transform:uppercase;}
+    .toc a:last-child{border-bottom:none;}
+    .toc a:hover{color:var(--white);}
+
+    /* SECTIONS */
+    .policy-section{
+      background:var(--glass-bg);border:1.5px solid var(--glass-border);
+      border-radius:var(--radius);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+      padding:32px 36px;margin-bottom:24px;box-shadow:var(--shadow);
+    }
+    .section-label{font-size:9px;letter-spacing:4px;color:var(--w60);margin-bottom:8px;text-transform:uppercase;}
+    .section-title{font-size:18px;letter-spacing:5px;margin-bottom:20px;text-transform:uppercase;}
+    .section-divider{width:50px;height:2px;background:rgba(255,255,255,0.3);border-radius:2px;margin-bottom:24px;}
+    .policy-text{font-size:11px;letter-spacing:0.5px;color:var(--w80);line-height:2.1;}
+    .policy-text p{margin-bottom:16px;}
+    .policy-text strong{color:var(--white);letter-spacing:1px;}
+    .policy-text ul,.policy-text ol{padding-left:22px;margin-bottom:16px;}
+    .policy-text li{margin-bottom:10px;color:var(--w80);}
+    .policy-text h3{font-size:11px;letter-spacing:3px;margin:24px 0 10px;text-transform:uppercase;color:var(--white);}
+
+    /* PRINCIPLE CARDS */
+    .principles-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0;}
+    .principle-card{
+      padding:18px 20px;
+      background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.18);
+      border-radius:14px;
+    }
+    .principle-icon{font-size:24px;margin-bottom:10px;}
+    .principle-name{font-size:10px;letter-spacing:3px;margin-bottom:8px;text-transform:uppercase;}
+    .principle-text{font-size:9px;letter-spacing:0.5px;color:var(--w60);line-height:1.8;}
+
+    /* CONTACT */
+    .contact-box{
+      margin-top:24px;padding:20px 24px;
+      background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.2);
+      border-radius:12px;font-size:10px;letter-spacing:2px;text-align:center;color:var(--w60);line-height:2;
+    }
+    .contact-box a{color:var(--white);border-bottom:1px solid rgba(255,255,255,0.3);}
+
+    /* DOVE DECO */
+    .dove-deco{text-align:center;font-size:40px;padding:20px 0;filter:drop-shadow(0 4px 16px rgba(255,255,255,0.4));}
+
+    @media(max-width:600px){
+      .principles-grid{grid-template-columns:1fr;}
+      .policy-section{padding:24px 20px;}
+    }
+  </style>
+</head>
+<body>
+
+<header class="page-header">
+  <h1>🕊 NAVA PEACE</h1>
+  <p>COMMUNITY POLICY & TERMS OF USE</p>
+</header>
+
+<div class="page-wrap">
+
+  <div class="dove-deco">🕊</div>
+
+  <!-- Table of Contents -->
+  <div class="toc">
+    <p class="toc-title">CONTENTS</p>
+    <a href="#mission">01 · Our Mission</a>
+    <a href="#community">02 · Community Guidelines</a>
+    <a href="#principles">03 · NAVA PEACE Principles</a>
+    <a href="#terms">04 · Terms of Use</a>
+    <a href="#privacy">05 · Privacy & Data</a>
+    <a href="#referrals">06 · Referral System Rules</a>
+    <a href="#moderation">07 · Content Moderation</a>
+    <a href="#contact">08 · Contact</a>
+  </div>
+
+  <!-- 01 Mission -->
+  <div class="policy-section" id="mission">
+    <p class="section-label">01</p>
+    <h2 class="section-title">OUR MISSION</h2>
+    <div class="section-divider"></div>
+    <div class="policy-text">
+      <p><strong>NAVA PEACE</strong> is a global movement built on a simple idea: if enough people consciously choose peace every single day, the world will change.</p>
+      <p>We believe in the collective power of daily intention. Every time you press the peace button, you add your voice to a global chorus that transcends borders, languages, religions, and politics.</p>
+      <p>This platform is free, anonymous, and open to every human being on Earth — regardless of nationality, age, gender, or belief. Peace is a universal value, and NAVA PEACE is its home.</p>
+    </div>
+  </div>
+
+  <!-- 02 Community Guidelines -->
+  <div class="policy-section" id="community">
+    <p class="section-label">02</p>
+    <h2 class="section-title">COMMUNITY GUIDELINES</h2>
+    <div class="section-divider"></div>
+    <div class="policy-text">
+      <p>NAVA PEACE is a <strong>safe, inclusive, and peaceful space</strong>. By participating, you agree to uphold these values:</p>
+
+      <h3>✅ What We Encourage</h3>
+      <ul>
+        <li>Sharing genuine, heartfelt peace messages with the global community</li>
+        <li>Inviting friends and family to join the movement</li>
+        <li>Daily engagement — one peace action per day, every day</li>
+        <li>Expressing solidarity with people of all backgrounds</li>
+        <li>Constructive, kind, and uplifting contributions</li>
+      </ul>
+
+      <h3>🚫 What Is Not Permitted</h3>
+      <ul>
+        <li><strong>Hate speech</strong> — content targeting race, religion, gender, nationality, sexual orientation or disability</li>
+        <li><strong>Violence or threats</strong> — any content promoting, glorifying or inciting violence</li>
+        <li><strong>Political propaganda</strong> — partisan political messaging, election interference, or extremist ideology</li>
+        <li><strong>Spam or manipulation</strong> — automated bots, fake accounts, or bulk fake referrals</li>
+        <li><strong>Misinformation</strong> — deliberately false or misleading content</li>
+        <li><strong>Commercial solicitation</strong> — unsolicited advertising or promotion of third-party products</li>
+        <li><strong>Privacy violations</strong> — sharing personal data of others without consent</li>
+        <li><strong>Content targeting minors</strong> — any inappropriate content involving people under 18</li>
+      </ul>
+
+      <p>Violations of these guidelines may result in removal of your content and permanent exclusion from the platform.</p>
+    </div>
+  </div>
+
+  <!-- 03 Principles -->
+  <div class="policy-section" id="principles">
+    <p class="section-label">03</p>
+    <h2 class="section-title">NAVA PEACE PRINCIPLES</h2>
+    <div class="section-divider"></div>
+    <div class="policy-text">
+      <p>Our community is guided by five core principles:</p>
+    </div>
+    <div class="principles-grid">
+      <div class="principle-card">
+        <div class="principle-icon">🌍</div>
+        <div class="principle-name">UNIVERSALITY</div>
+        <div class="principle-text">Peace belongs to everyone. NAVA PEACE welcomes all humans regardless of origin, belief, or identity.</div>
+      </div>
+      <div class="principle-card">
+        <div class="principle-icon">🔒</div>
+        <div class="principle-name">ANONYMITY</div>
+        <div class="principle-text">No email, no name, no login required. Your participation is private by default. We do not sell your data.</div>
+      </div>
+      <div class="principle-card">
+        <div class="principle-icon">📅</div>
+        <div class="principle-name">DAILY INTENTION</div>
+        <div class="principle-text">One conscious peace action per day creates lasting change. Consistency matters more than intensity.</div>
+      </div>
+      <div class="principle-card">
+        <div class="principle-icon">🕊</div>
+        <div class="principle-name">NON-VIOLENCE</div>
+        <div class="principle-text">We oppose all forms of physical, verbal, and structural violence. Our platform is a violence-free zone.</div>
+      </div>
+      <div class="principle-card">
+        <div class="principle-icon">🔍</div>
+        <div class="principle-name">TRANSPARENCY</div>
+        <div class="principle-text">Our global statistics are public and real. We do not inflate numbers or manipulate data.</div>
+      </div>
+      <div class="principle-card">
+        <div class="principle-icon">🌱</div>
+        <div class="principle-name">FREEDOM</div>
+        <div class="principle-text">Participation is always free and voluntary. No pressure, no algorithms, no monetisation of your attention.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 Terms of Use -->
+  <div class="policy-section" id="terms">
+    <p class="section-label">04</p>
+    <h2 class="section-title">TERMS OF USE</h2>
+    <div class="section-divider"></div>
+    <div class="policy-text">
+      <p><strong>Last updated: March 2026</strong></p>
+
+      <h3>1. Acceptance</h3>
+      <p>By accessing and using NAVA PEACE ("the App"), you agree to be bound by these Terms of Use and our Community Guidelines. If you disagree with any part of these terms, please do not use the App.</p>
+
+      <h3>2. Eligibility</h3>
+      <p>The App is open to all individuals aged <strong>13 years or older</strong>. Users under 18 should have parental consent. By using the App, you confirm that you meet these requirements.</p>
+
+      <h3>3. Device Identifier</h3>
+      <p>The App assigns a unique identifier (UID) to your device stored in your browser's local storage. This UID is used solely to track your participation count and referral connections. It is <strong>not linked to your personal identity</strong>.</p>
+
+      <h3>4. User Content</h3>
+      <p>If you choose to share a public peace message, you grant NAVA PEACE a non-exclusive, royalty-free licence to display that message on the platform. You retain ownership of your content. We reserve the right to remove content that violates our guidelines.</p>
+
+      <h3>5. Prohibited Conduct</h3>
+      <p>You agree not to use automated tools, bots, or scripts to interact with the App. You agree not to artificially inflate participation statistics or referral counts. Violations will result in permanent exclusion.</p>
+
+      <h3>6. Disclaimer</h3>
+      <p>NAVA PEACE is provided "as is" without warranties of any kind. We do not guarantee uninterrupted availability. We are not responsible for third-party links or content accessible through the App.</p>
+
+      <h3>7. Modifications</h3>
+      <p>We reserve the right to modify these Terms at any time. Continued use of the App after changes constitutes acceptance of the revised Terms.</p>
+
+      <h3>8. Governing Law</h3>
+      <p>These Terms are governed by the laws of the jurisdiction in which NAVA PEACE operates. Any disputes shall be resolved through good-faith negotiation before legal proceedings.</p>
+    </div>
+  </div>
+
+  <!-- 05 Privacy -->
+  <div class="policy-section" id="privacy">
+    <p class="section-label">05</p>
+    <h2 class="section-title">PRIVACY & DATA</h2>
+    <div class="section-divider"></div>
+    <div class="policy-text">
+      <h3>What We Collect</h3>
+      <ul>
+        <li><strong>Anonymous device UID</strong> — a randomly generated string stored in your browser</li>
+        <li><strong>Country, age group, gender</strong> — voluntarily provided during registration for statistical purposes</li>
+        <li><strong>Daily peace action timestamps</strong> — to track your streak and global totals</li>
+        <li><strong>Peace message</strong> — only if you choose to write and share one publicly</li>
+        <li><strong>Referral code</strong> — if you invited someone or were invited by someone</li>
+      </ul>
+
+      <h3>What We Do NOT Collect</h3>
+      <ul>
+        <li>Your name, email address, or phone number</li>
+        <li>Your IP address (no server-side logging)</li>
+        <li>Your location beyond the country you choose</li>
+        <li>Any financial or payment information</li>
+        <li>Any data from third parties or social networks</li>
+      </ul>
+
+      <h3>Data Storage</h3>
+      <p>Data is stored on <strong>Supabase</strong> (PostgreSQL), a GDPR-compliant infrastructure provider hosted in the European Union. Your device UID data is stored locally in your browser's localStorage.</p>
+
+      <h3>Your Rights</h3>
+      <p>Since we collect no personal identifying information, individual data deletion requests are technically limited. However, you can clear your browser's localStorage at any time to remove all local data. To request global data removal, contact us.</p>
+
+      <h3>Cookies</h3>
+      <p>NAVA PEACE does not use advertising cookies or tracking pixels. We use only functional browser storage (localStorage) necessary for the App to work.</p>
+    </div>
+  </div>
+
+  <!-- 06 Referrals -->
+  <div class="policy-section" id="referrals">
+    <p class="section-label">06</p>
+    <h2 class="section-title">REFERRAL SYSTEM RULES</h2>
+    <div class="section-divider"></div>
+    <div class="policy-text">
+      <p>The NAVA PEACE referral system rewards users who spread the peace movement. Here are the rules:</p>
+
+      <h3>Earning Doves</h3>
+      <ul>
+        <li><strong>1 Dove</strong> per day you choose peace (daily action)</li>
+        <li><strong>1 Dove</strong> for each new user who registers using your referral link</li>
+        <li>Referred users must complete registration to generate a dove reward</li>
+      </ul>
+
+      <h3>Prohibited Referral Behaviour</h3>
+      <ul>
+        <li>Creating fake accounts to self-refer</li>
+        <li>Using automated tools to generate referral clicks</li>
+        <li>Sharing referral links through spam, unsolicited messages, or deceptive means</li>
+        <li>Purchasing referral clicks or followers</li>
+      </ul>
+
+      <h3>Enforcement</h3>
+      <p>NAVA PEACE monitors referral patterns for anomalies. Accounts detected abusing the referral system will have their dove score reset to zero and may be permanently excluded from the platform. We reserve the right to adjust dove scores at any time to correct manipulation.</p>
+
+      <h3>No Monetary Value</h3>
+      <p>Dove scores are symbolic indicators of your peace contribution. They currently have <strong>no monetary value</strong> and cannot be exchanged for money, goods, or services unless explicitly stated in a future programme.</p>
+    </div>
+  </div>
+
+  <!-- 07 Moderation -->
+  <div class="policy-section" id="moderation">
+    <p class="section-label">07</p>
+    <h2 class="section-title">CONTENT MODERATION</h2>
+    <div class="section-divider"></div>
+    <div class="policy-text">
+      <p>All peace messages shared publicly on NAVA PEACE are subject to moderation. Our approach:</p>
+
+      <h3>How We Moderate</h3>
+      <ul>
+        <li><strong>Community reporting</strong> — users can flag inappropriate content (coming soon)</li>
+        <li><strong>Admin review</strong> — our team regularly reviews public messages</li>
+        <li><strong>Automated detection</strong> — keyword filters for clearly harmful content</li>
+      </ul>
+
+      <h3>Our Standard</h3>
+      <p>We aim to keep every message aligned with the spirit of peace: <strong>constructive, kind, inclusive, and hope-driven</strong>. Messages that express aggression, hatred, political extremism, or nihilism are removed — not because we fear debate, but because this platform is dedicated to a specific constructive intention.</p>
+
+      <h3>Appeals</h3>
+      <p>If your message was removed and you believe it was in error, you may contact us. We review all appeals within 7 business days.</p>
+
+      <h3>Remember</h3>
+      <p>Your peace message is your gift to the world. Make it something you would be proud to leave behind.</p>
+    </div>
+  </div>
+
+  <!-- 08 Contact -->
+  <div class="policy-section" id="contact">
+    <p class="section-label">08</p>
+    <h2 class="section-title">CONTACT</h2>
+    <div class="section-divider"></div>
+    <div class="policy-text">
+      <p>For questions about these terms, content removal requests, data deletion, or to report abuse:</p>
+    </div>
+    <div class="contact-box">
+      📧 <a href="mailto:peace@nava-peace.app">peace@nava-peace.app</a><br/><br/>
+      We aim to respond within <strong>5 business days</strong>.<br/>
+      For urgent abuse reports, please include <strong>"URGENT"</strong> in your subject line.
+    </div>
+  </div>
+
+  <div class="dove-deco">🕊</div>
+  <p style="text-align:center;font-size:9px;letter-spacing:3px;color:rgba(255,255,255,0.35);padding-bottom:20px;">
+    © 2026 NAVA PEACE · ALL RIGHTS RESERVED
+  </p>
+
+</div>
+
+<!-- Bottom nav -->
+<nav class="bottom-nav">
+  <a href="peace.html" class="nav-item">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="12" y1="3" x2="12" y2="21" stroke="currentColor" stroke-width="1.5"/><line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>
+    <span data-i18n="nav_peace">PEACE</span>
+  </a>
+  <a href="map.html" class="nav-item">
+    <svg viewBox="0 0 24 24"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
+    <span data-i18n="nav_map">MAP</span>
+  </a>
+  <a href="market.html" class="nav-item">
+    <svg viewBox="0 0 24 24"><path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm0 10c-1.66 0-3-1.34-3-3h2c0 .55.45 1 1 1s1-.45 1-1h2c0 1.66-1.34 3-3 3z"/></svg>
+    <span data-i18n="nav_market">MARKET</span>
+  </a>
+  <a href="profile.html" class="nav-item">
+    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+    <span data-i18n="nav_profile">PROFILE</span>
+  </a>
+  <a href="about.html" class="nav-item active">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="12" y1="11" x2="12" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="7.5" r="1.2" fill="currentColor"/></svg>
+    <span data-i18n="nav_about">ABOUT</span>
+  </a>
+</nav>
+
+<script>
+  // Apply i18n to nav labels
+  if(typeof LANG_DATA !== 'undefined') {
+    const lang = localStorage.getItem('nava_peace_lang') || 'en';
+    const t = LANG_DATA[lang] || LANG_DATA['en'] || {};
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if(t[key]) el.textContent = t[key];
+    });
+  }
+</script>
+</body>
+</html>
