@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NAVA PEACE – Admin</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase_config.js"></script>
+  <style>
+    @font-face {
+      font-family: 'Nasalization';
+      font-style: normal; font-weight: 400; font-display: swap;
+      src: url('nasalization.woff') format('woff');
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0a0f1e;
+      --panel:   rgba(255,255,255,0.05);
+      --border:  rgba(255,255,255,0.10);
+      --accent:  #3AACDF;
+      --accent2: #6DD5F5;
+      --white:   #ffffff;
+      --w60:     rgba(255,255,255,0.60);
+      --w40:     rgba(255,255,255,0.40);
+      --w15:     rgba(255,255,255,0.15);
+      --danger:  #ff5b5b;
+      --success: #4ade80;
+      --gold:    #f9c74f;
+      --font:    'Nasalization', Arial, sans-serif;
+      --radius:  14px;
+      --shadow:  0 8px 40px rgba(0,0,0,0.4);
+    }
+
+    html, body { min-height: 100vh; font-family: var(--font); background: var(--bg); color: var(--white); }
+
+    /* ── LOCK SCREEN ─────────────────── */
+    #lock-screen {
+      position: fixed; inset: 0; z-index: 999;
+      background: radial-gradient(ellipse at 50% 30%, #1a3a5c 0%, #0a0f1e 70%);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .lock-card {
+      text-align: center; padding: 48px 40px;
+      background: rgba(255,255,255,0.06);
+      border: 1.5px solid rgba(255,255,255,0.14);
+      border-radius: 24px; backdrop-filter: blur(20px);
+      width: 340px; box-shadow: var(--shadow);
+    }
+    .lock-icon { font-size: 52px; margin-bottom: 20px; }
+    .lock-title { font-size: 13px; letter-spacing: 6px; margin-bottom: 6px; color: var(--accent2); }
+    .lock-sub { font-size: 9px; letter-spacing: 3px; color: var(--w40); margin-bottom: 32px; }
+    .lock-input {
+      width: 100%; padding: 14px 18px; margin-bottom: 14px;
+      background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.18);
+      border-radius: 10px; color: var(--white); font-family: var(--font);
+      font-size: 16px; letter-spacing: 4px; text-align: center; outline: none;
+    }
+    .lock-input:focus { border-color: var(--accent); }
+    .lock-btn {
+      width: 100%; padding: 14px; background: var(--accent);
+      border: none; border-radius: 10px; color: var(--bg);
+      font-family: var(--font); font-size: 11px; letter-spacing: 4px;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    .lock-btn:hover { opacity: 0.85; }
+    .lock-error { margin-top: 14px; font-size: 10px; letter-spacing: 2px; color: var(--danger); min-height: 16px; }
+
+    /* ── ADMIN LAYOUT ────────────────── */
+    #admin-panel { display: none; flex-direction: column; min-height: 100vh; }
+
+    /* Header */
+    .adm-header {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(10,15,30,0.95); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; height: 60px;
+    }
+    .adm-logo { display: flex; align-items: center; gap: 10px; }
+    .adm-logo-text { font-size: 14px; letter-spacing: 5px; color: var(--white); }
+    .adm-badge {
+      background: var(--accent); color: var(--bg);
+      font-size: 8px; letter-spacing: 3px; padding: 3px 10px;
+      border-radius: 20px; margin-left: 4px;
+    }
+    .adm-header-right { display: flex; align-items: center; gap: 16px; }
+    .adm-user-tag { font-size: 9px; letter-spacing: 2px; color: var(--w40); }
+    .adm-logout-btn {
+      background: rgba(255,91,91,0.15); border: 1px solid rgba(255,91,91,0.35);
+      color: var(--danger); font-family: var(--font); font-size: 9px;
+      letter-spacing: 2px; padding: 6px 14px; border-radius: 8px;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .adm-logout-btn:hover { background: rgba(255,91,91,0.25); }
+
+    /* Main content */
+    .adm-main { padding: 28px; max-width: 1400px; margin: 0 auto; width: 100%; flex: 1; }
+
+    /* Stats bar */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+    .stat-card {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px 22px;
+      display: flex; flex-direction: column; gap: 8px;
+      transition: border-color 0.2s;
+    }
+    .stat-card:hover { border-color: rgba(58,172,223,0.4); }
+    .stat-label { font-size: 8px; letter-spacing: 3px; color: var(--w40); text-transform: uppercase; }
+    .stat-value { font-size: 32px; letter-spacing: 2px; color: var(--white); }
+    .stat-sub { font-size: 9px; letter-spacing: 1px; color: var(--w40); }
+    .stat-card.blue .stat-value { color: var(--accent2); }
+    .stat-card.gold .stat-value { color: var(--gold); }
+    .stat-card.green .stat-value { color: var(--success); }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 0; }
+    .tab-btn {
+      padding: 12px 22px; background: none; border: none;
+      font-family: var(--font); font-size: 9px; letter-spacing: 3px;
+      text-transform: uppercase; color: var(--w40);
+      cursor: pointer; border-bottom: 2px solid transparent;
+      margin-bottom: -1px; transition: all 0.2s;
+    }
+    .tab-btn:hover { color: var(--white); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* Tab content */
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* ── OVERVIEW TAB ──── */
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+    .charts-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+    .chart-card {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px;
+    }
+    .chart-title { font-size: 9px; letter-spacing: 3px; color: var(--w60); margin-bottom: 20px; text-transform: uppercase; }
+    .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .bar-label { font-size: 9px; letter-spacing: 1px; color: var(--w60); width: 90px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bar-wrap { flex: 1; height: 8px; background: rgba(255,255,255,0.07); border-radius: 4px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.5s; }
+    .bar-count { font-size: 10px; letter-spacing: 1px; color: var(--w40); width: 40px; text-align: right; flex-shrink: 0; }
+    .gender-row { display: flex; gap: 12px; margin-bottom: 10px; }
+    .gender-pill {
+      flex: 1; padding: 14px 12px; border-radius: 10px; text-align: center;
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+    }
+    .gender-pct { font-size: 28px; letter-spacing: 2px; }
+    .gender-lbl { font-size: 9px; letter-spacing: 2px; color: var(--w40); margin-top: 4px; }
+    .activity-chart { position: relative; height: 120px; }
+    .activity-bars { display: flex; align-items: flex-end; gap: 4px; height: 100%; }
+    .act-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+    .act-bar { width: 100%; border-radius: 3px 3px 0 0; background: linear-gradient(180deg, var(--accent2), var(--accent)); min-height: 2px; transition: height 0.4s; }
+    .act-label { font-size: 7px; color: var(--w40); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 28px; }
+
+    /* ── USERS TAB ──────── */
+    .table-toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px; gap: 12px; flex-wrap: wrap;
+    }
+    .search-input {
+      padding: 10px 16px; background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border); border-radius: 8px;
+      color: var(--white); font-family: var(--font); font-size: 10px;
+      letter-spacing: 2px; outline: none; width: 260px;
+    }
+    .search-input:focus { border-color: var(--accent); }
+    .export-btn {
+      padding: 10px 18px; background: rgba(58,172,223,0.15);
+      border: 1px solid rgba(58,172,223,0.35); border-radius: 8px;
+      color: var(--accent); font-family: var(--font); font-size: 9px;
+      letter-spacing: 2px; cursor: pointer; transition: background 0.2s;
+    }
+    .export-btn:hover { background: rgba(58,172,223,0.25); }
+    .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: 10px; }
+    thead tr { background: rgba(255,255,255,0.07); }
+    th {
+      padding: 12px 14px; text-align: left; font-size: 8px;
+      letter-spacing: 3px; color: var(--w60); text-transform: uppercase;
+      white-space: nowrap; border-bottom: 1px solid var(--border);
+    }
+    td { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--w60); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.03); color: var(--white); }
+    .uid-cell { font-size: 8px; letter-spacing: 1px; color: var(--w40); max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+    .uid-cell:hover { color: var(--accent); }
+    .flag-cell { font-size: 18px; }
+    .country-cell { letter-spacing: 1px; }
+    .days-badge {
+      display: inline-block; padding: 3px 10px;
+      background: rgba(58,172,223,0.18); color: var(--accent2);
+      border-radius: 20px; font-size: 9px; letter-spacing: 1px;
+    }
+    .ref-code { font-size: 8px; color: var(--gold); letter-spacing: 1px; }
+    .gender-m { color: #60a5fa; } .gender-f { color: #f9a8d4; } .gender-o { color: var(--w40); }
+    .table-footer { padding: 12px 14px; font-size: 9px; letter-spacing: 2px; color: var(--w40); border-top: 1px solid var(--border); }
+
+    /* ── MESSAGES TAB ──── */
+    .msg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+    .msg-card {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px;
+    }
+    .msg-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .msg-pseudo { font-size: 10px; letter-spacing: 2px; color: var(--accent2); }
+    .msg-date { font-size: 8px; letter-spacing: 1px; color: var(--w40); }
+    .msg-body { font-size: 11px; letter-spacing: 1px; color: var(--w60); line-height: 1.8; font-style: italic; }
+    .msg-country { font-size: 8px; color: var(--w40); margin-top: 10px; letter-spacing: 1px; }
+    .msg-empty { text-align: center; padding: 60px; color: var(--w40); font-size: 11px; letter-spacing: 3px; }
+
+    /* ── REFERRALS TAB ─── */
+    .leaderboard { max-width: 700px; }
+    .lb-row {
+      display: flex; align-items: center; gap: 16px;
+      padding: 14px 18px; border-radius: 10px;
+      background: var(--panel); border: 1px solid var(--border);
+      margin-bottom: 8px; transition: border-color 0.2s;
+    }
+    .lb-row:hover { border-color: rgba(58,172,223,0.35); }
+    .lb-rank { font-size: 16px; width: 32px; text-align: center; flex-shrink: 0; }
+    .lb-code { font-size: 10px; letter-spacing: 2px; color: var(--accent2); flex: 1; }
+    .lb-pts {
+      font-size: 18px; letter-spacing: 1px; color: var(--gold);
+      min-width: 48px; text-align: right;
+    }
+    .lb-pts-lbl { font-size: 8px; letter-spacing: 2px; color: var(--w40); text-align: right; }
+
+    /* ── LOADING SPINNER ─ */
+    .spinner { text-align: center; padding: 48px; }
+    .spin { display: inline-block; width: 36px; height: 36px; border: 3px solid rgba(58,172,223,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── RESPONSIVE ─────── */
+    @media (max-width: 900px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .charts-grid, .charts-grid-3 { grid-template-columns: 1fr; }
+      .adm-main { padding: 16px; }
+    }
+    @media (max-width: 500px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .stat-value { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ LOCK SCREEN ══════════════════════════════════════════ -->
+<div id="lock-screen">
+  <div class="lock-card">
+    <div class="lock-icon">🔐</div>
+    <p class="lock-title">NAVA PEACE</p>
+    <p class="lock-sub">ADMIN PANEL · RESTRICTED ACCESS</p>
+    <input class="lock-input" id="admin-pass" type="password"
+           placeholder="ACCESS CODE"
+           onkeydown="if(event.key==='Enter')checkPassword()" />
+    <button class="lock-btn" onclick="checkPassword()">ENTER →</button>
+    <p class="lock-error" id="lock-err"></p>
+  </div>
+</div>
+
+<!-- ══ ADMIN PANEL ════════════════════════════════════════════ -->
+<div id="admin-panel" style="display:none;flex-direction:column;min-height:100vh;">
+
+  <!-- Header -->
+  <header class="adm-header">
+    <div class="adm-logo">
+      <span style="font-size:22px;">🕊</span>
+      <span class="adm-logo-text">NAVA PEACE</span>
+      <span class="adm-badge">ADMIN</span>
+    </div>
+    <div class="adm-header-right">
+      <span class="adm-user-tag" id="adm-uid-tag"></span>
+      <button class="adm-logout-btn" onclick="adminLogout()">LOGOUT</button>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <div class="adm-main">
+
+    <!-- Stats row -->
+    <div class="stats-row">
+      <div class="stat-card blue">
+        <span class="stat-label">TOTAL USERS</span>
+        <span class="stat-value" id="stat-users">—</span>
+        <span class="stat-sub">unique devices</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">VOTES TODAY</span>
+        <span class="stat-value" id="stat-today">—</span>
+        <span class="stat-sub" id="stat-today-date">—</span>
+      </div>
+      <div class="stat-card gold">
+        <span class="stat-label">TOTAL VOTES</span>
+        <span class="stat-value" id="stat-votes">—</span>
+        <span class="stat-sub">peace actions</span>
+      </div>
+      <div class="stat-card green">
+        <span class="stat-label">COUNTRIES</span>
+        <span class="stat-value" id="stat-countries">—</span>
+        <span class="stat-sub">represented</span>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab('overview',this)">📊 OVERVIEW</button>
+      <button class="tab-btn" onclick="showTab('users',this)">👥 USERS</button>
+      <button class="tab-btn" onclick="showTab('messages',this)">💬 MESSAGES</button>
+      <button class="tab-btn" onclick="showTab('referrals',this)">🏆 REFERRALS</button>
+    </div>
+
+    <!-- ── OVERVIEW ─────────────────────── -->
+    <div id="tab-overview" class="tab-pane active">
+      <div class="spinner" id="overview-spinner"><div class="spin"></div></div>
+      <div id="overview-content" style="display:none;">
+        <div class="charts-grid" style="margin-bottom:20px;">
+          <!-- Activity chart -->
+          <div class="chart-card" style="grid-column:1/-1;">
+            <p class="chart-title">🗓 DAILY ACTIVITY — LAST 30 DAYS</p>
+            <div class="activity-chart"><div class="activity-bars" id="activity-bars"></div></div>
+          </div>
+        </div>
+        <div class="charts-grid-3">
+          <!-- Countries -->
+          <div class="chart-card" style="grid-column:span 2;">
+            <p class="chart-title">🌍 TOP COUNTRIES</p>
+            <div id="chart-countries"></div>
+          </div>
+          <!-- Gender -->
+          <div class="chart-card">
+            <p class="chart-title">⚧ GENDER</p>
+            <div id="chart-gender"></div>
+          </div>
+        </div>
+        <div class="charts-grid" style="margin-top:20px;">
+          <!-- Age groups -->
+          <div class="chart-card">
+            <p class="chart-title">🎂 AGE GROUPS</p>
+            <div id="chart-age"></div>
+          </div>
+          <!-- New registrations timeline -->
+          <div class="chart-card">
+            <p class="chart-title">📅 REGISTRATIONS — LAST 30 DAYS</p>
+            <div class="activity-chart"><div class="activity-bars" id="reg-bars"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── USERS ────────────────────────── -->
+    <div id="tab-users" class="tab-pane">
+      <div class="spinner" id="users-spinner"><div class="spin"></div></div>
+      <div id="users-content" style="display:none;">
+        <div class="table-toolbar">
+          <input class="search-input" id="user-search" type="search"
+                 placeholder="SEARCH UID / COUNTRY / CODE…"
+                 oninput="filterUsers(this.value)" />
+          <button class="export-btn" onclick="exportCSV()">⬇ EXPORT CSV</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>UID</th>
+                <th>🌍</th>
+                <th>COUNTRY</th>
+                <th>AGE</th>
+                <th>GENDER</th>
+                <th>DAYS</th>
+                <th>REF CODE</th>
+                <th>REFERRED BY</th>
+                <th>REGISTERED</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody"></tbody>
+          </table>
+          <div class="table-footer" id="users-footer"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MESSAGES ─────────────────────── -->
+    <div id="tab-messages" class="tab-pane">
+      <div class="spinner" id="msg-spinner"><div class="spin"></div></div>
+      <div id="msg-content" style="display:none;">
+        <div class="msg-grid" id="msg-grid"></div>
+      </div>
+    </div>
+
+    <!-- ── REFERRALS ────────────────────── -->
+    <div id="tab-referrals" class="tab-pane">
+      <div class="spinner" id="ref-spinner"><div class="spin"></div></div>
+      <div id="ref-content" style="display:none;">
+        <div class="leaderboard" id="leaderboard"></div>
+      </div>
+    </div>
+
+  </div><!-- /adm-main -->
+</div><!-- /admin-panel -->
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   NAVA PEACE — ADMIN PANEL
+   ═══════════════════════════════════════════════════════ */
+
+// ── CHANGE THIS PASSWORD ──────────────────────────────────
+const ADMIN_CODE = 'NAVA2024';
+// ─────────────────────────────────────────────────────────
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ── AUTH ─────────────────────────────────────────────────
+function checkPassword() {
+  const val = document.getElementById('admin-pass').value.trim();
+  if (val === ADMIN_CODE) {
+    sessionStorage.setItem('nava_admin_ok', '1');
+    unlockPanel();
+  } else {
+    const err = document.getElementById('lock-err');
+    err.textContent = '✗ INVALID ACCESS CODE';
+    document.getElementById('admin-pass').value = '';
+    setTimeout(() => { err.textContent = ''; }, 3000);
+  }
+}
+
+function unlockPanel() {
+  document.getElementById('lock-screen').style.display = 'none';
+  const panel = document.getElementById('admin-panel');
+  panel.style.display = 'flex';
+  const uid = localStorage.getItem('nava_peace_uid') || '';
+  if (uid) document.getElementById('adm-uid-tag').textContent = uid.slice(0,12) + '…';
+  loadAll();
+}
+
+function adminLogout() {
+  sessionStorage.removeItem('nava_admin_ok');
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('lock-screen').style.display = 'flex';
+  document.getElementById('admin-pass').value = '';
+}
+
+// Auto-unlock if session still valid
+if (sessionStorage.getItem('nava_admin_ok') === '1') unlockPanel();
+
+// ── TABS ─────────────────────────────────────────────────
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+// ── DATA ─────────────────────────────────────────────────
+let allUsers = [];
+let filteredUsers = [];
+
+async function loadAll() {
+  await Promise.all([loadVotes(), loadMessages(), loadReferrals()]);
+}
+
+// Country flag emoji helper
+function flag(code) {
+  if (!code || code.length < 2) return '🌐';
+  try {
+    return code.toUpperCase().replace(/./g, c =>
+      String.fromCodePoint(c.charCodeAt(0) + 127397)
+    );
+  } catch { return '🌐'; }
+}
+
+// Date formatter
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-CA'); // YYYY-MM-DD
+}
+
+// Format numbers
+function fmt(n) { return n == null ? '—' : n.toLocaleString(); }
+
+// ── VOTES / USERS ─────────────────────────────────────────
+async function loadVotes() {
+  try {
+    // Fetch all votes (paginate if needed)
+    let allVotes = [];
+    let from = 0; const step = 1000;
+    while (true) {
+      const { data, error } = await sb
+        .from('peace_votes')
+        .select('user_uid, country, age, gender, created_at, referral_code, referred_by')
+        .order('created_at', { ascending: false })
+        .range(from, from + step - 1);
+      if (error || !data || data.length === 0) break;
+      allVotes = allVotes.concat(data);
+      if (data.length < step) break;
+      from += step;
+    }
+
+    // Build unique users map (keep most recent info per UID)
+    const usersMap = new Map();
+    const votesPerUser = new Map();
+    const firstSeen = new Map();
+
+    // Process in reverse (oldest first) to set firstSeen correctly
+    for (let i = allVotes.length - 1; i >= 0; i--) {
+      const v = allVotes[i];
+      const uid = v.user_uid;
+      if (!uid) continue;
+      votesPerUser.set(uid, (votesPerUser.get(uid) || 0) + 1);
+      firstSeen.set(uid, v.created_at); // oldest = registered
+    }
+    // Then most recent data for profile
+    for (const v of allVotes) {
+      if (!v.user_uid) continue;
+      if (!usersMap.has(v.user_uid)) usersMap.set(v.user_uid, v);
+    }
+
+    // Stats
+    const totalUsers = usersMap.size;
+    const totalVotes = allVotes.length;
+    const today = new Date().toISOString().slice(0, 10);
+    const todayVotes = allVotes.filter(v => v.created_at && v.created_at.startsWith(today)).length;
+    const countries = new Set(allVotes.map(v => v.country).filter(Boolean)).size;
+
+    document.getElementById('stat-users').textContent = fmt(totalUsers);
+    document.getElementById('stat-today').textContent = fmt(todayVotes);
+    document.getElementById('stat-today-date').textContent = today;
+    document.getElementById('stat-votes').textContent = fmt(totalVotes);
+    document.getElementById('stat-countries').textContent = fmt(countries);
+
+    // Build user list
+    allUsers = Array.from(usersMap.values()).map(u => ({
+      uid: u.user_uid,
+      country: u.country || '',
+      age: u.age || '',
+      gender: u.gender || '',
+      days: votesPerUser.get(u.user_uid) || 1,
+      ref_code: u.referral_code || '',
+      referred_by: u.referred_by || '',
+      registered: firstSeen.get(u.user_uid) || u.created_at
+    })).sort((a, b) => b.days - a.days);
+
+    filteredUsers = [...allUsers];
+    renderUsersTable();
+
+    // Charts
+    renderOverview(allVotes, allUsers);
+
+  } catch (e) {
+    console.error('loadVotes error', e);
+  } finally {
+    document.getElementById('overview-spinner').style.display = 'none';
+    document.getElementById('overview-content').style.display = 'block';
+    document.getElementById('users-spinner').style.display = 'none';
+    document.getElementById('users-content').style.display = 'block';
+  }
+}
+
+// ── OVERVIEW CHARTS ───────────────────────────────────────
+function renderOverview(allVotes, allUsers) {
+  // Activity (last 30 days of votes)
+  renderActivityBars(allVotes, 'activity-bars', v => v.created_at?.slice(0,10));
+
+  // Registrations (last 30 days of first-seen)
+  const regDates = allUsers.map(u => u.registered?.slice(0,10)).filter(Boolean);
+  renderActivityBars(regDates.map(d => ({ date: d })), 'reg-bars', v => v.date);
+
+  // Countries (top 15 by unique users)
+  const cMap = new Map();
+  for (const u of allUsers) {
+    if (u.country) cMap.set(u.country, (cMap.get(u.country) || 0) + 1);
+  }
+  const topCountries = [...cMap.entries()].sort((a,b) => b[1]-a[1]).slice(0, 15);
+  const maxC = topCountries[0]?.[1] || 1;
+  document.getElementById('chart-countries').innerHTML = topCountries.map(([c, n]) =>
+    `<div class="bar-row">
+      <span class="bar-label">${flag(c)} ${c}</span>
+      <div class="bar-wrap"><div class="bar-fill" style="width:${(n/maxC*100).toFixed(1)}%"></div></div>
+      <span class="bar-count">${n}</span>
+    </div>`
+  ).join('');
+
+  // Gender
+  const gMap = { male: 0, female: 0, other: 0 };
+  for (const u of allUsers) {
+    const g = (u.gender || '').toLowerCase();
+    if (g === 'male') gMap.male++;
+    else if (g === 'female') gMap.female++;
+    else if (g) gMap.other++;
+  }
+  const total = allUsers.length || 1;
+  document.getElementById('chart-gender').innerHTML = `
+    <div class="gender-row">
+      <div class="gender-pill">
+        <div class="gender-pct gender-m">${(gMap.male/total*100).toFixed(0)}%</div>
+        <div class="gender-lbl">♂ MALE</div>
+      </div>
+      <div class="gender-pill">
+        <div class="gender-pct gender-f">${(gMap.female/total*100).toFixed(0)}%</div>
+        <div class="gender-lbl">♀ FEMALE</div>
+      </div>
+    </div>
+    ${gMap.other ? `<div class="gender-pill" style="margin-top:8px;"><div class="gender-pct gender-o">${(gMap.other/total*100).toFixed(0)}%</div><div class="gender-lbl">OTHER</div></div>` : ''}
+    <p style="font-size:9px;color:var(--w40);letter-spacing:2px;margin-top:16px;">${fmt(allUsers.length)} TOTAL USERS</p>
+  `;
+
+  // Age groups
+  const ageGroups = {'≤17':0,'18–24':0,'25–34':0,'35–49':0,'50–64':0,'65+':0,'N/A':0};
+  for (const u of allUsers) {
+    const a = parseInt(u.age);
+    if (isNaN(a)) ageGroups['N/A']++;
+    else if (a <= 17) ageGroups['≤17']++;
+    else if (a <= 24) ageGroups['18–24']++;
+    else if (a <= 34) ageGroups['25–34']++;
+    else if (a <= 49) ageGroups['35–49']++;
+    else if (a <= 64) ageGroups['50–64']++;
+    else ageGroups['65+']++;
+  }
+  const maxAge = Math.max(...Object.values(ageGroups)) || 1;
+  document.getElementById('chart-age').innerHTML = Object.entries(ageGroups)
+    .filter(([,v]) => v > 0)
+    .map(([g, n]) =>
+      `<div class="bar-row">
+        <span class="bar-label">${g}</span>
+        <div class="bar-wrap"><div class="bar-fill" style="width:${(n/maxAge*100).toFixed(1)}%;background:linear-gradient(90deg,#f9c74f,#f8961e)"></div></div>
+        <span class="bar-count">${n}</span>
+      </div>`
+    ).join('');
+}
+
+function renderActivityBars(items, containerId, getDate) {
+  const now = new Date();
+  const days = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(now); d.setDate(d.getDate() - i);
+    days.push(d.toISOString().slice(0,10));
+  }
+  const counts = {};
+  days.forEach(d => counts[d] = 0);
+  for (const item of items) {
+    const d = getDate(item);
+    if (d && counts[d] !== undefined) counts[d]++;
+  }
+  const max = Math.max(...Object.values(counts), 1);
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = days.map(d => {
+    const h = Math.max((counts[d] / max) * 100, 2);
+    const label = d.slice(5); // MM-DD
+    return `<div class="act-bar-wrap" title="${d}: ${counts[d]}">
+      <div class="act-bar" style="height:${h}%"></div>
+      <span class="act-label">${label}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── USERS TABLE ───────────────────────────────────────────
+function renderUsersTable() {
+  const tbody = document.getElementById('users-tbody');
+  const footer = document.getElementById('users-footer');
+  tbody.innerHTML = filteredUsers.map((u, i) => `
+    <tr>
+      <td style="color:var(--w40);font-size:9px;">${i+1}</td>
+      <td class="uid-cell" title="${u.uid}" onclick="navigator.clipboard.writeText('${u.uid}')">${u.uid.slice(0,14)}…</td>
+      <td class="flag-cell">${flag(u.country)}</td>
+      <td class="country-cell">${u.country || '—'}</td>
+      <td>${u.age || '—'}</td>
+      <td class="gender-${(u.gender||'').toLowerCase().slice(0,1)}">${u.gender || '—'}</td>
+      <td><span class="days-badge">${u.days}</span></td>
+      <td class="ref-code">${u.ref_code || '—'}</td>
+      <td style="font-size:9px;color:var(--w40);">${u.referred_by || '—'}</td>
+      <td style="font-size:9px;">${fmtDate(u.registered)}</td>
+    </tr>
+  `).join('');
+  footer.textContent = `SHOWING ${filteredUsers.length} OF ${allUsers.length} USERS`;
+}
+
+function filterUsers(q) {
+  const s = q.trim().toLowerCase();
+  if (!s) { filteredUsers = [...allUsers]; }
+  else {
+    filteredUsers = allUsers.filter(u =>
+      u.uid.toLowerCase().includes(s) ||
+      (u.country || '').toLowerCase().includes(s) ||
+      (u.ref_code || '').toLowerCase().includes(s) ||
+      (u.referred_by || '').toLowerCase().includes(s)
+    );
+  }
+  renderUsersTable();
+}
+
+function exportCSV() {
+  const headers = ['uid','country','age','gender','days','ref_code','referred_by','registered'];
+  const rows = filteredUsers.map(u =>
+    headers.map(h => `"${(u[h]||'').toString().replace(/"/g,'""')}"`).join(',')
+  );
+  const csv = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `nava-peace-users-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+// ── MESSAGES ──────────────────────────────────────────────
+async function loadMessages() {
+  try {
+    const { data } = await sb
+      .from('peace_messages')
+      .select('user_uid, pseudo, message, share_msg, updated_at')
+      .eq('share_msg', true)
+      .not('message', 'is', null)
+      .order('updated_at', { ascending: false })
+      .limit(200);
+
+    const grid = document.getElementById('msg-grid');
+    if (!data || data.length === 0) {
+      grid.innerHTML = '<p class="msg-empty">🕊 NO PUBLIC MESSAGES YET</p>';
+    } else {
+      const usersByUid = Object.fromEntries(allUsers.map(u => [u.uid, u]));
+      grid.innerHTML = data.map(m => {
+        const u = usersByUid[m.user_uid] || {};
+        return `<div class="msg-card">
+          <div class="msg-header">
+            <span class="msg-pseudo">🕊 ${m.pseudo || 'ANONYMOUS'}</span>
+            <span class="msg-date">${fmtDate(m.updated_at)}</span>
+          </div>
+          <p class="msg-body">"${m.message}"</p>
+          <p class="msg-country">${flag(u.country)} ${u.country || ''} · ${u.gender || ''} · ${u.age ? u.age + 'y' : ''}</p>
+        </div>`;
+      }).join('');
+    }
+  } catch (e) {
+    console.error('loadMessages error', e);
+  } finally {
+    document.getElementById('msg-spinner').style.display = 'none';
+    document.getElementById('msg-content').style.display = 'block';
+  }
+}
+
+// ── REFERRALS ─────────────────────────────────────────────
+async function loadReferrals() {
+  try {
+    const { data } = await sb
+      .from('referral_points')
+      .select('referral_code, user_uid')
+      .not('referral_code', 'is', null)
+      .limit(5000);
+
+    const board = document.getElementById('leaderboard');
+    if (!data || data.length === 0) {
+      board.innerHTML = '<p class="msg-empty">NO REFERRALS YET</p>';
+    } else {
+      const ptMap = new Map();
+      for (const r of data) {
+        if (r.referral_code) ptMap.set(r.referral_code, (ptMap.get(r.referral_code) || 0) + 1);
+      }
+      const sorted = [...ptMap.entries()].sort((a,b) => b[1]-a[1]).slice(0, 50);
+      const medals = ['🥇','🥈','🥉'];
+      board.innerHTML = sorted.map(([code, pts], i) =>
+        `<div class="lb-row">
+          <span class="lb-rank">${medals[i] || (i+1)}</span>
+          <span class="lb-code">${code}</span>
+          <div>
+            <div class="lb-pts">${pts}</div>
+            <div class="lb-pts-lbl">DOVES</div>
+          </div>
+        </div>`
+      ).join('');
+    }
+  } catch (e) {
+    console.error('loadReferrals error', e);
+  } finally {
+    document.getElementById('ref-spinner').style.display = 'none';
+    document.getElementById('ref-content').style.display = 'block';
+  }
+}
+</script>
+</body>
+</html>
