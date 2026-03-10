@@ -153,6 +153,17 @@
       .counter-item .num { font-size: 34px; }
       #cnt-timer { font-size: 18px !important; letter-spacing: 1px !important; }
       .counter-item .lbl { font-size: 12px; letter-spacing: 1.5px; }
+      /* DOVES — pleine largeur sur mobile */
+      #cnt-doves-item {
+        grid-column: 1 / -1;
+        border-top: 1px solid rgba(255,255,255,0.12);
+        padding-top: 14px;
+        margin-top: 4px;
+      }
+      #cnt-doves-item .num { font-size: 38px; }
+      /* DAYS+TIMER — pleine largeur aussi */
+      #cnt-doves-item ~ .counter-sep { display: none; }
+      .counter-item:last-child { grid-column: 1 / -1; border-top: 1px solid rgba(255,255,255,0.12); padding-top: 14px; margin-top: 4px; }
       .personal-strip { font-size: 13px; letter-spacing: 1.5px; }
     }
 
@@ -477,6 +488,11 @@
       <span class="lbl" data-i18n="lbl_today_map">GLOBAL ACTIONS TODAY</span>
     </div>
     <div class="counter-sep"></div>
+    <div class="counter-item" id="cnt-doves-item">
+      <span class="num" id="cnt-doves">—</span>
+      <span class="lbl">🕊 TOTAL DOVES</span>
+    </div>
+    <div class="counter-sep"></div>
     <div class="counter-item">
       <span class="num" id="cnt-days" style="font-size:42px;letter-spacing:2px;">0</span>
       <span class="lbl" style="font-size:11px;letter-spacing:2px;margin-bottom:2px;" data-i18n="lbl_days">DAYS</span>
@@ -666,7 +682,7 @@
         // Tous les votes
         const { data, error } = await sb
           .from('peace_votes')
-          .select('country, created_at')
+          .select('country, created_at, referred_by')
           .not('country', 'is', null);
 
         if (error) throw error;
@@ -675,6 +691,12 @@
         const todayStr = new Date().toISOString().split('T')[0];
         const todayCount = data.filter(r => r.created_at && r.created_at.startsWith(todayStr)).length;
         document.getElementById('cnt-today').textContent = '+' + todayCount.toLocaleString('fr-FR');
+
+        // Total doves = daily actions + referral bonus doves
+        const dailyDoves    = data.length;
+        const referralDoves = data.filter(r => r.referred_by).length;
+        const totalDoves    = dailyDoves + referralDoves;
+        document.getElementById('cnt-doves').textContent = totalDoves.toLocaleString('fr-FR');
 
         // Agréger par pays
         const counts = {};
@@ -702,6 +724,10 @@
     const total = peaceData.reduce((s, r) => s + r.user_count, 0);
     document.getElementById('cnt-people').textContent = total.toLocaleString('fr-FR');
     document.getElementById('cnt-countries').textContent = peaceData.length;
+    // Fallback doves si Supabase non configuré (données mock)
+    if (document.getElementById('cnt-doves').textContent === '—') {
+      document.getElementById('cnt-doves').textContent = total.toLocaleString('fr-FR');
+    }
 
     const root = am5.Root.new("chartdiv");
     root.setThemes([am5themes_Animated.new(root)]);
