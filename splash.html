@@ -420,52 +420,81 @@
         return;
       }
 
-      // Utilisateur enregistré — cache le bouton ENTER, on va auto-rediriger
+      // Utilisateur enregistré — cache le bouton ENTER
       var enterEl = document.querySelector('.enter-link');
       if (enterEl) enterEl.style.display = 'none';
 
       var pseudo = localStorage.getItem('nava_peace_pseudo') || '';
 
-      // Attendre 800ms (logo en cours d'apparition) puis switcher
+      // ① Laisser le logo + hero s'installer pleinement (3 s)
       setTimeout(function () {
         var hero   = document.querySelector('.hero');
         var dateEl = document.getElementById('daily-date');
         var textEl = document.getElementById('daily-text');
         var divEl  = document.querySelector('.divider');
 
-        // Fade-out du contenu actuel
+        // ── FADE-OUT lent du contenu (1.4 s) ──
         [hero, dateEl, textEl, divEl].forEach(function (el) {
-          if (el) { el.style.transition = 'opacity 0.45s'; el.style.opacity = '0'; }
+          if (el) { el.style.transition = 'opacity 1.4s ease'; el.style.opacity = '0'; }
         });
 
+        // ② Après le fade-out → WELCOME BACK : blur → net (2.5 s)
         setTimeout(function () {
-          // Welcome back
           if (hero) {
-            hero.textContent = 'WELCOME BACK';
-            hero.style.opacity = '1';
+            hero.textContent  = 'WELCOME BACK';
+            hero.style.transition = 'none';
+            hero.style.opacity    = '0';
+            hero.style.filter     = 'blur(20px)';
+            void hero.offsetWidth;                      // force reflow
+            hero.style.transition = 'opacity 2.5s ease, filter 2.5s ease';
+            hero.style.opacity    = '1';
+            hero.style.filter     = 'blur(0px)';
           }
-          // Pseudo ou fallback
-          if (textEl) {
-            textEl.innerHTML = pseudo ? pseudo.toUpperCase() : 'PEACE LOVER';
-            textEl.style.opacity = '1';
-          }
-          // Countdown dans le champ date
-          var t = 3;
-          if (dateEl) { dateEl.textContent = '· · ·  ' + t + '  · · ·'; dateEl.style.opacity = '1'; }
-          if (divEl)  { divEl.style.opacity = '0.4'; }
 
-          var iv = setInterval(function () {
-            t--;
-            if (t <= 0) {
-              clearInterval(iv);
-              window.location.href = 'peace.html';
-            } else {
-              if (dateEl) dateEl.textContent = '· · ·  ' + t + '  · · ·';
+          // ③ Pseudo — 2 s après, letter-spacing expand (2 s)
+          setTimeout(function () {
+            if (textEl) {
+              textEl.innerHTML       = pseudo ? pseudo.toUpperCase() : 'PEACE LOVER';
+              textEl.style.transition    = 'none';
+              textEl.style.opacity       = '0';
+              textEl.style.letterSpacing = '1px';
+              void textEl.offsetWidth;
+              textEl.style.transition    = 'opacity 2s ease, letter-spacing 2s ease';
+              textEl.style.opacity       = '1';
+              textEl.style.letterSpacing = 'clamp(5px, 1.1vw, 12px)';
             }
-          }, 1000);
+          }, 2000);
 
-        }, 450); // fade-out terminé
-      }, 800);   // logo visible
+          // ④ Divider + countdown — 3.5 s après welcome back
+          setTimeout(function () {
+            if (divEl) { divEl.style.transition = 'opacity 1.8s ease'; divEl.style.opacity = '0.4'; }
+
+            var t = 5;
+            if (dateEl) {
+              dateEl.style.transition = 'opacity 1.8s ease';
+              dateEl.textContent = _dots(t);
+              dateEl.style.opacity = '1';
+            }
+
+            var iv = setInterval(function () {
+              t--;
+              if (t <= 0) {
+                clearInterval(iv);
+                // ⑤ Fade-out global (1 s) puis redirect
+                var stage = document.querySelector('.stage');
+                if (stage) { stage.style.transition = 'opacity 1s ease'; stage.style.opacity = '0'; }
+                setTimeout(function () { window.location.href = 'peace.html'; }, 1050);
+              } else {
+                if (dateEl) dateEl.textContent = _dots(t);
+              }
+            }, 1000);
+
+          }, 3500);
+
+        }, 1400); // fade-out terminé
+      }, 3000);   // logo + hero pleinement visibles
+
+      function _dots(n) { return '· · ·  ' + n + '  · · ·'; }
     })();
   </script>
 </body>
