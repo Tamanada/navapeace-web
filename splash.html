@@ -69,7 +69,7 @@
 
     /* ── BRAND NAME ────────────────────────────── */
     .brand {
-      font-size: clamp(13px, 2.2vw, 22px);
+      font-size: clamp(18px, 3vw, 30px);
       letter-spacing: clamp(10px, 2vw, 22px);
       color: rgba(255,255,255,0.72);
       text-transform: uppercase;
@@ -104,7 +104,7 @@
 
     /* ── DAILY MESSAGE ──────────────────────────── */
     .daily-msg {
-      font-size: clamp(10px, 1.4vw, 15px);
+      font-size: clamp(14px, 1.9vw, 22px);
       letter-spacing: clamp(2px, 0.5vw, 5px);
       color: rgba(255,255,255,0.58);
       text-transform: uppercase;
@@ -116,7 +116,7 @@
     }
     .daily-msg-date {
       display: block;
-      font-size: clamp(7px, 0.8vw, 9px);
+      font-size: clamp(10px, 1.1vw, 13px);
       letter-spacing: 4px;
       color: rgba(255,255,255,0.3);
       margin-bottom: 8px;
@@ -164,7 +164,7 @@
     .enter-link {
       position: fixed;
       bottom: 90px; right: 32px;
-      font-size: 9px; letter-spacing: 4px;
+      font-size: 13px; letter-spacing: 4px;
       color: rgba(255,255,255,0.6);
       text-transform: uppercase;
       text-decoration: none;
@@ -246,11 +246,29 @@
 
     /* ── RESPONSIVE ────────────────────────────── */
     @media (max-width: 600px) {
-      .brand { letter-spacing: 8px; }
+      .brand { letter-spacing: 8px; font-size: 16px; }
       .logo-img { width: 150px; height: 150px; }
       .logo-fallback { font-size: 120px; }
-      .ticker-item { padding: 0 18px; }
-      .enter-link { bottom: 72px; right: 18px; }
+
+      /* Ticker mobile */
+      .ticker-wrap {
+        height: 56px;
+      }
+      .ticker-item {
+        padding: 0 18px;
+        font-size: clamp(13px, 4.2vw, 18px);
+        letter-spacing: clamp(2px, 0.8vw, 5px);
+      }
+      .ticker-track {
+        animation-duration: 32s; /* plus rapide car écran plus petit */
+      }
+
+      /* Ajustement stage pour ticker plus court */
+      .stage { padding-bottom: 72px; }
+
+      .enter-link { bottom: 68px; right: 18px; font-size: 11px; }
+      .daily-msg { font-size: 13px; padding: 0 18px; }
+      .daily-msg-date { font-size: 9px; }
     }
   </style>
 </head>
