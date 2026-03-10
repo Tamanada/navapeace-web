@@ -646,7 +646,7 @@ function showToast(msg, duration=2500) {
 function checkPassword() {
   const val = document.getElementById('admin-pass').value.trim();
   if (val === ADMIN_CODE) {
-    sessionStorage.setItem('nava_admin_ok','1');
+    localStorage.setItem('nava_admin_ok','1');
     unlockPanel();
   } else {
     const err = document.getElementById('lock-err');
@@ -665,12 +665,12 @@ function unlockPanel() {
   loadAll();
 }
 function adminLogout() {
-  sessionStorage.removeItem('nava_admin_ok');
+  localStorage.removeItem('nava_admin_ok');
   document.getElementById('admin-panel').style.display = 'none';
   document.getElementById('lock-screen').style.display = 'flex';
   document.getElementById('admin-pass').value = '';
 }
-if (sessionStorage.getItem('nava_admin_ok') === '1') unlockPanel();
+if (localStorage.getItem('nava_admin_ok') === '1') unlockPanel();
 
 // ── TABS ─────────────────────────────────────────────────
 function showTab(id, btn) {
