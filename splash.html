@@ -426,35 +426,46 @@
 
       var pseudo = localStorage.getItem('nava_peace_pseudo') || '';
 
-      // ① Laisser le logo + hero s'installer pleinement (3 s)
+      // Total doves — vérifie le statut du compte
+      var doveCount = 0;
+      try {
+        var adminFlags = JSON.parse(localStorage.getItem('nava_user_flags') || '{}');
+        var isDisabled = adminFlags[uid] && adminFlags[uid].status === 'disabled';
+        if (!isDisabled) {
+          doveCount = parseInt(localStorage.getItem('nava_peace_days') || '0', 10);
+        }
+      } catch(e) {}
+
+      // ① Logo + hero pleinement visibles (3 s)
       setTimeout(function () {
         var hero   = document.querySelector('.hero');
         var dateEl = document.getElementById('daily-date');
         var textEl = document.getElementById('daily-text');
         var divEl  = document.querySelector('.divider');
 
-        // ── FADE-OUT lent du contenu (1.4 s) ──
+        // Fade-out lent (1.4 s)
         [hero, dateEl, textEl, divEl].forEach(function (el) {
           if (el) { el.style.transition = 'opacity 1.4s ease'; el.style.opacity = '0'; }
         });
 
-        // ② Après le fade-out → WELCOME BACK : blur → net (2.5 s)
         setTimeout(function () {
+
+          // ② WELCOME BACK : blur → net (2.5 s)
           if (hero) {
-            hero.textContent  = 'WELCOME BACK';
+            hero.textContent      = 'WELCOME BACK';
             hero.style.transition = 'none';
             hero.style.opacity    = '0';
             hero.style.filter     = 'blur(20px)';
-            void hero.offsetWidth;                      // force reflow
+            void hero.offsetWidth;
             hero.style.transition = 'opacity 2.5s ease, filter 2.5s ease';
             hero.style.opacity    = '1';
             hero.style.filter     = 'blur(0px)';
           }
 
-          // ③ Pseudo — 2 s après, letter-spacing expand (2 s)
+          // ③ Pseudo — 2 s après WB, letter-spacing expand (2 s)
           setTimeout(function () {
             if (textEl) {
-              textEl.innerHTML       = pseudo ? pseudo.toUpperCase() : 'PEACE LOVER';
+              textEl.innerHTML           = pseudo ? pseudo.toUpperCase() : 'PEACE LOVER';
               textEl.style.transition    = 'none';
               textEl.style.opacity       = '0';
               textEl.style.letterSpacing = '1px';
@@ -465,31 +476,60 @@
             }
           }, 2000);
 
-          // ④ Divider + countdown — 3.5 s après welcome back
+          // ④ Divider + total DOVES — 2.5 s après WB
           setTimeout(function () {
-            if (divEl) { divEl.style.transition = 'opacity 1.8s ease'; divEl.style.opacity = '0.4'; }
-
-            var t = 5;
+            if (divEl) { divEl.style.transition = 'opacity 1.5s ease'; divEl.style.opacity = '0.4'; }
             if (dateEl) {
-              dateEl.style.transition = 'opacity 1.8s ease';
-              dateEl.textContent = _dots(t);
+              dateEl.style.transition    = 'opacity 1.5s ease';
+              dateEl.style.fontSize      = 'clamp(22px, 4vw, 52px)';
+              dateEl.style.letterSpacing = '3px';
+              dateEl.style.color         = 'rgba(255,255,255,0.85)';
+              dateEl.style.marginBottom  = '0';
+              dateEl.innerHTML =
+                '🕊&ensp;' + doveCount +
+                '<span style="display:block;font-size:clamp(8px,0.9vw,11px);' +
+                             'letter-spacing:6px;color:rgba(255,255,255,0.38);' +
+                             'margin-top:6px;">DOVES OFFERED</span>';
+              void dateEl.offsetWidth;
               dateEl.style.opacity = '1';
             }
+          }, 2500);
 
-            var iv = setInterval(function () {
-              t--;
-              if (t <= 0) {
-                clearInterval(iv);
-                // ⑤ Fade-out global (1 s) puis redirect
-                var stage = document.querySelector('.stage');
-                if (stage) { stage.style.transition = 'opacity 1s ease'; stage.style.opacity = '0'; }
-                setTimeout(function () { window.location.href = 'peace.html'; }, 1050);
-              } else {
-                if (dateEl) dateEl.textContent = _dots(t);
-              }
-            }, 1000);
+          // ⑤ DOVES → countdown — 5.5 s après WB
+          setTimeout(function () {
+            var t = 5;
+            if (dateEl) {
+              // Fade-out du compteur doves
+              dateEl.style.transition = 'opacity 0.8s ease';
+              dateEl.style.opacity    = '0';
+              setTimeout(function () {
+                // Remet les styles du date-label
+                dateEl.style.fontSize      = '';
+                dateEl.style.letterSpacing = '';
+                dateEl.style.color         = '';
+                dateEl.style.marginBottom  = '';
+                dateEl.textContent         = _dots(t);
+                dateEl.style.opacity       = '1';
+              }, 800);
+            }
 
-          }, 3500);
+            // Countdown démarre après la transition
+            setTimeout(function () {
+              var iv = setInterval(function () {
+                t--;
+                if (t <= 0) {
+                  clearInterval(iv);
+                  // ⑥ Fade-out global (1 s) puis redirect
+                  var stage = document.querySelector('.stage');
+                  if (stage) { stage.style.transition = 'opacity 1s ease'; stage.style.opacity = '0'; }
+                  setTimeout(function () { window.location.href = 'peace.html'; }, 1050);
+                } else {
+                  if (dateEl) dateEl.textContent = _dots(t);
+                }
+              }, 1000);
+            }, 800);
+
+          }, 5500);
 
         }, 1400); // fade-out terminé
       }, 3000);   // logo + hero pleinement visibles
