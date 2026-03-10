@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NAVA PEACE — Born To Grow</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <!-- Open Graph -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:url"         content="https://nava-peace.app/splash.html" />
+  <meta property="og:title"       content="NAVA PEACE — Born To Grow" />
+  <meta property="og:description" content="Born to grow. A global peace movement." />
+  <meta property="og:image"       content="https://nava-peace.app/logo.png" />
+  <style>
+    @font-face {
+      font-family: 'Nasalization';
+      font-style: normal; font-weight: 400; font-display: swap;
+      src: url('nasalization.woff') format('woff');
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --font: 'Nasalization', Arial, sans-serif;
+    }
+
+    html, body {
+      height: 100%; width: 100%; overflow: hidden;
+      font-family: var(--font);
+      background: radial-gradient(ellipse at 50% 20%, #6DD5F5 0%, #3AACDF 45%, #1E8EC4 100%);
+    }
+
+    /* ── MAIN LAYOUT ───────────────────────────── */
+    .stage {
+      position: fixed; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding-bottom: 80px; /* room for ticker */
+    }
+
+    /* ── LOGO ──────────────────────────────────── */
+    .logo-wrap {
+      margin-bottom: 36px;
+      animation: fadeUp 1s ease both;
+    }
+    .logo-img {
+      width: 140px; height: 140px; object-fit: contain;
+      filter: drop-shadow(0 8px 40px rgba(255,255,255,0.45));
+    }
+    .logo-fallback {
+      font-size: 110px;
+      filter: drop-shadow(0 8px 40px rgba(255,255,255,0.45));
+      line-height: 1;
+    }
+
+    /* ── BRAND NAME ────────────────────────────── */
+    .brand {
+      font-size: clamp(13px, 2.2vw, 22px);
+      letter-spacing: clamp(10px, 2vw, 22px);
+      color: rgba(255,255,255,0.72);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      animation: fadeUp 1s 0.15s ease both;
+    }
+
+    /* ── HERO TEXT ─────────────────────────────── */
+    .hero {
+      font-size: clamp(52px, 11vw, 160px);
+      letter-spacing: clamp(4px, 1.2vw, 18px);
+      color: #ffffff;
+      text-transform: uppercase;
+      text-align: center;
+      line-height: 1;
+      text-shadow:
+        0 0 60px rgba(255,255,255,0.35),
+        0 0 120px rgba(255,255,255,0.15),
+        0 4px 30px rgba(30,100,170,0.4);
+      animation: fadeUp 1s 0.3s ease both;
+      user-select: none;
+    }
+
+    /* ── DIVIDER ───────────────────────────────── */
+    .divider {
+      width: clamp(60px, 10vw, 140px);
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+      margin: 28px auto 0;
+      animation: fadeUp 1s 0.5s ease both;
+    }
+
+    /* ── BOTTOM TICKER ─────────────────────────── */
+    .ticker-wrap {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 60px;
+      background: rgba(10, 40, 80, 0.72);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      border-top: 1px solid rgba(255,255,255,0.18);
+      display: flex; align-items: center;
+      overflow: hidden;
+      animation: fadeIn 1s 0.8s ease both;
+    }
+
+    .ticker-track {
+      display: flex;
+      align-items: center;
+      white-space: nowrap;
+      animation: ticker 36s linear infinite;
+      will-change: transform;
+    }
+
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 32px;
+      font-size: clamp(10px, 1.4vw, 15px);
+      letter-spacing: clamp(2px, 0.4vw, 5px);
+      color: rgba(255,255,255,0.82);
+      text-transform: uppercase;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .ticker-item .lang-flag {
+      font-size: 1.3em;
+      flex-shrink: 0;
+    }
+    .ticker-sep {
+      width: 1px; height: 20px;
+      background: rgba(255,255,255,0.2);
+      flex-shrink: 0;
+    }
+
+    /* ── LINK (optional) ───────────────────────── */
+    .enter-link {
+      position: fixed;
+      top: 28px; right: 32px;
+      font-size: 9px; letter-spacing: 4px;
+      color: rgba(255,255,255,0.6);
+      text-transform: uppercase;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255,255,255,0.25);
+      padding-bottom: 2px;
+      transition: color 0.2s;
+      animation: fadeIn 1.2s 1s ease both;
+    }
+    .enter-link:hover { color: #fff; }
+
+    /* ── ANIMATIONS ────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes ticker {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ── RESPONSIVE ────────────────────────────── */
+    @media (max-width: 480px) {
+      .brand { letter-spacing: 8px; }
+      .logo-img, .logo-fallback { width: 90px; height: 90px; font-size: 80px; }
+      .ticker-item { padding: 0 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Optional: enter app link -->
+  <a class="enter-link" href="peace.html">ENTER →</a>
+
+  <!-- ── MAIN STAGE ─────────────────────────── -->
+  <div class="stage">
+
+    <!-- Logo -->
+    <div class="logo-wrap">
+      <img class="logo-img" src="logo.png" alt="NAVA PEACE"
+           onerror="this.style.display='none';document.getElementById('logo-fallback').style.display='block'" />
+      <span class="logo-fallback" id="logo-fallback" style="display:none;">🕊</span>
+    </div>
+
+    <!-- Brand -->
+    <p class="brand">NAVA PEACE</p>
+
+    <!-- Hero -->
+    <h1 class="hero">BORN TO GROW</h1>
+
+    <!-- Divider line -->
+    <div class="divider"></div>
+
+  </div>
+
+  <!-- ── TICKER ─────────────────────────────── -->
+  <div class="ticker-wrap" aria-label="Born to grow in 12 languages">
+    <div class="ticker-track" id="ticker-track">
+      <!-- filled by JS; duplicated for seamless loop -->
+    </div>
+  </div>
+
+  <script>
+    // 12 languages — flag · translation
+    const translations = [
+      { flag: '🇬🇧', lang: 'EN', text: 'BORN TO GROW'          },
+      { flag: '🇫🇷', lang: 'FR', text: 'NÉ POUR GRANDIR'       },
+      { flag: '🇪🇸', lang: 'ES', text: 'NACIDO PARA CRECER'    },
+      { flag: '🇵🇹', lang: 'PT', text: 'NASCIDO PARA CRESCER'  },
+      { flag: '🇩🇪', lang: 'DE', text: 'ZUM WACHSEN GEBOREN'   },
+      { flag: '🇮🇹', lang: 'IT', text: 'NATO PER CRESCERE'     },
+      { flag: '🇷🇺', lang: 'RU', text: 'РОЖДЁН РАСТИ'          },
+      { flag: '🇸🇦', lang: 'AR', text: 'وُلِدَ لِيَنمُو'            },
+      { flag: '🇨🇳', lang: 'ZH', text: '生而成长'               },
+      { flag: '🇯🇵', lang: 'JA', text: '成長のために生まれた'   },
+      { flag: '🇮🇳', lang: 'HI', text: 'बढ़ने के लिए जन्मा'     },
+      { flag: '🌍',  lang: 'SW', text: 'AMEZALIWA KUKUA'        },
+    ];
+
+    function buildTicker() {
+      const track = document.getElementById('ticker-track');
+      // Build one full set, then duplicate it for seamless loop
+      const html = translations.map((t, i) => `
+        <span class="ticker-item">
+          <span class="lang-flag">${t.flag}</span>
+          ${t.text}
+        </span>
+        <span class="ticker-sep"></span>
+      `).join('');
+      // Double it so the loop is invisible
+      track.innerHTML = html + html;
+    }
+
+    buildTicker();
+  </script>
+</body>
+</html>
