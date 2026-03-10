@@ -306,6 +306,72 @@
     }
     .toast.show{transform:translateX(-50%) translateY(0);}
 
+    /* ── USER DRAWER ───────────────────────────────── */
+    .user-drawer-overlay{
+      position:fixed;inset:0;z-index:500;
+      background:rgba(0,0,0,0);pointer-events:none;
+      transition:background 0.3s;
+    }
+    .user-drawer-overlay.open{background:rgba(0,0,0,0.50);pointer-events:all;}
+    .user-drawer{
+      position:fixed;bottom:0;left:0;right:0;
+      background:linear-gradient(160deg,#0d2a3e 0%,#1a4a6e 100%);
+      border-top:1px solid rgba(255,255,255,0.15);
+      border-radius:20px 20px 0 0;
+      padding:24px 32px 44px;
+      transform:translateY(100%);
+      transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);
+      max-height:82vh;overflow-y:auto;
+      box-shadow:0 -8px 60px rgba(0,0,0,0.5);
+    }
+    .user-drawer.open{transform:translateY(0);}
+    .drawer-handle{
+      width:40px;height:4px;border-radius:2px;
+      background:rgba(255,255,255,0.22);margin:0 auto 22px;
+    }
+    .drawer-uid{font-size:9px;letter-spacing:2px;color:var(--w40);margin-bottom:4px;}
+    .drawer-user-info{
+      font-size:11px;letter-spacing:3px;color:#fff;
+      margin-bottom:18px;padding-bottom:16px;
+      border-bottom:1px solid rgba(255,255,255,0.10);
+    }
+    .drawer-status-row{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+    .drawer-status-btn{
+      flex:1;min-width:90px;padding:11px 14px;
+      border:1.5px solid rgba(255,255,255,0.18);border-radius:10px;
+      background:transparent;color:rgba(255,255,255,0.50);
+      font-size:9px;letter-spacing:2px;text-transform:uppercase;
+      cursor:pointer;transition:all 0.2s;font-family:inherit;
+    }
+    .drawer-status-btn.active-btn{background:rgba(109,213,245,0.18);border-color:#6DD5F5;color:#6DD5F5;}
+    .drawer-status-btn.disabled-btn{background:rgba(255,80,80,0.15);border-color:rgba(255,80,80,0.55);color:#ff8080;}
+    .drawer-status-btn.flagged-btn{background:rgba(255,180,0,0.15);border-color:rgba(255,180,0,0.55);color:#ffb400;}
+    .drawer-note-label{font-size:9px;letter-spacing:2px;color:var(--w40);margin-bottom:8px;}
+    .drawer-note{
+      width:100%;background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.12);border-radius:10px;
+      color:#fff;font-family:inherit;font-size:10px;letter-spacing:1px;
+      padding:12px 14px;resize:vertical;min-height:76px;
+      box-sizing:border-box;outline:none;
+    }
+    .drawer-note:focus{border-color:rgba(109,213,245,0.5);}
+    .drawer-note::placeholder{color:var(--w40);}
+    .drawer-save-btn{
+      margin-top:14px;width:100%;padding:13px;
+      background:linear-gradient(90deg,#3AACDF,#1E8EC4);
+      border:none;border-radius:10px;color:#fff;
+      font-family:inherit;font-size:9px;letter-spacing:3px;
+      text-transform:uppercase;cursor:pointer;transition:opacity 0.2s;
+    }
+    .drawer-save-btn:hover{opacity:0.82;}
+    .status-badge{
+      display:inline-block;padding:2px 7px;border-radius:5px;
+      font-size:8px;letter-spacing:1.5px;font-weight:700;
+    }
+    .status-active{background:rgba(109,213,245,0.15);color:#6DD5F5;}
+    .status-disabled{background:rgba(255,80,80,0.15);color:#ff8080;}
+    .status-flagged{background:rgba(255,180,0,0.15);color:#ffb400;}
+
     /* ── RESPONSIVE ───────────────────────────────── */
     @media(max-width:900px){
       .stats-row{grid-template-columns:repeat(2,1fr);}
@@ -437,7 +503,7 @@
           <table>
             <thead>
               <tr>
-                <th>#</th><th>UID</th><th></th><th>COUNTRY</th>
+                <th>#</th><th>UID</th><th></th><th>STATUS</th><th>COUNTRY</th>
                 <th>AGE</th><th>GENDER</th><th>DAYS</th>
                 <th>REF CODE</th><th>REFERRED BY</th><th>REGISTERED</th>
               </tr>
@@ -742,10 +808,11 @@ function renderActivityBars(items, id, getDate) {
 // ── USERS TABLE ───────────────────────────────────────────
 function renderUsersTable() {
   document.getElementById('users-tbody').innerHTML=filteredUsers.map((u,i)=>`
-    <tr>
+    <tr style="cursor:pointer;" onclick="openUserDrawer('${u.uid}')">
       <td style="color:var(--w40);font-size:9px;">${i+1}</td>
-      <td class="uid-cell" title="Click to copy" onclick="navigator.clipboard.writeText('${u.uid}');showToast('✓ UID COPIED')">${u.uid.slice(0,14)}…</td>
+      <td class="uid-cell" title="Click row to manage user">${u.uid.slice(0,14)}…</td>
       <td class="flag-cell">${flag(u.country)}</td>
+      <td>${statusBadge(u.uid)}</td>
       <td>${u.country||'—'}</td>
       <td>${u.age||'—'}</td>
       <td>${u.gender||'—'}</td>
@@ -754,7 +821,7 @@ function renderUsersTable() {
       <td style="font-size:9px;color:var(--w40);">${u.referred_by||'—'}</td>
       <td style="font-size:9px;">${fmtDate(u.registered)}</td>
     </tr>`).join('');
-  document.getElementById('users-footer').textContent=`SHOWING ${filteredUsers.length} OF ${allUsers.length} USERS · CLICK UID TO COPY`;
+  document.getElementById('users-footer').textContent=`SHOWING ${filteredUsers.length} OF ${allUsers.length} USERS · CLICK ROW TO MANAGE`;
 }
 function filterUsers(q) {
   const s=q.trim().toLowerCase();
@@ -983,9 +1050,88 @@ async function loadReferrals() {
   } finally { hide('r-spin'); show('r-content'); }
 }
 
+// ── USER FLAGS ────────────────────────────────────────────
+let userFlags=JSON.parse(localStorage.getItem('nava_user_flags')||'{}');
+let drawerUid=null;
+
+function getUserStatus(uid){ return (userFlags[uid]&&userFlags[uid].status)||'active'; }
+
+function statusBadge(uid){
+  const s=getUserStatus(uid);
+  const map={
+    active:'<span class="status-badge status-active">ACTIVE</span>',
+    disabled:'<span class="status-badge status-disabled">DISABLED</span>',
+    flagged:'<span class="status-badge status-flagged">FLAGGED</span>',
+  };
+  return map[s]||map.active;
+}
+
+function openUserDrawer(uid){
+  drawerUid=uid;
+  const u=allUsers.find(x=>x.uid===uid);
+  document.getElementById('drawer-uid').textContent=uid;
+  const info=[u?u.country:'',u?u.age:'',u?u.gender:''].filter(Boolean).join('  ·  ');
+  document.getElementById('drawer-user-info').textContent=info||'—';
+  const f=userFlags[uid]||{};
+  document.getElementById('drawer-note').value=f.note||'';
+  _applyDrawerStatus(f.status||'active');
+  document.getElementById('user-drawer-overlay').classList.add('open');
+  document.getElementById('user-drawer').classList.add('open');
+}
+
+function closeUserDrawer(e){
+  if(e&&e.target!==document.getElementById('user-drawer-overlay'))return;
+  document.getElementById('user-drawer-overlay').classList.remove('open');
+  document.getElementById('user-drawer').classList.remove('open');
+  drawerUid=null;
+}
+
+function setDrawerStatus(status){ _applyDrawerStatus(status); }
+
+function _applyDrawerStatus(status){
+  ['active','disabled','flagged'].forEach(s=>{
+    document.getElementById('btn-'+s).className='drawer-status-btn';
+  });
+  const cls={active:'active-btn',disabled:'disabled-btn',flagged:'flagged-btn'};
+  const el=document.getElementById('btn-'+status);
+  if(el) el.classList.add(cls[status]);
+  document.getElementById('user-drawer').dataset.status=status;
+}
+
+function saveUserFlag(){
+  if(!drawerUid)return;
+  const status=document.getElementById('user-drawer').dataset.status||'active';
+  const note=document.getElementById('drawer-note').value.trim();
+  userFlags[drawerUid]={status,note,updatedAt:new Date().toISOString()};
+  localStorage.setItem('nava_user_flags',JSON.stringify(userFlags));
+  document.getElementById('user-drawer-overlay').classList.remove('open');
+  document.getElementById('user-drawer').classList.remove('open');
+  drawerUid=null;
+  renderUsersTable();
+  showToast('✓ USER FLAG SAVED');
+}
+
 // ── UTILS ─────────────────────────────────────────────────
 function show(id){ const el=document.getElementById(id); if(el) el.style.display='block'; }
 function hide(id){ const el=document.getElementById(id); if(el) el.style.display='none'; }
 </script>
+
+<!-- ══ USER DRAWER ════════════════════════════════════════ -->
+<div class="user-drawer-overlay" id="user-drawer-overlay" onclick="closeUserDrawer(event)">
+  <div class="user-drawer" id="user-drawer" onclick="event.stopPropagation()">
+    <div class="drawer-handle"></div>
+    <div class="drawer-uid" id="drawer-uid"></div>
+    <div class="drawer-user-info" id="drawer-user-info"></div>
+    <div class="drawer-status-row">
+      <button class="drawer-status-btn" id="btn-active"   onclick="setDrawerStatus('active')">✅ ACTIVE</button>
+      <button class="drawer-status-btn" id="btn-disabled" onclick="setDrawerStatus('disabled')">🚫 DISABLE</button>
+      <button class="drawer-status-btn" id="btn-flagged"  onclick="setDrawerStatus('flagged')">⚠️ FLAG</button>
+    </div>
+    <p class="drawer-note-label">ADMIN NOTE</p>
+    <textarea class="drawer-note" id="drawer-note"
+              placeholder="fraud · duplicate · test · suspended …" rows="3"></textarea>
+    <button class="drawer-save-btn" onclick="saveUserFlag()">SAVE</button>
+  </div>
+</div>
 </body>
 </html>
