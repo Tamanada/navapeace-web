@@ -506,20 +506,28 @@
     }
 
     // ── Charger les compteurs depuis peace_votes ────────────────────
+    // Utilise l'API count Supabase (HEAD request, pas de transfert de données)
+    // → exact peu importe le nombre de lignes, pas de limite à 1 000 rows.
     async function loadCounters() {
       if (!sb) return;
       try {
-        const { data: all } = await sb
-          .from('peace_votes')
-          .select('created_at');
+        // Calcul du lendemain en UTC pour le filtre "aujourd'hui"
+        const d = new Date(); d.setUTCDate(d.getUTCDate() + 1);
+        const TOMORROW = d.toISOString().split('T')[0];
 
-        if (!all) return;
+        const [{ count: total }, { count: todayCount }] = await Promise.all([
+          // Total all-time
+          sb.from('peace_votes')
+            .select('*', { count: 'exact', head: true }),
+          // Actions du jour (UTC, cohérent avec created_at Supabase)
+          sb.from('peace_votes')
+            .select('*', { count: 'exact', head: true })
+            .gte('created_at', TODAY + 'T00:00:00Z')
+            .lt('created_at', TOMORROW + 'T00:00:00Z'),
+        ]);
 
-        const total      = all.length;
-        const todayCount = all.filter(r => r.created_at && r.created_at.startsWith(TODAY)).length;
-
-        document.getElementById('cnt-total').textContent = total.toLocaleString('fr-FR');
-        document.getElementById('cnt-today').textContent = '+' + todayCount.toLocaleString('fr-FR');
+        document.getElementById('cnt-total').textContent = (total ?? 0).toLocaleString('fr-FR');
+        document.getElementById('cnt-today').textContent = '+' + (todayCount ?? 0).toLocaleString('fr-FR');
       } catch(e) { console.warn('Counter error', e); }
     }
 
