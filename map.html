@@ -138,6 +138,14 @@
       align-self: center;
     }
 
+    /* ── DAYS : 2 lignes centrées ── */
+    .launch-line {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 8px;
+    }
+
     /* ── MOBILE : grille 2×2 ── */
     @media (max-width: 540px) {
       .counter-strip {
@@ -153,17 +161,16 @@
       .counter-item .num { font-size: 34px; }
       #cnt-timer { font-size: 18px !important; letter-spacing: 1px !important; }
       .counter-item .lbl { font-size: 12px; letter-spacing: 1.5px; }
-      /* DOVES — pleine largeur sur mobile */
-      #cnt-doves-item {
+      /* DOVES — col 2, row 2 = sous COUNTRIES (grille normale) */
+      #cnt-doves-item .num { font-size: 34px; }
+      /* DAYS — pleine largeur, centré */
+      #cnt-launch-item {
         grid-column: 1 / -1;
         border-top: 1px solid rgba(255,255,255,0.12);
         padding-top: 14px;
         margin-top: 4px;
+        align-items: center;
       }
-      #cnt-doves-item .num { font-size: 38px; }
-      /* DAYS+TIMER — pleine largeur aussi */
-      #cnt-doves-item ~ .counter-sep { display: none; }
-      .counter-item:last-child { grid-column: 1 / -1; border-top: 1px solid rgba(255,255,255,0.12); padding-top: 14px; margin-top: 4px; }
       .personal-strip { font-size: 13px; letter-spacing: 1.5px; }
     }
 
@@ -493,11 +500,15 @@
       <span class="lbl">🕊 TOTAL DOVES</span>
     </div>
     <div class="counter-sep"></div>
-    <div class="counter-item">
-      <span class="num" id="cnt-days" style="font-size:42px;letter-spacing:2px;">0</span>
-      <span class="lbl" style="font-size:11px;letter-spacing:2px;margin-bottom:2px;" data-i18n="lbl_days">DAYS</span>
-      <span class="num" id="cnt-timer" style="font-size:22px;letter-spacing:2px;">00:00:00</span>
-      <span class="lbl" data-i18n="lbl_since">SINCE LAUNCH</span>
+    <div class="counter-item" id="cnt-launch-item">
+      <div class="launch-line">
+        <span class="num" id="cnt-days" style="font-size:38px;letter-spacing:2px;">0</span>
+        <span class="lbl" style="font-size:11px;letter-spacing:2.5px;" data-i18n="lbl_days">DAYS</span>
+      </div>
+      <div class="launch-line" style="margin-top:6px;">
+        <span class="num" id="cnt-timer" style="font-size:20px;letter-spacing:2px;">00:00:00</span>
+        <span class="lbl" style="font-size:10px;letter-spacing:2px;" data-i18n="lbl_since">SINCE LAUNCH</span>
+      </div>
     </div>
   </div>
 
