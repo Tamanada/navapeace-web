@@ -408,6 +408,65 @@
     }
 
     setDailyMessage();
+
+    // ── WELCOME BACK — utilisateur déjà enregistré ──────────────────
+    (function () {
+      var uid = localStorage.getItem('nava_peace_uid');
+
+      if (!uid) {
+        // Nouveau visiteur → ENTER pointe vers l'inscription
+        var enterEl = document.querySelector('.enter-link');
+        if (enterEl) enterEl.setAttribute('href', 'index.html');
+        return;
+      }
+
+      // Utilisateur enregistré — cache le bouton ENTER, on va auto-rediriger
+      var enterEl = document.querySelector('.enter-link');
+      if (enterEl) enterEl.style.display = 'none';
+
+      var pseudo = localStorage.getItem('nava_peace_pseudo') || '';
+
+      // Attendre 800ms (logo en cours d'apparition) puis switcher
+      setTimeout(function () {
+        var hero   = document.querySelector('.hero');
+        var dateEl = document.getElementById('daily-date');
+        var textEl = document.getElementById('daily-text');
+        var divEl  = document.querySelector('.divider');
+
+        // Fade-out du contenu actuel
+        [hero, dateEl, textEl, divEl].forEach(function (el) {
+          if (el) { el.style.transition = 'opacity 0.45s'; el.style.opacity = '0'; }
+        });
+
+        setTimeout(function () {
+          // Welcome back
+          if (hero) {
+            hero.textContent = 'WELCOME BACK';
+            hero.style.opacity = '1';
+          }
+          // Pseudo ou fallback
+          if (textEl) {
+            textEl.innerHTML = pseudo ? pseudo.toUpperCase() : 'PEACE LOVER';
+            textEl.style.opacity = '1';
+          }
+          // Countdown dans le champ date
+          var t = 3;
+          if (dateEl) { dateEl.textContent = '· · ·  ' + t + '  · · ·'; dateEl.style.opacity = '1'; }
+          if (divEl)  { divEl.style.opacity = '0.4'; }
+
+          var iv = setInterval(function () {
+            t--;
+            if (t <= 0) {
+              clearInterval(iv);
+              window.location.href = 'peace.html';
+            } else {
+              if (dateEl) dateEl.textContent = '· · ·  ' + t + '  · · ·';
+            }
+          }, 1000);
+
+        }, 450); // fade-out terminé
+      }, 800);   // logo visible
+    })();
   </script>
 </body>
 </html>
