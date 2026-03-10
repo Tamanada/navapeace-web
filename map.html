@@ -95,11 +95,28 @@
     /* ── COUNTER STRIP ── */
     .counter-strip {
       display: flex;
-      gap: 28px;
-      margin-bottom: 16px;
-      flex-wrap: nowrap;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
+      gap: 0;
+      margin-bottom: 16px;
+      width: 100%;
+    }
+
+    /* Ligne 1 : PEACE LOVERS · COUNTRIES · TODAY */
+    .counter-row-top,
+    .counter-row-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      width: 100%;
+    }
+
+    /* Ligne 2 : DOVES · DAYS — séparateur au-dessus */
+    .counter-row-bottom {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.18);
     }
 
     .counter-item {
@@ -107,7 +124,7 @@
       flex-direction: column;
       align-items: center;
       text-align: center;
-      min-width: 100px;   /* prevent neighbours shifting when number grows */
+      min-width: 100px;
       flex-shrink: 0;
     }
 
@@ -117,8 +134,8 @@
       letter-spacing: 2px;
       color: #fff;
       text-shadow: 0 0 20px rgba(255,255,255,0.5);
-      font-variant-numeric: tabular-nums; /* equal-width digits → no jitter */
-      white-space: nowrap;                /* never wraps mid-number */
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
     }
 
     .counter-item .lbl {
@@ -148,22 +165,25 @@
 
     /* ── MOBILE : grille 2×2 ── */
     @media (max-width: 540px) {
+      /* Les row-divs deviennent transparents → leurs enfants rejoignent la grille parente */
       .counter-strip {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 16px 28px;
         margin-bottom: 14px;
         justify-items: center;
-        align-items: center;
+        align-items: start;
+      }
+      .counter-row-top,
+      .counter-row-bottom {
+        display: contents;
       }
       .counter-sep { display: none; }
       .counter-item { min-width: 0; width: 100%; }
       .counter-item .num { font-size: 34px; }
       #cnt-timer { font-size: 18px !important; letter-spacing: 1px !important; }
       .counter-item .lbl { font-size: 12px; letter-spacing: 1.5px; }
-      /* DOVES — col 2, row 2 = sous COUNTRIES (grille normale) */
-      #cnt-doves-item .num { font-size: 34px; }
-      /* DAYS — pleine largeur, centré */
+      /* DAYS — pleine largeur, centré, séparateur */
       #cnt-launch-item {
         grid-column: 1 / -1;
         border-top: 1px solid rgba(255,255,255,0.12);
@@ -480,36 +500,44 @@
 
   <!-- COUNTER -->
   <div class="counter-strip">
-    <div class="counter-item info-trigger" onclick="openPopover('people')">
-      <span class="num" id="cnt-people">—</span>
-      <span class="lbl" data-i18n="lbl_peace_lovers">PEACE LOVERS</span>
-    </div>
-    <div class="counter-sep"></div>
-    <div class="counter-item info-trigger" onclick="openPopover('countries')">
-      <span class="num" id="cnt-countries">—</span>
-      <span class="lbl" style="font-size:10px;letter-spacing:1.5px;" data-i18n="lbl_countries">COUNTRIES REPRESENTED</span>
-    </div>
-    <div class="counter-sep"></div>
-    <div class="counter-item info-trigger" onclick="openPopover('today')">
-      <span class="num" id="cnt-today">—</span>
-      <span class="lbl" data-i18n="lbl_today_map">GLOBAL ACTIONS TODAY</span>
-    </div>
-    <div class="counter-sep"></div>
-    <div class="counter-item" id="cnt-doves-item">
-      <span class="num" id="cnt-doves">—</span>
-      <span class="lbl">🕊 TOTAL DOVES</span>
-    </div>
-    <div class="counter-sep"></div>
-    <div class="counter-item" id="cnt-launch-item">
-      <div class="launch-line">
-        <span class="num" id="cnt-days" style="font-size:38px;letter-spacing:2px;">0</span>
-        <span class="lbl" style="font-size:11px;letter-spacing:2.5px;" data-i18n="lbl_days">DAYS</span>
+
+    <!-- Ligne 1 : PEACE LOVERS · COUNTRIES · TODAY -->
+    <div class="counter-row-top">
+      <div class="counter-item info-trigger" onclick="openPopover('people')">
+        <span class="num" id="cnt-people">—</span>
+        <span class="lbl" data-i18n="lbl_peace_lovers">PEACE LOVERS</span>
       </div>
-      <div class="launch-line" style="margin-top:6px;">
-        <span class="num" id="cnt-timer" style="font-size:20px;letter-spacing:2px;">00:00:00</span>
-        <span class="lbl" style="font-size:10px;letter-spacing:2px;" data-i18n="lbl_since">SINCE LAUNCH</span>
+      <div class="counter-sep"></div>
+      <div class="counter-item info-trigger" onclick="openPopover('countries')">
+        <span class="num" id="cnt-countries">—</span>
+        <span class="lbl" style="font-size:10px;letter-spacing:1.5px;" data-i18n="lbl_countries">COUNTRIES REPRESENTED</span>
+      </div>
+      <div class="counter-sep"></div>
+      <div class="counter-item info-trigger" onclick="openPopover('today')">
+        <span class="num" id="cnt-today">—</span>
+        <span class="lbl" data-i18n="lbl_today_map">GLOBAL ACTIONS TODAY</span>
       </div>
     </div>
+
+    <!-- Ligne 2 : 🕊 TOTAL DOVES · DAYS SINCE LAUNCH -->
+    <div class="counter-row-bottom">
+      <div class="counter-item" id="cnt-doves-item">
+        <span class="num" id="cnt-doves">—</span>
+        <span class="lbl">🕊 TOTAL DOVES</span>
+      </div>
+      <div class="counter-sep"></div>
+      <div class="counter-item" id="cnt-launch-item">
+        <div class="launch-line">
+          <span class="num" id="cnt-days" style="font-size:38px;letter-spacing:2px;">0</span>
+          <span class="lbl" style="font-size:11px;letter-spacing:2.5px;" data-i18n="lbl_days">DAYS</span>
+        </div>
+        <div class="launch-line" style="margin-top:6px;">
+          <span class="num" id="cnt-timer" style="font-size:20px;letter-spacing:2px;">00:00:00</span>
+          <span class="lbl" style="font-size:10px;letter-spacing:2px;" data-i18n="lbl_since">SINCE LAUNCH</span>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- PERSONAL STREAK -->
