@@ -1489,8 +1489,9 @@
       localStorage.setItem('nava_peace_ref_code', refCode);
     }
 
-    const inviteURL = BASE + '/?ref=' + refCode;
-    const msg       = encodeURIComponent('PEACE NEED HELP, WE NEED PEACE, JOIN NAVA PEACE! ' + inviteURL);
+    const inviteURL   = BASE + '/?ref=' + refCode;
+    const inviteText  = 'The world talks about peace. Let\'s practice it.\nJoin NAVA PEACE today. 🕊\n' + inviteURL;
+    const msg         = encodeURIComponent(inviteText);
 
     // Show link
     document.getElementById('ref-link-display').textContent = inviteURL;
@@ -1504,7 +1505,7 @@
 
     // Share links
     document.getElementById('share-wa').href  = 'https://wa.me/?text=' + msg;
-    document.getElementById('share-tg').href  = 'https://t.me/share/url?url=' + encodeURIComponent(inviteURL) + '&text=' + encodeURIComponent('PEACE NEED HELP, WE NEED PEACE, JOIN NAVA PEACE!');
+    document.getElementById('share-tg').href  = 'https://t.me/share/url?url=' + encodeURIComponent(inviteURL) + '&text=' + encodeURIComponent('The world talks about peace. Let\'s practice it.\nJoin NAVA PEACE today. 🕊');
     document.getElementById('share-tw').href  = 'https://x.com/intent/tweet?text=' + msg;
     document.getElementById('share-sms').href = 'sms:?body=' + msg;
 
