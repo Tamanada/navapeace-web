@@ -970,24 +970,25 @@
     </div>
   </div>
 
-  <!-- MY IDENTITY -->
+  <!-- MY DOVES -->
   <div class="card">
-    <p class="section-title" data-i18n="section_identity">MY IDENTITY</p>
-    <div class="pseudo-display">
-      <span class="pseudo-icon">🕊</span>
-      <span class="pseudo-name" id="pseudo-name">...</span>
-      <span class="pseudo-tag" id="pseudo-tag" data-i18n="pseudo_auto_tag">AUTO</span>
-    </div>
-    <div class="pseudo-edit-area" id="pseudo-edit-area" style="display:none">
-      <input id="pseudo-input" type="text" class="pseudo-input" maxlength="30"
-             data-i18n-ph="pseudo_placeholder" />
-      <div class="pseudo-btn-row">
-        <button class="save-btn" onclick="savePseudo()" data-i18n="save_btn">SAVE</button>
-        <button class="edit-btn" onclick="cancelPseudo()" data-i18n="cancel_btn">CANCEL</button>
+    <p class="section-title" data-i18n="section_doves">MY DOVES</p>
+    <div class="dove-card-inner" onclick="openDovePopup()">
+      <span class="dove-icon">🕊</span>
+      <span class="dove-total" id="dove-total">—</span>
+      <span class="dove-label" data-i18n="dove_total_lbl">TOTAL DOVES</span>
+      <div class="dove-breakdown">
+        <div class="dove-part">
+          <span class="num" id="dove-own">—</span>
+          <span class="lbl" data-i18n-html="dove_own_lbl">OWN<br>ACTIONS</span>
+        </div>
+        <div class="dove-divider"></div>
+        <div class="dove-part">
+          <span class="num" id="dove-ref">—</span>
+          <span class="lbl" data-i18n-html="dove_ref_lbl">REFERRAL<br>DOVES</span>
+        </div>
       </div>
     </div>
-    <button class="edit-btn" id="pseudo-change-btn" onclick="startEditPseudo()"
-            data-i18n="pseudo_change_btn">CHANGE</button>
   </div>
 
   <!-- MY PEACE MESSAGE -->
@@ -1008,25 +1009,24 @@
             data-i18n="msg_save_btn">SAVE MESSAGE</button>
   </div>
 
-  <!-- MY DOVES -->
+  <!-- MY IDENTITY -->
   <div class="card">
-    <p class="section-title" data-i18n="section_doves">MY DOVES</p>
-    <div class="dove-card-inner" onclick="openDovePopup()">
-      <span class="dove-icon">🕊</span>
-      <span class="dove-total" id="dove-total">—</span>
-      <span class="dove-label" data-i18n="dove_total_lbl">TOTAL DOVES</span>
-      <div class="dove-breakdown">
-        <div class="dove-part">
-          <span class="num" id="dove-own">—</span>
-          <span class="lbl" data-i18n-html="dove_own_lbl">OWN<br>ACTIONS</span>
-        </div>
-        <div class="dove-divider"></div>
-        <div class="dove-part">
-          <span class="num" id="dove-ref">—</span>
-          <span class="lbl" data-i18n-html="dove_ref_lbl">REFERRAL<br>DOVES</span>
-        </div>
+    <p class="section-title" data-i18n="section_identity">MY IDENTITY</p>
+    <div class="pseudo-display">
+      <span class="pseudo-icon">🕊</span>
+      <span class="pseudo-name" id="pseudo-name">...</span>
+      <span class="pseudo-tag" id="pseudo-tag" data-i18n="pseudo_auto_tag">AUTO</span>
+    </div>
+    <div class="pseudo-edit-area" id="pseudo-edit-area" style="display:none">
+      <input id="pseudo-input" type="text" class="pseudo-input" maxlength="30"
+             data-i18n-ph="pseudo_placeholder" />
+      <div class="pseudo-btn-row">
+        <button class="save-btn" onclick="savePseudo()" data-i18n="save_btn">SAVE</button>
+        <button class="edit-btn" onclick="cancelPseudo()" data-i18n="cancel_btn">CANCEL</button>
       </div>
     </div>
+    <button class="edit-btn" id="pseudo-change-btn" onclick="startEditPseudo()"
+            data-i18n="pseudo_change_btn">CHANGE</button>
   </div>
 
   <!-- INVITE FRIENDS -->
