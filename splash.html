@@ -35,7 +35,7 @@
       position: fixed; inset: 0;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      padding-bottom: 80px; /* room for ticker */
+      padding-bottom: 90px; /* room for ticker */
     }
 
     /* ── LOGO ──────────────────────────────────── */
@@ -94,7 +94,7 @@
     .ticker-wrap {
       position: fixed;
       bottom: 0; left: 0; right: 0;
-      height: 60px;
+      height: 72px;
       background: rgba(10, 40, 80, 0.72);
       backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
       border-top: 1px solid rgba(255,255,255,0.18);
@@ -107,36 +107,31 @@
       display: flex;
       align-items: center;
       white-space: nowrap;
-      animation: ticker 36s linear infinite;
+      animation: ticker 42s linear infinite;
       will-change: transform;
     }
 
     .ticker-item {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
-      padding: 0 32px;
-      font-size: clamp(10px, 1.4vw, 15px);
-      letter-spacing: clamp(2px, 0.4vw, 5px);
-      color: rgba(255,255,255,0.82);
+      padding: 0 36px;
+      font-size: clamp(14px, 1.9vw, 24px);
+      letter-spacing: clamp(3px, 0.6vw, 8px);
+      color: rgba(255,255,255,0.88);
       text-transform: uppercase;
       white-space: nowrap;
       flex-shrink: 0;
     }
-    .ticker-item .lang-flag {
-      font-size: 1.3em;
-      flex-shrink: 0;
-    }
     .ticker-sep {
-      width: 1px; height: 20px;
-      background: rgba(255,255,255,0.2);
+      width: 1px; height: 26px;
+      background: rgba(255,255,255,0.22);
       flex-shrink: 0;
     }
 
     /* ── LINK ──────────────────────────────────── */
     .enter-link {
       position: fixed;
-      bottom: 78px; right: 32px;
+      bottom: 90px; right: 32px;
       font-size: 9px; letter-spacing: 4px;
       color: rgba(255,255,255,0.6);
       text-transform: uppercase;
@@ -243,10 +238,7 @@
       const track = document.getElementById('ticker-track');
       // Build one full set, then duplicate it for seamless loop
       const html = translations.map((t, i) => `
-        <span class="ticker-item">
-          <span class="lang-flag">${t.flag}</span>
-          ${t.text}
-        </span>
+        <span class="ticker-item">${t.text}</span>
         <span class="ticker-sep"></span>
       `).join('');
       // Double it so the loop is invisible
