@@ -24,8 +24,12 @@
       --font: 'Nasalization', Arial, sans-serif;
     }
 
-    html, body {
+    html {
       height: 100%; width: 100%; overflow: hidden;
+    }
+    body {
+      height: 100%; width: 100%;
+      /* Pas de overflow:hidden sur body — évite le clipping des position:fixed sur iOS Safari */
       font-family: var(--font);
       background: radial-gradient(ellipse at 50% 20%, #6DD5F5 0%, #3AACDF 45%, #1E8EC4 100%);
     }
@@ -126,6 +130,7 @@
     .ticker-wrap {
       position: fixed;
       bottom: 0; left: 0; right: 0;
+      z-index: 200;
       height: 72px;
       background: rgba(10, 40, 80, 0.72);
       backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
