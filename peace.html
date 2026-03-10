@@ -266,48 +266,53 @@
       display: none;
     }
 
-    /* ── DONE MESSAGE ── */
-    .done-msg {
-      display: none;
+    /* ── DONE MESSAGE (caché — tout se passe dans le bouton) ── */
+    .done-msg { display: none !important; }
+
+    /* ── ANIMATIONS BOUTON DONE ── */
+    @keyframes zoomInSlow {
+      from { opacity: 0; transform: scale(0.25); }
+      to   { opacity: 1; transform: scale(1);    }
+    }
+    @keyframes zoomOutFade {
+      from { opacity: 1; transform: scale(1);    }
+      to   { opacity: 0; transform: scale(1.25); }
+    }
+
+    /* Wrapper centré dans le bouton */
+    .btn-inner-msg {
+      position: absolute;
+      display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
-      text-transform: uppercase;
+      justify-content: center;
+      gap: 3px;
       text-align: center;
-      animation: fadeInUp 0.6s ease both;
+      pointer-events: none;
+      z-index: 2;
+      width: 78%;
     }
 
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: translateY(0); }
+    /* Phase 1 — THANK YOU / PEACE LOVER */
+    .btn-thank-wrap { animation: zoomInSlow 3s cubic-bezier(0.22,1,0.36,1) forwards; }
+    .btn-inner-line1 {
+      font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase;
+      color: #1A5F82; font-weight: 700; line-height: 1.5;
+    }
+    .btn-inner-line2 {
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: rgba(26,95,130,0.75); font-weight: 700; line-height: 1.5;
     }
 
-    .done-thank {
-      font-size: 20px;
-      letter-spacing: 4px;
-      color: #FFFFFF;
-      text-shadow: 0 0 24px rgba(255,255,255,0.6);
+    /* Phase 2 — NEXT ACTION IN + timer */
+    .btn-next-wrap { animation: zoomInSlow 3s cubic-bezier(0.22,1,0.36,1) forwards; }
+    .btn-next-label {
+      font-size: 8px; letter-spacing: 2px; text-transform: uppercase;
+      color: rgba(26,95,130,0.60);
     }
-
-    .done-sub {
-      font-size: 11px;
-      letter-spacing: 2px;
-      color: rgba(255,255,255,0.55);
-      line-height: 1.8;
-    }
-
-    .done-timer-label {
-      font-size: 10px;
-      letter-spacing: 3px;
-      color: rgba(255,255,255,0.4);
-      margin-top: 4px;
-    }
-
-    .done-timer {
-      font-size: 28px;
-      letter-spacing: 4px;
-      color: rgba(255,255,255,0.85);
-      text-shadow: 0 0 18px rgba(255,255,255,0.3);
+    .btn-next-timer {
+      font-size: 17px; letter-spacing: 3px;
+      color: #1A5F82; font-weight: 700; margin-top: 2px;
     }
 
     /* ── COUNTERS ── */
@@ -474,15 +479,50 @@
     // ── Vérifier si déjà cliqué aujourd'hui ────────────────────────
     function checkDone() {
       if (localStorage.getItem(PEACE_KEY) === TODAY) {
-        setDone();
+        setDone(false); // déjà voté → countdown direct, sans thank you
       }
     }
 
-    function setDone() {
+    function setDone(fresh) {
       const btn = document.getElementById('peaceBtn');
       btn.disabled = true;
-      btn.innerHTML = '<img src="logo.png" alt="✓" class="btn-logo" style="opacity:0.35;position:absolute;"/><span class="btn-status" style="position:absolute;font-size:42px;">✓</span>';
-      document.getElementById('doneMsg').style.display = 'flex';
+
+      // Contenu du bouton : logo + deux phases superposées
+      btn.innerHTML =
+        '<img src="logo.png" alt="NAVA" class="btn-logo" style="opacity:0.20;position:absolute;"/>' +
+        // Phase 1 — THANK YOU PEACE LOVER
+        '<div class="btn-inner-msg btn-thank-wrap" id="btn-thank-wrap"' +
+          (fresh ? '' : ' style="display:none;"') + '>' +
+          '<span class="btn-inner-line1">THANK YOU</span>' +
+          '<span class="btn-inner-line2">PEACE LOVER</span>' +
+        '</div>' +
+        // Phase 2 — NEXT ACTION IN + countdown
+        '<div class="btn-inner-msg btn-next-wrap" id="btn-next-wrap"' +
+          (fresh ? ' style="display:none;"' : '') + '>' +
+          '<span class="btn-next-label">NEXT ACTION IN</span>' +
+          '<span class="btn-next-timer" id="countdown">00:00:00</span>' +
+        '</div>';
+
+      if (fresh) {
+        // Après 3 s (zoom-in terminé) : zoom-out thank you → zoom-in countdown
+        setTimeout(function () {
+          var tw = document.getElementById('btn-thank-wrap');
+          if (!tw) return;
+          tw.style.animation = 'zoomOutFade 0.5s ease forwards';
+          setTimeout(function () {
+            if (tw) tw.style.display = 'none';
+            var nw = document.getElementById('btn-next-wrap');
+            if (nw) {
+              nw.style.display = 'flex';
+              // Force reflow pour relancer l'animation
+              nw.style.animation = 'none';
+              void nw.offsetWidth;
+              nw.style.animation = 'zoomInSlow 3s cubic-bezier(0.22,1,0.36,1) forwards';
+            }
+          }, 500);
+        }, 3000);
+      }
+
       startCountdown();
     }
 
@@ -501,7 +541,7 @@
       }
 
       localStorage.setItem(PEACE_KEY, TODAY);
-      setDone();
+      setDone(true); // vient de voter → thank you d'abord, puis countdown
       loadCounters(); // refresh counters
     }
 
