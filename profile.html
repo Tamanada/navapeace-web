@@ -1407,6 +1407,33 @@
 
   // ── MY DOVES ─────────────────────────────────────────────────────
   async function loadMyDoves() {
+    const uid = localStorage.getItem('nava_peace_uid');
+
+    // ── Vérifier si ce compte est désactivé par l'admin ──
+    try {
+      const adminFlags = JSON.parse(localStorage.getItem('nava_user_flags') || '{}');
+      if (uid && adminFlags[uid] && adminFlags[uid].status === 'disabled') {
+        document.getElementById('dove-total').textContent = '0';
+        document.getElementById('dove-own').textContent   = '0';
+        document.getElementById('dove-ref').textContent   = '0';
+        // Ajouter une bannière sous le compteur
+        const card = document.querySelector('.dove-card-inner');
+        if (card && !document.getElementById('disabled-banner')) {
+          const banner = document.createElement('div');
+          banner.id = 'disabled-banner';
+          banner.style.cssText =
+            'margin-top:12px;padding:10px 16px;border-radius:10px;' +
+            'background:rgba(255,80,80,0.15);border:1px solid rgba(255,80,80,0.35);' +
+            'font-size:9px;letter-spacing:2px;color:#ff8080;text-align:center;' +
+            'text-transform:uppercase;';
+          banner.textContent = '⊘ Account disabled by administrator';
+          card.parentNode.insertBefore(banner, card.nextSibling);
+        }
+        return; // Données réelles préservées, juste masquées
+      }
+    } catch(e) {}
+
+    // ── Compte actif : chargement normal ──
     const ownActions = parseInt(localStorage.getItem('nava_peace_days') || '0', 10);
     const refCode    = localStorage.getItem('nava_peace_ref_code');
 

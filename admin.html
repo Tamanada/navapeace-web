@@ -333,6 +333,17 @@
       margin-bottom:18px;padding-bottom:16px;
       border-bottom:1px solid rgba(255,255,255,0.10);
     }
+    .drawer-doves{
+      display:flex;align-items:center;gap:10px;
+      margin-bottom:18px;padding:13px 16px;
+      background:rgba(255,255,255,0.06);border-radius:12px;
+      border:1px solid rgba(255,255,255,0.10);
+    }
+    .drawer-doves-icon{font-size:22px;}
+    .drawer-doves-count{font-size:26px;letter-spacing:1px;color:#fff;font-weight:700;line-height:1;}
+    .drawer-doves-label{font-size:8px;letter-spacing:2px;color:var(--w40);text-transform:uppercase;margin-top:2px;}
+    .drawer-doves-zero{color:#ff8080;}
+    .drawer-doves-real{font-size:9px;letter-spacing:1px;color:var(--w40);margin-left:auto;text-align:right;}
     .drawer-status-row{display:flex;flex-direction:column;gap:9px;margin-bottom:20px;}
     .drawer-status-btn{
       width:100%;padding:15px 20px;
@@ -1092,8 +1103,27 @@ function openUserDrawer(uid){
   const f=userFlags[uid]||{};
   document.getElementById('drawer-note').value=f.note||'';
   _applyDrawerStatus(f.status||'active');
+  // Afficher les Doves (u.days = nb d'actions de paix)
+  const realDoves = u ? (u.days||0) : 0;
+  _renderDrawerDoves(realDoves, f.status||'active');
   document.getElementById('user-drawer-overlay').classList.add('open');
   document.getElementById('user-drawer').classList.add('open');
+}
+
+function _renderDrawerDoves(realCount, status){
+  const isDisabled = status === 'disabled';
+  const displayed  = isDisabled ? 0 : realCount;
+  const el = document.getElementById('drawer-doves');
+  if(!el) return;
+  el.innerHTML =
+    '<span class="drawer-doves-icon">🕊</span>' +
+    '<div>' +
+      '<div class="drawer-doves-count' + (isDisabled?' drawer-doves-zero':'') + '">' + displayed + '</div>' +
+      '<div class="drawer-doves-label">DOVES</div>' +
+    '</div>' +
+    (isDisabled && realCount > 0
+      ? '<div class="drawer-doves-real">was ' + realCount + '<br>restored on reactivation</div>'
+      : '');
 }
 
 function closeUserDrawer(e){
@@ -1103,7 +1133,12 @@ function closeUserDrawer(e){
   drawerUid=null;
 }
 
-function setDrawerStatus(status){ _applyDrawerStatus(status); }
+function setDrawerStatus(status){
+  _applyDrawerStatus(status);
+  // Rafraîchir l'affichage des Doves selon le nouveau statut
+  const u = drawerUid ? allUsers.find(x=>x.uid===drawerUid) : null;
+  _renderDrawerDoves(u ? (u.days||0) : 0, status);
+}
 
 function _applyDrawerStatus(status){
   ['active','disabled','flagged'].forEach(s=>{
@@ -1139,6 +1174,7 @@ function hide(id){ const el=document.getElementById(id); if(el) el.style.display
     <div class="drawer-handle"></div>
     <div class="drawer-uid" id="drawer-uid"></div>
     <div class="drawer-user-info" id="drawer-user-info"></div>
+    <div class="drawer-doves" id="drawer-doves"></div>
     <div class="drawer-status-row">
       <button class="drawer-status-btn" id="btn-active" onclick="setDrawerStatus('active')">
         <span class="dsb-icon">✅</span>
