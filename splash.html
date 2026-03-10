@@ -111,7 +111,7 @@
       text-align: center;
       max-width: 560px;
       padding: 0 24px;
-      line-height: 1.9;
+      line-height: 1.65;
       animation: msgReveal 2.5s 4.6s ease both;
     }
     .daily-msg-date {
@@ -391,7 +391,15 @@
       }).toUpperCase();
 
       document.getElementById('daily-date').textContent = dateStr;
-      document.getElementById('daily-text').textContent = msg;
+
+      // Split message into two balanced lines
+      const words = msg.split(' ');
+      let display = msg;
+      if (words.length >= 4) {
+        const mid = Math.round(words.length / 2);
+        display = words.slice(0, mid).join(' ') + '<br>' + words.slice(mid).join(' ');
+      }
+      document.getElementById('daily-text').innerHTML = display;
     }
 
     setDailyMessage();
