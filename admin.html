@@ -232,34 +232,32 @@
     .msg-empty{text-align:center;padding:60px;color:var(--w40);font-size:11px;letter-spacing:3px;}
 
     /* ── MODULES ──────────────────────────────────── */
-    .modules-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;}
-    .module-card{padding:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+    .modules-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;}
+    .module-card{padding:20px 22px;display:flex;flex-direction:column;gap:14px;}
+    .module-card-top{display:flex;align-items:flex-start;gap:14px;}
+    .module-icon{font-size:26px;flex-shrink:0;margin-top:2px;}
     .module-info{flex:1;}
-    .module-name{font-size:12px;letter-spacing:3px;margin-bottom:6px;}
-    .module-desc{font-size:9px;letter-spacing:1px;color:var(--w60);line-height:1.7;}
-    .module-icon{font-size:28px;margin-right:8px;}
-    .toggle-wrap{flex-shrink:0;}
-    .toggle{position:relative;width:52px;height:28px;cursor:pointer;}
-    .toggle input{opacity:0;width:0;height:0;}
-    .toggle-slider{
-      position:absolute;inset:0;background:rgba(255,255,255,0.2);border-radius:28px;
-      border:1.5px solid rgba(255,255,255,0.3);transition:background 0.3s;
+    .module-name{font-size:11px;letter-spacing:3px;margin-bottom:5px;}
+    .module-desc{font-size:9px;letter-spacing:1px;color:var(--w60);line-height:1.8;}
+    /* Big ON/OFF buttons — one per card, auto-saves on click */
+    .module-toggle-btn{
+      width:100%;padding:13px 0;border:none;border-radius:10px;
+      font-family:var(--font);font-size:9px;letter-spacing:3px;text-transform:uppercase;
+      cursor:pointer;transition:all 0.22s;font-weight:700;
     }
-    .toggle-slider::before{
-      content:'';position:absolute;height:20px;width:20px;left:3px;top:3px;
-      background:var(--white);border-radius:50%;transition:transform 0.3s;
-      box-shadow:0 2px 8px rgba(0,0,0,0.2);
+    .module-toggle-btn.mod-on{
+      background:rgba(74,222,128,0.18);color:#4ade80;
+      border:1.5px solid rgba(74,222,128,0.45);
     }
-    input:checked + .toggle-slider{background:rgba(74,222,128,0.6);border-color:rgba(74,222,128,0.8);}
-    input:checked + .toggle-slider::before{transform:translateX(24px);}
-    .module-status{font-size:8px;letter-spacing:2px;margin-top:8px;}
-    .module-status.on{color:var(--success);}
-    .module-status.off{color:var(--danger);}
+    .module-toggle-btn.mod-on:hover{background:rgba(74,222,128,0.28);}
+    .module-toggle-btn.mod-off{
+      background:rgba(255,80,80,0.15);color:#ff8080;
+      border:1.5px solid rgba(255,80,80,0.40);
+    }
+    .module-toggle-btn.mod-off:hover{background:rgba(255,80,80,0.25);}
     .modules-note{margin-top:24px;padding:18px 22px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.15);border-radius:12px;font-size:9px;letter-spacing:1px;color:var(--w60);line-height:1.8;}
     .modules-note code{background:rgba(255,255,255,0.15);padding:2px 8px;border-radius:4px;font-family:monospace;font-size:10px;color:var(--white);}
-    .modules-save-btn{margin-top:20px;padding:13px 32px;background:var(--btn-bg);color:var(--btn-text);border:none;border-radius:12px;font-family:var(--font);font-size:11px;letter-spacing:3px;cursor:pointer;transition:opacity 0.2s;box-shadow:0 4px 20px rgba(255,255,255,0.15);}
-    .modules-save-btn:hover{opacity:0.88;}
-    .save-feedback{display:inline-block;margin-left:14px;font-size:10px;letter-spacing:2px;color:var(--success);opacity:0;transition:opacity 0.3s;}
+    .save-feedback{display:inline-block;font-size:10px;letter-spacing:2px;color:var(--success);opacity:0;transition:opacity 0.3s;}
 
     /* ── SECURITY ─────────────────────────────────── */
     .security-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
@@ -335,17 +333,34 @@
       margin-bottom:18px;padding-bottom:16px;
       border-bottom:1px solid rgba(255,255,255,0.10);
     }
-    .drawer-status-row{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+    .drawer-status-row{display:flex;flex-direction:column;gap:9px;margin-bottom:20px;}
     .drawer-status-btn{
-      flex:1;min-width:90px;padding:11px 14px;
-      border:1.5px solid rgba(255,255,255,0.18);border-radius:10px;
-      background:transparent;color:rgba(255,255,255,0.50);
-      font-size:9px;letter-spacing:2px;text-transform:uppercase;
-      cursor:pointer;transition:all 0.2s;font-family:inherit;
+      width:100%;padding:15px 20px;
+      border-radius:12px;border:2px solid transparent;
+      font-family:inherit;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;
+      cursor:pointer;transition:all 0.22s;text-align:left;
+      display:flex;align-items:center;gap:14px;
+      background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.38);
+      border-color:rgba(255,255,255,0.10);
     }
-    .drawer-status-btn.active-btn{background:rgba(109,213,245,0.18);border-color:#6DD5F5;color:#6DD5F5;}
-    .drawer-status-btn.disabled-btn{background:rgba(255,80,80,0.15);border-color:rgba(255,80,80,0.55);color:#ff8080;}
-    .drawer-status-btn.flagged-btn{background:rgba(255,180,0,0.15);border-color:rgba(255,180,0,0.55);color:#ffb400;}
+    .drawer-status-btn .dsb-icon{font-size:18px;flex-shrink:0;}
+    .drawer-status-btn .dsb-label{flex:1;}
+    .drawer-status-btn .dsb-check{font-size:14px;opacity:0;}
+    .drawer-status-btn.active-btn{
+      background:rgba(74,222,128,0.14);
+      border-color:rgba(74,222,128,0.55);color:#4ade80;
+    }
+    .drawer-status-btn.active-btn .dsb-check{opacity:1;}
+    .drawer-status-btn.disabled-btn{
+      background:rgba(255,80,80,0.14);
+      border-color:rgba(255,80,80,0.55);color:#ff8080;
+    }
+    .drawer-status-btn.disabled-btn .dsb-check{opacity:1;}
+    .drawer-status-btn.flagged-btn{
+      background:rgba(255,180,0,0.14);
+      border-color:rgba(255,180,0,0.55);color:#ffb400;
+    }
+    .drawer-status-btn.flagged-btn .dsb-check{opacity:1;}
     .drawer-note-label{font-size:9px;letter-spacing:2px;color:var(--w40);margin-bottom:8px;}
     .drawer-note{
       width:100%;background:rgba(255,255,255,0.06);
@@ -534,8 +549,7 @@
     <!-- ══ MODULES ════════════════════════════════════ -->
     <div id="tab-modules" class="tab-pane">
       <div class="modules-grid" id="modules-grid"></div>
-      <div style="margin-top:24px;display:flex;align-items:center;flex-wrap:wrap;gap:16px;">
-        <button class="modules-save-btn" onclick="saveModules()">💾 SAVE SETTINGS</button>
+      <div style="margin-top:8px;display:flex;align-items:center;height:24px;">
         <span class="save-feedback" id="save-feedback">✓ SAVED</span>
       </div>
       <div class="modules-note">
@@ -929,34 +943,37 @@ function buildModules() {
   grid.innerHTML=MODULE_DEFS.map(m=>{
     const on=saved[m.key]!==false;
     return `<div class="g-card module-card">
-      <span class="module-icon">${m.icon}</span>
-      <div class="module-info">
-        <div class="module-name">${m.name}</div>
-        <div class="module-desc">${m.desc}</div>
-        <div class="module-status ${on?'on':'off'}" id="status-${m.key}">${on?'● ACTIVE':'● INACTIVE'}</div>
+      <div class="module-card-top">
+        <span class="module-icon">${m.icon}</span>
+        <div class="module-info">
+          <div class="module-name">${m.name}</div>
+          <div class="module-desc">${m.desc}</div>
+        </div>
       </div>
-      <div class="toggle-wrap">
-        <label class="toggle">
-          <input type="checkbox" id="toggle-${m.key}" ${on?'checked':''} onchange="updateModuleStatus('${m.key}',this.checked)" />
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
+      <button class="module-toggle-btn ${on?'mod-on':'mod-off'}"
+              id="modbtn-${m.key}"
+              onclick="toggleModule('${m.key}')">
+        ${on?'● ENABLED — CLICK TO DISABLE':'○ DISABLED — CLICK TO ENABLE'}
+      </button>
     </div>`;
   }).join('');
 }
 
-function updateModuleStatus(key, on) {
-  const el=document.getElementById('status-'+key);
-  if(el){ el.textContent=on?'● ACTIVE':'● INACTIVE'; el.className='module-status '+(on?'on':'off'); }
-}
-
-function saveModules() {
-  const saved={};
-  MODULE_DEFS.forEach(m=>{ saved[m.key]=document.getElementById('toggle-'+m.key)?.checked!==false; });
-  localStorage.setItem('nava_modules',JSON.stringify(saved));
+function toggleModule(key) {
+  const mods=JSON.parse(localStorage.getItem('nava_modules')||'{}');
+  const wasOn=mods[key]!==false;
+  mods[key]=!wasOn;
+  localStorage.setItem('nava_modules',JSON.stringify(mods));
+  // Update button appearance instantly
+  const btn=document.getElementById('modbtn-'+key);
+  if(btn){
+    const nowOn=mods[key];
+    btn.className='module-toggle-btn '+(nowOn?'mod-on':'mod-off');
+    btn.textContent=nowOn?'● ENABLED — CLICK TO DISABLE':'○ DISABLED — CLICK TO ENABLE';
+  }
   const fb=document.getElementById('save-feedback');
-  fb.style.opacity='1'; setTimeout(()=>fb.style.opacity='0',2500);
-  showToast('💾 MODULE SETTINGS SAVED');
+  fb.style.opacity='1'; setTimeout(()=>fb.style.opacity='0',1800);
+  showToast(mods[key]?'✓ MODULE ENABLED':'⊘ MODULE DISABLED');
 }
 
 // ── SECURITY ──────────────────────────────────────────────
@@ -1123,9 +1140,21 @@ function hide(id){ const el=document.getElementById(id); if(el) el.style.display
     <div class="drawer-uid" id="drawer-uid"></div>
     <div class="drawer-user-info" id="drawer-user-info"></div>
     <div class="drawer-status-row">
-      <button class="drawer-status-btn" id="btn-active"   onclick="setDrawerStatus('active')">✅ ACTIVE</button>
-      <button class="drawer-status-btn" id="btn-disabled" onclick="setDrawerStatus('disabled')">🚫 DISABLE</button>
-      <button class="drawer-status-btn" id="btn-flagged"  onclick="setDrawerStatus('flagged')">⚠️ FLAG</button>
+      <button class="drawer-status-btn" id="btn-active" onclick="setDrawerStatus('active')">
+        <span class="dsb-icon">✅</span>
+        <span class="dsb-label">ACTIVE — account in good standing</span>
+        <span class="dsb-check">●</span>
+      </button>
+      <button class="drawer-status-btn" id="btn-disabled" onclick="setDrawerStatus('disabled')">
+        <span class="dsb-icon">🚫</span>
+        <span class="dsb-label">DISABLED — block this account</span>
+        <span class="dsb-check">●</span>
+      </button>
+      <button class="drawer-status-btn" id="btn-flagged" onclick="setDrawerStatus('flagged')">
+        <span class="dsb-icon">⚠️</span>
+        <span class="dsb-label">FLAGGED — mark for review</span>
+        <span class="dsb-check">●</span>
+      </button>
     </div>
     <p class="drawer-note-label">ADMIN NOTE</p>
     <textarea class="drawer-note" id="drawer-note"
