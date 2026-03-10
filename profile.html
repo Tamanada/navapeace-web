@@ -321,6 +321,11 @@
       border-top: 1px solid rgba(255,255,255,0.2);
       padding-top: 20px;
     }
+    .edit-row-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
 
     .edit-field {
       display: flex;
@@ -954,17 +959,19 @@
           <option>Yemen</option><option>Zambia</option><option>Zimbabwe</option>
         </select>
       </div>
-      <div class="edit-field">
-        <label data-i18n="lbl_age">AGE</label>
-        <input id="edit-age" type="number" min="1" max="120" placeholder="25" />
-      </div>
-      <div class="edit-field">
-        <label data-i18n="lbl_gender">GENDER</label>
-        <select id="edit-gender">
-          <option value="" data-i18n="lbl_select">— SELECT —</option>
-          <option value="male" data-i18n="gender_male">MALE</option>
-          <option value="female" data-i18n="gender_female">FEMALE</option>
-        </select>
+      <div class="edit-row-2col">
+        <div class="edit-field">
+          <label data-i18n="lbl_age">AGE</label>
+          <input id="edit-age" type="number" min="1" max="120" placeholder="25" />
+        </div>
+        <div class="edit-field">
+          <label data-i18n="lbl_gender">GENDER</label>
+          <select id="edit-gender">
+            <option value="" data-i18n="lbl_select">— SELECT —</option>
+            <option value="male" data-i18n="gender_male">MALE</option>
+            <option value="female" data-i18n="gender_female">FEMALE</option>
+          </select>
+        </div>
       </div>
       <button class="save-btn" onclick="saveProfile()" data-i18n="save_btn">SAVE</button>
     </div>
