@@ -26,11 +26,12 @@
     }
 
     html {
-      height: 100%; width: 100%; overflow: hidden;
+      height: 100%; width: 100%;
+      /* pas d'overflow:hidden — iOS Safari clippe les position:fixed quand html OU body ont overflow:hidden */
     }
     body {
       height: 100%; width: 100%;
-      /* Pas de overflow:hidden sur body — évite le clipping des position:fixed sur iOS Safari */
+      overscroll-behavior: none; /* empêche le pull-to-refresh sans bloquer le ticker */
       font-family: var(--font);
       background: radial-gradient(ellipse at 50% 20%, #6DD5F5 0%, #3AACDF 45%, #1E8EC4 100%);
     }
