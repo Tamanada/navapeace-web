@@ -741,16 +741,14 @@
         const totalDoves    = dailyDoves + referralDoves;
         document.getElementById('cnt-doves').textContent = totalDoves.toLocaleString('fr-FR');
 
-        // Agréger par pays en comptant les utilisateurs UNIQUES
-        // (un user peut voter plusieurs jours → plusieurs lignes, 1 seul amoureux de la paix)
+        // Agréger par pays en comptant les utilisateurs UNIQUES avec user_uid
+        // (même logique que l'admin : les entrées sans user_uid sont ignorées)
         const countsByCountry = {};
         const seenUids = new Set();
         data_active.forEach(r => {
-          const uid = r.user_uid;
-          if (uid) {
-            if (seenUids.has(uid)) return; // déjà compté
-            seenUids.add(uid);
-          }
+          if (!r.user_uid) return; // ignorer les entrées anonymes (pas de UID)
+          if (seenUids.has(r.user_uid)) return; // déjà compté
+          seenUids.add(r.user_uid);
           countsByCountry[r.country] = (countsByCountry[r.country] || 0) + 1;
         });
 
