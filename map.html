@@ -752,6 +752,10 @@
           countsByCountry[r.country] = (countsByCountry[r.country] || 0) + 1;
         });
 
+        // PEACE LOVERS = tous les utilisateurs uniques, même ceux dont le pays
+        // n'a pas de coordonnées (on fixe avant le filtre lat/lon)
+        document.getElementById('cnt-people').textContent = seenUids.size.toLocaleString('fr-FR');
+
         const rows = Object.entries(countsByCountry).map(([country, count]) => {
           const coords = COUNTRY_COORDS[country] || {lat:0,lon:0};
           return { country, user_count: count, lat: coords.lat, lng: coords.lon };
@@ -772,7 +776,11 @@
 
     // Mettre à jour les compteurs
     const total = peaceData.reduce((s, r) => s + r.user_count, 0);
-    document.getElementById('cnt-people').textContent = total.toLocaleString('fr-FR');
+    // cnt-people est déjà fixé dans loadPeaceData() (tous users uniques, y compris pays sans coordonnées)
+    // On ne l'écrase que si Supabase n'est pas configuré (données mock)
+    if (document.getElementById('cnt-people').textContent === '—') {
+      document.getElementById('cnt-people').textContent = total.toLocaleString('fr-FR');
+    }
     document.getElementById('cnt-countries').textContent = peaceData.length;
     // Fallback doves si Supabase non configuré (données mock)
     if (document.getElementById('cnt-doves').textContent === '—') {
