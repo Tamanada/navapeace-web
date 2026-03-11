@@ -721,25 +721,29 @@
         // Tous les votes
         const { data, error } = await sb
           .from('peace_votes')
-          .select('country, created_at, referred_by')
+          .select('user_uid, country, created_at, referred_by')
           .not('country', 'is', null);
 
         if (error) throw error;
 
+        // Exclure les utilisateurs bloqués (status 'disabled' dans nava_user_flags)
+        const userFlags = JSON.parse(localStorage.getItem('nava_user_flags') || '{}');
+        const data_active = data.filter(r => !r.user_uid || userFlags[r.user_uid]?.status !== 'disabled');
+
         // Votes d'aujourd'hui
         const todayStr = new Date().toISOString().split('T')[0];
-        const todayCount = data.filter(r => r.created_at && r.created_at.startsWith(todayStr)).length;
+        const todayCount = data_active.filter(r => r.created_at && r.created_at.startsWith(todayStr)).length;
         document.getElementById('cnt-today').textContent = '+' + todayCount.toLocaleString('fr-FR');
 
         // Total doves = daily actions + referral bonus doves
-        const dailyDoves    = data.length;
-        const referralDoves = data.filter(r => r.referred_by).length;
+        const dailyDoves    = data_active.length;
+        const referralDoves = data_active.filter(r => r.referred_by).length;
         const totalDoves    = dailyDoves + referralDoves;
         document.getElementById('cnt-doves').textContent = totalDoves.toLocaleString('fr-FR');
 
         // Agréger par pays
         const counts = {};
-        data.forEach(r => { counts[r.country] = (counts[r.country] || 0) + 1; });
+        data_active.forEach(r => { counts[r.country] = (counts[r.country] || 0) + 1; });
 
         const rows = Object.entries(counts).map(([country, count]) => {
           const coords = COUNTRY_COORDS[country] || {lat:0,lon:0};
@@ -1076,7 +1080,7 @@
       const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       const { data, error } = await sb
         .from('peace_messages')
-        .select('pseudo, message, updated_at')
+        .select('user_uid, pseudo, message, updated_at')
         .eq('share_msg', true)
         .not('message', 'is', null)
         .neq('message', '')
@@ -1085,12 +1089,16 @@
 
       if (error) throw error;
 
-      if (!data || data.length === 0) {
+      // Exclure les utilisateurs bloqués
+      const userFlags = JSON.parse(localStorage.getItem('nava_user_flags') || '{}');
+      const msgs = (data || []).filter(m => !m.user_uid || userFlags[m.user_uid]?.status !== 'disabled');
+
+      if (!msgs.length) {
         list.innerHTML = `<p class="msgs-no-data">${t('no_msgs_yet')}</p>`;
         return;
       }
 
-      list.innerHTML = data.map((m, i) => {
+      list.innerHTML = msgs.map((m, i) => {
         const d       = new Date(m.updated_at);
         const dateStr = d.toLocaleDateString([], { day: '2-digit', month: 'short', year: '2-digit' });
         return `<div class="msg-card" style="animation-delay:${i * 0.05}s">
