@@ -529,7 +529,7 @@
           <table>
             <thead>
               <tr>
-                <th>#</th><th>UID</th><th></th><th>STATUS</th><th>COUNTRY</th>
+                <th>#</th><th>UID</th><th>STATUS</th><th>COUNTRY</th>
                 <th>AGE</th><th>GENDER</th><th>DAYS</th>
                 <th>REF CODE</th><th>REFERRED BY</th><th>REGISTERED</th>
               </tr>
@@ -693,9 +693,9 @@ function showTab(id, btn) {
 
 // ── HELPERS ──────────────────────────────────────────────
 function flag(code) {
-  if (!code || code.length < 2) return '🌐';
-  try { return code.toUpperCase().replace(/./g, c => String.fromCodePoint(c.charCodeAt(0)+127397)); }
-  catch { return '🌐'; }
+  // Les emojis drapeaux nécessitent des codes ISO-2 (ex: "US"), pas des noms complets ("United States").
+  // La DB stocke des noms complets → on retourne vide pour éviter les caractères brisés sur Windows.
+  return '';
 }
 function fmtDate(iso) {
   if (!iso) return '—';
@@ -844,7 +844,6 @@ function renderUsersTable() {
     <tr style="cursor:pointer;" onclick="openUserDrawer('${u.uid}')">
       <td style="color:var(--w40);font-size:9px;">${i+1}</td>
       <td class="uid-cell" title="Click row to manage user">${u.uid.slice(0,14)}…</td>
-      <td class="flag-cell">${flag(u.country)}</td>
       <td>${statusBadge(u.uid)}</td>
       <td>${u.country||'—'}</td>
       <td>${u.age||'—'}</td>
