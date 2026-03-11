@@ -735,17 +735,26 @@
         const todayCount = data_active.filter(r => r.created_at && r.created_at.startsWith(todayStr)).length;
         document.getElementById('cnt-today').textContent = '+' + todayCount.toLocaleString('fr-FR');
 
-        // Total doves = daily actions + referral bonus doves
+        // Total doves = toutes les actions + bonus référence (1 vote = 1 colombe)
         const dailyDoves    = data_active.length;
         const referralDoves = data_active.filter(r => r.referred_by).length;
         const totalDoves    = dailyDoves + referralDoves;
         document.getElementById('cnt-doves').textContent = totalDoves.toLocaleString('fr-FR');
 
-        // Agréger par pays
-        const counts = {};
-        data_active.forEach(r => { counts[r.country] = (counts[r.country] || 0) + 1; });
+        // Agréger par pays en comptant les utilisateurs UNIQUES
+        // (un user peut voter plusieurs jours → plusieurs lignes, 1 seul amoureux de la paix)
+        const countsByCountry = {};
+        const seenUids = new Set();
+        data_active.forEach(r => {
+          const uid = r.user_uid;
+          if (uid) {
+            if (seenUids.has(uid)) return; // déjà compté
+            seenUids.add(uid);
+          }
+          countsByCountry[r.country] = (countsByCountry[r.country] || 0) + 1;
+        });
 
-        const rows = Object.entries(counts).map(([country, count]) => {
+        const rows = Object.entries(countsByCountry).map(([country, count]) => {
           const coords = COUNTRY_COORDS[country] || {lat:0,lon:0};
           return { country, user_count: count, lat: coords.lat, lng: coords.lon };
         }).filter(r => r.lat !== 0);
