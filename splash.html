@@ -319,6 +319,8 @@
   </div>
 
   <script>
+    // Marquer la session : la splash a été vue — empêche les boucles de redirect
+    sessionStorage.setItem('nava_splash_shown', '1');
     // 12 languages — flag · translation
     const translations = [
       { flag: '🇬🇧', lang: 'EN', text: 'BORN TO GROW'          },
