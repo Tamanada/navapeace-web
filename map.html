@@ -710,6 +710,25 @@
     setInterval(tick, 1000);
   }
 
+  // ── Rafraîchissement du compteur "Actions today" toutes les 60 s ──
+  async function refreshTodayCount() {
+    const isConfigured = SUPABASE_URL && !SUPABASE_URL.includes('XXXXXXX');
+    if (!isConfigured) return;
+    try {
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const todayStr = new Date().toISOString().split('T')[0];
+      const { data, error } = await sb
+        .from('peace_votes')
+        .select('user_uid, created_at')
+        .gte('created_at', todayStr);
+      if (error) throw error;
+      const userFlags = JSON.parse(localStorage.getItem('nava_user_flags') || '{}');
+      const count = (data || []).filter(r => !r.user_uid || userFlags[r.user_uid]?.status !== 'disabled').length;
+      document.getElementById('cnt-today').textContent = '+' + count.toLocaleString('fr-FR');
+    } catch(e) { /* silencieux */ }
+  }
+  setInterval(refreshTodayCount, 60_000);
+
   // ── Initialisation Supabase & chargement des données ────────────
   async function loadPeaceData() {
     const isConfigured = SUPABASE_URL && !SUPABASE_URL.includes('XXXXXXX');
