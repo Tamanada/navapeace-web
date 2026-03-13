@@ -261,7 +261,7 @@
     #first-dove-overlay {
       display: none;
       position: fixed; inset: 0; z-index: 1000;
-      background: #ffffff;
+      background: radial-gradient(ellipse at 50% 25%, #6DD5F5 0%, #2a8fbf 55%, #0d5f8a 100%);
       flex-direction: column; align-items: center; justify-content: center;
       gap: 0; overflow: hidden;
     }
@@ -289,8 +289,8 @@
       to   { opacity:1; transform: translateY(0); }
     }
     @keyframes fdShimmer {
-      0%,100% { filter: drop-shadow(0 4px 20px rgba(58,172,223,0.4)); }
-      50%     { filter: drop-shadow(0 4px 40px rgba(58,172,223,0.9)); }
+      0%,100% { text-shadow: 0 0 20px rgba(255,255,255,0.4), 0 2px 8px rgba(0,0,0,0.2); }
+      50%     { text-shadow: 0 0 40px rgba(255,255,255,0.9), 0 2px 8px rgba(0,0,0,0.2); }
     }
     @keyframes fdParticle {
       0%   { opacity:1; transform: translate(0,0) scale(1); }
@@ -299,7 +299,7 @@
 
     #fd-logo {
       width: 90px; height: 90px; object-fit: contain;
-      filter: drop-shadow(0 4px 20px rgba(58,172,223,0.3));
+      filter: brightness(0) invert(1) drop-shadow(0 6px 32px rgba(255,255,255,0.6));
       opacity: 0;
       animation: fdLogoIn 0.8s cubic-bezier(.34,1.56,.64,1) 0.1s forwards;
       margin-bottom: 16px;
@@ -315,25 +315,25 @@
                  fdShimmer 2s ease-in-out 1.5s infinite;
     }
     #fd-count {
-      font-size: 13px; letter-spacing: 4px; color: #3AACDF;
+      font-size: 13px; letter-spacing: 4px; color: rgba(255,255,255,0.85);
       opacity: 0;
       animation: fdCountUp 0.5s ease 1.15s forwards;
     }
     #fd-title {
       font-size: 24px; font-weight: 400; letter-spacing: 8px;
-      color: #0d3d5a;
+      color: #fff; text-shadow: 0 2px 20px rgba(255,255,255,0.4);
       opacity: 0;
       animation: fdMsgIn 0.5s ease 1.4s forwards;
       margin-bottom: 10px;
     }
     #fd-msg {
-      font-size: 11px; letter-spacing: 2.5px; color: #3AACDF;
+      font-size: 11px; letter-spacing: 2.5px; color: rgba(255,255,255,0.9);
       text-transform: uppercase; text-align: center; max-width: 260px; line-height: 1.7;
       opacity: 0;
       animation: fdMsgIn 0.5s ease 1.75s forwards;
     }
     #fd-sub {
-      font-size: 9px; letter-spacing: 2px; color: rgba(13,61,90,0.45);
+      font-size: 9px; letter-spacing: 2px; color: rgba(255,255,255,0.55);
       text-transform: uppercase; text-align: center; max-width: 240px;
       opacity: 0;
       animation: fdMsgIn 0.5s ease 2.1s forwards;
