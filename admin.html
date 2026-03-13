@@ -587,6 +587,25 @@
           </div>
           <button class="filter-reset" onclick="resetFilters()">✕ RESET</button>
         </div>
+
+        <!-- ── ACTION BAR (visible when filters are active) ── -->
+        <div id="filter-action-bar" style="display:none;align-items:center;gap:12px;
+             margin-bottom:12px;padding:10px 16px;
+             background:rgba(58,172,223,0.08);border:1.5px solid rgba(58,172,223,0.25);
+             border-radius:10px;flex-wrap:wrap;">
+          <span id="filter-action-label"
+                style="font-size:9px;letter-spacing:2px;color:rgba(58,172,223,0.9);flex:1;min-width:140px;">
+            🎯 — USERS FILTERED
+          </span>
+          <button class="export-btn" id="push-filtered-btn" onclick="pushToFiltered()">
+            🔔 PUSH TO FILTERED
+          </button>
+          <button class="export-btn" onclick="exportCSV()"
+                  style="background:rgba(255,255,255,0.06);">
+            ⬇ EXPORT FILTERED
+          </button>
+        </div>
+
         <div class="g-card table-wrap">
           <table>
             <thead>
@@ -622,17 +641,22 @@
     <!-- ══ MODULES ════════════════════════════════════ -->
     <div id="tab-modules" class="tab-pane">
       <div class="modules-grid" id="modules-grid"></div>
-      <div style="margin-top:8px;display:flex;align-items:center;height:24px;">
-        <span class="save-feedback" id="save-feedback">✓ SAVED</span>
+      <div style="margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <button class="export-btn" id="modules-save-btn" onclick="saveModules()"
+                style="display:none;background:rgba(74,222,128,0.15);color:#4ade80;border-color:rgba(74,222,128,0.4);">
+          💾 SAVE CHANGES
+        </button>
+        <span class="save-feedback" id="save-feedback">✓ SAVED — ALL DEVICES UPDATED</span>
+        <span id="modules-unsaved" style="display:none;font-size:9px;letter-spacing:2px;color:rgba(255,200,80,0.85);">
+          ● UNSAVED CHANGES
+        </span>
       </div>
-      <div class="modules-note">
-        <strong>⚠️ HOW MODULE TOGGLES WORK</strong><br/><br/>
-        Settings are saved to <code>localStorage</code> under the key <code>nava_modules</code>.<br/>
-        To sync across all devices and users, create an <code>admin_settings</code> table in Supabase:<br/><br/>
-        <code>CREATE TABLE admin_settings (key TEXT PRIMARY KEY, value TEXT DEFAULT 'true');</code><br/>
-        <code>ALTER TABLE admin_settings ENABLE ROW LEVEL SECURITY;</code><br/>
-        <code>CREATE POLICY "public_read" ON admin_settings FOR SELECT USING (true);</code><br/><br/>
-        Then each app page will fetch the toggle states on load and hide/show sections accordingly.
+      <div class="modules-note" style="margin-top:18px;">
+        <strong>ℹ️ HOW MODULE TOGGLES WORK</strong><br/><br/>
+        Toggle modules ON/OFF then click <strong>SAVE CHANGES</strong>.<br/>
+        Settings are stored in Supabase (<code>admin_settings</code>) and synced across
+        all devices &amp; users on their next page load.<br/><br/>
+        Run <code>admin_settings_setup.sql</code> in Supabase SQL Editor once to create the table.
       </div>
     </div>
 
@@ -1018,6 +1042,7 @@ function applyFilters() {
     return true;
   });
   renderUsersTable();
+  updateFilterActionBar();
 }
 
 function resetFilters() {
@@ -1027,6 +1052,46 @@ function resetFilters() {
   document.querySelectorAll('.f-pills .f-pill').forEach((p,i)=>p.classList.toggle('active',i===0));
   filteredUsers=[...allUsers];
   renderUsersTable();
+  updateFilterActionBar();
+}
+
+function updateFilterActionBar() {
+  const bar=document.getElementById('filter-action-bar');
+  if(!bar) return;
+  const isFiltered=filteredUsers.length<allUsers.length||
+                   (document.getElementById('user-search')?.value||'').trim().length>0;
+  bar.style.display=isFiltered?'flex':'none';
+  if(isFiltered){
+    const lbl=document.getElementById('filter-action-label');
+    if(lbl) lbl.textContent=`🎯 ${filteredUsers.length} USER${filteredUsers.length===1?'':'S'} FILTERED`;
+  }
+}
+
+async function pushToFiltered() {
+  const n=filteredUsers.length;
+  if(!n){showToast('No users in current filter');return;}
+  const title=document.getElementById('push-title')?.value||'NAVA PEACE';
+  const body =document.getElementById('push-body')?.value ||'🕊 Time to choose peace today';
+  const url  =document.getElementById('push-url')?.value  ||'/peace.html';
+  if(!confirm(`Send push notification to ${n} filtered user${n===1?'':'s'}?\n\nTitle: ${title}\nBody: ${body}`)) return;
+  const btn=document.getElementById('push-filtered-btn');
+  btn.disabled=true; btn.textContent='···';
+  try {
+    const results=await Promise.allSettled(
+      filteredUsers.map(u=>fetch(`${SUPABASE_URL}/functions/v1/send-push`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':`Bearer ${SUPABASE_ANON_KEY}`},
+        body:JSON.stringify({title,body,url,to_user_uid:u.uid}),
+      }))
+    );
+    const sent  =results.filter(r=>r.status==='fulfilled').length;
+    const failed=results.filter(r=>r.status==='rejected').length;
+    showToast(`🔔 Push sent: ${sent} ✓  ${failed>0?`· ${failed} ✗`:''}`,3500);
+  } catch(e){
+    showToast('✗ Push error: '+e.message);
+  } finally {
+    btn.disabled=false; btn.textContent='🔔 PUSH TO FILTERED';
+  }
 }
 
 function populateFilterSelects() {
@@ -1147,11 +1212,31 @@ const MODULE_DEFS = [
   { key:'module_about',    icon:'ℹ️',  name:'ABOUT PAGE',     desc:'About NAVA PEACE, principles and mission statement.' },
 ];
 
-function buildModules() {
-  const saved=JSON.parse(localStorage.getItem('nava_modules')||'{}');
-  const grid=document.getElementById('modules-grid');
-  grid.innerHTML=MODULE_DEFS.map(m=>{
-    const on=saved[m.key]!==false;
+// In-memory pending state (not yet saved to Supabase)
+let pendingMods = {};
+
+async function buildModules() {
+  // 1 – Try Supabase first (source of truth, cross-device)
+  let saved = {};
+  try {
+    const { data, error } = await sb.from('admin_settings')
+      .select('value').eq('key','nava_modules').single();
+    if (!error && data?.value) {
+      saved = JSON.parse(data.value);
+      localStorage.setItem('nava_modules', data.value); // refresh local cache
+    } else throw new Error('no row');
+  } catch(_) {
+    // 2 – Fall back to localStorage cache
+    saved = JSON.parse(localStorage.getItem('nava_modules') || '{}');
+  }
+  pendingMods = { ...saved };
+  renderModulesGrid();
+}
+
+function renderModulesGrid() {
+  const grid = document.getElementById('modules-grid');
+  grid.innerHTML = MODULE_DEFS.map(m => {
+    const on = pendingMods[m.key] !== false;
     return `<div class="g-card module-card">
       <div class="module-card-top">
         <span class="module-icon">${m.icon}</span>
@@ -1167,23 +1252,55 @@ function buildModules() {
       </button>
     </div>`;
   }).join('');
+  // Reset unsaved indicator
+  const saveBtn = document.getElementById('modules-save-btn');
+  const unsaved = document.getElementById('modules-unsaved');
+  if(saveBtn) saveBtn.style.display = 'none';
+  if(unsaved) unsaved.style.display = 'none';
 }
 
 function toggleModule(key) {
-  const mods=JSON.parse(localStorage.getItem('nava_modules')||'{}');
-  const wasOn=mods[key]!==false;
-  mods[key]=!wasOn;
-  localStorage.setItem('nava_modules',JSON.stringify(mods));
+  const wasOn = pendingMods[key] !== false;
+  pendingMods[key] = !wasOn;
   // Update button appearance instantly
-  const btn=document.getElementById('modbtn-'+key);
-  if(btn){
-    const nowOn=mods[key];
-    btn.className='module-toggle-btn '+(nowOn?'mod-on':'mod-off');
-    btn.textContent=nowOn?'● ENABLED — CLICK TO DISABLE':'○ DISABLED — CLICK TO ENABLE';
+  const btn = document.getElementById('modbtn-' + key);
+  if(btn) {
+    const nowOn = pendingMods[key];
+    btn.className = 'module-toggle-btn ' + (nowOn ? 'mod-on' : 'mod-off');
+    btn.textContent = nowOn ? '● ENABLED — CLICK TO DISABLE' : '○ DISABLED — CLICK TO ENABLE';
   }
-  const fb=document.getElementById('save-feedback');
-  fb.style.opacity='1'; setTimeout(()=>fb.style.opacity='0',1800);
-  showToast(mods[key]?'✓ MODULE ENABLED':'⊘ MODULE DISABLED');
+  // Show SAVE button & unsaved indicator
+  const saveBtn = document.getElementById('modules-save-btn');
+  const unsaved = document.getElementById('modules-unsaved');
+  if(saveBtn) saveBtn.style.display = 'inline-flex';
+  if(unsaved) unsaved.style.display = 'inline-block';
+}
+
+async function saveModules() {
+  const btn = document.getElementById('modules-save-btn');
+  const unsaved = document.getElementById('modules-unsaved');
+  btn.disabled = true; btn.textContent = '···';
+  try {
+    const value = JSON.stringify(pendingMods);
+    // Upsert to Supabase (web + app source of truth)
+    const { error } = await sb.from('admin_settings')
+      .upsert({ key:'nava_modules', value, updated_at: new Date().toISOString() },
+               { onConflict:'key' });
+    if(error) throw error;
+    // Also update local cache so gate script stays in sync on this device
+    localStorage.setItem('nava_modules', value);
+    btn.style.display = 'none';
+    if(unsaved) unsaved.style.display = 'none';
+    const fb = document.getElementById('save-feedback');
+    if(fb){ fb.style.opacity='1'; setTimeout(()=>fb.style.opacity='0',2500); }
+    showToast('✓ MODULES SAVED — all devices will update on next load', 3000);
+  } catch(e) {
+    showToast('✗ SAVE FAILED: ' + e.message, 4000);
+    btn.textContent = '💾 SAVE CHANGES';
+  } finally {
+    btn.disabled = false;
+    if(btn.textContent === '···') btn.textContent = '💾 SAVE CHANGES';
+  }
 }
 
 // ── SECURITY ──────────────────────────────────────────────

@@ -69,18 +69,62 @@ var NAVA_NAV_MAP = {
   } catch (e) { /* échouer silencieusement */ }
 
   // ── 2. NAV HIDE : masquer les onglets des modules désactivés ──
+  function applyNavHide(mods) {
+    Object.keys(NAVA_NAV_MAP).forEach(function (moduleKey) {
+      if (mods[moduleKey] === false) {
+        var href = NAVA_NAV_MAP[moduleKey];
+        document.querySelectorAll('.nav-item[href="' + href + '"]')
+          .forEach(function (el) { el.style.display = 'none'; });
+      } else {
+        var href = NAVA_NAV_MAP[moduleKey];
+        document.querySelectorAll('.nav-item[href="' + href + '"]')
+          .forEach(function (el) { if (el.style.display === 'none') el.style.display = ''; });
+      }
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
+    // Apply cached settings immediately (fast, synchronous)
     try {
       var mods = JSON.parse(localStorage.getItem('nava_modules') || '{}');
-      Object.keys(NAVA_NAV_MAP).forEach(function (moduleKey) {
-        if (mods[moduleKey] === false) {
-          var href = NAVA_NAV_MAP[moduleKey];
-          document.querySelectorAll('.nav-item[href="' + href + '"]')
-            .forEach(function (el) {
-              el.style.display = 'none';
-            });
-        }
-      });
+      applyNavHide(mods);
+    } catch (e) {}
+
+    // ── 3. SUPABASE SYNC : fetch latest settings from server (cross-device) ──
+    // Runs async after paint so it never blocks the page.
+    // SUPABASE_URL and SUPABASE_ANON_KEY are defined in supabase_config.js (loaded in <head>).
+    try {
+      if (typeof SUPABASE_URL !== 'undefined' && SUPABASE_URL &&
+          !SUPABASE_URL.includes('XXXXXXX') &&
+          typeof SUPABASE_ANON_KEY !== 'undefined' && SUPABASE_ANON_KEY) {
+
+        fetch(
+          SUPABASE_URL + '/rest/v1/admin_settings?key=eq.nava_modules&select=value',
+          {
+            headers: {
+              'apikey':        SUPABASE_ANON_KEY,
+              'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+            },
+          }
+        ).then(function (r) { return r.json(); })
+         .then(function (data) {
+           if (!Array.isArray(data) || !data[0] || !data[0].value) return;
+           var newVal = data[0].value;
+           var oldVal = localStorage.getItem('nava_modules') || '{}';
+           if (newVal === oldVal) return; // nothing changed
+           localStorage.setItem('nava_modules', newVal);
+
+           var newMods = JSON.parse(newVal);
+           // Re-apply nav hide with fresh data
+           applyNavHide(newMods);
+
+           // If current page's module was just disabled, gate it now
+           var pageKey = document.documentElement.getAttribute('data-module');
+           if (pageKey && newMods[pageKey] === false) {
+             window.location.reload(); // will hit the localStorage gate on reload
+           }
+         }).catch(function () {});
+      }
     } catch (e) {}
   });
 
