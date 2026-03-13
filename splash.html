@@ -169,7 +169,24 @@
       flex-shrink: 0;
     }
 
-    /* ── LINK ──────────────────────────────────── */
+    /* ── TAP TO CONTINUE ───────────────────────── */
+    .tap-hint {
+      margin-top: clamp(18px, 3vh, 28px);
+      font-size: clamp(9px, 1.1vw, 12px);
+      letter-spacing: clamp(5px, 1vw, 10px);
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      opacity: 0;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    @keyframes tapPulse {
+      0%, 100% { opacity: 0.3; }
+      50%       { opacity: 0.75; }
+    }
+
+    /* ── LINK (nouveau visiteur) ────────────────── */
     .enter-link {
       position: fixed;
       bottom: 90px; right: 32px;
@@ -312,6 +329,9 @@
       <span id="daily-text"></span>
     </div>
 
+    <!-- Tap / click to continue -->
+    <p class="tap-hint" id="tap-hint">TAP TO CONTINUE</p>
+
   </div>
 
   <!-- ── TICKER ─────────────────────────────── -->
@@ -416,6 +436,30 @@
 
     setDailyMessage();
 
+    // ── Navigation tap/click → page suivante ────────────────────────
+    function enableTap(dest) {
+      var tapEl  = document.getElementById('tap-hint');
+      var stage  = document.querySelector('.stage');
+
+      // Afficher le hint avec pulsation
+      if (tapEl) {
+        tapEl.style.animation = 'tapPulse 2.2s ease-in-out infinite';
+        tapEl.style.opacity   = '1';
+      }
+
+      // Toute la page répond au clic ET au touch (mobile)
+      function goNext(e) {
+        e.preventDefault();
+        document.removeEventListener('click',    goNext);
+        document.removeEventListener('touchend', goNext);
+        if (tapEl) tapEl.style.animation = 'none';
+        if (stage) { stage.style.transition = 'opacity 0.7s ease'; stage.style.opacity = '0'; }
+        setTimeout(function () { window.location.href = dest; }, 720);
+      }
+      document.addEventListener('click',    goNext);
+      document.addEventListener('touchend', goNext, { passive: false });
+    }
+
     // ── WELCOME BACK — utilisateur déjà enregistré ──────────────────
     (function () {
       var uid = localStorage.getItem('nava_peace_uid');
@@ -424,6 +468,8 @@
         // Nouveau visiteur → ENTER pointe vers l'inscription
         var enterEl = document.querySelector('.enter-link');
         if (enterEl) enterEl.setAttribute('href', 'index.html');
+        // Tap n'importe où après les animations → inscription
+        setTimeout(function () { enableTap('index.html'); }, 5000);
         return;
       }
 
@@ -500,48 +546,17 @@
               void dateEl.offsetWidth;
               dateEl.style.opacity = '1';
             }
-          }, 2500);
 
-          // ⑤ DOVES → countdown — 5.5 s après WB
-          setTimeout(function () {
-            var t = 5;
-            if (dateEl) {
-              // Fade-out du compteur doves
-              dateEl.style.transition = 'opacity 0.8s ease';
-              dateEl.style.opacity    = '0';
-              setTimeout(function () {
-                // Remet les styles du date-label
-                dateEl.style.fontSize      = '';
-                dateEl.style.letterSpacing = '';
-                dateEl.style.color         = '';
-                dateEl.style.marginBottom  = '';
-                dateEl.textContent         = _dots(t);
-                dateEl.style.opacity       = '1';
-              }, 800);
-            }
-
-            // Countdown démarre après la transition
+            // ⑤ TAP TO CONTINUE — 1.5 s après DOVES (laisse le temps de les lire)
             setTimeout(function () {
-              var iv = setInterval(function () {
-                t--;
-                if (t <= 0) {
-                  clearInterval(iv);
-                  // ⑥ Fade-out global (1 s) puis redirect
-                  var stage = document.querySelector('.stage');
-                  if (stage) { stage.style.transition = 'opacity 1s ease'; stage.style.opacity = '0'; }
-                  setTimeout(function () { window.location.href = 'peace.html'; }, 1050);
-                } else {
-                  if (dateEl) dateEl.textContent = _dots(t);
-                }
-              }, 1000);
-            }, 800);
+              enableTap('peace.html');
+            }, 1500);
 
-          }, 5500);
+          }, 2500);
 
         }, 1400); // fade-out terminé
       }, 3000);   // logo + hero pleinement visibles
 
-      function _dots(n) { return '· · ·  ' + n + '  · · ·'; }
     })();
   </script>
 </body>
