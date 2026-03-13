@@ -600,7 +600,7 @@
                 <th><div class="th-wrap">FIRST NAME<button class="col-filter-btn" id="cfb-firstname" onclick="openColFilter(event,'firstname')">▼</button></div></th>
                 <th>REF CODE</th>
                 <th>REFERRED BY</th>
-                <th>REGISTERED</th>
+                <th><div class="th-wrap">REGISTERED<button class="col-filter-btn" id="cfb-registered" onclick="openColFilter(event,'registered')">▼</button></div></th>
               </tr>
             </thead>
             <tbody id="users-tbody"></tbody>
@@ -827,7 +827,10 @@ function flag(code) {
 }
 function fmtDate(iso) {
   if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('en-CA');
+  const d = new Date(iso);
+  const date = d.toLocaleDateString('en-CA');                              // 2024-03-13
+  const time = d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); // 14:32:05
+  return `${date} · ${time}`;
 }
 function fmt(n) { return n==null ? '—' : n.toLocaleString(); }
 
@@ -1058,7 +1061,7 @@ function renderUsersTable() {
   document.getElementById('users-footer').textContent=`SHOWING ${filteredUsers.length} OF ${allUsers.length} USERS · CLICK ROW TO MANAGE`;
 }
 // ── COLUMN FILTER STATE (Excel-style) ─────────────────────
-const colFilters={status:new Set(),country:new Set(),age:new Set(),gender:new Set(),days:new Set(),firstname:new Set()};
+const colFilters={status:new Set(),country:new Set(),age:new Set(),gender:new Set(),days:new Set(),firstname:new Set(),registered:new Set()};
 let _cfKey=null; // currently open filter column key
 
 function getColValues(key){
@@ -1069,6 +1072,7 @@ function getColValues(key){
     case 'gender':   return [...new Set(allUsers.map(u=>u.gender||'__blank__'))].sort().map(v=>({v,label:v==='__blank__'?'(Blank)':v}));
     case 'days':     return [...new Set(allUsers.map(u=>String(u.days)))].sort((a,b)=>Number(a)-Number(b)).map(v=>({v,label:v+' day'+(v==='1'?'':'s')}));
     case 'firstname':return [{v:'__set__',label:'✓ Has name'},{v:'__unset__',label:'— No name'}];
+    case 'registered':return [...new Set(allUsers.map(u=>(u.registered||'').slice(0,10)).filter(Boolean))].sort().reverse().map(v=>({v,label:v}));
     default: return [];
   }
 }
@@ -1149,6 +1153,10 @@ function applyFilters(){
       const wantUnset=colFilters.firstname.has('__unset__');
       if(wantSet&&!wantUnset&&!hasName) return false;
       if(wantUnset&&!wantSet&&hasName) return false;
+    }
+    if(colFilters.registered.size>0){
+      const day=(u.registered||'').slice(0,10);
+      if(!colFilters.registered.has(day)) return false;
     }
     return true;
   });
