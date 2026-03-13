@@ -289,8 +289,8 @@
       to   { opacity:1; transform: translateY(0); }
     }
     @keyframes fdShimmer {
-      0%,100% { filter: brightness(0) invert(1) drop-shadow(0 4px 20px rgba(255,255,255,0.4)); }
-      50%     { filter: brightness(0) invert(1) drop-shadow(0 4px 40px rgba(255,255,255,0.9)); }
+      0%,100% { filter: invert(1) drop-shadow(0 0 12px rgba(255,255,255,0.5)); }
+      50%     { filter: invert(1) drop-shadow(0 0 30px rgba(255,255,255,1)); }
     }
     @keyframes fdParticle {
       0%   { opacity:1; transform: translate(0,0) scale(1); }
@@ -309,8 +309,8 @@
       margin-bottom: 20px;
     }
     #fd-dove-icon {
-      width: 80px; height: 80px; object-fit: contain;
-      filter: brightness(0) invert(1) drop-shadow(0 4px 24px rgba(255,255,255,0.5));
+      font-size: 72px; line-height: 1;
+      filter: invert(1);
       opacity: 0;
       animation: fdDovePop 0.7s cubic-bezier(.34,1.56,.64,1) 0.6s forwards,
                  fdShimmer 2s ease-in-out 1.5s infinite;
@@ -359,7 +359,7 @@
   <div id="first-dove-overlay">
     <img id="fd-logo" src="logo.png" alt="NAVA PEACE" />
     <div id="fd-dove-wrap">
-      <img id="fd-dove-icon" src="logo.png" alt="dove" />
+      <div id="fd-dove-icon">🕊</div>
       <div id="fd-count">YOUR FIRST DOVE</div>
     </div>
     <h2 id="fd-title">NAVA PEACE</h2>
