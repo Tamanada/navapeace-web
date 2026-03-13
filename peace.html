@@ -529,10 +529,19 @@
     }
 
     // ── Clic sur le bouton ──────────────────────────────────────────
+    let _voting = false; // guard contre double-submit
     async function choosePeace() {
+      // Double-submit guard (2 onglets ouverts, double-tap, etc.)
+      if (_voting) return;
+      if (localStorage.getItem(PEACE_KEY) === TODAY) { setDone(true); return; }
+      _voting = true;
+
       const btn = document.getElementById('peaceBtn');
       btn.disabled = true;
       btn.innerHTML = '<span class="btn-status" style="color:#3AACDF;font-size:36px;">···</span>';
+
+      // Marquer localement AVANT l'insert pour bloquer tout autre onglet
+      localStorage.setItem(PEACE_KEY, TODAY);
 
       const uid        = localStorage.getItem('nava_peace_uid');
       const referredBy = localStorage.getItem('nava_peace_referred_by') || null;
@@ -555,7 +564,7 @@
         }
       }
 
-      localStorage.setItem(PEACE_KEY, TODAY);
+      _voting = false;
       setDone(true);          // thank you → countdown
       await loadCounters();   // rafraîchir après insert
     }
