@@ -190,17 +190,25 @@
       color:var(--white);font-family:var(--font);font-size:9px;letter-spacing:2px;cursor:pointer;transition:background 0.2s;
     }
     .export-btn:hover{background:rgba(255,255,255,0.25);}
-    .user-filters{display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-bottom:14px;padding:10px 14px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:10px;}
-    .filter-group{display:flex;align-items:center;gap:7px;}
-    .filter-lbl{font-size:8px;letter-spacing:2px;color:var(--w40);white-space:nowrap;}
-    .f-pills{display:flex;gap:4px;}
-    .f-pill{padding:4px 9px;font-size:8px;letter-spacing:1.5px;background:rgba(255,255,255,0.06);border:1px solid var(--glass-border);border-radius:6px;color:var(--w60);font-family:var(--font);cursor:pointer;transition:all 0.15s;}
-    .f-pill.active{background:rgba(255,255,255,0.22);border-color:rgba(255,255,255,0.55);color:var(--white);}
-    .f-pill:hover:not(.active){background:rgba(255,255,255,0.12);}
-    .f-sel{padding:4px 9px;font-size:8px;letter-spacing:1.5px;background:rgba(255,255,255,0.06);border:1px solid var(--glass-border);border-radius:6px;color:var(--white);font-family:var(--font);cursor:pointer;outline:none;max-width:130px;}
-    .f-sel option{background:#0d3352;}
-    .filter-reset{margin-left:auto;font-size:8px;letter-spacing:2px;color:var(--w40);background:none;border:none;cursor:pointer;font-family:var(--font);padding:4px 8px;}
-    .filter-reset:hover{color:var(--white);}
+    /* Excel-style column filters */
+    .th-wrap{display:flex;align-items:center;gap:5px;white-space:nowrap;}
+    .col-filter-btn{padding:1px 5px;font-size:9px;background:rgba(255,255,255,0.07);border:1px solid var(--glass-border);border-radius:4px;color:var(--w60);cursor:pointer;font-family:var(--font);line-height:1.4;transition:all 0.15s;}
+    .col-filter-btn:hover{background:rgba(255,255,255,0.15);color:var(--white);}
+    .col-filter-btn.active{background:rgba(58,172,223,0.25);border-color:rgba(58,172,223,0.6);color:rgba(58,172,223,1);}
+    #col-filter-popup{position:fixed;z-index:9999;background:#0b2236;border:1px solid rgba(58,172,223,0.3);border-radius:10px;padding:10px;min-width:180px;max-width:230px;box-shadow:0 10px 30px rgba(0,0,0,0.6);display:none;}
+    .cfp-search{width:100%;box-sizing:border-box;padding:5px 9px;font-size:10px;background:rgba(255,255,255,0.07);border:1px solid var(--glass-border);border-radius:6px;color:var(--white);font-family:var(--font);outline:none;margin-bottom:8px;}
+    .cfp-list{max-height:190px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;}
+    .cfp-item{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:0.5px;cursor:pointer;padding:3px 5px;border-radius:5px;color:var(--w80);}
+    .cfp-item:hover{background:rgba(255,255,255,0.07);}
+    .cfp-item input[type=checkbox]{accent-color:rgba(58,172,223,0.9);cursor:pointer;width:13px;height:13px;}
+    .cfp-item.all-item{border-bottom:1px solid var(--glass-border);margin-bottom:4px;padding-bottom:6px;color:var(--white);font-weight:600;}
+    .cfp-footer{display:flex;gap:6px;margin-top:8px;border-top:1px solid var(--glass-border);padding-top:8px;}
+    .cfp-btn{flex:1;padding:5px;font-size:8px;letter-spacing:1.5px;font-family:var(--font);border-radius:5px;cursor:pointer;border:1px solid var(--glass-border);}
+    .cfp-btn-ok{background:rgba(58,172,223,0.2);color:rgba(58,172,223,1);border-color:rgba(58,172,223,0.4);}
+    .cfp-btn-clear{background:rgba(255,255,255,0.06);color:var(--w60);}
+    .cfp-btn-clear:hover{color:var(--white);}
+    .filter-reset-all{font-size:8px;letter-spacing:2px;color:var(--w40);background:none;border:none;cursor:pointer;font-family:var(--font);padding:4px 8px;}
+    .filter-reset-all:hover{color:var(--white);}
     .table-wrap{overflow-x:auto;border-radius:var(--radius);}
     table{width:100%;border-collapse:collapse;font-size:10px;}
     thead tr{background:rgba(255,255,255,0.12);}
@@ -552,62 +560,8 @@
           <input class="search-input" id="user-search" type="search"
                  placeholder="SEARCH UID / COUNTRY / CODE…"
                  oninput="applyFilters()" />
+          <button class="filter-reset-all" id="filters-reset-btn" onclick="resetFilters()" style="display:none;">✕ RESET FILTERS</button>
           <button class="export-btn" onclick="exportCSV()">⬇ EXPORT CSV</button>
-        </div>
-        <div class="user-filters">
-          <div class="filter-group">
-            <span class="filter-lbl">STATUS</span>
-            <div class="f-pills">
-              <button class="f-pill active" onclick="setPill(this,'status','')" >ALL</button>
-              <button class="f-pill"        onclick="setPill(this,'status','active')"  >ACTIVE</button>
-              <button class="f-pill"        onclick="setPill(this,'status','disabled')">DISABLED</button>
-            </div>
-          </div>
-          <div class="filter-group">
-            <span class="filter-lbl">COUNTRY</span>
-            <select class="f-sel" id="f-country" onchange="applyFilters()"><option value="">ALL</option></select>
-          </div>
-          <div class="filter-group">
-            <span class="filter-lbl">GENDER</span>
-            <select class="f-sel" id="f-gender" onchange="applyFilters()"><option value="">ALL</option></select>
-          </div>
-          <div class="filter-group">
-            <span class="filter-lbl">AGE</span>
-            <select class="f-sel" id="f-age" onchange="applyFilters()">
-              <option value="">ALL</option>
-              <option value="0-17">≤ 17</option>
-              <option value="18-24">18 – 24</option>
-              <option value="25-34">25 – 34</option>
-              <option value="35-49">35 – 49</option>
-              <option value="50-64">50 – 64</option>
-              <option value="65-999">65 +</option>
-              <option value="na">N/A</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <span class="filter-lbl">DAYS</span>
-            <select class="f-sel" id="f-days" onchange="applyFilters()">
-              <option value="">ALL</option>
-              <option value="1">1</option>
-              <option value="2-4">2 – 4</option>
-              <option value="5-9">5 – 9</option>
-              <option value="10-9999">10 +</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <span class="filter-lbl">FIRST NAME</span>
-            <select class="f-sel" id="f-firstname" onchange="uFilters.firstname=this.value;applyFilters()">
-              <option value="">ALL</option>
-              <option value="__set__">✓ SET</option>
-              <option value="__unset__">— NOT SET</option>
-            </select>
-          </div>
-          <button class="filter-reset" onclick="resetFilters()">✕ RESET</button>
-          <button class="filter-reset" id="load-preset-btn"
-                  onclick="loadFilterPreset()"
-                  style="display:none;background:rgba(58,172,223,0.12);border-color:rgba(58,172,223,0.35);color:rgba(58,172,223,0.9);">
-            ♻ LOAD PRESET
-          </button>
         </div>
 
         <!-- ── ACTION BAR (visible when filters are active) ── -->
@@ -636,9 +590,17 @@
           <table>
             <thead>
               <tr>
-                <th>#</th><th>UID</th><th>STATUS</th><th>COUNTRY</th>
-                <th>AGE</th><th>GENDER</th><th>DAYS</th>
-                <th>FIRST NAME</th><th>REF CODE</th><th>REFERRED BY</th><th>REGISTERED</th>
+                <th>#</th>
+                <th>UID</th>
+                <th><div class="th-wrap">STATUS<button class="col-filter-btn" id="cfb-status" onclick="openColFilter(event,'status')">▼</button></div></th>
+                <th><div class="th-wrap">COUNTRY<button class="col-filter-btn" id="cfb-country" onclick="openColFilter(event,'country')">▼</button></div></th>
+                <th><div class="th-wrap">AGE<button class="col-filter-btn" id="cfb-age" onclick="openColFilter(event,'age')">▼</button></div></th>
+                <th><div class="th-wrap">GENDER<button class="col-filter-btn" id="cfb-gender" onclick="openColFilter(event,'gender')">▼</button></div></th>
+                <th><div class="th-wrap">DAYS<button class="col-filter-btn" id="cfb-days" onclick="openColFilter(event,'days')">▼</button></div></th>
+                <th><div class="th-wrap">FIRST NAME<button class="col-filter-btn" id="cfb-firstname" onclick="openColFilter(event,'firstname')">▼</button></div></th>
+                <th>REF CODE</th>
+                <th>REFERRED BY</th>
+                <th>REGISTERED</th>
               </tr>
             </thead>
             <tbody id="users-tbody"></tbody>
@@ -1095,73 +1057,124 @@ function renderUsersTable() {
     </tr>`).join('');
   document.getElementById('users-footer').textContent=`SHOWING ${filteredUsers.length} OF ${allUsers.length} USERS · CLICK ROW TO MANAGE`;
 }
-// ── USER FILTER STATE ─────────────────────────────────────
-const uFilters={status:'',country:'',gender:'',age:'',days:'',firstname:''};
+// ── COLUMN FILTER STATE (Excel-style) ─────────────────────
+const colFilters={status:new Set(),country:new Set(),age:new Set(),gender:new Set(),days:new Set(),firstname:new Set()};
+let _cfKey=null; // currently open filter column key
 
-function setPill(el, key, val) {
-  uFilters[key]=val;
-  el.closest('.f-pills').querySelectorAll('.f-pill').forEach(p=>p.classList.remove('active'));
-  el.classList.add('active');
+function getColValues(key){
+  switch(key){
+    case 'status':   return [{v:'active',label:'● Active'},{v:'disabled',label:'○ Disabled'}];
+    case 'country':  return [...new Set(allUsers.map(u=>u.country||'__blank__'))].sort().map(v=>({v,label:v==='__blank__'?'(Blank)':v}));
+    case 'age':      return [...new Set(allUsers.map(u=>String(u.age||'')||'__blank__'))].sort((a,b)=>{if(a==='__blank__')return 1;if(b==='__blank__')return -1;return Number(a)-Number(b);}).map(v=>({v,label:v==='__blank__'?'(Blank)':v}));
+    case 'gender':   return [...new Set(allUsers.map(u=>u.gender||'__blank__'))].sort().map(v=>({v,label:v==='__blank__'?'(Blank)':v}));
+    case 'days':     return [...new Set(allUsers.map(u=>String(u.days)))].sort((a,b)=>Number(a)-Number(b)).map(v=>({v,label:v+' day'+(v==='1'?'':'s')}));
+    case 'firstname':return [{v:'__set__',label:'✓ Has name'},{v:'__unset__',label:'— No name'}];
+    default: return [];
+  }
+}
+
+function openColFilter(evt,key){
+  evt.stopPropagation();
+  const popup=document.getElementById('col-filter-popup');
+  if(_cfKey===key&&popup.style.display!=='none'){popup.style.display='none';_cfKey=null;return;}
+  _cfKey=key;
+  const vals=getColValues(key);
+  const cur=colFilters[key];
+  const allSel=cur.size===0;
+  popup.innerHTML=`
+    <input class="cfp-search" type="search" placeholder="Search…" oninput="cfpSearch(this)">
+    <div class="cfp-list">
+      <label class="cfp-item all-item"><input type="checkbox" id="cfp-all" ${allSel?'checked':''} onchange="cfpToggleAll('${key}',this.checked)"> (Select All)</label>
+      ${vals.map(({v,label})=>`<label class="cfp-item" data-label="${label.toLowerCase()}"><input type="checkbox" value="${v}" ${allSel||cur.has(v)?'checked':''} onchange="cfpToggleVal('${key}','${v}',this.checked)"> ${label}</label>`).join('')}
+    </div>
+    <div class="cfp-footer">
+      <button class="cfp-btn cfp-btn-clear" onclick="cfpClear('${key}')">RESET</button>
+      <button class="cfp-btn cfp-btn-ok" onclick="closeColFilter()">OK</button>
+    </div>`;
+  const rect=evt.target.getBoundingClientRect();
+  const pw=220;
+  let left=rect.left;
+  if(left+pw>window.innerWidth-10) left=window.innerWidth-pw-10;
+  popup.style.cssText=`display:block;left:${left}px;top:${rect.bottom+4}px;`;
+}
+
+function closeColFilter(){const p=document.getElementById('col-filter-popup');if(p)p.style.display='none';_cfKey=null;}
+
+function cfpSearch(input){
+  const q=input.value.toLowerCase();
+  document.querySelectorAll('#col-filter-popup .cfp-item[data-label]').forEach(item=>{
+    item.style.display=item.dataset.label.includes(q)?'':'none';
+  });
+}
+
+function cfpToggleAll(key,checked){
+  colFilters[key].clear();
+  document.querySelectorAll('#col-filter-popup .cfp-item[data-label] input').forEach(cb=>cb.checked=checked);
   applyFilters();
 }
 
-function applyFilters() {
+function cfpToggleVal(key,val,checked){
+  const s=colFilters[key];
+  const allVals=getColValues(key).map(x=>x.v);
+  if(s.size===0) allVals.forEach(v=>s.add(v)); // start from "all selected"
+  checked?s.add(val):s.delete(val);
+  if(s.size===allVals.length) s.clear(); // all selected = no filter
+  const allCb=document.getElementById('cfp-all');
+  if(allCb) allCb.checked=s.size===0;
+  applyFilters();
+}
+
+function cfpClear(key){colFilters[key].clear();closeColFilter();applyFilters();}
+
+// Close popup on click outside
+document.addEventListener('click',function(e){
+  const p=document.getElementById('col-filter-popup');
+  if(p&&p.style.display!=='none'&&!p.contains(e.target)&&!e.target.classList.contains('col-filter-btn')) closeColFilter();
+});
+
+function applyFilters(){
   const q=(document.getElementById('user-search')?.value||'').trim().toLowerCase();
-  const {status,country,gender,age,days,firstname}=uFilters;
   filteredUsers=allUsers.filter(u=>{
-    // text search
-    if(q && !(u.uid.toLowerCase().includes(q)||(u.country||'').toLowerCase().includes(q)||
+    if(q&&!(u.uid.toLowerCase().includes(q)||(u.country||'').toLowerCase().includes(q)||
       (u.ref_code||'').toLowerCase().includes(q)||(u.referred_by||'').toLowerCase().includes(q)||
       (u.first_name||'').toLowerCase().includes(q))) return false;
-    // status
-    if(status){const s=(userFlags[u.uid]?.status||'active'); if(s!==status) return false;}
-    // country
-    if(country && (u.country||'')!==country) return false;
-    // gender
-    if(gender && (u.gender||'').toLowerCase()!==(gender||'').toLowerCase()) return false;
-    // age
-    if(age){
-      if(age==='na'){if(u.age) return false;}
-      else{
-        const [lo,hi]=age.split('-').map(Number);
-        const a=parseInt(u.age);
-        if(!u.age||isNaN(a)||a<lo||a>hi) return false;
-      }
+    if(colFilters.status.size>0){const s=userFlags[u.uid]?.status||'active';if(!colFilters.status.has(s))return false;}
+    if(colFilters.country.size>0&&!colFilters.country.has(u.country||'__blank__')) return false;
+    if(colFilters.age.size>0&&!colFilters.age.has(String(u.age||'')||'__blank__')) return false;
+    if(colFilters.gender.size>0&&!colFilters.gender.has(u.gender||'__blank__')) return false;
+    if(colFilters.days.size>0&&!colFilters.days.has(String(u.days))) return false;
+    if(colFilters.firstname.size>0){
+      const hasName=!!u.first_name;
+      const wantSet=colFilters.firstname.has('__set__');
+      const wantUnset=colFilters.firstname.has('__unset__');
+      if(wantSet&&!wantUnset&&!hasName) return false;
+      if(wantUnset&&!wantSet&&hasName) return false;
     }
-    // days
-    if(days){
-      const [lo,hi]=days.split('-').map(Number);
-      if(u.days<lo||u.days>(hi||lo)) return false;
-    }
-    // first name
-    if(firstname==='__set__'   && !u.first_name) return false;
-    if(firstname==='__unset__' &&  u.first_name) return false;
     return true;
   });
+  // Update ▼ button active states
+  Object.keys(colFilters).forEach(k=>{const b=document.getElementById('cfb-'+k);if(b)b.classList.toggle('active',colFilters[k].size>0);});
   renderUsersTable();
   updateFilterActionBar();
 }
 
-function resetFilters() {
-  Object.keys(uFilters).forEach(k=>uFilters[k]='');
+function resetFilters(){
+  Object.keys(colFilters).forEach(k=>colFilters[k].clear());
   document.getElementById('user-search').value='';
-  ['f-country','f-gender','f-age','f-days','f-firstname'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  document.querySelectorAll('.f-pills .f-pill').forEach((p,i)=>p.classList.toggle('active',i===0));
+  Object.keys(colFilters).forEach(k=>{const b=document.getElementById('cfb-'+k);if(b)b.classList.remove('active');});
   filteredUsers=[...allUsers];
   renderUsersTable();
   updateFilterActionBar();
 }
 
-function updateFilterActionBar() {
+function updateFilterActionBar(){
   const bar=document.getElementById('filter-action-bar');
+  const rstBtn=document.getElementById('filters-reset-btn');
   if(!bar) return;
-  const isFiltered=filteredUsers.length<allUsers.length||
-                   (document.getElementById('user-search')?.value||'').trim().length>0;
+  const isFiltered=filteredUsers.length<allUsers.length||(document.getElementById('user-search')?.value||'').trim().length>0;
   bar.style.display=isFiltered?'flex':'none';
-  if(isFiltered){
-    const lbl=document.getElementById('filter-action-label');
-    if(lbl) lbl.textContent=`🎯 ${filteredUsers.length} USER${filteredUsers.length===1?'':'S'} FILTERED`;
-  }
+  if(rstBtn) rstBtn.style.display=isFiltered?'inline-flex':'none';
+  if(isFiltered){const lbl=document.getElementById('filter-action-label');if(lbl)lbl.textContent=`🎯 ${filteredUsers.length} USER${filteredUsers.length===1?'':'S'} FILTERED`;}
 }
 
 async function pushToFiltered() {
@@ -1193,43 +1206,28 @@ async function pushToFiltered() {
 
 // ── FILTER PRESETS ────────────────────────────────────────
 function saveFilterPreset() {
-  const preset = {
-    filters: { ...uFilters },
-    search:  (document.getElementById('user-search')?.value || '').trim(),
-    label:   document.getElementById('filter-action-label')?.textContent || '',
-    savedAt: new Date().toISOString(),
-  };
-  localStorage.setItem('nava_filter_preset', JSON.stringify(preset));
-  // Show LOAD PRESET button so admin can reload it next session
-  const lb = document.getElementById('load-preset-btn');
-  if(lb) lb.style.display = 'inline-flex';
-  showToast('💾 Filter preset saved — click ♻ LOAD PRESET to restore', 3000);
+  const serialized={};
+  Object.keys(colFilters).forEach(k=>serialized[k]=[...colFilters[k]]);
+  const preset={filters:serialized,search:(document.getElementById('user-search')?.value||'').trim(),savedAt:new Date().toISOString()};
+  localStorage.setItem('nava_filter_preset',JSON.stringify(preset));
+  const lb=document.getElementById('load-preset-btn');
+  if(lb) lb.style.display='inline-flex';
+  showToast('💾 Filter preset saved',3000);
 }
 
-function loadFilterPreset() {
-  try {
-    const preset = JSON.parse(localStorage.getItem('nava_filter_preset') || 'null');
-    if(!preset) { showToast('No saved preset found'); return; }
-    // Restore search
-    const searchEl = document.getElementById('user-search');
-    if(searchEl) searchEl.value = preset.search || '';
-    // Restore select filters
-    Object.assign(uFilters, preset.filters || {});
-    ['country','gender','age','days'].forEach(k => {
-      const el = document.getElementById('f-' + k);
-      if(el) el.value = uFilters[k] || '';
-    });
-    const fnEl = document.getElementById('f-firstname');
-    if(fnEl) fnEl.value = uFilters.firstname || '';
-    // Restore STATUS pill
-    document.querySelectorAll('.f-pills .f-pill').forEach(p => {
-      const pillVal = p.textContent.trim().toLowerCase();
-      const target  = (uFilters.status || '').toLowerCase();
-      p.classList.toggle('active', (!target && pillVal === 'all') || pillVal === target);
+function loadFilterPreset(){
+  try{
+    const preset=JSON.parse(localStorage.getItem('nava_filter_preset')||'null');
+    if(!preset){showToast('No saved preset found');return;}
+    const searchEl=document.getElementById('user-search');
+    if(searchEl) searchEl.value=preset.search||'';
+    Object.keys(colFilters).forEach(k=>{
+      colFilters[k].clear();
+      (preset.filters?.[k]||[]).forEach(v=>colFilters[k].add(v));
     });
     applyFilters();
-    showToast('♻ Filter preset restored', 2500);
-  } catch(e) { showToast('✗ Could not load preset'); }
+    showToast('♻ Filter preset restored',2500);
+  }catch(e){showToast('✗ Could not load preset');}
 }
 
 // Show LOAD PRESET button on startup if a preset exists
@@ -1242,23 +1240,7 @@ function loadFilterPreset() {
   }
 })();
 
-function populateFilterSelects() {
-  const countries=[...new Set(allUsers.map(u=>u.country).filter(Boolean))].sort();
-  const sel=(id,vals)=>{
-    const el=document.getElementById(id); if(!el) return;
-    const cur=el.value;
-    el.innerHTML='<option value="">ALL</option>'+vals.map(v=>`<option value="${v}">${v}</option>`).join('');
-    el.value=cur;
-  };
-  sel('f-country', countries);
-  // Gender is always Male / Female only (already normalised in allUsers)
-  const hasMale   = allUsers.some(u=>u.gender==='Male');
-  const hasFemale = allUsers.some(u=>u.gender==='Female');
-  const gOpts = [];
-  if(hasFemale) gOpts.push('Female');
-  if(hasMale)   gOpts.push('Male');
-  sel('f-gender', gOpts);
-}
+function populateFilterSelects() { /* no-op — using Excel-style column filters */ }
 function exportCSV() {
   const h=['uid','first_name','country','age','gender','days','ref_code','referred_by','registered'];
   const rows=filteredUsers.map(u=>h.map(k=>`"${(u[k]||'').toString().replace(/"/g,'""')}"`).join(','));
@@ -1721,5 +1703,7 @@ if (localStorage.getItem('nava_admin_ok') === '1') unlockPanel();
     <button class="drawer-save-btn" onclick="saveUserFlag()">SAVE</button>
   </div>
 </div>
+  <!-- Excel-style column filter popup -->
+  <div id="col-filter-popup"></div>
 </body>
 </html>
