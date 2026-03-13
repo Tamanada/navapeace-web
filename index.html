@@ -256,6 +256,94 @@
       animation: wbOverlayOut 0.45s ease both;
       pointer-events: none;
     }
+
+    /* ── FIRST DOVE OVERLAY ─────────────────────── */
+    #first-dove-overlay {
+      display: none;
+      position: fixed; inset: 0; z-index: 1000;
+      background: radial-gradient(ellipse at 50% 25%, #6DD5F5 0%, #2a8fbf 55%, #0d5f8a 100%);
+      flex-direction: column; align-items: center; justify-content: center;
+      gap: 0; overflow: hidden;
+    }
+    #first-dove-overlay.visible { display: flex; }
+    #first-dove-overlay.hiding  { animation: wbOverlayOut 0.6s ease both; pointer-events: none; }
+
+    @keyframes fdLogoIn {
+      0%   { opacity:0; transform: scale(0.3) translateY(-30px); }
+      70%  { transform: scale(1.08) translateY(0); }
+      100% { opacity:1; transform: scale(1) translateY(0); }
+    }
+    @keyframes fdDovePop {
+      0%   { opacity:0; transform: scale(0) rotate(-15deg); }
+      60%  { transform: scale(1.25) rotate(5deg); }
+      80%  { transform: scale(0.95) rotate(-2deg); }
+      100% { opacity:1; transform: scale(1) rotate(0); }
+    }
+    @keyframes fdCountUp {
+      0%   { opacity:0; transform: translateY(20px) scale(0.7); }
+      70%  { transform: translateY(-4px) scale(1.1); }
+      100% { opacity:1; transform: translateY(0) scale(1); }
+    }
+    @keyframes fdMsgIn {
+      from { opacity:0; transform: translateY(16px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+    @keyframes fdShimmer {
+      0%,100% { text-shadow: 0 0 20px rgba(255,255,255,0.4), 0 2px 8px rgba(0,0,0,0.2); }
+      50%     { text-shadow: 0 0 40px rgba(255,255,255,0.9), 0 2px 8px rgba(0,0,0,0.2); }
+    }
+    @keyframes fdParticle {
+      0%   { opacity:1; transform: translate(0,0) scale(1); }
+      100% { opacity:0; transform: translate(var(--tx),var(--ty)) scale(0.3); }
+    }
+
+    #fd-logo {
+      width: 90px; height: 90px; object-fit: contain;
+      filter: drop-shadow(0 6px 32px rgba(255,255,255,0.6));
+      opacity: 0;
+      animation: fdLogoIn 0.8s cubic-bezier(.34,1.56,.64,1) 0.1s forwards;
+      margin-bottom: 16px;
+    }
+    #fd-dove-wrap {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      margin-bottom: 20px;
+    }
+    #fd-dove-icon {
+      font-size: 72px; line-height: 1;
+      opacity: 0;
+      animation: fdDovePop 0.7s cubic-bezier(.34,1.56,.64,1) 0.6s forwards,
+                 fdShimmer 2s ease-in-out 1.5s infinite;
+      filter: drop-shadow(0 4px 24px rgba(255,255,255,0.5));
+    }
+    #fd-count {
+      font-size: 13px; letter-spacing: 4px; color: rgba(255,255,255,0.85);
+      opacity: 0;
+      animation: fdCountUp 0.5s ease 1.15s forwards;
+    }
+    #fd-title {
+      font-size: 24px; font-weight: 400; letter-spacing: 8px;
+      color: #fff; text-shadow: 0 2px 20px rgba(255,255,255,0.4);
+      opacity: 0;
+      animation: fdMsgIn 0.5s ease 1.4s forwards;
+      margin-bottom: 10px;
+    }
+    #fd-msg {
+      font-size: 11px; letter-spacing: 2.5px; color: rgba(255,255,255,0.9);
+      text-transform: uppercase; text-align: center; max-width: 260px; line-height: 1.7;
+      opacity: 0;
+      animation: fdMsgIn 0.5s ease 1.75s forwards;
+    }
+    #fd-sub {
+      font-size: 9px; letter-spacing: 2px; color: rgba(255,255,255,0.55);
+      text-transform: uppercase; text-align: center; max-width: 240px;
+      opacity: 0;
+      animation: fdMsgIn 0.5s ease 2.1s forwards;
+      margin-top: 6px;
+    }
+    .fd-particle {
+      position: absolute; font-size: 18px; pointer-events: none;
+      animation: fdParticle 1.6s ease forwards;
+    }
   </style>
 </head>
 <body>
@@ -265,6 +353,18 @@
     <img id="wb-logo" src="logo.png" alt="NAVA PEACE" />
     <h1 id="wb-title">NAVA PEACE</h1>
     <p id="wb-msg"></p>
+  </div>
+
+  <!-- FIRST DOVE OVERLAY (shown after first registration) -->
+  <div id="first-dove-overlay">
+    <img id="fd-logo" src="logo.png" alt="NAVA PEACE" />
+    <div id="fd-dove-wrap">
+      <div id="fd-dove-icon">🕊</div>
+      <div id="fd-count">YOUR FIRST DOVE</div>
+    </div>
+    <h2 id="fd-title">NAVA PEACE</h2>
+    <p id="fd-msg">WELCOME TO THE PEACE MOVEMENT</p>
+    <p id="fd-sub">YOUR ACTION HAS BEEN COUNTED — THANK YOU</p>
   </div>
 
   <div class="card">
@@ -599,8 +699,8 @@
       // Register push subscription for new user (SW already loaded on peace.html)
       registerPushForNewUser(userUid);
 
-      // Première inscription → page peace pour découvrir le bouton
-      window.location.href = 'peace.html';
+      // Première inscription → animation première colombe → peace.html
+      showFirstDoveOverlay();
     });
 
     // ── WEB PUSH (new user registration) ───────────────────────────────────
@@ -611,6 +711,39 @@
       const base64  = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
       const raw     = atob(base64);
       return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+    }
+
+    // ── First Dove Animation ──────────────────────────────────────
+    function showFirstDoveOverlay() {
+      const overlay = document.getElementById('first-dove-overlay');
+      overlay.classList.add('visible');
+
+      // Burst of dove particles from center
+      setTimeout(() => spawnParticles(overlay), 700);
+
+      // After 3.2s → fade out → redirect
+      setTimeout(() => {
+        overlay.classList.add('hiding');
+        setTimeout(() => window.location.href = 'peace.html', 600);
+      }, 3200);
+    }
+
+    function spawnParticles(container) {
+      const doves = ['🕊','🕊','✨','🌿','🕊','✨','🕊'];
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      doves.forEach((d, i) => {
+        const el = document.createElement('div');
+        el.className = 'fd-particle';
+        el.textContent = d;
+        const angle = (i / doves.length) * 2 * Math.PI - Math.PI / 2;
+        const dist  = 80 + Math.random() * 100;
+        el.style.cssText = `left:${cx}px;top:${cy - 60}px;`
+          + `--tx:${Math.cos(angle)*dist}px;--ty:${Math.sin(angle)*dist - 60}px;`
+          + `animation-delay:${i * 0.07}s;`;
+        container.appendChild(el);
+        setTimeout(() => el.remove(), 2000);
+      });
     }
 
     async function registerPushForNewUser(uid) {
