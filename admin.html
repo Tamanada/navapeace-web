@@ -486,6 +486,7 @@
     <!-- Tabs -->
     <div class="tabs" style="margin-bottom:24px;">
       <button class="tab-btn active" onclick="showTab('overview',this)">📊 OVERVIEW</button>
+      <button class="tab-btn" onclick="showTab('stats',this)">📈 STATS</button>
       <button class="tab-btn" onclick="showTab('users',this)">👥 USERS</button>
       <button class="tab-btn" onclick="showTab('messages',this)">💬 MESSAGES</button>
       <button class="tab-btn" onclick="showTab('modules',this)">⚙️ MODULES</button>
@@ -504,24 +505,40 @@
             <div class="activity-chart"><div class="activity-bars" id="bars-activity"></div></div>
           </div>
         </div>
-        <div class="charts-grid-3">
-          <div class="g-card chart-card" style="grid-column:span 2;">
+        <div class="charts-grid" style="margin-top:20px;">
+          <div class="g-card chart-card">
             <p class="chart-title">🌍 TOP COUNTRIES (by unique users)</p>
             <div id="chart-countries"></div>
           </div>
           <div class="g-card chart-card">
+            <p class="chart-title">📅 NEW REGISTRATIONS — LAST 30 DAYS</p>
+            <div class="activity-chart"><div class="activity-bars" id="bars-reg"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ STATS ═══════════════════════════════════════ -->
+    <div id="tab-stats" class="tab-pane">
+      <div id="st-content">
+        <div class="charts-grid" style="margin-bottom:20px;">
+          <div class="g-card chart-card">
             <p class="chart-title">⚧ GENDER SPLIT</p>
             <div id="chart-gender"></div>
           </div>
-        </div>
-        <div class="charts-grid" style="margin-top:20px;">
           <div class="g-card chart-card">
             <p class="chart-title">🎂 AGE DISTRIBUTION</p>
             <div id="chart-age"></div>
           </div>
+        </div>
+        <div class="charts-grid">
           <div class="g-card chart-card">
-            <p class="chart-title">📅 NEW REGISTRATIONS — LAST 30 DAYS</p>
-            <div class="activity-chart"><div class="activity-bars" id="bars-reg"></div></div>
+            <p class="chart-title">📆 VOTES PER DAY (engagement)</p>
+            <div id="chart-days-dist"></div>
+          </div>
+          <div class="g-card chart-card">
+            <p class="chart-title">🌍 USERS WITH / WITHOUT PROFILE DATA</p>
+            <div id="chart-profile-completeness"></div>
           </div>
         </div>
       </div>
@@ -541,9 +558,9 @@
           <div class="filter-group">
             <span class="filter-lbl">STATUS</span>
             <div class="f-pills">
-              <button class="f-pill active" onclick="setPill(this,'f-status','')" >ALL</button>
-              <button class="f-pill"        onclick="setPill(this,'f-status','active')"  >ACTIVE</button>
-              <button class="f-pill"        onclick="setPill(this,'f-status','disabled')">DISABLED</button>
+              <button class="f-pill active" onclick="setPill(this,'status','')" >ALL</button>
+              <button class="f-pill"        onclick="setPill(this,'status','active')"  >ACTIVE</button>
+              <button class="f-pill"        onclick="setPill(this,'status','disabled')">DISABLED</button>
             </div>
           </div>
           <div class="filter-group">
@@ -649,17 +666,23 @@
 
     <!-- ══ MODULES ════════════════════════════════════ -->
     <div id="tab-modules" class="tab-pane">
-      <div class="modules-grid" id="modules-grid"></div>
-      <div style="margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+
+      <!-- Sticky save bar — appears at top when pending changes exist -->
+      <div id="modules-save-bar" style="display:none;position:sticky;top:0;z-index:50;
+           margin-bottom:18px;padding:12px 18px;
+           background:rgba(74,222,128,0.12);border:1.5px solid rgba(74,222,128,0.45);
+           border-radius:12px;display:none;align-items:center;gap:14px;flex-wrap:wrap;">
+        <span style="flex:1;font-size:9px;letter-spacing:2px;color:rgba(255,200,80,0.9);">
+          ● UNSAVED CHANGES
+        </span>
         <button class="export-btn" id="modules-save-btn" onclick="saveModules()"
-                style="display:none;background:rgba(74,222,128,0.15);color:#4ade80;border-color:rgba(74,222,128,0.4);">
+                style="background:rgba(74,222,128,0.2);color:#4ade80;border-color:rgba(74,222,128,0.5);">
           💾 SAVE CHANGES
         </button>
         <span class="save-feedback" id="save-feedback">✓ SAVED — ALL DEVICES UPDATED</span>
-        <span id="modules-unsaved" style="display:none;font-size:9px;letter-spacing:2px;color:rgba(255,200,80,0.85);">
-          ● UNSAVED CHANGES
-        </span>
       </div>
+
+      <div class="modules-grid" id="modules-grid"></div>
       <div class="modules-note" style="margin-top:18px;">
         <strong>ℹ️ HOW MODULE TOGGLES WORK</strong><br/><br/>
         Toggle modules ON/OFF then click <strong>SAVE CHANGES</strong>.<br/>
@@ -830,7 +853,8 @@ function showTab(id, btn) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
   if (btn) btn.classList.add('active');
-  if (id === 'push') loadPushSubCount();
+  if (id === 'push')  loadPushSubCount();
+  if (id === 'stats') renderStats();
 }
 
 // ── HELPERS ──────────────────────────────────────────────
@@ -853,6 +877,25 @@ let msgFilter='all';
 async function loadAll() {
   await Promise.all([loadVotes(), loadMessages(), loadReferrals()]);
   await mergeFirstNames(); // doit tourner après loadVotes (allUsers) et loadMessages
+}
+
+// ── GENDER NORMALISATION ──────────────────────────────────
+// Maps any raw DB value → "Male" | "Female" | ""
+function normalizeGender(raw) {
+  if(!raw) return '';
+  const v = raw.trim().toLowerCase();
+  const F = ['female','femme','femelle','mujer','féminin','femenino',
+             'หญิง','ស្ត្រី','女','женщин','donna','frau','kvinna',
+             'vrouw','kobieta','nữ','naine','dama','kadın'];
+  const M = ['male','homme','masculin','hombre','ชาย','ប្រុស','男',
+             'мужчин','uomo','mann','man','hombre','mężczyzna','nam',
+             'mies','erkek','homem'];
+  if(F.includes(v)) return 'Female';
+  if(M.includes(v)) return 'Male';
+  // Prefix matching for partial entries
+  if(v.startsWith('fe') || v.startsWith('fm') || v.startsWith('wo')) return 'Female';
+  if(v.startsWith('ma') || v.startsWith('ho') || v.startsWith('hm')) return 'Male';
+  return ''; // unknown → treat as not set
 }
 
 // ── VOTES / USERS ─────────────────────────────────────────
@@ -909,7 +952,7 @@ async function loadVotes() {
 
     allUsers=[...usersMap.values()].map(u=>({
       uid:u.user_uid, country:u.country||'', age:u.age||'',
-      gender:u.gender||'', days:votesCount.get(u.user_uid)||1,
+      gender:normalizeGender(u.gender), days:votesCount.get(u.user_uid)||1,
       ref_code:u.referral_code||'', referred_by:referredByMap.get(u.user_uid)||u.referred_by||'',
       registered:firstSeen.get(u.user_uid)||u.created_at,
       first_name:''
@@ -919,6 +962,7 @@ async function loadVotes() {
     populateFilterSelects();
     renderUsersTable();
     renderOverview();
+    renderStats();
     renderSecurity();
 
   } finally {
@@ -948,19 +992,34 @@ function renderOverview() {
     </div>`
   ).join('');
 
-  // Gender
-  const g={male:0,female:0,other:0};
-  allUsers.forEach(u=>{ const v=(u.gender||'').toLowerCase(); if(v==='male') g.male++; else if(v==='female') g.female++; else if(v) g.other++; });
-  const tot=allUsers.length||1;
+}
+
+// ── STATS TAB ─────────────────────────────────────────────
+function renderStats() {
+  const tot = allUsers.length || 1;
+
+  // Gender (normalised → only Male / Female / empty)
+  const gMale   = allUsers.filter(u=>u.gender==='Male').length;
+  const gFemale = allUsers.filter(u=>u.gender==='Female').length;
+  const gUnset  = allUsers.filter(u=>!u.gender).length;
   document.getElementById('chart-gender').innerHTML=`
     <div class="gender-pills">
-      <div class="gender-pill"><div class="gender-pct">${(g.male/tot*100).toFixed(0)}%</div><div class="gender-lbl">♂ MALE<br/>${fmt(g.male)}</div></div>
-      <div class="gender-pill"><div class="gender-pct">${(g.female/tot*100).toFixed(0)}%</div><div class="gender-lbl">♀ FEMALE<br/>${fmt(g.female)}</div></div>
+      <div class="gender-pill">
+        <div class="gender-pct">${(gFemale/tot*100).toFixed(0)}%</div>
+        <div class="gender-lbl">♀ FEMALE<br/>${fmt(gFemale)}</div>
+      </div>
+      <div class="gender-pill">
+        <div class="gender-pct">${(gMale/tot*100).toFixed(0)}%</div>
+        <div class="gender-lbl">♂ MALE<br/>${fmt(gMale)}</div>
+      </div>
+      ${gUnset?`<div class="gender-pill" style="opacity:0.5;">
+        <div class="gender-pct">${(gUnset/tot*100).toFixed(0)}%</div>
+        <div class="gender-lbl">— N/A<br/>${fmt(gUnset)}</div>
+      </div>`:''}
     </div>
-    ${g.other?`<div class="gender-pill" style="margin-bottom:12px;"><div class="gender-pct">${(g.other/tot*100).toFixed(0)}%</div><div class="gender-lbl">⚧ OTHER<br/>${fmt(g.other)}</div></div>`:''}
-    <p style="font-size:9px;color:var(--w40);letter-spacing:2px;">${fmt(allUsers.length)} TOTAL USERS</p>`;
+    <p style="font-size:9px;color:var(--w40);letter-spacing:2px;margin-top:12px;">${fmt(tot)} TOTAL USERS</p>`;
 
-  // Age
+  // Age distribution
   const ag={'≤17':0,'18–24':0,'25–34':0,'35–49':0,'50–64':0,'65+':0,'N/A':0};
   allUsers.forEach(u=>{ const a=parseInt(u.age); if(isNaN(a)) ag['N/A']++; else if(a<=17) ag['≤17']++; else if(a<=24) ag['18–24']++; else if(a<=34) ag['25–34']++; else if(a<=49) ag['35–49']++; else if(a<=64) ag['50–64']++; else ag['65+']++; });
   const maxA=Math.max(...Object.values(ag))||1;
@@ -971,6 +1030,35 @@ function renderOverview() {
       <span class="bar-count">${n}</span>
     </div>`
   ).join('');
+
+  // Days distribution (engagement)
+  const dd={'1 day':0,'2–4':0,'5–9':0,'10–29':0,'30+':0};
+  allUsers.forEach(u=>{ const d=u.days||1; if(d===1) dd['1 day']++; else if(d<=4) dd['2–4']++; else if(d<=9) dd['5–9']++; else if(d<=29) dd['10–29']++; else dd['30+']++; });
+  const maxD=Math.max(...Object.values(dd))||1;
+  document.getElementById('chart-days-dist').innerHTML=Object.entries(dd).filter(([,v])=>v>0).map(([k,n])=>
+    `<div class="bar-row">
+      <span class="bar-label">${k}</span>
+      <div class="bar-wrap"><div class="bar-fill" style="width:${(n/maxD*100).toFixed(1)}%;background:linear-gradient(90deg,rgba(58,172,223,0.5),rgba(58,172,223,0.9))"></div></div>
+      <span class="bar-count">${n}</span>
+    </div>`
+  ).join('');
+
+  // Profile completeness
+  const hasAge    = allUsers.filter(u=>u.age).length;
+  const hasGender = allUsers.filter(u=>u.gender).length;
+  const hasName   = allUsers.filter(u=>u.first_name).length;
+  const maxP = tot;
+  document.getElementById('chart-profile-completeness').innerHTML=
+    [['AGE SET', hasAge, 'rgba(74,222,128,0.7)'],
+     ['GENDER SET', hasGender, 'rgba(58,172,223,0.7)'],
+     ['FIRST NAME SET', hasName, 'rgba(249,199,79,0.7)']
+    ].map(([k,n,col])=>
+      `<div class="bar-row">
+        <span class="bar-label">${k}</span>
+        <div class="bar-wrap"><div class="bar-fill" style="width:${(n/maxP*100).toFixed(1)}%;background:linear-gradient(90deg,${col.replace('0.7','0.4')},${col})"></div></div>
+        <span class="bar-count">${n} / ${tot}</span>
+      </div>`
+    ).join('');
 }
 
 function renderActivityBars(items, id, getDate) {
@@ -1156,7 +1244,6 @@ function loadFilterPreset() {
 
 function populateFilterSelects() {
   const countries=[...new Set(allUsers.map(u=>u.country).filter(Boolean))].sort();
-  const genders  =[...new Set(allUsers.map(u=>u.gender ).filter(Boolean))].sort();
   const sel=(id,vals)=>{
     const el=document.getElementById(id); if(!el) return;
     const cur=el.value;
@@ -1164,7 +1251,13 @@ function populateFilterSelects() {
     el.value=cur;
   };
   sel('f-country', countries);
-  sel('f-gender',  genders);
+  // Gender is always Male / Female only (already normalised in allUsers)
+  const hasMale   = allUsers.some(u=>u.gender==='Male');
+  const hasFemale = allUsers.some(u=>u.gender==='Female');
+  const gOpts = [];
+  if(hasFemale) gOpts.push('Female');
+  if(hasMale)   gOpts.push('Male');
+  sel('f-gender', gOpts);
 }
 function exportCSV() {
   const h=['uid','first_name','country','age','gender','days','ref_code','referred_by','registered'];
@@ -1316,11 +1409,7 @@ function renderModulesGrid() {
       </button>
     </div>`;
   }).join('');
-  // Reset unsaved indicator
-  const saveBtn = document.getElementById('modules-save-btn');
-  const unsaved = document.getElementById('modules-unsaved');
-  if(saveBtn) saveBtn.style.display = 'none';
-  if(unsaved) unsaved.style.display = 'none';
+  showModulesSaveBar(false); // hide save bar after re-render
 }
 
 function toggleModule(key) {
@@ -1333,11 +1422,16 @@ function toggleModule(key) {
     btn.className = 'module-toggle-btn ' + (nowOn ? 'mod-on' : 'mod-off');
     btn.textContent = nowOn ? '● ENABLED — CLICK TO DISABLE' : '○ DISABLED — CLICK TO ENABLE';
   }
-  // Show SAVE button & unsaved indicator
-  const saveBtn = document.getElementById('modules-save-btn');
-  const unsaved = document.getElementById('modules-unsaved');
-  if(saveBtn) saveBtn.style.display = 'inline-flex';
-  if(unsaved) unsaved.style.display = 'inline-block';
+  // Show sticky save bar at top
+  const bar = document.getElementById('modules-save-bar');
+  if(bar) bar.style.display = 'flex';
+}
+
+function showModulesSaveBar(visible) {
+  const bar = document.getElementById('modules-save-bar');
+  if(bar) bar.style.display = visible ? 'flex' : 'none';
+  const fb = document.getElementById('save-feedback');
+  if(fb && !visible) { fb.style.opacity='0'; }
 }
 
 async function saveModules() {
@@ -1353,8 +1447,7 @@ async function saveModules() {
     if(error) throw error;
     // Also update local cache so gate script stays in sync on this device
     localStorage.setItem('nava_modules', value);
-    btn.style.display = 'none';
-    if(unsaved) unsaved.style.display = 'none';
+    showModulesSaveBar(false);
     const fb = document.getElementById('save-feedback');
     if(fb){ fb.style.opacity='1'; setTimeout(()=>fb.style.opacity='0',2500); }
     showToast('✓ MODULES SAVED — all devices will update on next load', 3000);
