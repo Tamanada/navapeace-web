@@ -577,6 +577,14 @@
               <option value="10-9999">10 +</option>
             </select>
           </div>
+          <div class="filter-group">
+            <span class="filter-lbl">FIRST NAME</span>
+            <select class="f-sel" id="f-firstname" onchange="uFilters.firstname=this.value;applyFilters()">
+              <option value="">ALL</option>
+              <option value="__set__">✓ SET</option>
+              <option value="__unset__">— NOT SET</option>
+            </select>
+          </div>
           <button class="filter-reset" onclick="resetFilters()">✕ RESET</button>
         </div>
         <div class="g-card table-wrap">
@@ -585,7 +593,7 @@
               <tr>
                 <th>#</th><th>UID</th><th>STATUS</th><th>COUNTRY</th>
                 <th>AGE</th><th>GENDER</th><th>DAYS</th>
-                <th>REF CODE</th><th>REFERRED BY</th><th>REGISTERED</th>
+                <th>FIRST NAME</th><th>REF CODE</th><th>REFERRED BY</th><th>REGISTERED</th>
               </tr>
             </thead>
             <tbody id="users-tbody"></tbody>
@@ -811,6 +819,7 @@ let msgFilter='all';
 // ── LOAD ALL ──────────────────────────────────────────────
 async function loadAll() {
   await Promise.all([loadVotes(), loadMessages(), loadReferrals()]);
+  await mergeFirstNames(); // doit tourner après loadVotes (allUsers) et loadMessages
 }
 
 // ── VOTES / USERS ─────────────────────────────────────────
@@ -869,7 +878,8 @@ async function loadVotes() {
       uid:u.user_uid, country:u.country||'', age:u.age||'',
       gender:u.gender||'', days:votesCount.get(u.user_uid)||1,
       ref_code:u.referral_code||'', referred_by:referredByMap.get(u.user_uid)||u.referred_by||'',
-      registered:firstSeen.get(u.user_uid)||u.created_at
+      registered:firstSeen.get(u.user_uid)||u.created_at,
+      first_name:''
     })).sort((a,b)=>b.days-a.days);
 
     filteredUsers=[...allUsers];
@@ -957,6 +967,7 @@ function renderUsersTable() {
       <td>${u.age||'—'}</td>
       <td>${u.gender||'—'}</td>
       <td><span class="days-badge">${u.days}</span></td>
+      <td style="font-size:10px;color:rgba(255,255,255,0.8);">${u.first_name||'—'}</td>
       <td class="ref-code">${u.ref_code||'—'}</td>
       <td style="font-size:9px;color:var(--w40);">${u.referred_by||'—'}</td>
       <td style="font-size:9px;">${fmtDate(u.registered)}</td>
@@ -964,7 +975,7 @@ function renderUsersTable() {
   document.getElementById('users-footer').textContent=`SHOWING ${filteredUsers.length} OF ${allUsers.length} USERS · CLICK ROW TO MANAGE`;
 }
 // ── USER FILTER STATE ─────────────────────────────────────
-const uFilters={status:'',country:'',gender:'',age:'',days:''};
+const uFilters={status:'',country:'',gender:'',age:'',days:'',firstname:''};
 
 function setPill(el, key, val) {
   uFilters[key]=val;
@@ -975,11 +986,12 @@ function setPill(el, key, val) {
 
 function applyFilters() {
   const q=(document.getElementById('user-search')?.value||'').trim().toLowerCase();
-  const {status,country,gender,age,days}=uFilters;
+  const {status,country,gender,age,days,firstname}=uFilters;
   filteredUsers=allUsers.filter(u=>{
     // text search
     if(q && !(u.uid.toLowerCase().includes(q)||(u.country||'').toLowerCase().includes(q)||
-      (u.ref_code||'').toLowerCase().includes(q)||(u.referred_by||'').toLowerCase().includes(q))) return false;
+      (u.ref_code||'').toLowerCase().includes(q)||(u.referred_by||'').toLowerCase().includes(q)||
+      (u.first_name||'').toLowerCase().includes(q))) return false;
     // status
     if(status){const s=(userFlags[u.uid]?.status||'active'); if(s!==status) return false;}
     // country
@@ -1000,6 +1012,9 @@ function applyFilters() {
       const [lo,hi]=days.split('-').map(Number);
       if(u.days<lo||u.days>(hi||lo)) return false;
     }
+    // first name
+    if(firstname==='__set__'   && !u.first_name) return false;
+    if(firstname==='__unset__' &&  u.first_name) return false;
     return true;
   });
   renderUsersTable();
@@ -1008,7 +1023,7 @@ function applyFilters() {
 function resetFilters() {
   Object.keys(uFilters).forEach(k=>uFilters[k]='');
   document.getElementById('user-search').value='';
-  ['f-country','f-gender','f-age','f-days'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['f-country','f-gender','f-age','f-days','f-firstname'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.querySelectorAll('.f-pills .f-pill').forEach((p,i)=>p.classList.toggle('active',i===0));
   filteredUsers=[...allUsers];
   renderUsersTable();
@@ -1027,7 +1042,7 @@ function populateFilterSelects() {
   sel('f-gender',  genders);
 }
 function exportCSV() {
-  const h=['uid','country','age','gender','days','ref_code','referred_by','registered'];
+  const h=['uid','first_name','country','age','gender','days','ref_code','referred_by','registered'];
   const rows=filteredUsers.map(u=>h.map(k=>`"${(u[k]||'').toString().replace(/"/g,'""')}"`).join(','));
   const blob=new Blob([[h.join(','),...rows].join('\n')],{type:'text/csv'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
@@ -1048,6 +1063,19 @@ async function loadMessages() {
     allMessages=data||[];
     renderMessages();
   } finally { hide('m-spin'); show('m-content'); }
+}
+
+async function mergeFirstNames() {
+  try {
+    const {data}=await sb.from('peace_messages')
+      .select('user_uid,first_name')
+      .not('first_name','is',null);
+    if(!data) return;
+    const fnMap=new Map(data.map(r=>[r.user_uid, r.first_name]));
+    allUsers.forEach(u=>{ u.first_name = fnMap.get(u.uid)||''; });
+    filteredUsers.forEach(u=>{ u.first_name = fnMap.get(u.uid)||''; });
+    renderUsersTable();
+  } catch(e) { /* silencieux */ }
 }
 
 function renderMessages() {
