@@ -596,9 +596,30 @@
       const prevDays = parseInt(localStorage.getItem('nava_peace_days') || '0', 10);
       localStorage.setItem('nava_peace_days', prevDays + 1);
 
+      // Register push subscription for new user (SW already loaded on peace.html)
+      registerPushForNewUser(userUid);
+
       // Première inscription → page peace pour découvrir le bouton
       window.location.href = 'peace.html';
     });
+
+    // ── WEB PUSH (new user registration) ───────────────────────────────────
+    const VAPID_PUBLIC_KEY = 'BJ05qnJnaYlLAhvlO4s1CDbh42eD7PYuNDgk33AgzBQ6mhRMDNcPqPj138WWZqA_hAon8CAN9RpYA5yikWEi8p4';
+
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64  = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+      const raw     = atob(base64);
+      return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+    }
+
+    async function registerPushForNewUser(uid) {
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+      try {
+        const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+        // Will ask on peace.html after 4s — just pre-register the SW here
+      } catch(e) { /* silent */ }
+    }
   </script>
 </body>
 </html>

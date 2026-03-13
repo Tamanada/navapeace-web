@@ -647,6 +647,56 @@
     checkDone();
     loadCounters();
     checkNotifications();
+    initPush();
+
+    // ── WEB PUSH ────────────────────────────────────────────────────────────
+    const VAPID_PUBLIC_KEY = 'BJ05qnJnaYlLAhvlO4s1CDbh42eD7PYuNDgk33AgzBQ6mhRMDNcPqPj138WWZqA_hAon8CAN9RpYA5yikWEi8p4';
+
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64  = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+      const raw     = atob(base64);
+      return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+    }
+
+    async function initPush() {
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+      try {
+        // Register service worker
+        const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+
+        // Only prompt if user hasn't decided yet
+        if (Notification.permission === 'default') {
+          // Small delay so it doesn't fire immediately on page load
+          setTimeout(() => askPushPermission(reg), 4000);
+        } else if (Notification.permission === 'granted') {
+          await savePushSubscription(reg);
+        }
+      } catch(e) { console.warn('SW registration failed:', e); }
+    }
+
+    async function askPushPermission(reg) {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') await savePushSubscription(reg);
+    }
+
+    async function savePushSubscription(reg) {
+      try {
+        const uid = localStorage.getItem('nava_peace_uid');
+        if (!uid || !sb) return;
+        let sub = await reg.pushManager.getSubscription();
+        if (!sub) {
+          sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+          });
+        }
+        await sb.from('push_subscriptions').upsert(
+          { user_uid: uid, subscription: sub.toJSON(), updated_at: new Date().toISOString() },
+          { onConflict: 'user_uid' }
+        );
+      } catch(e) { console.warn('Push subscription error:', e); }
+    }
   </script>
 
 </body>

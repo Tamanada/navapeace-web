@@ -176,7 +176,7 @@
     .act-label{font-size:6px;color:var(--w40);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:26px;}
 
     /* ── USERS TABLE ──────────────────────────────── */
-    .table-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap;}
+    .table-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:12px;flex-wrap:wrap;}
     .search-input{
       padding:11px 18px;background:var(--glass-bg);
       border:1.5px solid var(--glass-border);border-radius:10px;
@@ -190,6 +190,17 @@
       color:var(--white);font-family:var(--font);font-size:9px;letter-spacing:2px;cursor:pointer;transition:background 0.2s;
     }
     .export-btn:hover{background:rgba(255,255,255,0.25);}
+    .user-filters{display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-bottom:14px;padding:10px 14px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:10px;}
+    .filter-group{display:flex;align-items:center;gap:7px;}
+    .filter-lbl{font-size:8px;letter-spacing:2px;color:var(--w40);white-space:nowrap;}
+    .f-pills{display:flex;gap:4px;}
+    .f-pill{padding:4px 9px;font-size:8px;letter-spacing:1.5px;background:rgba(255,255,255,0.06);border:1px solid var(--glass-border);border-radius:6px;color:var(--w60);font-family:var(--font);cursor:pointer;transition:all 0.15s;}
+    .f-pill.active{background:rgba(255,255,255,0.22);border-color:rgba(255,255,255,0.55);color:var(--white);}
+    .f-pill:hover:not(.active){background:rgba(255,255,255,0.12);}
+    .f-sel{padding:4px 9px;font-size:8px;letter-spacing:1.5px;background:rgba(255,255,255,0.06);border:1px solid var(--glass-border);border-radius:6px;color:var(--white);font-family:var(--font);cursor:pointer;outline:none;max-width:130px;}
+    .f-sel option{background:#0d3352;}
+    .filter-reset{margin-left:auto;font-size:8px;letter-spacing:2px;color:var(--w40);background:none;border:none;cursor:pointer;font-family:var(--font);padding:4px 8px;}
+    .filter-reset:hover{color:var(--white);}
     .table-wrap{overflow-x:auto;border-radius:var(--radius);}
     table{width:100%;border-collapse:collapse;font-size:10px;}
     thead tr{background:rgba(255,255,255,0.12);}
@@ -480,6 +491,7 @@
       <button class="tab-btn" onclick="showTab('modules',this)">⚙️ MODULES</button>
       <button class="tab-btn" onclick="showTab('security',this)">🛡 SECURITY</button>
       <button class="tab-btn" onclick="showTab('referrals',this)">🏆 REFERRALS</button>
+      <button class="tab-btn" onclick="showTab('push',this)">🔔 PUSH</button>
     </div>
 
     <!-- ══ OVERVIEW ══════════════════════════════════ -->
@@ -522,8 +534,50 @@
         <div class="table-toolbar">
           <input class="search-input" id="user-search" type="search"
                  placeholder="SEARCH UID / COUNTRY / CODE…"
-                 oninput="filterUsers(this.value)" />
+                 oninput="applyFilters()" />
           <button class="export-btn" onclick="exportCSV()">⬇ EXPORT CSV</button>
+        </div>
+        <div class="user-filters">
+          <div class="filter-group">
+            <span class="filter-lbl">STATUS</span>
+            <div class="f-pills">
+              <button class="f-pill active" onclick="setPill(this,'f-status','')" >ALL</button>
+              <button class="f-pill"        onclick="setPill(this,'f-status','active')"  >ACTIVE</button>
+              <button class="f-pill"        onclick="setPill(this,'f-status','disabled')">DISABLED</button>
+            </div>
+          </div>
+          <div class="filter-group">
+            <span class="filter-lbl">COUNTRY</span>
+            <select class="f-sel" id="f-country" onchange="applyFilters()"><option value="">ALL</option></select>
+          </div>
+          <div class="filter-group">
+            <span class="filter-lbl">GENDER</span>
+            <select class="f-sel" id="f-gender" onchange="applyFilters()"><option value="">ALL</option></select>
+          </div>
+          <div class="filter-group">
+            <span class="filter-lbl">AGE</span>
+            <select class="f-sel" id="f-age" onchange="applyFilters()">
+              <option value="">ALL</option>
+              <option value="0-17">≤ 17</option>
+              <option value="18-24">18 – 24</option>
+              <option value="25-34">25 – 34</option>
+              <option value="35-49">35 – 49</option>
+              <option value="50-64">50 – 64</option>
+              <option value="65-999">65 +</option>
+              <option value="na">N/A</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <span class="filter-lbl">DAYS</span>
+            <select class="f-sel" id="f-days" onchange="applyFilters()">
+              <option value="">ALL</option>
+              <option value="1">1</option>
+              <option value="2-4">2 – 4</option>
+              <option value="5-9">5 – 9</option>
+              <option value="10-9999">10 +</option>
+            </select>
+          </div>
+          <button class="filter-reset" onclick="resetFilters()">✕ RESET</button>
         </div>
         <div class="g-card table-wrap">
           <table>
@@ -632,6 +686,54 @@
       </div>
     </div>
 
+    <!-- ══ PUSH ════════════════════════════════════════ -->
+    <div id="tab-push" class="tab-pane">
+      <div class="g-card" style="max-width:600px;margin:0 auto;">
+        <p style="font-size:10px;letter-spacing:3px;color:var(--w60);margin-bottom:20px;">🔔 SEND WEB PUSH NOTIFICATION</p>
+
+        <div style="margin-bottom:14px;">
+          <label style="font-size:8px;letter-spacing:2px;color:var(--w40);display:block;margin-bottom:6px;">TITLE</label>
+          <input id="push-title" class="search-input" style="width:100%;box-sizing:border-box;"
+                 placeholder="NAVA PEACE" value="NAVA PEACE" />
+        </div>
+        <div style="margin-bottom:14px;">
+          <label style="font-size:8px;letter-spacing:2px;color:var(--w40);display:block;margin-bottom:6px;">MESSAGE</label>
+          <input id="push-body" class="search-input" style="width:100%;box-sizing:border-box;"
+                 placeholder="🕊 Time to choose peace today" value="🕊 Time to choose peace today" />
+        </div>
+        <div style="margin-bottom:14px;">
+          <label style="font-size:8px;letter-spacing:2px;color:var(--w40);display:block;margin-bottom:6px;">URL (click destination)</label>
+          <input id="push-url" class="search-input" style="width:100%;box-sizing:border-box;"
+                 placeholder="/peace.html" value="/peace.html" />
+        </div>
+        <div style="margin-bottom:20px;">
+          <label style="font-size:8px;letter-spacing:2px;color:var(--w40);display:block;margin-bottom:6px;">TARGET USER UID (leave empty = broadcast to all)</label>
+          <input id="push-uid" class="search-input" style="width:100%;box-sizing:border-box;"
+                 placeholder="u_xxxx… or empty for ALL" />
+        </div>
+
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          <button class="export-btn" onclick="sendPushNotif()" id="push-send-btn">🔔 SEND PUSH</button>
+          <span id="push-result" style="font-size:9px;letter-spacing:2px;color:var(--w60);"></span>
+        </div>
+
+        <div style="margin-top:28px;padding-top:18px;border-top:1px solid var(--glass-border);">
+          <p style="font-size:8px;letter-spacing:2px;color:var(--w40);margin-bottom:10px;">📋 SETUP CHECKLIST</p>
+          <div style="font-size:9px;line-height:2;color:var(--w60);">
+            <div>1 · Run <code style="background:rgba(255,255,255,0.1);padding:1px 6px;border-radius:4px;">push_setup.sql</code> in Supabase SQL Editor</div>
+            <div>2 · Deploy Edge Function: <code style="background:rgba(255,255,255,0.1);padding:1px 6px;border-radius:4px;">supabase functions deploy send-push</code></div>
+            <div>3 · Set secrets in Supabase Dashboard → Edge Functions → Secrets:</div>
+            <div style="padding-left:16px;font-size:8px;color:var(--w40);">
+              VAPID_PUBLIC_KEY = BJ05qnJnaYlLAhvlO4s1CDbh42eD7PYuNDgk33AgzBQ6mhRMDNcPqPj138WWZqA_hAon8CAN9RpYA5yikWEi8p4<br/>
+              VAPID_PRIVATE_KEY = <em>(keep secret — do not share)</em>
+            </div>
+            <div>4 · Users auto-subscribe when they open peace.html</div>
+            <div id="push-sub-count" style="margin-top:8px;color:rgba(58,172,223,0.9);"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /adm-main -->
 </div><!-- /admin-panel -->
 
@@ -687,6 +789,7 @@ function showTab(id, btn) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
   if (btn) btn.classList.add('active');
+  if (id === 'push') loadPushSubCount();
 }
 
 // ── HELPERS ──────────────────────────────────────────────
@@ -770,6 +873,7 @@ async function loadVotes() {
     })).sort((a,b)=>b.days-a.days);
 
     filteredUsers=[...allUsers];
+    populateFilterSelects();
     renderUsersTable();
     renderOverview();
     renderSecurity();
@@ -859,13 +963,68 @@ function renderUsersTable() {
     </tr>`).join('');
   document.getElementById('users-footer').textContent=`SHOWING ${filteredUsers.length} OF ${allUsers.length} USERS · CLICK ROW TO MANAGE`;
 }
-function filterUsers(q) {
-  const s=q.trim().toLowerCase();
-  filteredUsers=!s?[...allUsers]:allUsers.filter(u=>
-    u.uid.toLowerCase().includes(s)||(u.country||'').toLowerCase().includes(s)||
-    (u.ref_code||'').toLowerCase().includes(s)||(u.referred_by||'').toLowerCase().includes(s)
-  );
+// ── USER FILTER STATE ─────────────────────────────────────
+const uFilters={status:'',country:'',gender:'',age:'',days:''};
+
+function setPill(el, key, val) {
+  uFilters[key]=val;
+  el.closest('.f-pills').querySelectorAll('.f-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  applyFilters();
+}
+
+function applyFilters() {
+  const q=(document.getElementById('user-search')?.value||'').trim().toLowerCase();
+  const {status,country,gender,age,days}=uFilters;
+  filteredUsers=allUsers.filter(u=>{
+    // text search
+    if(q && !(u.uid.toLowerCase().includes(q)||(u.country||'').toLowerCase().includes(q)||
+      (u.ref_code||'').toLowerCase().includes(q)||(u.referred_by||'').toLowerCase().includes(q))) return false;
+    // status
+    if(status){const s=(userFlags[u.uid]?.status||'active'); if(s!==status) return false;}
+    // country
+    if(country && (u.country||'')!==country) return false;
+    // gender
+    if(gender && (u.gender||'').toLowerCase()!==(gender||'').toLowerCase()) return false;
+    // age
+    if(age){
+      if(age==='na'){if(u.age) return false;}
+      else{
+        const [lo,hi]=age.split('-').map(Number);
+        const a=parseInt(u.age);
+        if(!u.age||isNaN(a)||a<lo||a>hi) return false;
+      }
+    }
+    // days
+    if(days){
+      const [lo,hi]=days.split('-').map(Number);
+      if(u.days<lo||u.days>(hi||lo)) return false;
+    }
+    return true;
+  });
   renderUsersTable();
+}
+
+function resetFilters() {
+  Object.keys(uFilters).forEach(k=>uFilters[k]='');
+  document.getElementById('user-search').value='';
+  ['f-country','f-gender','f-age','f-days'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.querySelectorAll('.f-pills .f-pill').forEach((p,i)=>p.classList.toggle('active',i===0));
+  filteredUsers=[...allUsers];
+  renderUsersTable();
+}
+
+function populateFilterSelects() {
+  const countries=[...new Set(allUsers.map(u=>u.country).filter(Boolean))].sort();
+  const genders  =[...new Set(allUsers.map(u=>u.gender ).filter(Boolean))].sort();
+  const sel=(id,vals)=>{
+    const el=document.getElementById(id); if(!el) return;
+    const cur=el.value;
+    el.innerHTML='<option value="">ALL</option>'+vals.map(v=>`<option value="${v}">${v}</option>`).join('');
+    el.value=cur;
+  };
+  sel('f-country', countries);
+  sel('f-gender',  genders);
 }
 function exportCSV() {
   const h=['uid','country','age','gender','days','ref_code','referred_by','registered'];
@@ -1178,6 +1337,48 @@ function saveUserFlag(){
 // ── UTILS ─────────────────────────────────────────────────
 function show(id){ const el=document.getElementById(id); if(el) el.style.display='block'; }
 function hide(id){ const el=document.getElementById(id); if(el) el.style.display='none'; }
+
+// ── PUSH NOTIFICATIONS ────────────────────────────────────────────
+async function sendPushNotif() {
+  const btn    = document.getElementById('push-send-btn');
+  const result = document.getElementById('push-result');
+  const title  = document.getElementById('push-title').value || 'NAVA PEACE';
+  const body   = document.getElementById('push-body').value  || '🕊 Time to choose peace today';
+  const url    = document.getElementById('push-url').value   || '/peace.html';
+  const uid    = document.getElementById('push-uid').value.trim();
+
+  btn.disabled = true; btn.textContent = '···';
+  result.textContent = '';
+
+  try {
+    const payload = { title, body, url };
+    if (uid) payload.to_user_uid = uid;
+
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+      body:    JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    result.style.color = 'rgba(58,172,223,0.9)';
+    result.textContent = `✓ SENT: ${data.sent}  ·  FAILED: ${data.failed}`;
+    showToast(`🔔 Push sent to ${data.sent} user(s)`);
+  } catch(e) {
+    result.style.color = '#ff6b6b';
+    result.textContent = '✗ ' + e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = '🔔 SEND PUSH';
+  }
+}
+
+async function loadPushSubCount() {
+  try {
+    const { count } = await sb.from('push_subscriptions').select('*', { count: 'exact', head: true });
+    const el = document.getElementById('push-sub-count');
+    if (el) el.textContent = `📱 ${count || 0} subscriber(s) currently registered`;
+  } catch(_) {}
+}
 
 // ── AUTO-LOGIN (doit être APRÈS toutes les déclarations let) ──────
 // Si on déplace ce check plus haut dans le script, les let (allUsers,
