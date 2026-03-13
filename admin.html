@@ -681,8 +681,6 @@ function adminLogout() {
   document.getElementById('lock-screen').style.display = 'flex';
   document.getElementById('admin-pass').value = '';
 }
-if (localStorage.getItem('nava_admin_ok') === '1') unlockPanel();
-
 // ── TABS ─────────────────────────────────────────────────
 function showTab(id, btn) {
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
@@ -1174,6 +1172,12 @@ function saveUserFlag(){
 // ── UTILS ─────────────────────────────────────────────────
 function show(id){ const el=document.getElementById(id); if(el) el.style.display='block'; }
 function hide(id){ const el=document.getElementById(id); if(el) el.style.display='none'; }
+
+// ── AUTO-LOGIN (doit être APRÈS toutes les déclarations let) ──────
+// Si on déplace ce check plus haut dans le script, les let (allUsers,
+// allReferrals, etc.) seraient en TDZ quand loadAll() s'exécute via
+// le cache navigateur (réponse Supabase instantanée au refresh).
+if (localStorage.getItem('nava_admin_ok') === '1') unlockPanel();
 </script>
 
 <!-- ══ USER DRAWER ════════════════════════════════════════ -->
