@@ -1275,22 +1275,26 @@ const MODULE_DEFS = [
 // In-memory pending state (not yet saved to Supabase)
 let pendingMods = {};
 
-async function buildModules() {
-  // 1 – Try Supabase first (source of truth, cross-device)
-  let saved = {};
-  try {
-    const { data, error } = await sb.from('admin_settings')
-      .select('value').eq('key','nava_modules').single();
-    if (!error && data?.value) {
-      saved = JSON.parse(data.value);
-      localStorage.setItem('nava_modules', data.value); // refresh local cache
-    } else throw new Error('no row');
-  } catch(_) {
-    // 2 – Fall back to localStorage cache
-    saved = JSON.parse(localStorage.getItem('nava_modules') || '{}');
-  }
-  pendingMods = { ...saved };
+function buildModules() {
+  // 1 – Render IMMEDIATELY from localStorage (synchronous, zero delay)
+  pendingMods = JSON.parse(localStorage.getItem('nava_modules') || '{}');
   renderModulesGrid();
+
+  // 2 – Then fetch from Supabase async and refresh if newer data found
+  sb.from('admin_settings').select('value').eq('key','nava_modules').single()
+    .then(({ data, error }) => {
+      if (error || !data?.value) return; // table not created yet → keep localStorage
+      const newVal = data.value;
+      if (newVal === JSON.stringify(pendingMods)) return; // no change
+      localStorage.setItem('nava_modules', newVal);
+      // Only re-render if admin hasn't started editing yet (save btn hidden)
+      const saveBtn = document.getElementById('modules-save-btn');
+      if (!saveBtn || saveBtn.style.display === 'none') {
+        pendingMods = JSON.parse(newVal);
+        renderModulesGrid();
+      }
+    })
+    .catch(() => {}); // silently ignore network errors
 }
 
 function renderModulesGrid() {
