@@ -1436,21 +1436,23 @@ function showModulesSaveBar(visible) {
 
 async function saveModules() {
   const btn = document.getElementById('modules-save-btn');
-  const unsaved = document.getElementById('modules-unsaved');
   btn.disabled = true; btn.textContent = '···';
   try {
     const value = JSON.stringify(pendingMods);
-    // Upsert to Supabase (web + app source of truth)
-    const { error } = await sb.from('admin_settings')
-      .upsert({ key:'nava_modules', value, updated_at: new Date().toISOString() },
-               { onConflict:'key' });
-    if(error) throw error;
-    // Also update local cache so gate script stays in sync on this device
+    // Always save locally first
     localStorage.setItem('nava_modules', value);
+    // Try Supabase for cross-device sync (requires admin_settings table)
+    try {
+      const { error } = await sb.from('admin_settings')
+        .upsert({ key:'nava_modules', value, updated_at: new Date().toISOString() },
+                 { onConflict:'key' });
+      if(error) throw error;
+      showToast('✓ MODULES SAVED & SYNCED', 3000);
+    } catch(supaErr) {
+      // Table not yet created — local save still works
+      showToast('✓ SAVED LOCALLY (run admin_settings_setup.sql to enable cross-device sync)', 4000);
+    }
     showModulesSaveBar(false);
-    const fb = document.getElementById('save-feedback');
-    if(fb){ fb.style.opacity='1'; setTimeout(()=>fb.style.opacity='0',2500); }
-    showToast('✓ MODULES SAVED — all devices will update on next load', 3000);
   } catch(e) {
     showToast('✗ SAVE FAILED: ' + e.message, 4000);
     btn.textContent = '💾 SAVE CHANGES';
