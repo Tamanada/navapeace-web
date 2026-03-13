@@ -734,15 +734,17 @@ async function loadVotes() {
     allVotes=votes;
 
     // Build user map
+    // votes est trié DESC (le plus récent en premier).
+    // On itère en forward ET on écrase toujours → on termine avec le vote le
+    // plus ANCIEN pour chaque uid, c'est-à-dire le vote d'inscription qui
+    // contient age + gender (peace.html n'envoie pas ces champs pour les
+    // votes suivants).
     const usersMap=new Map(), votesCount=new Map(), firstSeen=new Map();
-    for(let i=votes.length-1;i>=0;i--) {
-      const v=votes[i]; if(!v.user_uid) continue;
-      votesCount.set(v.user_uid,(votesCount.get(v.user_uid)||0)+1);
-      firstSeen.set(v.user_uid, v.created_at);
-    }
     for(const v of votes) {
       if(!v.user_uid) continue;
-      if(!usersMap.has(v.user_uid)) usersMap.set(v.user_uid,v);
+      votesCount.set(v.user_uid,(votesCount.get(v.user_uid)||0)+1);
+      firstSeen.set(v.user_uid, v.created_at); // écrase → finit avec le plus ancien
+      usersMap.set(v.user_uid, v);              // idem → vote d'inscription (age/gender)
     }
 
     // Stats
