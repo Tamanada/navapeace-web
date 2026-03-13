@@ -324,6 +324,27 @@
     .toast.show{transform:translateX(-50%) translateY(0);}
 
     /* ── USER DRAWER ───────────────────────────────── */
+    /* ── ADMINS TAB ── */
+    .admins-table{width:100%;border-collapse:collapse;font-size:10px;}
+    .admins-table th{font-size:8px;letter-spacing:2px;color:var(--w40);padding:8px 10px;border-bottom:1px solid var(--glass-border);text-align:left;white-space:nowrap;}
+    .admins-table td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,0.05);vertical-align:middle;}
+    .admins-table tr:hover td{background:rgba(255,255,255,0.03);}
+    .role-badge{display:inline-block;padding:2px 8px;border-radius:5px;font-size:8px;letter-spacing:1.5px;}
+    .role-super{background:rgba(249,199,79,0.15);color:rgba(249,199,79,0.9);border:1px solid rgba(249,199,79,0.3);}
+    .role-viewer{background:rgba(58,172,223,0.12);color:rgba(58,172,223,0.85);border:1px solid rgba(58,172,223,0.25);}
+    .active-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;}
+    .adm-form{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:12px;padding:18px 20px;margin-top:20px;}
+    .adm-form-title{font-size:9px;letter-spacing:2px;color:var(--w40);margin-bottom:14px;}
+    .adm-form-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+    .adm-input{flex:1;min-width:130px;padding:8px 12px;background:rgba(255,255,255,0.06);border:1px solid var(--glass-border);border-radius:7px;color:var(--white);font-family:var(--font);font-size:10px;outline:none;}
+    .adm-input:focus{border-color:rgba(58,172,223,0.5);}
+    .adm-select{padding:8px 12px;background:#0d2d45;border:1px solid var(--glass-border);border-radius:7px;color:var(--white);font-family:var(--font);font-size:10px;outline:none;cursor:pointer;}
+    .adm-select option{background:#0d2d45;}
+    .adm-action-btn{padding:4px 10px;font-size:8px;letter-spacing:1.5px;font-family:var(--font);border-radius:5px;cursor:pointer;border:1px solid var(--glass-border);background:rgba(255,255,255,0.06);color:var(--w60);}
+    .adm-action-btn:hover{color:var(--white);}
+    .adm-action-btn.danger{color:rgba(255,100,100,0.8);border-color:rgba(255,100,100,0.3);}
+    .adm-action-btn.danger:hover{background:rgba(255,100,100,0.12);}
+    .adm-no-access{text-align:center;padding:40px;font-size:9px;letter-spacing:2px;color:var(--w40);}
     .user-drawer-overlay{
       position:fixed;inset:0;z-index:500;
       background:rgba(0,0,0,0);pointer-events:none;
@@ -508,6 +529,7 @@
       <button class="tab-btn" onclick="showTab('security',this)">🛡 SECURITY</button>
       <button class="tab-btn" onclick="showTab('referrals',this)">🏆 REFERRALS</button>
       <button class="tab-btn" onclick="showTab('push',this)">🔔 PUSH</button>
+      <button class="tab-btn" onclick="showTab('admins',this)">👤 ADMINS</button>
     </div>
 
     <!-- ══ OVERVIEW ══════════════════════════════════ -->
@@ -767,6 +789,9 @@
       </div>
     </div>
 
+    <!-- ══ ADMINS ══════════════════════════════════════ -->
+    <div id="tab-admins" class="tab-pane"></div>
+
   </div><!-- /adm-main -->
 </div><!-- /admin-panel -->
 
@@ -789,17 +814,35 @@ function showToast(msg, duration=2500) {
 }
 
 // ── AUTH ─────────────────────────────────────────────────
-function checkPassword() {
+let _adminCode = ''; // session-only, never persisted
+let _adminRole = '';
+let _adminName = '';
+
+async function checkPassword() {
   const val = document.getElementById('admin-pass').value.trim();
+  if (!val) return;
+  const btn = document.querySelector('.lock-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '···'; }
+  try {
+    // Try Supabase admin_users via RPC (run admin_users_setup.sql once to enable)
+    const { data, error } = await sb.rpc('nava_check_admin', { input_code: val });
+    if (!error && data?.valid) {
+      _adminCode = val; _adminRole = data.role; _adminName = data.name;
+      localStorage.setItem('nava_admin_ok','1');
+      unlockPanel(); return;
+    }
+  } catch(e) { /* RPC not set up yet — fall through */ }
+  // Fallback: hardcoded master code
   if (val === ADMIN_CODE) {
+    _adminCode = val; _adminRole = 'super_admin'; _adminName = 'Super Admin';
     localStorage.setItem('nava_admin_ok','1');
-    unlockPanel();
-  } else {
-    const err = document.getElementById('lock-err');
-    err.textContent = '✗ INVALID ACCESS CODE';
-    document.getElementById('admin-pass').value = '';
-    setTimeout(() => err.textContent = '', 3000);
+    unlockPanel(); return;
   }
+  if (btn) { btn.disabled = false; btn.textContent = 'ENTER →'; }
+  const err = document.getElementById('lock-err');
+  err.textContent = '✗ INVALID ACCESS CODE';
+  document.getElementById('admin-pass').value = '';
+  setTimeout(() => err.textContent = '', 3000);
 }
 function unlockPanel() {
   document.getElementById('lock-screen').style.display = 'none';
@@ -822,8 +865,9 @@ function showTab(id, btn) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
   if (btn) btn.classList.add('active');
-  if (id === 'push')  loadPushSubCount();
-  if (id === 'stats') renderStats();
+  if (id === 'push')   loadPushSubCount();
+  if (id === 'stats')  renderStats();
+  if (id === 'admins') loadAdminsTab();
 }
 
 // ── HELPERS ──────────────────────────────────────────────
@@ -1695,6 +1739,117 @@ async function loadPushSubCount() {
     const el = document.getElementById('push-sub-count');
     if (el) el.textContent = `📱 ${count || 0} subscriber(s) currently registered`;
   } catch(_) {}
+}
+
+// ── ADMINS TAB ────────────────────────────────────────────────────
+async function loadAdminsTab() {
+  const pane = document.getElementById('tab-admins');
+  if (!pane) return;
+  if (_adminRole !== 'super_admin') {
+    pane.innerHTML = `<div class="adm-no-access">🔒 SUPER ADMIN ACCESS REQUIRED<br/><br/>
+      <span style="font-size:8px;">You are logged in as <strong>${_adminName||'unknown'}</strong> (${_adminRole||'?'})</span></div>`;
+    return;
+  }
+  pane.innerHTML = `<div class="spinner"><div class="spin"></div></div>`;
+  try {
+    const { data, error } = await sb.rpc('nava_get_admins', { caller_code: _adminCode });
+    if (error) throw error;
+    const admins = Array.isArray(data) ? data : JSON.parse(data || '[]');
+    renderAdminsTab(admins);
+  } catch(e) {
+    pane.innerHTML = `<div class="adm-no-access">⚠️ RUN <code>admin_users_setup.sql</code> IN SUPABASE FIRST<br/><br/>
+      <span style="font-size:8px;color:rgba(255,180,80,0.8);">${e.message||''}</span></div>`;
+  }
+}
+
+function renderAdminsTab(admins) {
+  const pane = document.getElementById('tab-admins');
+  const rows = admins.map(a => `
+    <tr>
+      <td><span class="active-dot" style="background:${a.active?'#4ade80':'#ff8080'};"></span>${a.name}</td>
+      <td style="color:var(--w60);">${a.email||'—'}</td>
+      <td><span class="role-badge ${a.role==='super_admin'?'role-super':'role-viewer'}">${a.role==='super_admin'?'SUPER ADMIN':'VIEWER'}</span></td>
+      <td style="color:var(--w40);font-size:9px;">${fmtDate(a.created_at)}</td>
+      <td>
+        <button class="adm-action-btn" onclick="toggleAdminUser('${a.id}',${!a.active})"
+          title="${a.active?'Deactivate':'Activate'}">
+          ${a.active?'🚫 DISABLE':'✅ ENABLE'}
+        </button>
+        <button class="adm-action-btn danger" onclick="deleteAdminUser('${a.id}','${a.name}')"
+          style="margin-left:6px;">✕ DELETE</button>
+      </td>
+    </tr>`).join('');
+
+  pane.innerHTML = `
+    <div class="g-card">
+      <p style="font-size:10px;letter-spacing:3px;color:var(--w60);margin-bottom:16px;">👤 ADMIN ACCOUNTS · ${admins.length}</p>
+      <div style="overflow-x:auto;">
+        <table class="admins-table">
+          <thead><tr>
+            <th>NAME</th><th>EMAIL</th><th>ROLE</th><th>CREATED</th><th>ACTIONS</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+
+      <div class="adm-form">
+        <p class="adm-form-title">➕ ADD NEW ADMIN</p>
+        <div class="adm-form-row">
+          <input class="adm-input" id="new-adm-name"  type="text"     placeholder="Full name"         maxlength="60" />
+          <input class="adm-input" id="new-adm-email" type="email"    placeholder="Email (optional)"  maxlength="100" />
+        </div>
+        <div class="adm-form-row">
+          <input class="adm-input" id="new-adm-code"  type="text"     placeholder="Access code (password)" maxlength="60" />
+          <select class="adm-select" id="new-adm-role">
+            <option value="viewer">VIEWER</option>
+            <option value="super_admin">SUPER ADMIN</option>
+          </select>
+        </div>
+        <button class="export-btn" onclick="addAdminUser()" style="margin-top:6px;">➕ CREATE ADMIN</button>
+      </div>
+    </div>`;
+}
+
+async function addAdminUser() {
+  const name  = document.getElementById('new-adm-name')?.value.trim();
+  const email = document.getElementById('new-adm-email')?.value.trim();
+  const code  = document.getElementById('new-adm-code')?.value.trim();
+  const role  = document.getElementById('new-adm-role')?.value;
+  if (!name || !code) { showToast('✗ Name and access code are required'); return; }
+  try {
+    const { data, error } = await sb.rpc('nava_add_admin', {
+      caller_code: _adminCode, new_name: name, new_email: email||'', new_code: code, new_role: role
+    });
+    if (error) throw error;
+    const res = typeof data === 'string' ? JSON.parse(data) : data;
+    if (res?.error === 'code_already_exists') { showToast('✗ This access code is already taken'); return; }
+    if (res?.error) throw new Error(res.error);
+    showToast(`✓ Admin "${name}" created`);
+    loadAdminsTab();
+  } catch(e) { showToast('✗ ' + e.message); }
+}
+
+async function toggleAdminUser(id, newActive) {
+  try {
+    const { data, error } = await sb.rpc('nava_toggle_admin', {
+      caller_code: _adminCode, target_id: id, new_active: newActive
+    });
+    if (error) throw error;
+    showToast(newActive ? '✓ Admin activated' : '✓ Admin disabled');
+    loadAdminsTab();
+  } catch(e) { showToast('✗ ' + e.message); }
+}
+
+async function deleteAdminUser(id, name) {
+  if (!confirm(`Delete admin "${name}"? This cannot be undone.`)) return;
+  try {
+    const { data, error } = await sb.rpc('nava_delete_admin', {
+      caller_code: _adminCode, target_id: id
+    });
+    if (error) throw error;
+    showToast(`✓ Admin "${name}" deleted`);
+    loadAdminsTab();
+  } catch(e) { showToast('✗ ' + e.message); }
 }
 
 // ── AUTO-LOGIN (doit être APRÈS toutes les déclarations let) ──────
