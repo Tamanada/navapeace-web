@@ -614,6 +614,8 @@
               '<img src="logo.png" alt="NAVA PEACE" class="btn-logo" id="btnLogo" />' +
               '<span class="btn-hint" data-i18n-html="press_hint">PRESS<br>TO CHOOSE<br>PEACE</span>';
             btn.disabled = false;
+            // Force reflow → redémarre les animations ::before / ::after (pulse rings)
+            void btn.offsetWidth;
             if (typeof applyLang === 'function') applyLang(detectLang());
           }
           return;
