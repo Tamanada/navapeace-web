@@ -586,6 +586,11 @@
             </select>
           </div>
           <button class="filter-reset" onclick="resetFilters()">✕ RESET</button>
+          <button class="filter-reset" id="load-preset-btn"
+                  onclick="loadFilterPreset()"
+                  style="display:none;background:rgba(58,172,223,0.12);border-color:rgba(58,172,223,0.35);color:rgba(58,172,223,0.9);">
+            ♻ LOAD PRESET
+          </button>
         </div>
 
         <!-- ── ACTION BAR (visible when filters are active) ── -->
@@ -603,6 +608,10 @@
           <button class="export-btn" onclick="exportCSV()"
                   style="background:rgba(255,255,255,0.06);">
             ⬇ EXPORT FILTERED
+          </button>
+          <button class="export-btn" onclick="saveFilterPreset()"
+                  style="background:rgba(74,222,128,0.12);color:#4ade80;border-color:rgba(74,222,128,0.4);">
+            💾 SAVE
           </button>
         </div>
 
@@ -1093,6 +1102,57 @@ async function pushToFiltered() {
     btn.disabled=false; btn.textContent='🔔 PUSH TO FILTERED';
   }
 }
+
+// ── FILTER PRESETS ────────────────────────────────────────
+function saveFilterPreset() {
+  const preset = {
+    filters: { ...uFilters },
+    search:  (document.getElementById('user-search')?.value || '').trim(),
+    label:   document.getElementById('filter-action-label')?.textContent || '',
+    savedAt: new Date().toISOString(),
+  };
+  localStorage.setItem('nava_filter_preset', JSON.stringify(preset));
+  // Show LOAD PRESET button so admin can reload it next session
+  const lb = document.getElementById('load-preset-btn');
+  if(lb) lb.style.display = 'inline-flex';
+  showToast('💾 Filter preset saved — click ♻ LOAD PRESET to restore', 3000);
+}
+
+function loadFilterPreset() {
+  try {
+    const preset = JSON.parse(localStorage.getItem('nava_filter_preset') || 'null');
+    if(!preset) { showToast('No saved preset found'); return; }
+    // Restore search
+    const searchEl = document.getElementById('user-search');
+    if(searchEl) searchEl.value = preset.search || '';
+    // Restore select filters
+    Object.assign(uFilters, preset.filters || {});
+    ['country','gender','age','days'].forEach(k => {
+      const el = document.getElementById('f-' + k);
+      if(el) el.value = uFilters[k] || '';
+    });
+    const fnEl = document.getElementById('f-firstname');
+    if(fnEl) fnEl.value = uFilters.firstname || '';
+    // Restore STATUS pill
+    document.querySelectorAll('.f-pills .f-pill').forEach(p => {
+      const pillVal = p.textContent.trim().toLowerCase();
+      const target  = (uFilters.status || '').toLowerCase();
+      p.classList.toggle('active', (!target && pillVal === 'all') || pillVal === target);
+    });
+    applyFilters();
+    showToast('♻ Filter preset restored', 2500);
+  } catch(e) { showToast('✗ Could not load preset'); }
+}
+
+// Show LOAD PRESET button on startup if a preset exists
+(function() {
+  if(localStorage.getItem('nava_filter_preset')) {
+    document.addEventListener('DOMContentLoaded', function() {
+      const lb = document.getElementById('load-preset-btn');
+      if(lb) lb.style.display = 'inline-flex';
+    });
+  }
+})();
 
 function populateFilterSelects() {
   const countries=[...new Set(allUsers.map(u=>u.country).filter(Boolean))].sort();
