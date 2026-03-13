@@ -1682,9 +1682,20 @@
         if (!seen.has(f.user_uid)) { seen.add(f.user_uid); unique.push(f); }
       });
 
+      // Fetch pseudos from peace_messages
+      const uids = unique.map(f => f.user_uid).filter(Boolean);
+      const { data: msgData } = await sb
+        .from('peace_messages')
+        .select('user_uid, pseudo')
+        .in('user_uid', uids);
+      const pseudoMap = {};
+      (msgData || []).forEach(m => { if (m.pseudo) pseudoMap[m.user_uid] = m.pseudo; });
+
       list.innerHTML = unique.map(f => {
         const doves  = dovesPerUser[f.user_uid] || 0;
-        const pseudo = '🕊 ' + (f.user_uid || '').replace(/[^a-z0-9]/gi, '').slice(-6).toUpperCase();
+        const pseudo = pseudoMap[f.user_uid]
+          ? '🕊 ' + pseudoMap[f.user_uid]
+          : '🕊 ' + (f.user_uid || '').replace(/[^a-z0-9]/gi, '').slice(-6).toUpperCase();
         const cooldownKey = 'nava_remind_' + f.user_uid;
         const lastSent = parseInt(localStorage.getItem(cooldownKey) || '0', 10);
         const canRemind = Date.now() - lastSent > 86400000; // 24h cooldown
