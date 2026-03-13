@@ -534,17 +534,30 @@
       btn.disabled = true;
       btn.innerHTML = '<span class="btn-status" style="color:#3AACDF;font-size:36px;">···</span>';
 
-      // Reward referrer: insert 1 point in referral_points
-      const referredBy = localStorage.getItem('nava_peace_referred_by');
-      if (sb && referredBy) {
+      const uid        = localStorage.getItem('nava_peace_uid');
+      const referredBy = localStorage.getItem('nava_peace_referred_by') || null;
+
+      if (sb) {
+        // Enregistrer l'action du jour dans peace_votes
         try {
-          await sb.from('referral_points').insert({ referral_code: referredBy });
-        } catch(e) { console.warn('Referral point error', e); }
+          await sb.from('peace_votes').insert({
+            user_uid:   uid,
+            country:    country,
+            referred_by: referredBy,
+          });
+        } catch(e) { console.warn('Vote insert error', e); }
+
+        // Récompenser le parrain si applicable
+        if (referredBy) {
+          try {
+            await sb.from('referral_points').insert({ referral_code: referredBy });
+          } catch(e) { console.warn('Referral point error', e); }
+        }
       }
 
       localStorage.setItem(PEACE_KEY, TODAY);
-      setDone(true); // vient de voter → thank you d'abord, puis countdown
-      loadCounters(); // refresh counters
+      setDone(true);          // thank you → countdown
+      await loadCounters();   // rafraîchir après insert
     }
 
     // ── Charger les compteurs depuis peace_votes ────────────────────

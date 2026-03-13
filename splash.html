@@ -57,17 +57,18 @@
 
     /* ── LOGO ──────────────────────────────────── */
     .logo-wrap {
-      margin-bottom: 36px;
+      margin-bottom: min(36px, 3.5vh);
       animation: logoFadeIn 3s ease-out both,
                  logoFloat 10s 3.2s ease-in-out infinite;
     }
     .logo-img {
-      width: 286px; height: 286px; object-fit: contain;
+      /* min(286px, 28vh) : sur PC 800px de haut → 224px ; mobile portrait inchangé */
+      width: min(286px, 28vh); height: min(286px, 28vh); object-fit: contain;
       animation: logoBlur 3s ease-out both,
                  logoGlow 7s 3.2s ease-in-out infinite;
     }
     .logo-fallback {
-      font-size: 170px;
+      font-size: min(170px, 20vh);
       line-height: 1;
       animation: logoBlur 3s ease-out both,
                  logoGlow 7s 3.2s ease-in-out infinite;
@@ -85,8 +86,9 @@
 
     /* ── HERO TEXT ─────────────────────────────── */
     .hero {
-      font-size: clamp(52px, 11vw, 160px);
-      letter-spacing: clamp(4px, 1.2vw, 18px);
+      /* min(11vw, 9vh) : sur PC 1280×800 → min(140px, 72px) = 72px ; mobile portrait inchangé */
+      font-size: clamp(48px, min(11vw, 9vh), 160px);
+      letter-spacing: clamp(4px, min(1.2vw, 0.8vh), 18px);
       color: #ffffff;
       text-transform: uppercase;
       text-align: center;
@@ -277,6 +279,7 @@
       .daily-msg { font-size: 13px; padding: 0 18px; }
       .daily-msg-date { font-size: 9px; }
     }
+
   </style>
 </head>
 <body>
