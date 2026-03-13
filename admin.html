@@ -401,6 +401,13 @@
     }
     .drawer-note:focus{border-color:rgba(109,213,245,0.5);}
     .drawer-note::placeholder{color:var(--w40);}
+    .drawer-votes-section{margin:16px 0 0;}
+    .drawer-votes-title{font-size:8px;letter-spacing:2px;color:var(--w40);margin-bottom:8px;}
+    .drawer-votes-list{display:flex;flex-direction:column;gap:5px;max-height:220px;overflow-y:auto;padding-right:4px;}
+    .drawer-vote-item{display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);border-radius:7px;}
+    .drawer-vote-dove{font-size:14px;flex-shrink:0;}
+    .drawer-vote-date{font-size:10px;color:rgba(255,255,255,0.8);letter-spacing:0.5px;}
+    .drawer-vote-time{font-size:9px;color:var(--w40);margin-left:auto;white-space:nowrap;}
     .drawer-save-btn{
       margin-top:14px;width:100%;padding:13px;
       background:linear-gradient(90deg,#3AACDF,#1E8EC4);
@@ -1571,6 +1578,22 @@ function openUserDrawer(uid){
   // Afficher les Doves (u.days = nb d'actions de paix)
   const realDoves = u ? (u.days||0) : 0;
   _renderDrawerDoves(realDoves, f.status||'active');
+  // Daily actions list
+  const uVotes = allVotes.filter(v=>v.user_uid===uid)
+    .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  const vList = document.getElementById('drawer-votes-list');
+  if(vList){
+    vList.innerHTML = uVotes.length ? uVotes.map((v,i)=>{
+      const d = new Date(v.created_at);
+      const date = d.toLocaleDateString('en-CA');
+      const time = d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+      return `<div class="drawer-vote-item">
+        <span class="drawer-vote-dove">🕊</span>
+        <span class="drawer-vote-date">${date}</span>
+        <span class="drawer-vote-time">${time}</span>
+      </div>`;
+    }).join('') : '<div style="font-size:10px;color:var(--w40);padding:6px;">No actions recorded</div>';
+  }
   document.getElementById('user-drawer-overlay').classList.add('open');
   document.getElementById('user-drawer').classList.add('open');
 }
@@ -1688,6 +1711,10 @@ if (localStorage.getItem('nava_admin_ok') === '1') unlockPanel();
     <div class="drawer-uid" id="drawer-uid"></div>
     <div class="drawer-user-info" id="drawer-user-info"></div>
     <div class="drawer-doves" id="drawer-doves"></div>
+    <div class="drawer-votes-section">
+      <p class="drawer-votes-title">🕊 DAILY ACTIONS FOR PEACE</p>
+      <div class="drawer-votes-list" id="drawer-votes-list"></div>
+    </div>
     <div class="drawer-status-row">
       <button class="drawer-status-btn" id="btn-active" onclick="setDrawerStatus('active')">
         <span class="dsb-icon">✅</span>
