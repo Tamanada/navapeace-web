@@ -1034,6 +1034,23 @@
     </div>
     <button class="edit-btn" id="pseudo-change-btn" onclick="startEditPseudo()"
             data-i18n="pseudo_change_btn">CHANGE</button>
+
+    <!-- FIRST NAME -->
+    <div style="margin-top:18px;border-top:1px solid rgba(255,255,255,0.1);padding-top:18px;">
+      <p style="font-size:8px;letter-spacing:3px;color:rgba(255,255,255,0.4);margin-bottom:10px;" data-i18n="firstname_label">FIRST NAME <span style="font-size:7px;opacity:0.5;">(OPTIONAL)</span></p>
+      <div id="firstname-display-row" style="display:flex;align-items:center;gap:10px;">
+        <span id="firstname-display" style="font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.85);flex:1;">—</span>
+        <button class="edit-btn" onclick="startEditFirstname()" data-i18n="firstname_change_btn">EDIT</button>
+      </div>
+      <div id="firstname-edit-area" style="display:none;margin-top:10px;">
+        <input id="firstname-input" type="text" class="pseudo-input" maxlength="40"
+               placeholder="Your first name…" autocomplete="given-name" />
+        <div class="pseudo-btn-row" style="margin-top:10px;">
+          <button class="save-btn" onclick="saveFirstname()" data-i18n="save_btn">SAVE</button>
+          <button class="edit-btn" onclick="cancelFirstname()" data-i18n="cancel_btn">CANCEL</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- INVITE FRIENDS -->
@@ -1313,22 +1330,57 @@
   }
 
   async function syncMessage() {
-    const uid    = localStorage.getItem('nava_peace_uid');
-    const pseudo = localStorage.getItem('nava_peace_pseudo') || generatePseudo();
-    const msg    = localStorage.getItem('nava_peace_message') || '';
-    const shared = localStorage.getItem('nava_peace_share_msg') === '1';
+    const uid       = localStorage.getItem('nava_peace_uid');
+    const pseudo    = localStorage.getItem('nava_peace_pseudo') || generatePseudo();
+    const msg       = localStorage.getItem('nava_peace_message') || '';
+    const shared    = localStorage.getItem('nava_peace_share_msg') === '1';
+    const firstname = localStorage.getItem('nava_peace_firstname') || null;
     if (!uid) return;
     try {
       const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       await sb.from('peace_messages').upsert(
-        { user_uid: uid, pseudo, message: msg, share_msg: shared, updated_at: new Date().toISOString() },
+        { user_uid: uid, pseudo, message: msg, share_msg: shared, first_name: firstname, updated_at: new Date().toISOString() },
         { onConflict: 'user_uid' }
       );
     } catch(e) { console.warn('Message sync error', e); }
   }
 
+  // ── FIRST NAME ───────────────────────────────────────────────────
+  function loadFirstname() {
+    const val = localStorage.getItem('nava_peace_firstname') || '';
+    document.getElementById('firstname-display').textContent = val || '—';
+  }
+
+  function startEditFirstname() {
+    const val = localStorage.getItem('nava_peace_firstname') || '';
+    document.getElementById('firstname-input').value = val;
+    document.getElementById('firstname-edit-area').style.display = 'block';
+    document.getElementById('firstname-display-row').style.display = 'none';
+    document.getElementById('firstname-input').focus();
+  }
+
+  function cancelFirstname() {
+    document.getElementById('firstname-edit-area').style.display = 'none';
+    document.getElementById('firstname-display-row').style.display = 'flex';
+  }
+
+  async function saveFirstname() {
+    const raw = document.getElementById('firstname-input').value.trim();
+    // Capitalize first letter only
+    const val = raw ? raw.charAt(0).toUpperCase() + raw.slice(1) : '';
+    if (val) {
+      localStorage.setItem('nava_peace_firstname', val);
+    } else {
+      localStorage.removeItem('nava_peace_firstname');
+    }
+    document.getElementById('firstname-display').textContent = val || '—';
+    cancelFirstname();
+    await syncMessage();
+  }
+
   loadPseudo();
   loadMessage();
+  loadFirstname();
 
   // ── Age groups ───────────────────────────────────────────────────
   const AGE_GROUPS = [

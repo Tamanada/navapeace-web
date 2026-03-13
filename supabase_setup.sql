@@ -29,3 +29,7 @@ CREATE POLICY "public_select" ON public.peace_votes
 --  Vérification : après exécution tu devrais voir la table
 --  dans Database → Tables
 -- ═══════════════════════════════════════════════════════════════
+
+-- ── Add first_name to peace_messages (user profile) ──────────────────────────
+ALTER TABLE public.peace_messages
+  ADD COLUMN IF NOT EXISTS first_name TEXT;
