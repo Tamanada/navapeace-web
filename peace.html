@@ -604,6 +604,21 @@
         next.setHours(0, 0, 0, 0);
         const diff = next - now;
 
+        // ── Minuit atteint → nouveau jour → réactiver le bouton ──
+        if (diff <= 0) {
+          clearInterval(_countdownInterval);
+          localStorage.removeItem(PEACE_KEY);
+          const btn = document.getElementById('peaceBtn');
+          if (btn) {
+            btn.innerHTML =
+              '<img src="logo.png" alt="NAVA PEACE" class="btn-logo" id="btnLogo" />' +
+              '<span class="btn-hint" data-i18n-html="press_hint">PRESS<br>TO CHOOSE<br>PEACE</span>';
+            btn.disabled = false;
+            if (typeof applyLang === 'function') applyLang(detectLang());
+          }
+          return;
+        }
+
         const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
         const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
         const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
@@ -612,8 +627,9 @@
         if (el) el.textContent = h + ':' + m + ':' + s;
       }
       tick();
-      setInterval(tick, 1000);
+      _countdownInterval = setInterval(tick, 1000);
     }
+    let _countdownInterval = null;
 
     // ── NOTIFICATION BANNER ────────────────────────────────────────────
     async function checkNotifications() {
