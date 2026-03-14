@@ -452,9 +452,23 @@
        text-shadow:0 2px 16px rgba(0,0,0,0.15);">"…"</p>
     <p id="inspo-author" style="font-size:10px;letter-spacing:3px;color:rgba(255,255,255,0.6);
        margin-bottom:30px;font-family:Nasalization,Arial,sans-serif;">—</p>
-    <div style="width:180px;height:2px;background:rgba(255,255,255,0.2);border-radius:2px;overflow:hidden;margin-bottom:22px;">
+    <div style="width:180px;height:2px;background:rgba(255,255,255,0.2);border-radius:2px;overflow:hidden;margin-bottom:24px;">
       <div id="inspo-bar" style="height:100%;background:rgba(255,255,255,0.75);width:100%;border-radius:2px;"></div>
     </div>
+    <!-- SHARE BUTTON -->
+    <button id="inspo-share-btn" onclick="event.stopPropagation();shareInstagram()"
+      style="display:flex;align-items:center;gap:8px;
+             background:rgba(255,255,255,0.18);border:1.5px solid rgba(255,255,255,0.4);
+             border-radius:28px;color:#fff;font-family:Nasalization,Arial,sans-serif;
+             font-size:10px;letter-spacing:3px;padding:12px 26px;cursor:pointer;
+             transition:background 0.2s;margin-bottom:18px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+        <circle cx="12" cy="12" r="4"/>
+        <circle cx="17.5" cy="6.5" r="1.5" fill="white" stroke="none"/>
+      </svg>
+      SHARE
+    </button>
     <p style="font-size:7px;letter-spacing:3px;color:rgba(255,255,255,0.3);font-family:Nasalization,Arial,sans-serif;">TAP ANYWHERE TO CONTINUE</p>
   </div>
 
@@ -774,6 +788,122 @@
         overlay.style.opacity = '';
         overlay.style.transition = '';
       }, 400);
+    }
+
+    // ── INSTAGRAM SHARE ──────────────────────────────────────────────────
+    async function generateShareCard() {
+      const canvas  = document.createElement('canvas');
+      canvas.width  = 1080;
+      canvas.height = 1080;
+      const ctx     = canvas.getContext('2d');
+
+      // Background gradient
+      const grad = ctx.createRadialGradient(540, 200, 0, 540, 200, 850);
+      grad.addColorStop(0,   '#6DD5F5');
+      grad.addColorStop(0.5, '#3AACDF');
+      grad.addColorStop(1,   '#1470A0');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 1080, 1080);
+
+      // Subtle vignette
+      const vig = ctx.createRadialGradient(540, 540, 300, 540, 540, 760);
+      vig.addColorStop(0, 'rgba(0,0,0,0)');
+      vig.addColorStop(1, 'rgba(0,0,0,0.22)');
+      ctx.fillStyle = vig;
+      ctx.fillRect(0, 0, 1080, 1080);
+
+      // Logo (white)
+      await new Promise(res => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          const tmp = document.createElement('canvas');
+          tmp.width = tmp.height = 200;
+          const tc = tmp.getContext('2d');
+          tc.filter = 'brightness(0) invert(1)';
+          tc.drawImage(img, 0, 0, 200, 200);
+          ctx.drawImage(tmp, 440, 140, 200, 200);
+          res();
+        };
+        img.onerror = res;
+        img.src = 'logo.png';
+      });
+
+      // NAVA PEACE
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign  = 'center';
+      ctx.font = '700 76px Arial, sans-serif';
+      ctx.fillText('NAVA  PEACE', 540, 430);
+
+      // Divider
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      ctx.fillRect(390, 458, 300, 1.5);
+
+      // Quote
+      const { q } = getTodayQuote();
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.font = 'italic 32px Georgia, serif';
+      const words = ('\u201C' + q + '\u201D').split(' ');
+      let line = '', lines = [], maxW = 780;
+      for (const w of words) {
+        const test = line + (line ? ' ' : '') + w;
+        if (ctx.measureText(test).width > maxW && line) { lines.push(line); line = w; }
+        else line = test;
+      }
+      if (line) lines.push(line);
+      lines.slice(0, 4).forEach((l, i) => ctx.fillText(l, 540, 530 + i * 46));
+
+      // Dove count
+      const days = parseInt(localStorage.getItem('nava_peace_days') || '1');
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '700 110px Arial, sans-serif';
+      ctx.fillText(days, 540, 740);
+      ctx.font = '500 26px Arial, sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.fillText('ACTIONS FOR PEACE', 540, 785);
+
+      // "I CHOSE PEACE TODAY"
+      ctx.fillStyle = 'rgba(255,255,255,0.55)';
+      ctx.font = '500 22px Arial, sans-serif';
+      const d = new Date();
+      const dateStr = d.toLocaleDateString('en-US', {day:'numeric', month:'long', year:'numeric'}).toUpperCase();
+      ctx.fillText(dateStr, 540, 860);
+
+      // Bottom branding
+      ctx.fillStyle = 'rgba(255,255,255,0.35)';
+      ctx.font = '18px Arial, sans-serif';
+      ctx.fillText('NAVA-PEACE.APP  ·  #CHOOSPEACE  ·  🕊', 540, 990);
+
+      return new Promise(res => canvas.toBlob(res, 'image/png'));
+    }
+
+    async function shareInstagram() {
+      const btn = document.getElementById('inspo-share-btn');
+      if (btn) { btn.style.opacity = '0.5'; btn.style.pointerEvents = 'none'; }
+      try {
+        const blob = await generateShareCard();
+        const file = new File([blob], 'nava-peace.png', { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: 'NAVA PEACE',
+            text: 'I chose peace today 🕊 #NavaPeace #ChoosePeace'
+          });
+        } else {
+          // Fallback : télécharge l'image
+          const url = URL.createObjectURL(blob);
+          const a   = document.createElement('a');
+          a.href    = url;
+          a.download = 'nava-peace.png';
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1500);
+          showBanner('IMAGE SAVED — OPEN INSTAGRAM TO SHARE 📸');
+        }
+      } catch(e) {
+        if (e.name !== 'AbortError') console.warn('Share error:', e);
+      } finally {
+        if (btn) { btn.style.opacity = ''; btn.style.pointerEvents = ''; }
+      }
     }
 
     checkDone();
