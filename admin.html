@@ -1535,16 +1535,26 @@ async function saveModules() {
     const value = JSON.stringify(pendingMods);
     // Always save locally first
     localStorage.setItem('nava_modules', value);
-    // Try Supabase via RPC sécurisée (SECURITY DEFINER contourne RLS)
+    // Try RPC sécurisée d'abord, puis fallback direct upsert
     try {
-      const { error } = await sb.rpc('nava_upsert_admin_setting', {
-        p_key: 'nava_modules', p_value: value, p_code: _adminCode
-      });
-      if(error) throw error;
+      let saved = false;
+      try {
+        const { error } = await sb.rpc('nava_upsert_admin_setting', {
+          p_key: 'nava_modules', p_value: value, p_code: _adminCode
+        });
+        if (!error) saved = true;
+      } catch(e) { /* RPC non disponible */ }
+
+      if (!saved) {
+        // Fallback : upsert direct (fonctionne si RLS pas encore actif)
+        const { error } = await sb.from('admin_settings')
+          .upsert({ key: 'nava_modules', value, updated_at: new Date().toISOString() },
+                  { onConflict: 'key' });
+        if (error) throw error;
+      }
       showToast('✓ MODULES SAVED & SYNCED', 3000);
     } catch(supaErr) {
-      // Table not yet created — local save still works
-      showToast('✓ SAVED LOCALLY (run admin_settings_setup.sql to enable cross-device sync)', 4000);
+      showToast('✓ SAVED LOCALLY', 3000);
     }
     showModulesSaveBar(false);
   } catch(e) {

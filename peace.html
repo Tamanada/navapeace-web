@@ -440,6 +440,24 @@
 
   </div>
 
+  <!-- ══ INSPIRATION CARD OVERLAY ════════════════════════ -->
+  <div id="inspo-overlay" onclick="closeInspo()" style="display:none;position:fixed;inset:0;z-index:200;
+       background:radial-gradient(ellipse at 50% 20%,#6DD5F5 0%,#3AACDF 45%,#1E8EC4 100%);
+       flex-direction:column;align-items:center;justify-content:center;
+       padding:40px 28px;text-align:center;box-sizing:border-box;">
+    <img src="logo.png" style="width:60px;height:60px;filter:brightness(0) invert(1);margin-bottom:20px;opacity:0.85;" />
+    <p style="font-size:8px;letter-spacing:5px;color:rgba(255,255,255,0.55);margin-bottom:22px;font-family:Nasalization,Arial,sans-serif;">INSPIRATION OF THE DAY</p>
+    <p id="inspo-quote" style="font-family:Georgia,serif;font-size:17px;font-style:italic;color:#fff;
+       line-height:1.75;margin-bottom:14px;max-width:300px;
+       text-shadow:0 2px 16px rgba(0,0,0,0.15);">"…"</p>
+    <p id="inspo-author" style="font-size:10px;letter-spacing:3px;color:rgba(255,255,255,0.6);
+       margin-bottom:30px;font-family:Nasalization,Arial,sans-serif;">—</p>
+    <div style="width:180px;height:2px;background:rgba(255,255,255,0.2);border-radius:2px;overflow:hidden;margin-bottom:22px;">
+      <div id="inspo-bar" style="height:100%;background:rgba(255,255,255,0.75);width:100%;border-radius:2px;"></div>
+    </div>
+    <p style="font-size:7px;letter-spacing:3px;color:rgba(255,255,255,0.3);font-family:Nasalization,Arial,sans-serif;">TAP ANYWHERE TO CONTINUE</p>
+  </div>
+
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
     <a href="peace.html" class="nav-item active">
@@ -507,21 +525,23 @@
         '</div>';
 
       if (fresh) {
-        // Après 3 s (zoom-in terminé) : zoom-out thank you → zoom-in countdown
+        // Après 3 s : zoom-out thank you → carte inspiration → countdown
         setTimeout(function () {
           var tw = document.getElementById('btn-thank-wrap');
           if (!tw) return;
           tw.style.animation = 'zoomOutFade 0.5s ease forwards';
           setTimeout(function () {
             if (tw) tw.style.display = 'none';
+            // Préparer le countdown en arrière-plan (invisible)
             var nw = document.getElementById('btn-next-wrap');
             if (nw) {
               nw.style.display = 'flex';
-              // Force reflow pour relancer l'animation
               nw.style.animation = 'none';
               void nw.offsetWidth;
               nw.style.animation = 'zoomInSlow 3s cubic-bezier(0.22,1,0.36,1) forwards';
             }
+            // Afficher la carte inspiration (par-dessus tout)
+            showInspo();
           }, 500);
         }, 3000);
       }
@@ -547,18 +567,28 @@
       const uid        = localStorage.getItem('nava_peace_uid');
       const referredBy = localStorage.getItem('nava_peace_referred_by') || null;
 
+      let alreadyVotedToday = false;
+
       if (sb) {
         // Enregistrer l'action du jour dans peace_votes
         try {
-          await sb.from('peace_votes').insert({
-            user_uid:   uid,
-            country:    country,
+          const { error } = await sb.from('peace_votes').insert({
+            user_uid:    uid,
+            country:     country,
             referred_by: referredBy,
           });
+          if (error) {
+            // Code 23505 = unique constraint violation (déjà voté aujourd'hui)
+            if (error.code === '23505' || error.message?.includes('unique')) {
+              alreadyVotedToday = true;
+            } else {
+              console.warn('Vote insert error', error);
+            }
+          }
         } catch(e) { console.warn('Vote insert error', e); }
 
-        // Récompenser le parrain si applicable
-        if (referredBy) {
+        // Récompenser le parrain si applicable (seulement si vote réel)
+        if (referredBy && !alreadyVotedToday) {
           try {
             await sb.from('referral_points').insert({ referral_code: referredBy });
           } catch(e) { console.warn('Referral point error', e); }
@@ -566,8 +596,9 @@
       }
 
       _voting = false;
-      setDone(true);          // thank you → countdown
-      await loadCounters();   // rafraîchir après insert
+      // Si déjà voté aujourd'hui (ex: autre appareil) → countdown direct sans thank you
+      setDone(!alreadyVotedToday);
+      await loadCounters();
     }
 
     // ── Charger les compteurs depuis peace_votes ────────────────────
@@ -670,6 +701,79 @@
       banner.style.transform = 'translateY(-100%)';
       banner.style.transition = 'opacity 0.3s, transform 0.3s';
       setTimeout(() => { banner.style.display = 'none'; }, 300);
+    }
+
+    // ── INSPIRATION CARD ──────────────────────────────────────────────────
+    const PEACE_QUOTES = [
+      { q:'Peace begins with a smile.',                                            a:'Mother Teresa' },
+      { q:'There is no way to peace. Peace is the way.',                           a:'A.J. Muste' },
+      { q:'An eye for an eye will only make the whole world blind.',               a:'Mahatma Gandhi' },
+      { q:'When the power of love overcomes the love of power, the world will know peace.', a:'Jimi Hendrix' },
+      { q:'Peace cannot be kept by force; it can only be achieved by understanding.', a:'Albert Einstein' },
+      { q:'You cannot shake hands with a clenched fist.',                          a:'Indira Gandhi' },
+      { q:'Peace is the only battle worth waging.',                                a:'Albert Camus' },
+      { q:'Every act of love is a vote for peace.',                                a:'Nava Peace' },
+      { q:'Peace comes from within. Do not seek it without.',                      a:'Gautama Buddha' },
+      { q:'Darkness cannot drive out darkness; only light can do that.',           a:'Martin Luther King Jr.' },
+      { q:'Forgiveness is the attribute of the strong.',                           a:'Mahatma Gandhi' },
+      { q:'True peace is not merely the absence of tension; it is the presence of justice.', a:'Martin Luther King Jr.' },
+      { q:'If we have no peace, it is because we have forgotten that we belong to each other.', a:'Mother Teresa' },
+      { q:'A smile is the beginning of peace.',                                    a:'Mother Teresa' },
+      { q:'Where there is love there is life.',                                    a:'Mahatma Gandhi' },
+      { q:'Give peace a chance.',                                                  a:'John Lennon' },
+      { q:'It is not enough to say we must not wage war. It is necessary to love peace and sacrifice for it.', a:'Martin Luther King Jr.' },
+      { q:'War is what happens when language fails.',                              a:'Margaret Atwood' },
+      { q:'You must not lose faith in humanity.',                                  a:'Mahatma Gandhi' },
+      { q:'The world is a dangerous place, not because of those who do evil, but because of those who look on and do nothing.', a:'Albert Einstein' },
+      { q:'We shall overcome because the arc of the moral universe is long, but it bends toward justice.', a:'Martin Luther King Jr.' },
+      { q:'Peace is not absence of conflict, it is the ability to handle conflict by peaceful means.', a:'Ronald Reagan' },
+      { q:'If you want peace, you don\'t talk to your friends. You talk to your enemies.', a:'Desmond Tutu' },
+      { q:'One day we must come to see that peace is not merely a distant goal that we seek, but a means by which we arrive at that goal.', a:'Martin Luther King Jr.' },
+      { q:'Nonviolence is the greatest force at the disposal of mankind.',          a:'Mahatma Gandhi' },
+      { q:'To be prepared for war is one of the most effective means of preserving peace.', a:'George Washington' },
+      { q:'I speak to everyone in the same way, whether he is the garbage man or the president.', a:'Albert Einstein' },
+      { q:'The most important thing in the world is love — and peace is its language.', a:'Nava Peace' },
+      { q:'Those who make peaceful revolution impossible will make violent revolution inevitable.', a:'John F. Kennedy' },
+      { q:'Imagine all the people living life in peace.',                          a:'John Lennon' },
+    ];
+
+    function getTodayQuote() {
+      const start = new Date(new Date().getFullYear(), 0, 0);
+      const dayOfYear = Math.floor((Date.now() - start) / 86400000);
+      return PEACE_QUOTES[dayOfYear % PEACE_QUOTES.length];
+    }
+
+    let _inspoTimer = null;
+    function showInspo() {
+      const { q, a } = getTodayQuote();
+      document.getElementById('inspo-quote').textContent = '\u201C' + q + '\u201D';
+      document.getElementById('inspo-author').textContent = '\u2014 ' + a;
+      const overlay = document.getElementById('inspo-overlay');
+      overlay.style.display = 'flex';
+      overlay.style.opacity  = '0';
+      overlay.style.transition = 'opacity 0.5s ease';
+      void overlay.offsetWidth;
+      overlay.style.opacity  = '1';
+      // Progress bar countdown
+      const bar = document.getElementById('inspo-bar');
+      bar.style.transition = 'none';
+      bar.style.width = '100%';
+      void bar.offsetWidth;
+      bar.style.transition = 'width 8s linear';
+      bar.style.width = '0%';
+      _inspoTimer = setTimeout(closeInspo, 8000);
+    }
+
+    function closeInspo() {
+      clearTimeout(_inspoTimer);
+      const overlay = document.getElementById('inspo-overlay');
+      overlay.style.opacity = '0';
+      overlay.style.transition = 'opacity 0.4s ease';
+      setTimeout(() => {
+        overlay.style.display = 'none';
+        overlay.style.opacity = '';
+        overlay.style.transition = '';
+      }, 400);
     }
 
     checkDone();
