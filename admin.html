@@ -1533,8 +1533,9 @@ async function saveModules() {
   btn.disabled = true; btn.textContent = '···';
   try {
     const value = JSON.stringify(pendingMods);
-    // Always save locally first
+    // Sauvegarder localement + timestamp (priorité sur sync Supabase pendant 1h)
     localStorage.setItem('nava_modules', value);
+    localStorage.setItem('nava_modules_ts', Date.now().toString());
     // Try RPC sécurisée d'abord, puis fallback direct upsert
     try {
       let saved = false;

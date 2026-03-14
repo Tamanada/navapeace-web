@@ -112,6 +112,12 @@ var NAVA_NAV_MAP = {
            var newVal = data[0].value;
            var oldVal = localStorage.getItem('nava_modules') || '{}';
            if (newVal === oldVal) return; // nothing changed
+
+           // Si l'admin a sauvegardé localement dans les 60 dernières minutes,
+           // la valeur locale est plus récente → ne pas écraser
+           var localTs = parseInt(localStorage.getItem('nava_modules_ts') || '0', 10);
+           if (localTs && Date.now() - localTs < 60 * 60 * 1000) return;
+
            localStorage.setItem('nava_modules', newVal);
 
            var newMods = JSON.parse(newVal);
