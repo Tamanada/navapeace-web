@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.amcharts.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.myshopify.com; frame-ancestors 'none';" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NAVA PEACE – Admin</title>
   <link rel="icon" type="image/png" href="favicon.png" />
@@ -818,31 +819,83 @@ let _adminCode = ''; // session-only, never persisted
 let _adminRole = '';
 let _adminName = '';
 
+// ── RATE LIMITING & SESSION ───────────────────────────────
+const ADMIN_SESSION_MS  = 8 * 60 * 60 * 1000; // 8 h
+const MAX_ATTEMPTS      = 5;
+const LOCKOUT_MS        = 15 * 60 * 1000;      // 15 min
+const LOGIN_STATE_KEY   = 'nava_admin_ls';
+
+function _getLS()  { try { return JSON.parse(localStorage.getItem(LOGIN_STATE_KEY)||'{}'); } catch(e){ return {}; } }
+function _setLS(o) { localStorage.setItem(LOGIN_STATE_KEY, JSON.stringify(o)); }
+
+function _isLockedOut() {
+  const s = _getLS();
+  if (!s.lockUntil) return false;
+  if (Date.now() < s.lockUntil) return true;
+  _setLS({ attempts: 0 }); // lockout expired
+  return false;
+}
+function _recordFail() {
+  const s    = _getLS();
+  const att  = (s.attempts || 0) + 1;
+  if (att >= MAX_ATTEMPTS) { _setLS({ attempts: att, lockUntil: Date.now() + LOCKOUT_MS }); return true; }
+  _setLS({ attempts: att });
+  return false;
+}
+function _resetLS() { localStorage.removeItem(LOGIN_STATE_KEY); }
+
+function _startLockoutTick() {
+  const err = document.getElementById('lock-err');
+  const tick = () => {
+    const s = _getLS();
+    if (!s.lockUntil || Date.now() >= s.lockUntil) { err.textContent = ''; return; }
+    const rem = Math.ceil((s.lockUntil - Date.now()) / 1000);
+    const m = String(Math.floor(rem/60)).padStart(2,'0');
+    const sc = String(rem%60).padStart(2,'0');
+    err.textContent = `⛔ LOCKED — ${m}:${sc} REMAINING`;
+    setTimeout(tick, 1000);
+  };
+  tick();
+}
+
 async function checkPassword() {
+  if (_isLockedOut()) { _startLockoutTick(); return; }
+
   const val = document.getElementById('admin-pass').value.trim();
   if (!val) return;
   const btn = document.querySelector('.lock-btn');
   if (btn) { btn.disabled = true; btn.textContent = '···'; }
+
   try {
-    // Try Supabase admin_users via RPC (run admin_users_setup.sql once to enable)
     const { data, error } = await sb.rpc('nava_check_admin', { input_code: val });
     if (!error && data?.valid) {
+      _resetLS();
       _adminCode = val; _adminRole = data.role; _adminName = data.name;
-      localStorage.setItem('nava_admin_ok','1');
+      localStorage.setItem('nava_admin_ok', String(Date.now() + ADMIN_SESSION_MS));
       unlockPanel(); return;
     }
-  } catch(e) { /* RPC not set up yet — fall through */ }
+  } catch(e) { /* RPC not set up yet */ }
+
   // Fallback: hardcoded master code
   if (val === ADMIN_CODE) {
+    _resetLS();
     _adminCode = val; _adminRole = 'super_admin'; _adminName = 'Super Admin';
-    localStorage.setItem('nava_admin_ok','1');
+    localStorage.setItem('nava_admin_ok', String(Date.now() + ADMIN_SESSION_MS));
     unlockPanel(); return;
   }
+
+  // Failed attempt
   if (btn) { btn.disabled = false; btn.textContent = 'ENTER →'; }
-  const err = document.getElementById('lock-err');
-  err.textContent = '✗ INVALID ACCESS CODE';
   document.getElementById('admin-pass').value = '';
-  setTimeout(() => err.textContent = '', 3000);
+  const locked = _recordFail();
+  const err = document.getElementById('lock-err');
+  if (locked) {
+    _startLockoutTick();
+  } else {
+    const left = MAX_ATTEMPTS - (_getLS().attempts || 0);
+    err.textContent = `✗ INVALID CODE · ${left} ATTEMPT${left>1?'S':''} LEFT`;
+    setTimeout(() => { if (!_isLockedOut()) err.textContent = ''; }, 3000);
+  }
 }
 function unlockPanel() {
   document.getElementById('lock-screen').style.display = 'none';
@@ -1482,11 +1535,11 @@ async function saveModules() {
     const value = JSON.stringify(pendingMods);
     // Always save locally first
     localStorage.setItem('nava_modules', value);
-    // Try Supabase for cross-device sync (requires admin_settings table)
+    // Try Supabase via RPC sécurisée (SECURITY DEFINER contourne RLS)
     try {
-      const { error } = await sb.from('admin_settings')
-        .upsert({ key:'nava_modules', value, updated_at: new Date().toISOString() },
-                 { onConflict:'key' });
+      const { error } = await sb.rpc('nava_upsert_admin_setting', {
+        p_key: 'nava_modules', p_value: value, p_code: _adminCode
+      });
       if(error) throw error;
       showToast('✓ MODULES SAVED & SYNCED', 3000);
     } catch(supaErr) {
@@ -1856,7 +1909,14 @@ async function deleteAdminUser(id, name) {
 // Si on déplace ce check plus haut dans le script, les let (allUsers,
 // allReferrals, etc.) seraient en TDZ quand loadAll() s'exécute via
 // le cache navigateur (réponse Supabase instantanée au refresh).
-if (localStorage.getItem('nava_admin_ok') === '1') unlockPanel();
+// ── AUTO-LOGIN avec vérification d'expiration de session ──
+const _adminExpiry = parseInt(localStorage.getItem('nava_admin_ok') || '0', 10);
+if (_adminExpiry && Date.now() < _adminExpiry) {
+  unlockPanel();
+} else if (_adminExpiry) {
+  // Session expirée → nettoyer
+  localStorage.removeItem('nava_admin_ok');
+}
 </script>
 
 <!-- ══ USER DRAWER ════════════════════════════════════════ -->

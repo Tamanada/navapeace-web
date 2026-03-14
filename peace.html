@@ -2,6 +2,7 @@
 <html lang="en" data-module="module_peace">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.amcharts.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.myshopify.com; frame-ancestors 'none';" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NAVA PEACE – Choose Peace</title>
   <link rel="icon" type="image/png" href="favicon.png" />
@@ -675,6 +676,18 @@
     loadCounters();
     checkNotifications();
     initPush();
+
+    // ── Compteurs live : polling 30s ──────────────────────────────────────
+    setInterval(loadCounters, 30_000);
+
+    // ── Compteurs live : Supabase Realtime (mise à jour instantanée) ──────
+    if (sb) {
+      sb.channel('nava_votes_rt')
+        .on('postgres_changes',
+            { event: 'INSERT', schema: 'public', table: 'peace_votes' },
+            () => loadCounters())
+        .subscribe();
+    }
 
     // ── WEB PUSH ────────────────────────────────────────────────────────────
     const VAPID_PUBLIC_KEY = 'BJ05qnJnaYlLAhvlO4s1CDbh42eD7PYuNDgk33AgzBQ6mhRMDNcPqPj138WWZqA_hAon8CAN9RpYA5yikWEi8p4';
