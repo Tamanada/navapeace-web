@@ -1972,30 +1972,54 @@ function regenAdminCode() {
   if (inp) inp.value = genAdminCode();
 }
 
+function toggleAdminForm() {
+  const form     = document.getElementById('drawer-admin-form');
+  const chevron  = document.getElementById('drawer-admin-chevron');
+  if (!form) return;
+  const open = form.style.display !== 'none';
+  form.style.display    = open ? 'none' : '';
+  if (chevron) chevron.style.transform = open ? '' : 'rotate(180deg)';
+}
+
 function populateAdminSection(uid) {
-  const admin = adminUsersMap.get(uid);
+  const admin      = adminUsersMap.get(uid);
   const currentDiv = document.getElementById('drawer-admin-current');
+  const pill       = document.getElementById('drawer-admin-status-pill');
   const grantBtn   = document.getElementById('adm-grant-btn');
   const revokeBtn  = document.getElementById('adm-revoke-btn');
+  const form       = document.getElementById('drawer-admin-form');
+  const chevron    = document.getElementById('drawer-admin-chevron');
 
   if (admin) {
-    // Existing admin — populate fields
+    // Show status pill in header
+    const roleLabel = admin.role === 'super_admin' ? 'SUPER ADMIN' : 'VIEWER';
+    const activeColor = admin.active ? '#4ade80' : '#ff8080';
+    if (pill) pill.innerHTML = `<span style="background:rgba(109,213,245,0.15);border:1px solid rgba(109,213,245,0.35);border-radius:20px;padding:2px 10px;font-size:7px;letter-spacing:2px;color:#6DD5F5;margin-left:8px;">👑 ${roleLabel}</span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${activeColor};margin-left:6px;"></span>`;
+    // Populate form fields
     document.getElementById('adm-name').value  = admin.name  || '';
     document.getElementById('adm-email').value = admin.email || '';
     document.getElementById('adm-role').value  = admin.role  || 'viewer';
     document.getElementById('adm-code').value  = admin.code  || '';
-    currentDiv.innerHTML = `<span class="drawer-admin-badge">👑 ${admin.role === 'super_admin' ? 'SUPER ADMIN' : 'VIEWER'} · ${admin.active ? 'ACTIVE' : 'DISABLED'}</span>`;
-    grantBtn.textContent  = '💾 UPDATE ADMIN';
+    if (currentDiv) currentDiv.innerHTML = '';
+    if (grantBtn)  grantBtn.textContent  = '💾 UPDATE ADMIN';
     if (revokeBtn) revokeBtn.style.display = '';
+    // Auto-open the form since there's data to show
+    if (form)    form.style.display = '';
+    if (chevron) chevron.style.transform = 'rotate(180deg)';
   } else {
-    // No admin yet — clear & pre-generate code
+    // No admin — show neutral pill
+    if (pill) pill.innerHTML = `<span style="font-size:7px;letter-spacing:2px;color:var(--w40);margin-left:8px;">NO ACCESS</span>`;
+    // Clear form fields & pre-generate code
     document.getElementById('adm-name').value  = '';
     document.getElementById('adm-email').value = '';
     document.getElementById('adm-role').value  = 'viewer';
     document.getElementById('adm-code').value  = genAdminCode();
-    currentDiv.innerHTML = '';
-    grantBtn.textContent = '👑 GRANT ADMIN ACCESS';
+    if (currentDiv) currentDiv.innerHTML = '';
+    if (grantBtn)  grantBtn.textContent  = '👑 GRANT ADMIN ACCESS';
     if (revokeBtn) revokeBtn.style.display = 'none';
+    // Collapsed by default for non-admins
+    if (form)    form.style.display = 'none';
+    if (chevron) chevron.style.transform = '';
   }
 }
 
@@ -2085,6 +2109,45 @@ if (_adminExpiry && Date.now() < _adminExpiry) {
     <div class="drawer-handle"></div>
     <div class="drawer-uid" id="drawer-uid"></div>
     <div class="drawer-user-info" id="drawer-user-info"></div>
+
+    <!-- ADMIN ACCESS SECTION — visible at top for super_admin -->
+    <div class="drawer-admin-section" id="drawer-admin-section" style="display:none;">
+      <div class="drawer-admin-header" onclick="toggleAdminForm()" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
+        <p class="drawer-admin-title" style="margin:0;">👑 ADMIN ACCESS</p>
+        <div id="drawer-admin-status-pill"></div>
+        <span id="drawer-admin-chevron" style="font-size:10px;color:var(--w40);transition:transform 0.2s;">▼</span>
+      </div>
+      <div id="drawer-admin-form" style="display:none;margin-top:12px;">
+        <div id="drawer-admin-current"></div>
+        <div class="drawer-admin-field">
+          <span class="drawer-admin-label">NAME</span>
+          <input class="drawer-admin-input" id="adm-name" type="text" placeholder="Full name…" autocomplete="off" />
+        </div>
+        <div class="drawer-admin-field">
+          <span class="drawer-admin-label">EMAIL</span>
+          <input class="drawer-admin-input" id="adm-email" type="email" placeholder="email@domain.com" autocomplete="off" />
+        </div>
+        <div class="drawer-admin-row">
+          <div class="drawer-admin-field">
+            <span class="drawer-admin-label">ROLE</span>
+            <select class="drawer-admin-input" id="adm-role">
+              <option value="viewer">VIEWER</option>
+              <option value="super_admin">SUPER ADMIN</option>
+            </select>
+          </div>
+          <div class="drawer-admin-field">
+            <span class="drawer-admin-label">ACCESS CODE</span>
+            <div class="drawer-admin-code-wrap">
+              <input class="drawer-admin-input drawer-admin-code" id="adm-code" placeholder="Auto…" autocomplete="off" />
+              <button class="drawer-admin-regen" onclick="regenAdminCode()" title="Generate new code">↺</button>
+            </div>
+          </div>
+        </div>
+        <button class="drawer-admin-grant" id="adm-grant-btn" onclick="saveAdminAccess()">👑 GRANT ADMIN ACCESS</button>
+        <button class="drawer-admin-revoke" id="adm-revoke-btn" style="display:none;" onclick="revokeAdminAccess()">✕ REVOKE ADMIN ACCESS</button>
+      </div>
+    </div>
+
     <div class="drawer-doves" id="drawer-doves"></div>
     <div class="drawer-votes-section">
       <p class="drawer-votes-title">🕊 DAILY ACTIONS FOR PEACE</p>
@@ -2111,38 +2174,6 @@ if (_adminExpiry && Date.now() < _adminExpiry) {
     <textarea class="drawer-note" id="drawer-note"
               placeholder="fraud · duplicate · test · suspended …" rows="3"></textarea>
     <button class="drawer-save-btn" onclick="saveUserFlag()">SAVE</button>
-
-    <!-- ADMIN ACCESS SECTION -->
-    <div class="drawer-admin-section" id="drawer-admin-section" style="display:none;">
-      <p class="drawer-admin-title">👑 ADMIN ACCESS</p>
-      <div id="drawer-admin-current"></div>
-      <div class="drawer-admin-field">
-        <span class="drawer-admin-label">NAME</span>
-        <input class="drawer-admin-input" id="adm-name" type="text" placeholder="Full name…" autocomplete="off" />
-      </div>
-      <div class="drawer-admin-field">
-        <span class="drawer-admin-label">EMAIL</span>
-        <input class="drawer-admin-input" id="adm-email" type="email" placeholder="email@domain.com" autocomplete="off" />
-      </div>
-      <div class="drawer-admin-row">
-        <div class="drawer-admin-field">
-          <span class="drawer-admin-label">ROLE</span>
-          <select class="drawer-admin-input" id="adm-role">
-            <option value="viewer">VIEWER</option>
-            <option value="super_admin">SUPER ADMIN</option>
-          </select>
-        </div>
-        <div class="drawer-admin-field">
-          <span class="drawer-admin-label">ACCESS CODE</span>
-          <div class="drawer-admin-code-wrap">
-            <input class="drawer-admin-input drawer-admin-code" id="adm-code" placeholder="Auto…" autocomplete="off" />
-            <button class="drawer-admin-regen" onclick="regenAdminCode()" title="Generate new code">↺</button>
-          </div>
-        </div>
-      </div>
-      <button class="drawer-admin-grant" id="adm-grant-btn" onclick="saveAdminAccess()">👑 GRANT ADMIN ACCESS</button>
-      <button class="drawer-admin-revoke" id="adm-revoke-btn" style="display:none;" onclick="revokeAdminAccess()">✕ REVOKE ADMIN ACCESS</button>
-    </div>
   </div>
 </div>
   <!-- Excel-style column filter popup -->
