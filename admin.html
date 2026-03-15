@@ -642,6 +642,7 @@
                 <th style="text-align:center;">👑</th>
                 <th>#</th>
                 <th>UID</th>
+                <th><div class="th-wrap">PSEUDO<button class="col-filter-btn" id="cfb-pseudo" onclick="openColFilter(event,'pseudo')">▼</button></div></th>
                 <th><div class="th-wrap">STATUS<button class="col-filter-btn" id="cfb-status" onclick="openColFilter(event,'status')">▼</button></div></th>
                 <th><div class="th-wrap">COUNTRY<button class="col-filter-btn" id="cfb-country" onclick="openColFilter(event,'country')">▼</button></div></th>
                 <th><div class="th-wrap">AGE<button class="col-filter-btn" id="cfb-age" onclick="openColFilter(event,'age')">▼</button></div></th>
@@ -1063,7 +1064,7 @@ async function loadVotes() {
       gender:normalizeGender(u.gender), days:votesCount.get(u.user_uid)||1,
       ref_code:u.referral_code||'', referred_by:referredByMap.get(u.user_uid)||u.referred_by||'',
       registered:firstSeen.get(u.user_uid)||u.created_at,
-      first_name:''
+      first_name:'', pseudo:''
     })).sort((a,b)=>b.days-a.days);
 
     filteredUsers=[...allUsers];
@@ -1192,6 +1193,7 @@ function renderUsersTable() {
       <td class="crown-cell">${adminUsersMap.has(u.uid)?'👑':''}</td>
       <td style="color:var(--w40);font-size:9px;">${i+1}</td>
       <td class="uid-cell" title="Click row to manage user">${u.uid.slice(0,14)}…</td>
+      <td style="font-size:10px;letter-spacing:1px;color:#fff;font-weight:500;">${u.pseudo||'<span style="color:var(--w40);">—</span>'}</td>
       <td>${statusBadge(u.uid)}</td>
       <td>${u.country||'—'}</td>
       <td>${u.age||'—'}</td>
@@ -1205,7 +1207,7 @@ function renderUsersTable() {
   document.getElementById('users-footer').textContent=`SHOWING ${filteredUsers.length} OF ${allUsers.length} USERS · CLICK ROW TO MANAGE`;
 }
 // ── COLUMN FILTER STATE (Excel-style) ─────────────────────
-const colFilters={status:new Set(),country:new Set(),age:new Set(),gender:new Set(),days:new Set(),firstname:new Set(),registered:new Set()};
+const colFilters={status:new Set(),country:new Set(),age:new Set(),gender:new Set(),days:new Set(),firstname:new Set(),pseudo:new Set(),registered:new Set()};
 let _cfKey=null; // currently open filter column key
 
 function getColValues(key){
@@ -1215,6 +1217,7 @@ function getColValues(key){
     case 'age':      return [...new Set(allUsers.map(u=>String(u.age||'')||'__blank__'))].sort((a,b)=>{if(a==='__blank__')return 1;if(b==='__blank__')return -1;return Number(a)-Number(b);}).map(v=>({v,label:v==='__blank__'?'(Blank)':v}));
     case 'gender':   return [...new Set(allUsers.map(u=>u.gender||'__blank__'))].sort().map(v=>({v,label:v==='__blank__'?'(Blank)':v}));
     case 'days':     return [...new Set(allUsers.map(u=>String(u.days)))].sort((a,b)=>Number(a)-Number(b)).map(v=>({v,label:v+' day'+(v==='1'?'':'s')}));
+    case 'pseudo':   return [{v:'__set__',label:'✓ Has pseudo'},{v:'__unset__',label:'— No pseudo'}];
     case 'firstname':return [{v:'__set__',label:'✓ Has name'},{v:'__unset__',label:'— No name'}];
     case 'registered':return [...new Set(allUsers.map(u=>(u.registered||'').slice(0,10)).filter(Boolean))].sort().reverse().map(v=>({v,label:v}));
     default: return [];
@@ -1285,12 +1288,19 @@ function applyFilters(){
   filteredUsers=allUsers.filter(u=>{
     if(q&&!(u.uid.toLowerCase().includes(q)||(u.country||'').toLowerCase().includes(q)||
       (u.ref_code||'').toLowerCase().includes(q)||(u.referred_by||'').toLowerCase().includes(q)||
-      (u.first_name||'').toLowerCase().includes(q))) return false;
+      (u.first_name||'').toLowerCase().includes(q)||(u.pseudo||'').toLowerCase().includes(q))) return false;
     if(colFilters.status.size>0){const s=userFlags[u.uid]?.status||'active';if(!colFilters.status.has(s))return false;}
     if(colFilters.country.size>0&&!colFilters.country.has(u.country||'__blank__')) return false;
     if(colFilters.age.size>0&&!colFilters.age.has(String(u.age||'')||'__blank__')) return false;
     if(colFilters.gender.size>0&&!colFilters.gender.has(u.gender||'__blank__')) return false;
     if(colFilters.days.size>0&&!colFilters.days.has(String(u.days))) return false;
+    if(colFilters.pseudo.size>0){
+      const hasPseudo=!!u.pseudo;
+      const wantSet=colFilters.pseudo.has('__set__');
+      const wantUnset=colFilters.pseudo.has('__unset__');
+      if(wantSet&&!wantUnset&&!hasPseudo) return false;
+      if(wantUnset&&!wantSet&&hasPseudo) return false;
+    }
     if(colFilters.firstname.size>0){
       const hasName=!!u.first_name;
       const wantSet=colFilters.firstname.has('__set__');
@@ -1394,7 +1404,7 @@ function loadFilterPreset(){
 
 function populateFilterSelects() { /* no-op — using Excel-style column filters */ }
 function exportCSV() {
-  const h=['uid','first_name','country','age','gender','days','ref_code','referred_by','registered'];
+  const h=['uid','pseudo','first_name','country','age','gender','days','ref_code','referred_by','registered'];
   const rows=filteredUsers.map(u=>h.map(k=>`"${(u[k]||'').toString().replace(/"/g,'""')}"`).join(','));
   const blob=new Blob([[h.join(','),...rows].join('\n')],{type:'text/csv'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
@@ -1420,12 +1430,18 @@ async function loadMessages() {
 async function mergeFirstNames() {
   try {
     const {data}=await sb.from('peace_messages')
-      .select('user_uid,first_name')
-      .not('first_name','is',null);
+      .select('user_uid,first_name,pseudo');
     if(!data) return;
-    const fnMap=new Map(data.map(r=>[r.user_uid, r.first_name]));
-    allUsers.forEach(u=>{ u.first_name = fnMap.get(u.uid)||''; });
-    filteredUsers.forEach(u=>{ u.first_name = fnMap.get(u.uid)||''; });
+    const fnMap     = new Map(data.map(r=>[r.user_uid, r.first_name||'']));
+    const pseudoMap = new Map(data.map(r=>[r.user_uid, r.pseudo||'']));
+    allUsers.forEach(u=>{
+      u.first_name = fnMap.get(u.uid)     || '';
+      u.pseudo     = pseudoMap.get(u.uid) || '';
+    });
+    filteredUsers.forEach(u=>{
+      u.first_name = fnMap.get(u.uid)     || '';
+      u.pseudo     = pseudoMap.get(u.uid) || '';
+    });
     renderUsersTable();
   } catch(e) { /* silencieux */ }
 }
