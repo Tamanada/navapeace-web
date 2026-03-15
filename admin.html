@@ -437,6 +437,25 @@
       font-family:inherit;font-size:9px;letter-spacing:3px;
       text-transform:uppercase;cursor:pointer;transition:opacity 0.2s;
     }
+    /* ── ADMIN SECTION IN DRAWER ── */
+    .drawer-admin-section{margin-top:18px;border-top:1px solid rgba(255,255,255,0.1);padding-top:16px;}
+    .drawer-admin-title{font-size:8px;letter-spacing:3px;color:rgba(109,213,245,0.8);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+    .drawer-admin-badge{display:inline-block;background:rgba(109,213,245,0.15);border:1px solid rgba(109,213,245,0.3);border-radius:5px;padding:2px 8px;font-size:8px;letter-spacing:2px;color:#6DD5F5;margin-bottom:10px;}
+    .drawer-admin-field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
+    .drawer-admin-label{font-size:7px;letter-spacing:2px;color:var(--w40);}
+    .drawer-admin-input{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-family:Nasalization,Arial,sans-serif;font-size:11px;padding:9px 12px;width:100%;box-sizing:border-box;outline:none;}
+    .drawer-admin-input:focus{border-color:rgba(109,213,245,0.5);}
+    .drawer-admin-code-wrap{display:flex;gap:6px;align-items:center;}
+    .drawer-admin-code{font-family:monospace;letter-spacing:3px;background:rgba(109,213,245,0.08);border-color:rgba(109,213,245,0.25);}
+    .drawer-admin-regen{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:var(--w40);font-size:9px;padding:6px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+    .drawer-admin-row{display:flex;gap:8px;}
+    .drawer-admin-row .drawer-admin-field{flex:1;}
+    .drawer-admin-grant{margin-top:8px;width:100%;padding:12px;background:rgba(109,213,245,0.15);border:1px solid rgba(109,213,245,0.35);border-radius:10px;color:#6DD5F5;font-family:inherit;font-size:9px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:background 0.2s;}
+    .drawer-admin-grant:hover{background:rgba(109,213,245,0.25);}
+    .drawer-admin-revoke{margin-top:6px;width:100%;padding:10px;background:rgba(255,100,100,0.08);border:1px solid rgba(255,100,100,0.25);border-radius:10px;color:#ff8080;font-family:inherit;font-size:9px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:background 0.2s;}
+    .drawer-admin-revoke:hover{background:rgba(255,100,100,0.15);}
+    /* ── CROWN IN TABLE ── */
+    .crown-cell{text-align:center;font-size:14px;}
     .drawer-save-btn:hover{opacity:0.82;}
     .status-badge{
       display:inline-block;padding:2px 7px;border-radius:5px;
@@ -620,6 +639,7 @@
           <table>
             <thead>
               <tr>
+                <th style="text-align:center;">👑</th>
                 <th>#</th>
                 <th>UID</th>
                 <th><div class="th-wrap">STATUS<button class="col-filter-btn" id="cfb-status" onclick="openColFilter(event,'status')">▼</button></div></th>
@@ -941,11 +961,24 @@ function fmt(n) { return n==null ? '—' : n.toLocaleString(); }
 // ── GLOBAL DATA ───────────────────────────────────────────
 let allUsers=[], filteredUsers=[], allVotes=[], allMessages=[], allReferrals=[];
 let msgFilter='all';
+let adminUsersMap = new Map(); // key: user_uid → admin record
 
 // ── LOAD ALL ──────────────────────────────────────────────
 async function loadAll() {
-  await Promise.all([loadVotes(), loadMessages(), loadReferrals()]);
+  await Promise.all([loadVotes(), loadMessages(), loadReferrals(), loadAdminUsers()]);
   await mergeFirstNames(); // doit tourner après loadVotes (allUsers) et loadMessages
+}
+
+// ── ADMIN USERS MAP ───────────────────────────────────────
+async function loadAdminUsers() {
+  if (_adminRole !== 'super_admin') return;
+  try {
+    const { data, error } = await sb.rpc('nava_get_admins', { caller_code: _adminCode });
+    if (error) throw error;
+    const admins = Array.isArray(data) ? data : JSON.parse(data || '[]');
+    adminUsersMap.clear();
+    admins.forEach(a => { if (a.user_uid) adminUsersMap.set(a.user_uid, a); });
+  } catch(_) {} // silently fail — table may not exist yet
 }
 
 // ── GENDER NORMALISATION ──────────────────────────────────
@@ -1150,6 +1183,7 @@ function renderActivityBars(items, id, getDate) {
 function renderUsersTable() {
   document.getElementById('users-tbody').innerHTML=filteredUsers.map((u,i)=>`
     <tr style="cursor:pointer;" onclick="openUserDrawer('${u.uid}')">
+      <td class="crown-cell">${adminUsersMap.has(u.uid)?'👑':''}</td>
       <td style="color:var(--w40);font-size:9px;">${i+1}</td>
       <td class="uid-cell" title="Click row to manage user">${u.uid.slice(0,14)}…</td>
       <td>${statusBadge(u.uid)}</td>
@@ -1704,6 +1738,16 @@ function openUserDrawer(uid){
   }
   document.getElementById('user-drawer-overlay').classList.add('open');
   document.getElementById('user-drawer').classList.add('open');
+  // Admin section — only for super_admin
+  const adminSection = document.getElementById('drawer-admin-section');
+  if (adminSection) {
+    if (_adminRole === 'super_admin') {
+      adminSection.style.display = '';
+      populateAdminSection(uid);
+    } else {
+      adminSection.style.display = 'none';
+    }
+  }
 }
 
 function _renderDrawerDoves(realCount, status){
@@ -1916,6 +1960,111 @@ async function deleteAdminUser(id, name) {
   } catch(e) { showToast('✗ ' + e.message); }
 }
 
+// ── ADMIN DRAWER FUNCTIONS ─────────────────────────────────────────
+
+function genAdminCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({length: 8}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+}
+
+function regenAdminCode() {
+  const inp = document.getElementById('adm-code');
+  if (inp) inp.value = genAdminCode();
+}
+
+function populateAdminSection(uid) {
+  const admin = adminUsersMap.get(uid);
+  const currentDiv = document.getElementById('drawer-admin-current');
+  const grantBtn   = document.getElementById('adm-grant-btn');
+  const revokeBtn  = document.getElementById('adm-revoke-btn');
+
+  if (admin) {
+    // Existing admin — populate fields
+    document.getElementById('adm-name').value  = admin.name  || '';
+    document.getElementById('adm-email').value = admin.email || '';
+    document.getElementById('adm-role').value  = admin.role  || 'viewer';
+    document.getElementById('adm-code').value  = admin.code  || '';
+    currentDiv.innerHTML = `<span class="drawer-admin-badge">👑 ${admin.role === 'super_admin' ? 'SUPER ADMIN' : 'VIEWER'} · ${admin.active ? 'ACTIVE' : 'DISABLED'}</span>`;
+    grantBtn.textContent  = '💾 UPDATE ADMIN';
+    if (revokeBtn) revokeBtn.style.display = '';
+  } else {
+    // No admin yet — clear & pre-generate code
+    document.getElementById('adm-name').value  = '';
+    document.getElementById('adm-email').value = '';
+    document.getElementById('adm-role').value  = 'viewer';
+    document.getElementById('adm-code').value  = genAdminCode();
+    currentDiv.innerHTML = '';
+    grantBtn.textContent = '👑 GRANT ADMIN ACCESS';
+    if (revokeBtn) revokeBtn.style.display = 'none';
+  }
+}
+
+async function saveAdminAccess() {
+  const uid   = drawerUid;
+  if (!uid) return;
+  const name  = document.getElementById('adm-name')?.value.trim();
+  const email = document.getElementById('adm-email')?.value.trim();
+  const role  = document.getElementById('adm-role')?.value;
+  const code  = document.getElementById('adm-code')?.value.trim();
+  if (!name || !code) { showToast('✗ Name and access code are required'); return; }
+
+  const existing = adminUsersMap.get(uid);
+  try {
+    if (existing) {
+      // Update existing admin
+      const { data, error } = await sb.rpc('nava_update_admin', {
+        caller_code: _adminCode,
+        target_id: existing.id,
+        new_name: name,
+        new_email: email || '',
+        new_role: role,
+        new_user_uid: uid
+      });
+      if (error) throw error;
+      const res = typeof data === 'string' ? JSON.parse(data) : data;
+      if (res?.error) throw new Error(res.error);
+      showToast(`✓ Admin "${name}" updated`);
+    } else {
+      // Create new admin linked to this user_uid
+      const { data, error } = await sb.rpc('nava_add_admin', {
+        caller_code: _adminCode,
+        new_name: name,
+        new_email: email || '',
+        new_code: code,
+        new_role: role,
+        new_user_uid: uid
+      });
+      if (error) throw error;
+      const res = typeof data === 'string' ? JSON.parse(data) : data;
+      if (res?.error === 'code_already_exists') { showToast('✗ Code already taken — regenerate'); return; }
+      if (res?.error) throw new Error(res.error);
+      showToast(`✓ Admin access granted to "${name}"`);
+    }
+    // Reload admin map and re-render users table
+    await loadAdminUsers();
+    renderUsersTable();
+    populateAdminSection(uid);
+  } catch(e) { showToast('✗ ' + e.message); }
+}
+
+async function revokeAdminAccess() {
+  const uid = drawerUid;
+  if (!uid) return;
+  const admin = adminUsersMap.get(uid);
+  if (!admin) return;
+  if (!confirm(`Revoke admin access for "${admin.name}"? They will no longer be able to log in.`)) return;
+  try {
+    const { data, error } = await sb.rpc('nava_delete_admin', {
+      caller_code: _adminCode, target_id: admin.id
+    });
+    if (error) throw error;
+    showToast(`✓ Admin access revoked`);
+    await loadAdminUsers();
+    renderUsersTable();
+    populateAdminSection(uid);
+  } catch(e) { showToast('✗ ' + e.message); }
+}
+
 // ── AUTO-LOGIN (doit être APRÈS toutes les déclarations let) ──────
 // Si on déplace ce check plus haut dans le script, les let (allUsers,
 // allReferrals, etc.) seraient en TDZ quand loadAll() s'exécute via
@@ -1962,6 +2111,38 @@ if (_adminExpiry && Date.now() < _adminExpiry) {
     <textarea class="drawer-note" id="drawer-note"
               placeholder="fraud · duplicate · test · suspended …" rows="3"></textarea>
     <button class="drawer-save-btn" onclick="saveUserFlag()">SAVE</button>
+
+    <!-- ADMIN ACCESS SECTION -->
+    <div class="drawer-admin-section" id="drawer-admin-section" style="display:none;">
+      <p class="drawer-admin-title">👑 ADMIN ACCESS</p>
+      <div id="drawer-admin-current"></div>
+      <div class="drawer-admin-field">
+        <span class="drawer-admin-label">NAME</span>
+        <input class="drawer-admin-input" id="adm-name" type="text" placeholder="Full name…" autocomplete="off" />
+      </div>
+      <div class="drawer-admin-field">
+        <span class="drawer-admin-label">EMAIL</span>
+        <input class="drawer-admin-input" id="adm-email" type="email" placeholder="email@domain.com" autocomplete="off" />
+      </div>
+      <div class="drawer-admin-row">
+        <div class="drawer-admin-field">
+          <span class="drawer-admin-label">ROLE</span>
+          <select class="drawer-admin-input" id="adm-role">
+            <option value="viewer">VIEWER</option>
+            <option value="super_admin">SUPER ADMIN</option>
+          </select>
+        </div>
+        <div class="drawer-admin-field">
+          <span class="drawer-admin-label">ACCESS CODE</span>
+          <div class="drawer-admin-code-wrap">
+            <input class="drawer-admin-input drawer-admin-code" id="adm-code" placeholder="Auto…" autocomplete="off" />
+            <button class="drawer-admin-regen" onclick="regenAdminCode()" title="Generate new code">↺</button>
+          </div>
+        </div>
+      </div>
+      <button class="drawer-admin-grant" id="adm-grant-btn" onclick="saveAdminAccess()">👑 GRANT ADMIN ACCESS</button>
+      <button class="drawer-admin-revoke" id="adm-revoke-btn" style="display:none;" onclick="revokeAdminAccess()">✕ REVOKE ADMIN ACCESS</button>
+    </div>
   </div>
 </div>
   <!-- Excel-style column filter popup -->
