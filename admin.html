@@ -648,7 +648,6 @@
                 <th><div class="th-wrap">AGE<button class="col-filter-btn" id="cfb-age" onclick="openColFilter(event,'age')">▼</button></div></th>
                 <th><div class="th-wrap">GENDER<button class="col-filter-btn" id="cfb-gender" onclick="openColFilter(event,'gender')">▼</button></div></th>
                 <th><div class="th-wrap">DAYS<button class="col-filter-btn" id="cfb-days" onclick="openColFilter(event,'days')">▼</button></div></th>
-                <th><div class="th-wrap">FIRST NAME<button class="col-filter-btn" id="cfb-firstname" onclick="openColFilter(event,'firstname')">▼</button></div></th>
                 <th>REF CODE</th>
                 <th>REFERRED BY</th>
                 <th><div class="th-wrap">REGISTERED<button class="col-filter-btn" id="cfb-registered" onclick="openColFilter(event,'registered')">▼</button></div></th>
@@ -1064,7 +1063,7 @@ async function loadVotes() {
       gender:normalizeGender(u.gender), days:votesCount.get(u.user_uid)||1,
       ref_code:u.referral_code||'', referred_by:referredByMap.get(u.user_uid)||u.referred_by||'',
       registered:firstSeen.get(u.user_uid)||u.created_at,
-      first_name:'', pseudo:''
+      pseudo:''
     })).sort((a,b)=>b.days-a.days);
 
     filteredUsers=[...allUsers];
@@ -1199,7 +1198,6 @@ function renderUsersTable() {
       <td>${u.age||'—'}</td>
       <td>${u.gender||'—'}</td>
       <td><span class="days-badge">${u.days}</span></td>
-      <td style="font-size:10px;color:rgba(255,255,255,0.8);">${u.first_name||'—'}</td>
       <td class="ref-code">${u.ref_code||'—'}</td>
       <td style="font-size:9px;color:var(--w40);">${u.referred_by||'—'}</td>
       <td style="font-size:9px;">${fmtDate(u.registered)}</td>
@@ -1404,7 +1402,7 @@ function loadFilterPreset(){
 
 function populateFilterSelects() { /* no-op — using Excel-style column filters */ }
 function exportCSV() {
-  const h=['uid','pseudo','first_name','country','age','gender','days','ref_code','referred_by','registered'];
+  const h=['uid','pseudo','country','age','gender','days','ref_code','referred_by','registered'];
   const rows=filteredUsers.map(u=>h.map(k=>`"${(u[k]||'').toString().replace(/"/g,'""')}"`).join(','));
   const blob=new Blob([[h.join(','),...rows].join('\n')],{type:'text/csv'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
@@ -1429,19 +1427,13 @@ async function loadMessages() {
 
 async function mergeFirstNames() {
   try {
-    const {data}=await sb.from('peace_messages')
-      .select('user_uid,first_name,pseudo');
-    if(!data) return;
-    const fnMap     = new Map(data.map(r=>[r.user_uid, r.first_name||'']));
+    // first_name does not exist in peace_messages — fetch only pseudo
+    const {data, error}=await sb.from('peace_messages')
+      .select('user_uid,pseudo');
+    if(error||!data) return;
     const pseudoMap = new Map(data.map(r=>[r.user_uid, r.pseudo||'']));
-    allUsers.forEach(u=>{
-      u.first_name = fnMap.get(u.uid)     || '';
-      u.pseudo     = pseudoMap.get(u.uid) || '';
-    });
-    filteredUsers.forEach(u=>{
-      u.first_name = fnMap.get(u.uid)     || '';
-      u.pseudo     = pseudoMap.get(u.uid) || '';
-    });
+    allUsers.forEach(u=>{ u.pseudo = pseudoMap.get(u.uid) || ''; });
+    filteredUsers.forEach(u=>{ u.pseudo = pseudoMap.get(u.uid) || ''; });
     renderUsersTable();
   } catch(e) { /* silencieux */ }
 }
