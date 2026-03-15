@@ -490,6 +490,19 @@
       font-weight: 400;
     }
 
+    .launch-inline {
+      font-size: 11px;
+      letter-spacing: 2.5px;
+      color: rgba(255,255,255,0.6);
+      text-transform: uppercase;
+      margin-top: 8px;
+      white-space: nowrap;
+    }
+    .launch-inline span {
+      color: #fff;
+      font-size: 13px;
+    }
+
     /* Share overlay */
     #share-overlay.open { display: flex !important; }
   </style>
@@ -501,12 +514,16 @@
     <img src="logo.png" alt="NAVA PEACE" />
     <h1>NAVA PEACE</h1>
     <p class="tagline" data-i18n="tagline">TODAY HUMANITY CHOOSE PEACE</p>
+    <!-- DAYS inline under tagline -->
+    <p class="launch-inline">
+      <span id="cnt-days">0</span> DAYS &nbsp;·&nbsp; <span id="cnt-timer">00:00:00</span> SINCE LAUNCH
+    </p>
   </div>
 
   <!-- COUNTER -->
   <div class="counter-strip">
 
-    <!-- Ligne 1 : PEACE LOVERS · COUNTRIES · TODAY -->
+    <!-- PEACE LOVERS · COUNTRIES · TODAY -->
     <div class="counter-row-top">
       <div class="counter-item info-trigger" onclick="openPopover('people')">
         <span class="num" id="cnt-people">—</span>
@@ -524,22 +541,11 @@
       </div>
     </div>
 
-    <!-- Ligne 2 : 🕊 TOTAL DOVES · DAYS SINCE LAUNCH -->
-    <div class="counter-row-bottom">
+    <!-- 🕊 TOTAL DOVES (seul sur la ligne du bas) -->
+    <div class="counter-row-bottom" style="border-top:1px solid rgba(255,255,255,0.18);margin-top:16px;padding-top:16px;">
       <div class="counter-item" id="cnt-doves-item">
         <span class="num" id="cnt-doves">—</span>
         <span class="lbl">🕊 TOTAL DOVES</span>
-      </div>
-      <div class="counter-sep"></div>
-      <div class="counter-item" id="cnt-launch-item">
-        <div class="launch-line">
-          <span class="num" id="cnt-days" style="font-size:38px;letter-spacing:2px;">0</span>
-          <span class="lbl" style="font-size:11px;letter-spacing:2.5px;" data-i18n="lbl_days">DAYS</span>
-        </div>
-        <div class="launch-line" style="margin-top:6px;">
-          <span class="num" id="cnt-timer" style="font-size:20px;letter-spacing:2px;">00:00:00</span>
-          <span class="lbl" style="font-size:10px;letter-spacing:2px;" data-i18n="lbl_since">SINCE LAUNCH</span>
-        </div>
       </div>
     </div>
 
