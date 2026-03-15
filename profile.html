@@ -865,6 +865,63 @@
     }
     .ref-remind-btn:hover:not(:disabled) { background: rgba(255,255,255,0.22); }
     .ref-remind-btn:disabled { opacity: 0.45; cursor: default; }
+
+    /* ── STREAK PROGRESS ───────────────────────────────── */
+    .streak-header { display:flex; align-items:baseline; gap:10px; margin-bottom:18px; }
+    .streak-num  { font-size:48px; font-weight:700; color:#fff; line-height:1; }
+    .streak-unit { font-size:10px; letter-spacing:3px; color:rgba(255,255,255,0.55); }
+    .streak-bar-wrap { margin-bottom:20px; }
+    .streak-bar-label {
+      display:flex; justify-content:space-between;
+      font-size:9px; letter-spacing:2px; color:rgba(255,255,255,0.5);
+      margin-bottom:8px;
+    }
+    .streak-bar-track {
+      height:8px; background:rgba(255,255,255,0.12); border-radius:8px; overflow:hidden;
+    }
+    .streak-bar-fill {
+      height:100%; border-radius:8px;
+      background:linear-gradient(90deg,#6DD5F5,#fff);
+      transition: width 1.2s cubic-bezier(.22,1,.36,1);
+    }
+    .streak-milestones {
+      display:flex; justify-content:space-between; gap:6px; margin-top:4px;
+    }
+    .streak-milestone {
+      flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;
+      padding:10px 4px; border-radius:10px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.1);
+      transition: background 0.3s, border 0.3s;
+    }
+    .streak-milestone.done {
+      background:rgba(255,255,255,0.18);
+      border-color:rgba(255,255,255,0.4);
+    }
+    .streak-milestone.active {
+      background:rgba(109,213,245,0.18);
+      border-color:rgba(109,213,245,0.5);
+      box-shadow:0 0 14px rgba(109,213,245,0.2);
+    }
+    .streak-milestone .ms-icon { font-size:18px; filter:brightness(0) invert(1); opacity:0.5; }
+    .streak-milestone.done .ms-icon,
+    .streak-milestone.active .ms-icon { opacity:1; }
+    .streak-milestone .ms-days {
+      font-size:11px; font-weight:700; color:rgba(255,255,255,0.5);
+      letter-spacing:1px;
+    }
+    .streak-milestone.done .ms-days,
+    .streak-milestone.active .ms-days { color:#fff; }
+    .streak-milestone .ms-name {
+      font-size:7px; letter-spacing:1.5px; color:rgba(255,255,255,0.35);
+      text-align:center; line-height:1.3;
+    }
+    .streak-milestone.done .ms-name { color:rgba(255,255,255,0.7); }
+    .streak-next-msg {
+      text-align:center; font-size:9px; letter-spacing:2px;
+      color:rgba(255,255,255,0.45); margin-top:14px; line-height:1.8;
+    }
+    .streak-next-msg strong { color:rgba(255,255,255,0.85); }
   </style>
 </head>
 <body>
@@ -997,6 +1054,12 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- STREAK PROGRESS -->
+  <div class="card" id="streak-card" style="display:none;">
+    <p class="section-title">🔥 PEACE STREAK</p>
+    <div id="streak-progress-inner"></div>
   </div>
 
   <!-- MY PEACE MESSAGE -->
@@ -1554,13 +1617,89 @@
     document.getElementById('dove-own').textContent   = ownActions;
     document.getElementById('dove-ref').textContent   = referralDoves;
 
-    // Afficher le streak consécutif
+    // Afficher le streak consécutif dans le popup
     const streakEl = document.getElementById('dove-streak');
     if (streakEl && streak > 0) {
       streakEl.textContent = streak;
       const streakRow = document.getElementById('streak-row');
       if (streakRow) streakRow.style.display = 'flex';
     }
+
+    // Afficher la barre de progression
+    renderStreakProgress(streak);
+  }
+
+  // ── STREAK PROGRESS BAR ──────────────────────────────────────────
+  function renderStreakProgress(streak) {
+    const card = document.getElementById('streak-card');
+    const inner = document.getElementById('streak-progress-inner');
+    if (!card || !inner || streak === 0) return;
+    card.style.display = 'block';
+
+    const MILESTONES = [
+      { days:7,  icon:'🌱', name:'SEEDLING',  reward:'Peace Seedling Badge' },
+      { days:14, icon:'🕊', name:'KEEPER',    reward:'Peace Keeper Badge'   },
+      { days:21, icon:'⭐', name:'WARRIOR',   reward:'Peace Warrior Badge'  },
+      { days:28, icon:'🌟', name:'CHAMPION',  reward:'Peace Champion Badge' },
+      { days:30, icon:'🏆', name:'LEGEND',    reward:'Peace Legend Badge'   },
+    ];
+
+    // Trouver la barre active
+    let currentTarget = MILESTONES[0];
+    let prevTarget = null;
+    for (let i = 0; i < MILESTONES.length; i++) {
+      if (streak < MILESTONES[i].days) { currentTarget = MILESTONES[i]; prevTarget = MILESTONES[i-1]||null; break; }
+      if (i === MILESTONES.length - 1) { currentTarget = MILESTONES[i]; prevTarget = MILESTONES[i-1]; }
+    }
+
+    const barStart   = prevTarget ? prevTarget.days : 0;
+    const barEnd     = currentTarget.days;
+    const barCurrent = Math.min(streak, barEnd);
+    const pct        = Math.round(((barCurrent - barStart) / (barEnd - barStart)) * 100);
+    const daysLeft   = barEnd - streak;
+    const done       = streak >= barEnd;
+
+    // Milestones row
+    const msHTML = MILESTONES.map(m => {
+      const isDone   = streak >= m.days;
+      const isActive = !done && m.days === currentTarget.days;
+      return `<div class="streak-milestone ${isDone?'done':''} ${isActive?'active':''}">
+        <span class="ms-icon">${m.icon}</span>
+        <span class="ms-days">${m.days}</span>
+        <span class="ms-name">${m.name}</span>
+      </div>`;
+    }).join('');
+
+    // Message suivant objectif
+    const nextMsg = streak >= 30
+      ? `<div class="streak-next-msg">🏆 <strong>PEACE LEGEND</strong> — You've reached the ultimate level!</div>`
+      : `<div class="streak-next-msg">${daysLeft} more day${daysLeft>1?'s':''} to unlock <strong>${currentTarget.name}</strong></div>`;
+
+    inner.innerHTML = `
+      <div class="streak-header">
+        <span class="streak-num">${streak}</span>
+        <span class="streak-unit">DAYS IN A ROW</span>
+      </div>
+      <div class="streak-bar-wrap">
+        <div class="streak-bar-label">
+          <span>${barStart} DAYS</span>
+          <span>${barEnd} DAYS</span>
+        </div>
+        <div class="streak-bar-track">
+          <div class="streak-bar-fill" id="streak-fill" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="streak-milestones">${msHTML}</div>
+      ${nextMsg}
+    `;
+
+    // Animer la barre après rendu
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const fill = document.getElementById('streak-fill');
+        if (fill) fill.style.width = (done ? 100 : pct) + '%';
+      });
+    });
   }
 
   loadMyDoves();
