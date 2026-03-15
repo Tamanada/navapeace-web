@@ -1493,9 +1493,23 @@
       }
     } catch(e) {}
 
-    // ── Compte actif : chargement normal ──
-    const ownActions = parseInt(localStorage.getItem('nava_peace_days') || '0', 10);
-    const refCode    = localStorage.getItem('nava_peace_ref_code');
+    // ── Compte actif : chargement depuis DB (source de vérité) ──
+    const uid2    = localStorage.getItem('nava_peace_uid');
+    const refCode = localStorage.getItem('nava_peace_ref_code');
+    let ownActions = parseInt(localStorage.getItem('nava_peace_days') || '0', 10);
+    try {
+      if (uid2) {
+        const sb2b = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { count } = await sb2b
+          .from('peace_votes')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_uid', uid2);
+        if (count !== null) {
+          ownActions = count;
+          localStorage.setItem('nava_peace_days', count); // sync localStorage
+        }
+      }
+    } catch(e) { console.warn('Own actions load error', e); }
 
     let referralDoves = 0;
     try {

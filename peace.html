@@ -610,6 +610,13 @@
       }
 
       _voting = false;
+
+      // Incrémenter le compteur local de jours consécutifs
+      if (!alreadyVotedToday) {
+        const prevDays = parseInt(localStorage.getItem('nava_peace_days') || '1', 10);
+        localStorage.setItem('nava_peace_days', prevDays + 1);
+      }
+
       // Si déjà voté aujourd'hui (ex: autre appareil) → countdown direct sans thank you
       setDone(!alreadyVotedToday);
       await loadCounters();
