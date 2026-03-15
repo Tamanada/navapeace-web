@@ -698,6 +698,12 @@
       localStorage.setItem('nava_peace_action', TODAY); // sync avec peace.html
       const prevDays = parseInt(localStorage.getItem('nava_peace_days') || '0', 10);
       localStorage.setItem('nava_peace_days', prevDays + 1);
+      // Log offline-first : vote d'inscription → synced (déjà inséré en DB)
+      try {
+        const _log = JSON.parse(localStorage.getItem('nava_peace_votes_log') || '[]');
+        if (!_log.find(e => e.date === TODAY)) _log.push({ date: TODAY, synced: true });
+        localStorage.setItem('nava_peace_votes_log', JSON.stringify(_log));
+      } catch(e) {}
 
       // Register push subscription for new user (SW already loaded on peace.html)
       registerPushForNewUser(userUid);

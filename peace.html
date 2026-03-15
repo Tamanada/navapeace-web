@@ -577,6 +577,7 @@
 
       // Marquer localement AVANT l'insert pour bloquer tout autre onglet
       localStorage.setItem(PEACE_KEY, TODAY);
+      logVoteToday(); // ajouter au log offline-first
 
       const uid        = localStorage.getItem('nava_peace_uid');
       const referredBy = localStorage.getItem('nava_peace_referred_by') || null;
@@ -595,9 +596,12 @@
             // Code 23505 = unique constraint violation (déjà voté aujourd'hui)
             if (error.code === '23505' || error.message?.includes('unique')) {
               alreadyVotedToday = true;
+              markVoteSynced(TODAY); // déjà en DB → synced
             } else {
               console.warn('Vote insert error', error);
             }
+          } else {
+            markVoteSynced(TODAY); // insert réussi → synced
           }
         } catch(e) { console.warn('Vote insert error', e); }
 
@@ -913,10 +917,110 @@
       }
     }
 
+    // ── OFFLINE-FIRST SYNC ────────────────────────────────────────────────
+    // Migre les votes localStorage → Supabase au démarrage
+    // Fonctionne pour les données existantes ET les futurs votes offline
+    // ─────────────────────────────────────────────────────────────────────
+
+    const VOTES_LOG_KEY = 'nava_peace_votes_log'; // [{date:'YYYY-MM-DD', synced:bool}]
+
+    /* ── 1. Initialise le log (migration des données existantes) ── */
+    function initVotesLog() {
+      const uid = localStorage.getItem('nava_peace_uid');
+      if (!uid) return;
+
+      let log = [];
+      try { log = JSON.parse(localStorage.getItem(VOTES_LOG_KEY) || '[]'); } catch(e) {}
+
+      const localDays = parseInt(localStorage.getItem('nava_peace_days') || '0', 10);
+      if (localDays <= 0 || log.length >= localDays) return; // déjà migré
+
+      // Générer les dates manquantes en remontant depuis aujourd'hui
+      const existingDates = new Set(log.map(e => e.date));
+      const lastVoteDate  = localStorage.getItem(PEACE_KEY) || TODAY;
+      const msPerDay      = 86400000;
+      const lastMs        = new Date(lastVoteDate).getTime();
+
+      let added = 0;
+      for (let i = 0; added < (localDays - log.length) && i < 365; i++) {
+        const d = new Date(lastMs - i * msPerDay).toISOString().split('T')[0];
+        if (!existingDates.has(d)) {
+          log.push({ date: d, synced: false });
+          existingDates.add(d);
+          added++;
+        }
+      }
+      log.sort((a, b) => a.date.localeCompare(b.date));
+      localStorage.setItem(VOTES_LOG_KEY, JSON.stringify(log));
+    }
+
+    /* ── 2. Enregistre le vote du jour dans le log ── */
+    function logVoteToday() {
+      let log = [];
+      try { log = JSON.parse(localStorage.getItem(VOTES_LOG_KEY) || '[]'); } catch(e) {}
+      if (!log.find(e => e.date === TODAY)) {
+        log.push({ date: TODAY, synced: false });
+        localStorage.setItem(VOTES_LOG_KEY, JSON.stringify(log));
+      }
+    }
+
+    /* ── 3. Marque un vote comme synced dans le log ── */
+    function markVoteSynced(date) {
+      let log = [];
+      try { log = JSON.parse(localStorage.getItem(VOTES_LOG_KEY) || '[]'); } catch(e) {}
+      log = log.map(e => e.date === date ? { ...e, synced: true } : e);
+      localStorage.setItem(VOTES_LOG_KEY, JSON.stringify(log));
+    }
+
+    /* ── 4. Sync les votes non-synced vers Supabase ── */
+    async function syncVotesToSupabase() {
+      if (!sb) return;
+      const uid     = localStorage.getItem('nava_peace_uid');
+      const ctry    = localStorage.getItem('nava_peace_country') || null;
+      const refCode = localStorage.getItem('nava_peace_ref_code') || null;
+      if (!uid) return;
+
+      let log = [];
+      try { log = JSON.parse(localStorage.getItem(VOTES_LOG_KEY) || '[]'); } catch(e) {}
+      const unsynced = log.filter(e => !e.synced);
+      if (unsynced.length === 0) return;
+
+      let syncedCount = 0;
+      for (const entry of unsynced) {
+        try {
+          // Insérer avec la date exacte du vote (midi UTC pour éviter ambiguïté timezone)
+          const created_at = entry.date + 'T12:00:00.000Z';
+          const { error } = await sb.from('peace_votes').insert({
+            user_uid:     uid,
+            country:      ctry,
+            referral_code: refCode,
+            created_at:   created_at,
+          });
+          // Succès ou doublon (déjà en DB) → marquer synced
+          if (!error || error.code === '23505' || error.message?.includes('unique')) {
+            markVoteSynced(entry.date);
+            syncedCount++;
+          }
+        } catch(e) { /* réseau indisponible — on réessaiera au prochain chargement */ }
+      }
+
+      if (syncedCount > 0) {
+        console.log(`[NAVA] ${syncedCount} vote(s) synced to Supabase`);
+        loadCounters(); // rafraîchir les compteurs après sync
+      }
+    }
+
+    /* ── 5. Point d'entrée : init + sync au démarrage ── */
+    async function initAndSync() {
+      initVotesLog();
+      await syncVotesToSupabase();
+    }
+
     checkDone();
     loadCounters();
     checkNotifications();
     initPush();
+    initAndSync(); // ← sync offline votes au démarrage
 
     // ── Compteurs live : polling 30s ──────────────────────────────────────
     setInterval(loadCounters, 30_000);
