@@ -1157,6 +1157,16 @@
         </div>
       </div>
 
+      <!-- Streak consécutif -->
+      <div id="streak-row" style="display:none;align-items:center;justify-content:center;gap:10px;
+           background:rgba(255,255,255,0.1);border-radius:12px;padding:12px 20px;margin-bottom:14px;">
+        <span style="font-size:22px;filter:brightness(0) invert(1);">🔥</span>
+        <span style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.85);font-family:Nasalization,Arial,sans-serif;">
+          <span id="dove-streak" style="font-size:22px;font-weight:700;color:#fff;">0</span>
+          <span data-i18n="streak_lbl" style="margin-left:6px;">DAYS IN A ROW</span>
+        </span>
+      </div>
+
       <p class="dove-popup-desc">
         Each day you choose peace<br>= <strong style="color:#fff;">+1 Dove</strong><br><br>
         Each friend's daily action<br>= <strong style="color:#fff;">+1 Dove</strong> for you<br><br>
@@ -1497,16 +1507,32 @@
     const uid2    = localStorage.getItem('nava_peace_uid');
     const refCode = localStorage.getItem('nava_peace_ref_code');
     let ownActions = parseInt(localStorage.getItem('nava_peace_days') || '0', 10);
+    let streak = 0;
     try {
       if (uid2) {
         const sb2b = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const { count } = await sb2b
+        // Récupérer tous les created_at pour calculer le streak réel
+        const { data: voteData } = await sb2b
           .from('peace_votes')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_uid', uid2);
-        if (count !== null) {
-          ownActions = count;
-          localStorage.setItem('nava_peace_days', count); // sync localStorage
+          .select('created_at')
+          .eq('user_uid', uid2)
+          .order('created_at', { ascending: false });
+        if (voteData && voteData.length > 0) {
+          ownActions = voteData.length;
+          localStorage.setItem('nava_peace_days', ownActions);
+          // Calcul du streak consécutif (jours UTC sans interruption)
+          const dayNums = [...new Set(voteData.map(v =>
+            Math.floor(new Date(v.created_at).getTime() / 86400000)
+          ))].sort((a, b) => b - a);
+          const today = Math.floor(Date.now() / 86400000);
+          if (dayNums[0] >= today - 1) { // streak actif si voté aujourd'hui ou hier
+            streak = 1;
+            for (let i = 1; i < dayNums.length; i++) {
+              if (dayNums[i - 1] - dayNums[i] === 1) streak++;
+              else break;
+            }
+          }
+          localStorage.setItem('nava_peace_streak', streak);
         }
       }
     } catch(e) { console.warn('Own actions load error', e); }
@@ -1527,6 +1553,14 @@
     document.getElementById('dove-total').textContent = total;
     document.getElementById('dove-own').textContent   = ownActions;
     document.getElementById('dove-ref').textContent   = referralDoves;
+
+    // Afficher le streak consécutif
+    const streakEl = document.getElementById('dove-streak');
+    if (streakEl && streak > 0) {
+      streakEl.textContent = streak;
+      const streakRow = document.getElementById('streak-row');
+      if (streakRow) streakRow.style.display = 'flex';
+    }
   }
 
   loadMyDoves();

@@ -976,12 +976,15 @@
     wordSeries.data.setAll(wordData);
   }
 
-  // ── Affichage du compteur de jours personnels ────────────────────
+  // ── Affichage du streak consécutif réel ──────────────────────────
   (function() {
-    const days = parseInt(localStorage.getItem('nava_peace_days') || '0', 10);
-    if (days > 0) {
+    // Lire le streak calculé dans profile.html (sinon fallback total)
+    const streak = parseInt(localStorage.getItem('nava_peace_streak') || '0', 10);
+    const days   = parseInt(localStorage.getItem('nava_peace_days')   || '0', 10);
+    const display = streak > 0 ? streak : days;
+    if (display > 0) {
       const strip = document.getElementById('personal-strip');
-      strip.innerHTML = tParam('personal_streak', { days: `<span>${days}</span>` });
+      strip.innerHTML = tParam('personal_streak', { days: `<span>${display}</span>` });
       strip.style.display = 'block';
     }
   })();
