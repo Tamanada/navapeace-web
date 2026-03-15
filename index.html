@@ -705,6 +705,23 @@
         localStorage.setItem('nava_peace_votes_log', JSON.stringify(_log));
       } catch(e) {}
 
+      // Générer et sauvegarder le pseudo si pas encore défini
+      if (!localStorage.getItem('nava_peace_pseudo')) {
+        const _adj  = ['Serene','Bright','Gentle','Calm','Pure','Warm','Kind','Free','Bold','Clear','Swift','Still','Deep','True','Wise'];
+        const _noun = ['Dove','Heart','Soul','Light','Spirit','Wing','Hope','Dream','Star','Wave','Peace','River','Ocean','Forest','Flame'];
+        const _pseudo = _adj[Math.floor(Math.random()*_adj.length)] + _noun[Math.floor(Math.random()*_noun.length)] + (Math.floor(Math.random()*9000)+1000);
+        localStorage.setItem('nava_peace_pseudo', _pseudo);
+        localStorage.setItem('nava_peace_pseudo_auto', '1');
+      }
+      // Sync pseudo → peace_messages (fire & forget)
+      if (sbClient) {
+        const _pseudo = localStorage.getItem('nava_peace_pseudo');
+        sbClient.from('peace_messages').upsert(
+          { user_uid: userUid, pseudo: _pseudo, updated_at: new Date().toISOString() },
+          { onConflict: 'user_uid', ignoreDuplicates: true }
+        ).then(()=>{}).catch(()=>{});
+      }
+
       // Register push subscription for new user (SW already loaded on peace.html)
       registerPushForNewUser(userUid);
 

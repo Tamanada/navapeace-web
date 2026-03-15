@@ -1404,16 +1404,15 @@
   }
 
   async function syncMessage() {
-    const uid       = localStorage.getItem('nava_peace_uid');
-    const pseudo    = localStorage.getItem('nava_peace_pseudo') || generatePseudo();
-    const msg       = localStorage.getItem('nava_peace_message') || '';
-    const shared    = localStorage.getItem('nava_peace_share_msg') === '1';
-    const firstname = localStorage.getItem('nava_peace_firstname') || null;
+    const uid    = localStorage.getItem('nava_peace_uid');
+    const pseudo = localStorage.getItem('nava_peace_pseudo') || generatePseudo();
+    const msg    = localStorage.getItem('nava_peace_message') || '';
+    const shared = localStorage.getItem('nava_peace_share_msg') === '1';
     if (!uid) return;
     try {
       const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       await sb.from('peace_messages').upsert(
-        { user_uid: uid, pseudo, message: msg, share_msg: shared, first_name: firstname, updated_at: new Date().toISOString() },
+        { user_uid: uid, pseudo, message: msg, share_msg: shared, updated_at: new Date().toISOString() },
         { onConflict: 'user_uid' }
       );
     } catch(e) { console.warn('Message sync error', e); }

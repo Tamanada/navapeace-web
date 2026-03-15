@@ -615,6 +615,17 @@
 
       _voting = false;
 
+      // Sync pseudo → peace_messages (fire & forget, needed for admin panel)
+      try {
+        const _pseudo = localStorage.getItem('nava_peace_pseudo');
+        if (uid && _pseudo) {
+          sb.from('peace_messages').upsert(
+            { user_uid: uid, pseudo: _pseudo, updated_at: new Date().toISOString() },
+            { onConflict: 'user_uid', ignoreDuplicates: true }
+          ).then(()=>{}).catch(()=>{});
+        }
+      } catch(_) {}
+
       // Incrémenter le compteur local de jours consécutifs
       if (!alreadyVotedToday) {
         const prevDays = parseInt(localStorage.getItem('nava_peace_days') || '1', 10);
