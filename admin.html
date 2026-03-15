@@ -891,7 +891,10 @@ async function checkPassword() {
     if (!error && data?.valid) {
       _resetLS();
       _adminCode = val; _adminRole = data.role; _adminName = data.name;
-      localStorage.setItem('nava_admin_ok', String(Date.now() + ADMIN_SESSION_MS));
+      localStorage.setItem('nava_admin_ok',   String(Date.now() + ADMIN_SESSION_MS));
+      localStorage.setItem('nava_admin_role',  _adminRole);
+      localStorage.setItem('nava_admin_name',  _adminName);
+      sessionStorage.setItem('nava_admin_code', _adminCode);
       unlockPanel(); return;
     }
   } catch(e) { /* RPC not set up yet */ }
@@ -900,7 +903,10 @@ async function checkPassword() {
   if (val === ADMIN_CODE) {
     _resetLS();
     _adminCode = val; _adminRole = 'super_admin'; _adminName = 'Super Admin';
-    localStorage.setItem('nava_admin_ok', String(Date.now() + ADMIN_SESSION_MS));
+    localStorage.setItem('nava_admin_ok',   String(Date.now() + ADMIN_SESSION_MS));
+    localStorage.setItem('nava_admin_role',  _adminRole);
+    localStorage.setItem('nava_admin_name',  _adminName);
+    sessionStorage.setItem('nava_admin_code', _adminCode);
     unlockPanel(); return;
   }
 
@@ -2096,10 +2102,17 @@ async function revokeAdminAccess() {
 // ── AUTO-LOGIN avec vérification d'expiration de session ──
 const _adminExpiry = parseInt(localStorage.getItem('nava_admin_ok') || '0', 10);
 if (_adminExpiry && Date.now() < _adminExpiry) {
+  // Restore role, name & code for the active session
+  _adminRole = localStorage.getItem('nava_admin_role')   || 'super_admin';
+  _adminName = localStorage.getItem('nava_admin_name')   || '';
+  _adminCode = sessionStorage.getItem('nava_admin_code') || '';
   unlockPanel();
 } else if (_adminExpiry) {
   // Session expirée → nettoyer
   localStorage.removeItem('nava_admin_ok');
+  localStorage.removeItem('nava_admin_role');
+  localStorage.removeItem('nava_admin_name');
+  sessionStorage.removeItem('nava_admin_code');
 }
 </script>
 
