@@ -858,11 +858,17 @@
     const root = am5.Root.new("chartdiv");
     root.setThemes([am5themes_Animated.new(root)]);
 
-    // Export plugin — used by share button to capture real-time snapshot
-    window._mapExporting = am5exporting.Exporting.new(root, {
-      filePrefix: "nava-peace-map",
-      backgroundColor: am5.color(0x3AACDF)
-    });
+    // Export plugin — optional, used by share button
+    try {
+      if (typeof am5exporting !== 'undefined') {
+        window._mapExporting = am5exporting.Exporting.new(root, {
+          filePrefix: "nava-peace-map",
+          backgroundColor: am5.color(0x3AACDF)
+        });
+      }
+    } catch(e) { /* plugin not available, will use canvas fallback */ }
+    // Keep reference to root for canvas fallback
+    window._mapRoot = root;
 
     const chart = root.container.children.push(
       am5map.MapChart.new(root, {
@@ -1249,9 +1255,14 @@
     let mapDataUrl = null;
     try {
       if (window._mapExporting) {
+        // amCharts export plugin
         mapDataUrl = await window._mapExporting.export('png');
+      } else {
+        // Fallback: grab the amCharts canvas element directly
+        const chartCanvas = document.querySelector('#chartdiv canvas');
+        if (chartCanvas) mapDataUrl = chartCanvas.toDataURL('image/png');
       }
-    } catch(e) { console.warn('Map export error', e); }
+    } catch(e) { console.warn('Map capture error', e); }
 
     // 2. Load assets in parallel
     const [mapImg, logoImg] = await Promise.all([
