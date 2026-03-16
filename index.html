@@ -692,7 +692,14 @@
         try {
           const { error } = await sbClient
             .from('peace_votes')
-            .insert({ country, age, gender, referral_code: referralCode, referred_by: referredBy, user_uid: userUid });
+            .insert({
+              country, age, gender,
+              referral_code: referralCode,
+              referred_by: referredBy,
+              user_uid: userUid,
+              source: (typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram) ? 'telegram' : 'web',
+              telegram_id: (typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram && NAVA_TG.user) ? String(NAVA_TG.user.id) : null
+            });
           if (error) console.warn('Supabase insert error:', error.message);
         } catch (err) {
           console.warn('Supabase unavailable:', err.message);

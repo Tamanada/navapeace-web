@@ -651,6 +651,8 @@
             user_uid:    uid,
             country:     country,
             referred_by: referredBy,
+            source: (typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram) ? 'telegram' : 'web',
+            telegram_id: (typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram && NAVA_TG.user) ? String(NAVA_TG.user.id) : null,
           });
           if (error) {
             // Code 23505 = unique constraint violation (déjà voté aujourd'hui)
@@ -1168,6 +1170,8 @@
             country:      ctry,
             referral_code: refCode,
             created_at:   created_at,
+            source: (typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram) ? 'telegram' : 'web',
+            telegram_id: (typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram && NAVA_TG.user) ? String(NAVA_TG.user.id) : null,
           });
           // Succès ou doublon (déjà en DB) → marquer synced
           if (!error || error.code === '23505' || error.message?.includes('unique')) {
