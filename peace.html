@@ -451,7 +451,7 @@
         <polyline points="16 6 12 2 8 6"/>
         <line x1="12" y1="2" x2="12" y2="15"/>
       </svg>
-      SHARE PEACE
+      <span id="share-peace-label">SHARE PEACE</span>
     </button>
 
   </div>
@@ -1197,6 +1197,9 @@
 
     // ── Appliquer les traductions ──────────────────────────────────────
     if (typeof applyLang === 'function') applyLang(detectLang());
+    // Traduire le bouton share (contient SVG, donc pas data-i18n)
+    var _spl = document.getElementById('share-peace-label');
+    if (_spl && typeof t === 'function') _spl.textContent = t('share_peace');
 
     // ── Compteurs live : polling 30s ──────────────────────────────────────
     setInterval(loadCounters, 30_000);

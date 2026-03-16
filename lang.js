@@ -153,7 +153,7 @@ const NAVA_TRANSLATIONS = {
     streak_legend_msg:   "🏆 PEACE LEGEND — You've reached the ultimate level!",
     streak_unlock:       '{n} more day(s) to unlock',
     share_map_btn:       'SHARE THE MAP',
-    share_progress_btn:  'SHARE MY PROGRESS',
+    share_peace:         'SHARE PEACE',
   },
 
   fr: {
@@ -297,7 +297,7 @@ const NAVA_TRANSLATIONS = {
     streak_legend_msg:   '🏆 LÉGENDE DE LA PAIX — Vous avez atteint le niveau ultime !',
     streak_unlock:       'Encore {n} jour(s) pour débloquer',
     share_map_btn:       'PARTAGER LA CARTE',
-    share_progress_btn:  'PARTAGER MA PROGRESSION',
+    share_peace:         'PARTAGER LA PAIX',
   },
 
   es: {
@@ -441,7 +441,7 @@ const NAVA_TRANSLATIONS = {
     streak_legend_msg:   '🏆 LEYENDA DE LA PAZ — ¡Has alcanzado el nivel máximo!',
     streak_unlock:       '{n} día(s) más para desbloquear',
     share_map_btn:       'COMPARTIR EL MAPA',
-    share_progress_btn:  'COMPARTIR MI PROGRESO',
+    share_peace:         'COMPARTIR PAZ',
   },
 
   pt: {
@@ -585,7 +585,7 @@ const NAVA_TRANSLATIONS = {
     streak_legend_msg:   '🏆 LENDA DA PAZ — Você atingiu o nível máximo!',
     streak_unlock:       'Mais {n} dia(s) para desbloquear',
     share_map_btn:       'COMPARTILHAR O MAPA',
-    share_progress_btn:  'COMPARTILHAR MEU PROGRESSO',
+    share_peace:         'COMPARTILHAR PAZ',
   },
 
   de: {
@@ -729,7 +729,7 @@ const NAVA_TRANSLATIONS = {
     streak_legend_msg:   '🏆 FRIEDENSLEGENDE — Du hast das höchste Level erreicht!',
     streak_unlock:       'Noch {n} Tag(e) bis zum Freischalten',
     share_map_btn:       'KARTE TEILEN',
-    share_progress_btn:  'MEINEN FORTSCHRITT TEILEN',
+    share_peace:         'FRIEDEN TEILEN',
   },
 
   ar: {
@@ -873,7 +873,7 @@ const NAVA_TRANSLATIONS = {
     streak_legend_msg:   '🏆 أسطورة السلام — لقد وصلت إلى المستوى الأعلى!',
     streak_unlock:       '{n} يوم/أيام أخرى للفتح',
     share_map_btn:       'مشاركة الخريطة',
-    share_progress_btn:  'مشاركة تقدمي',
+    share_peace:         'مشاركة السلام',
   },
 
   zh: {
@@ -1017,7 +1017,7 @@ const NAVA_TRANSLATIONS = {
     streak_legend_msg:   '🏆 和平传奇 — 你已达到最高级别！',
     streak_unlock:       '还差{n}天解锁',
     share_map_btn:       '分享地图',
-    share_progress_btn:  '分享我的进展',
+    share_peace:         '分享和平',
   },
 
   ru: {
@@ -1161,7 +1161,7 @@ const NAVA_TRANSLATIONS = {
     streak_legend_msg:   '🏆 ЛЕГЕНДА МИРА — Вы достигли высшего уровня!',
     streak_unlock:       'Ещё {n} день(дней) до разблокировки',
     share_map_btn:       'ПОДЕЛИТЬСЯ КАРТОЙ',
-    share_progress_btn:  'ПОДЕЛИТЬСЯ ПРОГРЕССОМ',
+    share_peace:         'ПОДЕЛИТЬСЯ МИРОМ',
   },
 
   th: {
@@ -1305,7 +1305,7 @@ const NAVA_TRANSLATIONS = {
     streak_legend_msg:   '🏆 ตำนานสันติภาพ — คุณถึงระดับสูงสุดแล้ว!',
     streak_unlock:       'อีก {n} วันเพื่อปลดล็อก',
     share_map_btn:       'แชร์แผนที่',
-    share_progress_btn:  'แชร์ความก้าวหน้า',
+    share_peace:         'แชร์สันติภาพ',
   },
 
   ja: {
@@ -1449,7 +1449,7 @@ const NAVA_TRANSLATIONS = {
     streak_legend_msg:   '🏆 平和のレジェンド — 最高レベルに到達しました！',
     streak_unlock:       'あと{n}日で解除',
     share_map_btn:       '地図を共有',
-    share_progress_btn:  '進捗を共有',
+    share_peace:         '平和を共有',
   },
 
   my: {
@@ -1593,7 +1593,7 @@ const NAVA_TRANSLATIONS = {
     streak_legend_msg:   '🏆 ငြိမ်းချမ်းရေး ဒဏ္ဍာရီ — အမြင့်ဆုံးအဆင့်ရောက်ပါပြီ!',
     streak_unlock:       'နောက် {n} ရက်ဖွင့်ရန်',
     share_map_btn:       'မြေပုံမျှဝေရန်',
-    share_progress_btn:  'တိုးတက်မှုမျှဝေရန်',
+    share_peace:         'ငြိမ်းချမ်းရေးမျှဝေရန်',
   },
 
   hi: {
@@ -1737,7 +1737,7 @@ const NAVA_TRANSLATIONS = {
     streak_legend_msg:   '🏆 शांति महापुरुष — आपने सर्वोच्च स्तर प्राप्त किया!',
     streak_unlock:       'अनलॉक करने में {n} दिन और',
     share_map_btn:       'मानचित्र साझा करें',
-    share_progress_btn:  'मेरी प्रगति साझा करें',
+    share_peace:         'शांति साझा करें',
   },
 
   uk: {
@@ -1887,7 +1887,7 @@ const NAVA_TRANSLATIONS = {
     streak_legend_msg:   '🏆 ЛЕГЕНДА МИРУ — Ви досягли найвищого рівня!',
     streak_unlock:       'Ще {n} день(днів) до розблокування',
     share_map_btn:       'ПОДІЛИТИСЯ КАРТОЮ',
-    share_progress_btn:  'ПОДІЛИТИСЯ ПРОГРЕСОМ',
+    share_peace:         'ПОДІЛИТИСЯ МИРОМ',
   },
 
 };
