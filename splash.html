@@ -367,6 +367,7 @@
       { flag: '🇯🇵', lang: 'JA', text: '成長のために生まれた'   },
       { flag: '🇮🇳', lang: 'HI', text: 'बढ़ने के लिए जन्मा'     },
       { flag: '🌍',  lang: 'SW', text: 'AMEZALIWA KUKUA'        },
+      { flag: '🇺🇦', lang: 'UK', text: 'НАРОДЖЕНИЙ ЗРОСТАТИ'    },
     ];
 
     function buildTicker() {
@@ -469,20 +470,103 @@
       document.addEventListener('touchend', goNext, { passive: false });
     }
 
-    // ── WELCOME BACK — utilisateur déjà enregistré ──────────────────
+    // ── 13 traductions de "BIENVENUE" ──────────────────────────────────
+    var WELCOME_WORDS = [
+      'WELCOME',           // EN
+      'BIENVENUE',         // FR
+      'BIENVENIDO',        // ES
+      'BEM-VINDO',         // PT
+      'WILLKOMMEN',        // DE
+      'مرحباً',              // AR
+      '欢迎',               // ZH
+      'ДОБРО ПОЖАЛОВАТЬ',  // RU
+      'ยินดีต้อนรับ',         // TH
+      'ようこそ',            // JA
+      'ကြိုဆိုပါသည်',        // MY
+      'स्वागत है',           // HI
+      'ЛАСКАВО ПРОСИМО',   // UK
+    ];
+
+    // ── SPLASH LOGIC ──────────────────────────────────────────────────
     (function () {
       var uid = localStorage.getItem('nava_peace_uid');
+      var isRegistered = uid && localStorage.getItem('nava_peace_country');
 
-      if (!uid) {
-        // Nouveau visiteur → ENTER pointe vers l'inscription
+      if (!isRegistered) {
+        // ═══════════════════════════════════════════════
+        // NOUVEAU VISITEUR — "Bienvenue" cycling en 13 langues
+        // ═══════════════════════════════════════════════
         var enterEl = document.querySelector('.enter-link');
         if (enterEl) enterEl.setAttribute('href', 'index.html');
-        // Tap n'importe où après les animations → inscription
-        setTimeout(function () { enableTap('index.html'); }, 5000);
+
+        // Après 3s (logo visible), fade out BORN TO GROW + daily msg
+        setTimeout(function () {
+          var hero   = document.querySelector('.hero');
+          var dateEl = document.getElementById('daily-date');
+          var textEl = document.getElementById('daily-text');
+          var divEl  = document.querySelector('.divider');
+
+          [hero, dateEl, textEl, divEl].forEach(function (el) {
+            if (el) { el.style.transition = 'opacity 1.2s ease'; el.style.opacity = '0'; }
+          });
+
+          setTimeout(function () {
+            if (!hero) return;
+            // Hide daily msg area
+            if (dateEl) dateEl.style.display = 'none';
+            if (textEl) textEl.style.display = 'none';
+            if (divEl)  divEl.style.display  = 'none';
+
+            // Start cycling welcome words
+            var idx = 0;
+            hero.textContent      = WELCOME_WORDS[0];
+            hero.style.transition = 'none';
+            hero.style.opacity    = '0';
+            hero.style.filter     = 'blur(12px)';
+            hero.style.transform  = 'scale(0.9)';
+            void hero.offsetWidth;
+            hero.style.transition = 'opacity 0.8s ease, filter 0.8s ease, transform 0.8s ease';
+            hero.style.opacity    = '1';
+            hero.style.filter     = 'blur(0)';
+            hero.style.transform  = 'scale(1)';
+
+            var cycleTimer = setInterval(function () {
+              idx++;
+              if (idx >= WELCOME_WORDS.length) {
+                clearInterval(cycleTimer);
+                // After all words shown, enable tap
+                setTimeout(function () { enableTap('index.html'); }, 800);
+                return;
+              }
+              // Fade out current
+              hero.style.transition = 'opacity 0.4s ease, filter 0.4s ease, transform 0.4s ease';
+              hero.style.opacity    = '0';
+              hero.style.filter     = 'blur(8px)';
+              hero.style.transform  = 'scale(0.95)';
+
+              setTimeout(function () {
+                hero.textContent      = WELCOME_WORDS[idx];
+                hero.style.transition = 'none';
+                hero.style.opacity    = '0';
+                hero.style.filter     = 'blur(12px)';
+                hero.style.transform  = 'scale(0.9)';
+                void hero.offsetWidth;
+                hero.style.transition = 'opacity 0.6s ease, filter 0.6s ease, transform 0.6s ease';
+                hero.style.opacity    = '1';
+                hero.style.filter     = 'blur(0)';
+                hero.style.transform  = 'scale(1)';
+              }, 400);
+            }, 1200); // 1.2s per word
+
+          }, 1200); // after fade-out
+        }, 3000);   // after logo visible
+
         return;
       }
 
-      // Utilisateur enregistré — cache le bouton ENTER
+      // ═══════════════════════════════════════════════
+      // UTILISATEUR ENREGISTRÉ — WELCOME BACK
+      // ═══════════════════════════════════════════════
       var enterEl = document.querySelector('.enter-link');
       if (enterEl) enterEl.style.display = 'none';
 
