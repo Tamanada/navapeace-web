@@ -2,11 +2,13 @@
 <html lang="en" data-module="module_peace">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.amcharts.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.myshopify.com; frame-ancestors 'none';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.amcharts.com https://telegram.org; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.myshopify.com; frame-ancestors 'none';" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NAVA PEACE – Choose Peace</title>
   <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="apple-touch-icon" href="favicon.png" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="telegram.js"></script>
   <!-- Splash gate : redirige vers splash.html à chaque nouvelle session -->
   <script>if (!sessionStorage.getItem('nava_splash_shown')) { window.location.replace('splash.html'); }</script>
   <script src="module_gate.js"></script>
@@ -923,7 +925,7 @@
     // Generate QR code locally via qrcodejs
     async function _genQR() {
       const refCode = localStorage.getItem('nava_peace_ref_code')||'';
-      const url = refCode ? 'https://nava-peace.app/?ref='+refCode : 'https://nava-peace.app';
+      const url = getShareLink(refCode);
       if (typeof QRCode==='undefined') return null;
       const h = document.createElement('div');
       h.style.cssText='position:absolute;left:-9999px;top:-9999px;';
@@ -1070,8 +1072,7 @@
       const blob=await new Promise(r=>document.getElementById('share-canvas').toBlob(r,'image/png'));
       const file=new File([blob],'nava-peace-progress.png',{type:'image/png'});
       if(navigator.canShare&&navigator.canShare({files:[file]})){
-        const rc=localStorage.getItem('nava_peace_ref_code')||'';
-        const lnk=rc?'nava-peace.app/?ref='+rc:'nava-peace.app';
+        const lnk=getShareLink();
         try{await navigator.share({files:[file],title:'NAVA PEACE',text:'My peace journey 🕊 Join → '+lnk+' #NavaPeace #ChoosePeace'});return;}catch(e){if(e.name==='AbortError')return;}
       }
       downloadProgress();
@@ -1080,8 +1081,7 @@
     function shareProgressX(){
       const days=localStorage.getItem('nava_peace_days')||'0';
       const streak=localStorage.getItem('nava_peace_streak')||'0';
-      const rc=localStorage.getItem('nava_peace_ref_code')||'';
-      const link=rc?'nava-peace.app/?ref='+rc:'nava-peace.app';
+      const link=getShareLink();
       const t=encodeURIComponent(`🕊 ${days} peace actions, ${streak}-day streak on NAVA PEACE!\nJoin → ${link}\n#NavaPeace #ChoosePeace`);
       window.open('https://twitter.com/intent/tweet?text='+t,'_blank');
     }

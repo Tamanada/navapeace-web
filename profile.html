@@ -2,11 +2,13 @@
 <html lang="en" data-module="module_profile">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.amcharts.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.myshopify.com; frame-ancestors 'none';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.amcharts.com https://telegram.org; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.myshopify.com; frame-ancestors 'none';" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NAVA PEACE – Profile</title>
   <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="apple-touch-icon" href="favicon.png" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="telegram.js"></script>
   <script src="module_gate.js"></script>
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
@@ -1736,7 +1738,8 @@
       localStorage.setItem('nava_peace_ref_code', refCode);
     }
 
-    const inviteURL   = BASE + '/?ref=' + refCode;
+    // Use Telegram-aware share link (t.me/NavaPeaceBot/app?startapp=CODE in TG, nava-peace.app/?ref=CODE on web)
+    const inviteURL   = getShareLink(refCode);
     const inviteText  = 'The world talks about peace. Let\'s practice it.\nJoin NAVA PEACE today. 🕊\n' + inviteURL;
     const msg         = encodeURIComponent(inviteText);
 
@@ -1752,7 +1755,16 @@
 
     // Share links
     document.getElementById('share-wa').href  = 'https://wa.me/?text=' + msg;
-    document.getElementById('share-tg').href  = 'https://t.me/share/url?url=' + encodeURIComponent(inviteURL) + '&text=' + encodeURIComponent('The world talks about peace. Let\'s practice it.\nJoin NAVA PEACE today. 🕊');
+    if (NAVA_TG.isTelegram) {
+      // In Telegram: use openTelegramLink for native share
+      document.getElementById('share-tg').href = '#';
+      document.getElementById('share-tg').onclick = function(e) {
+        e.preventDefault();
+        Telegram.WebApp.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(inviteURL) + '&text=' + encodeURIComponent('The world talks about peace. Let\'s practice it.\nJoin NAVA PEACE today. 🕊'));
+      };
+    } else {
+      document.getElementById('share-tg').href = 'https://t.me/share/url?url=' + encodeURIComponent(inviteURL) + '&text=' + encodeURIComponent('The world talks about peace. Let\'s practice it.\nJoin NAVA PEACE today. 🕊');
+    }
     document.getElementById('share-tw').href  = 'https://x.com/intent/tweet?text=' + msg;
     document.getElementById('share-sms').href = 'sms:?body=' + msg;
 
@@ -1763,7 +1775,7 @@
   initInvite();
 
   function copyLink() {
-    const link = 'https://nava-peace.app/?ref=' + localStorage.getItem('nava_peace_ref_code');
+    const link = getShareLink();
     navigator.clipboard.writeText(link).then(() => {
       const btn = document.querySelector('.copy-btn');
       btn.textContent = t('copied_lbl');

@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NAVA PEACE — Born To Grow</title>
   <link rel="icon" type="image/png" href="favicon.png" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="telegram.js"></script>
   <script src="module_gate.js"></script>
   <!-- Open Graph -->
   <meta property="og:type"        content="website" />
@@ -344,6 +346,13 @@
   <script>
     // Marquer la session : la splash a été vue — empêche les boucles de redirect
     sessionStorage.setItem('nava_splash_shown', '1');
+
+    // Telegram returning user → skip splash animation, go directly
+    if (NAVA_TG.isTelegram && localStorage.getItem('nava_peace_country')) {
+      var _today = new Date().toISOString().split('T')[0];
+      var _dest = (localStorage.getItem('nava_peace_voted') === _today) ? 'map.html' : 'peace.html';
+      window.location.replace(_dest);
+    }
     // 12 languages — flag · translation
     const translations = [
       { flag: '🇬🇧', lang: 'EN', text: 'BORN TO GROW'          },
