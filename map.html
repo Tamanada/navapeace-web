@@ -1365,7 +1365,7 @@
         document.body.appendChild(qrHolder);
         await new Promise(resolve => {
           new QRCode(qrHolder, {
-            text: 'https://nava-peace.app',
+            text: (function(){ const rc=localStorage.getItem('nava_peace_ref_code'); return rc ? 'https://nava-peace.app/?ref='+rc : 'https://nava-peace.app'; })(),
             width: 320, height: 320,
             colorDark: '#ffffff', colorLight: '#0a3060',
             correctLevel: QRCode.CorrectLevel.M
@@ -1518,21 +1518,6 @@
       ctx.fillText('nava-peace.app', W/2, y+qrSize/2+8);
     }
     y += qrSize + 50;
-
-    // ── nava-peace.app ──
-    ctx.fillStyle='#fff'; ctx.textAlign='center';
-    ctx.font='bold 40px Nasalization,Arial,sans-serif';
-    ctx.fillText('nava-peace.app', W/2, y); y+=50;
-
-    // ── Social handles (lisibles) ──
-    ctx.globalAlpha=0.7; ctx.font='30px Nasalization,Arial,sans-serif';
-    ctx.fillText('@nava.peace.world  ·  @NAVAPEACEWORLD', W/2, y); y+=46;
-    ctx.globalAlpha=1;
-
-    // ── Hashtags ──
-    ctx.globalAlpha=0.45; ctx.font='26px Nasalization,Arial,sans-serif';
-    ctx.fillText('#NavaPeace  ·  #Peace  ·  #ChoosePeace', W/2, y);
-    ctx.globalAlpha=1;
   }
 
   // Helper: wrap text to fit maxWidth
@@ -1579,7 +1564,7 @@
         await navigator.share({
           files: [file],
           title: 'NAVA PEACE — Peace Map',
-          text: 'Today humanity chooses peace 🕊 Join us at nava-peace.app #NavaPeace',
+          text: 'Today humanity chooses peace 🕊 Join us at ' + (function(){ const rc=localStorage.getItem('nava_peace_ref_code'); return rc ? 'nava-peace.app/?ref='+rc : 'nava-peace.app'; })() + ' #NavaPeace',
         });
         return;
       } catch(e) { if (e.name === 'AbortError') return; }
@@ -1593,7 +1578,7 @@
     const c = getCounters();
     const text = encodeURIComponent(
       `🕊 ${c.people} people from ${c.countries} countries chose peace today on NAVA PEACE.\n` +
-      `Join the movement → nava-peace.app\n#NavaPeace #Peace #ChoosePeace`
+      `Join the movement → ${(function(){ const rc=localStorage.getItem('nava_peace_ref_code'); return rc ? 'nava-peace.app/?ref='+rc : 'nava-peace.app'; })()}\n#NavaPeace #Peace #ChoosePeace`
     );
     window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
   }

@@ -439,6 +439,21 @@
       </div>
     </div>
 
+    <!-- SHARE PROGRESS BUTTON -->
+    <button onclick="openShareOverlay()" style="
+      display:flex;align-items:center;gap:8px;margin-top:18px;
+      background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.3);
+      border-radius:28px;color:#fff;font-family:Nasalization,Arial,sans-serif;
+      font-size:9px;letter-spacing:3px;padding:11px 24px;cursor:pointer;
+      transition:background 0.2s;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+        <polyline points="16 6 12 2 8 6"/>
+        <line x1="12" y1="2" x2="12" y2="15"/>
+      </svg>
+      SHARE MY PROGRESS
+    </button>
+
   </div>
 
   <!-- ══ INSPIRATION CARD OVERLAY ════════════════════════ -->
@@ -1052,7 +1067,9 @@
       const blob=await new Promise(r=>document.getElementById('share-canvas').toBlob(r,'image/png'));
       const file=new File([blob],'nava-peace-progress.png',{type:'image/png'});
       if(navigator.canShare&&navigator.canShare({files:[file]})){
-        try{await navigator.share({files:[file],title:'NAVA PEACE',text:'My peace journey 🕊 #NavaPeace #ChoosePeace'});return;}catch(e){if(e.name==='AbortError')return;}
+        const rc=localStorage.getItem('nava_peace_ref_code')||'';
+        const lnk=rc?'nava-peace.app/?ref='+rc:'nava-peace.app';
+        try{await navigator.share({files:[file],title:'NAVA PEACE',text:'My peace journey 🕊 Join → '+lnk+' #NavaPeace #ChoosePeace'});return;}catch(e){if(e.name==='AbortError')return;}
       }
       downloadProgress();
       showBanner('IMAGE SAVED — OPEN INSTAGRAM TO SHARE 📸');
@@ -1060,7 +1077,9 @@
     function shareProgressX(){
       const days=localStorage.getItem('nava_peace_days')||'0';
       const streak=localStorage.getItem('nava_peace_streak')||'0';
-      const t=encodeURIComponent(`🕊 ${days} peace actions, ${streak}-day streak on NAVA PEACE!\nJoin → nava-peace.app\n#NavaPeace #ChoosePeace`);
+      const rc=localStorage.getItem('nava_peace_ref_code')||'';
+      const link=rc?'nava-peace.app/?ref='+rc:'nava-peace.app';
+      const t=encodeURIComponent(`🕊 ${days} peace actions, ${streak}-day streak on NAVA PEACE!\nJoin → ${link}\n#NavaPeace #ChoosePeace`);
       window.open('https://twitter.com/intent/tweet?text='+t,'_blank');
     }
     function downloadProgress(){
