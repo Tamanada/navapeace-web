@@ -1872,36 +1872,130 @@
     var smsURL = 'sms:?body=' + msg;
     document.getElementById('share-sms').href = smsURL;
 
-    // Messenger share – copy message to clipboard then open Messenger contact picker
+    // Messenger share – generate invite card image with QR + share via Web Share API
     var msgrText = 'The world talks about peace. Let\'s practice it. 🕊\nJoin NAVA PEACE today.\n' + inviteURL;
     var msgrBtn = document.getElementById('share-msngr');
     msgrBtn.href = '#';
     msgrBtn.onclick = function(e) {
       e.preventDefault();
-      // Copy invite message to clipboard
-      navigator.clipboard.writeText(msgrText).then(function() {
-        // Show brief toast
-        var toast = document.createElement('div');
-        toast.textContent = '✓ Message copied! Paste it in Messenger';
-        toast.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.85);color:#fff;padding:14px 24px;border-radius:12px;font-size:14px;z-index:99999;text-align:center;';
-        document.body.appendChild(toast);
-        setTimeout(function() { toast.remove(); }, 2500);
-        // Open Messenger app
-        var openURL = 'https://m.me/';
-        if (NAVA_TG.isTelegram) {
-          Telegram.WebApp.openLink(openURL);
+      generateShareCard(inviteURL, refCode).then(function(file) {
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({
+            text: msgrText,
+            files: [file]
+          }).catch(function(){});
         } else {
-          window.open(openURL, '_blank');
-        }
-      }).catch(function() {
-        // Clipboard failed – just open messenger
-        if (NAVA_TG.isTelegram) {
-          Telegram.WebApp.openLink('https://m.me/');
-        } else {
-          window.open('https://m.me/', '_blank');
+          // Fallback: download image + copy text
+          var link = document.createElement('a');
+          link.download = 'nava-peace-invite.png';
+          link.href = URL.createObjectURL(file);
+          link.click();
+          navigator.clipboard.writeText(msgrText).catch(function(){});
+          var toast = document.createElement('div');
+          toast.textContent = '✓ Image saved! Share it on Messenger';
+          toast.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.85);color:#fff;padding:14px 24px;border-radius:12px;font-size:14px;z-index:99999;text-align:center;';
+          document.body.appendChild(toast);
+          setTimeout(function() { toast.remove(); }, 2500);
         }
       });
     };
+
+    // Generate share card canvas with logo, message, QR code
+    function generateShareCard(url, code) {
+      return new Promise(function(resolve) {
+        var w = 600, h = 800;
+        var canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        var ctx = canvas.getContext('2d');
+
+        // Background gradient (blue)
+        var grad = ctx.createLinearGradient(0, 0, 0, h);
+        grad.addColorStop(0, '#1A6E96');
+        grad.addColorStop(1, '#3AACDF');
+        ctx.fillStyle = grad;
+        // Rounded rect
+        var r = 30;
+        ctx.beginPath();
+        ctx.moveTo(r, 0); ctx.lineTo(w-r, 0); ctx.quadraticCurveTo(w, 0, w, r);
+        ctx.lineTo(w, h-r); ctx.quadraticCurveTo(w, h, w-r, h);
+        ctx.lineTo(r, h); ctx.quadraticCurveTo(0, h, 0, h-r);
+        ctx.lineTo(0, r); ctx.quadraticCurveTo(0, 0, r, 0);
+        ctx.closePath();
+        ctx.fill();
+
+        // Dove emoji
+        ctx.font = '60px serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('🕊', w/2, 90);
+
+        // Title
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 36px Arial, sans-serif';
+        ctx.fillText('NAVA PEACE', w/2, 150);
+
+        // Tagline
+        ctx.font = '18px Arial, sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.fillText('The world talks about peace.', w/2, 195);
+        ctx.fillText("Let's practice it.", w/2, 220);
+
+        // Separator line
+        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(100, 250); ctx.lineTo(w-100, 250); ctx.stroke();
+
+        // "Join me" text
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 22px Arial, sans-serif';
+        ctx.fillText('JOIN ME FOR PEACE', w/2, 295);
+
+        // Ref code
+        ctx.font = '16px monospace';
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.fillText('Code: ' + code, w/2, 325);
+
+        // QR code – grab from existing canvas on page
+        var qrCanvas = document.querySelector('#qrcode canvas');
+        if (qrCanvas) {
+          // White background for QR
+          var qrSize = 220;
+          var qrX = (w - qrSize) / 2;
+          var qrY = 355;
+          ctx.fillStyle = '#fff';
+          var qrR = 16;
+          ctx.beginPath();
+          ctx.moveTo(qrX+qrR, qrY); ctx.lineTo(qrX+qrSize-qrR, qrY); ctx.quadraticCurveTo(qrX+qrSize, qrY, qrX+qrSize, qrY+qrR);
+          ctx.lineTo(qrX+qrSize, qrY+qrSize-qrR); ctx.quadraticCurveTo(qrX+qrSize, qrY+qrSize, qrX+qrSize-qrR, qrY+qrSize);
+          ctx.lineTo(qrX+qrR, qrY+qrSize); ctx.quadraticCurveTo(qrX, qrY+qrSize, qrX, qrY+qrSize-qrR);
+          ctx.lineTo(qrX, qrY+qrR); ctx.quadraticCurveTo(qrX, qrY, qrX+qrR, qrY);
+          ctx.closePath();
+          ctx.fill();
+          // Draw QR
+          ctx.drawImage(qrCanvas, qrX + 15, qrY + 15, qrSize - 30, qrSize - 30);
+        }
+
+        // URL at bottom
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.font = '14px Arial, sans-serif';
+        ctx.fillText(url, w/2, 620);
+
+        // Scan me text
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 16px Arial, sans-serif';
+        ctx.fillText('SCAN OR TAP TO JOIN', w/2, 655);
+
+        // Footer
+        ctx.fillStyle = 'rgba(255,255,255,0.4)';
+        ctx.font = '12px Arial, sans-serif';
+        ctx.fillText('nava-peace.app', w/2, h - 30);
+
+        // Export as PNG file
+        canvas.toBlob(function(blob) {
+          var file = new File([blob], 'nava-peace-invite.png', { type: 'image/png' });
+          resolve(file);
+        }, 'image/png');
+      });
+    }
 
     // Facebook share
     var fbURL = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(inviteURL) + '&quote=' + encodeURIComponent('The world talks about peace. Let\'s practice it. Join NAVA PEACE today. 🕊');
