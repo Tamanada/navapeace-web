@@ -935,7 +935,7 @@
   <div class="header">
     <img src="logo.png" alt="NAVA PEACE" />
     <h1>NAVA PEACE</h1>
-    <p class="tagline" data-i18n="profile_tagline">COMMUNITY PROFILE</p>
+    <p class="tagline" id="daily-quote" style="font-style:italic;font-family:Georgia,serif;font-size:13px;letter-spacing:1px;line-height:1.4;max-width:320px;text-align:center;opacity:0.85;"></p>
   </div>
 
   <!-- YOUR PROFILE -->
@@ -1284,6 +1284,47 @@
   </nav>
 
   <script>
+  // ── Daily quote ──────────────────────────────────────────────────
+  const PEACE_QUOTES = [
+    { q:'Peace begins with a smile.',                                            a:'Mother Teresa' },
+    { q:'There is no way to peace. Peace is the way.',                           a:'A.J. Muste' },
+    { q:'An eye for an eye will only make the whole world blind.',               a:'Mahatma Gandhi' },
+    { q:'When the power of love overcomes the love of power, the world will know peace.', a:'Jimi Hendrix' },
+    { q:'Peace cannot be kept by force; it can only be achieved by understanding.', a:'Albert Einstein' },
+    { q:'You cannot shake hands with a clenched fist.',                          a:'Indira Gandhi' },
+    { q:'Peace is the only battle worth waging.',                                a:'Albert Camus' },
+    { q:'Every act of love is a vote for peace.',                                a:'Nava Peace' },
+    { q:'Peace comes from within. Do not seek it without.',                      a:'Gautama Buddha' },
+    { q:'Darkness cannot drive out darkness; only light can do that.',           a:'Martin Luther King Jr.' },
+    { q:'Forgiveness is the attribute of the strong.',                           a:'Mahatma Gandhi' },
+    { q:'True peace is not merely the absence of tension; it is the presence of justice.', a:'Martin Luther King Jr.' },
+    { q:'If we have no peace, it is because we have forgotten that we belong to each other.', a:'Mother Teresa' },
+    { q:'A smile is the beginning of peace.',                                    a:'Mother Teresa' },
+    { q:'Where there is love there is life.',                                    a:'Mahatma Gandhi' },
+    { q:'Give peace a chance.',                                                  a:'John Lennon' },
+    { q:'It is not enough to say we must not wage war. It is necessary to love peace and sacrifice for it.', a:'Martin Luther King Jr.' },
+    { q:'War is what happens when language fails.',                              a:'Margaret Atwood' },
+    { q:'You must not lose faith in humanity.',                                  a:'Mahatma Gandhi' },
+    { q:'The world is a dangerous place, not because of those who do evil, but because of those who look on and do nothing.', a:'Albert Einstein' },
+    { q:'We shall overcome because the arc of the moral universe is long, but it bends toward justice.', a:'Martin Luther King Jr.' },
+    { q:'Peace is not absence of conflict, it is the ability to handle conflict by peaceful means.', a:'Ronald Reagan' },
+    { q:'If you want peace, you don\'t talk to your friends. You talk to your enemies.', a:'Desmond Tutu' },
+    { q:'One day we must come to see that peace is not merely a distant goal that we seek, but a means by which we arrive at that goal.', a:'Martin Luther King Jr.' },
+    { q:'Nonviolence is the greatest force at the disposal of mankind.',          a:'Mahatma Gandhi' },
+    { q:'To be prepared for war is one of the most effective means of preserving peace.', a:'George Washington' },
+    { q:'I speak to everyone in the same way, whether he is the garbage man or the president.', a:'Albert Einstein' },
+    { q:'The most important thing in the world is love \u2014 and peace is its language.', a:'Nava Peace' },
+    { q:'Those who make peaceful revolution impossible will make violent revolution inevitable.', a:'John F. Kennedy' },
+    { q:'Imagine all the people living life in peace.',                          a:'John Lennon' },
+  ];
+  (function() {
+    const start = new Date(new Date().getFullYear(), 0, 0);
+    const dayOfYear = Math.floor((Date.now() - start) / 86400000);
+    const { q, a } = PEACE_QUOTES[dayOfYear % PEACE_QUOTES.length];
+    const el = document.getElementById('daily-quote');
+    if (el) el.innerHTML = '\u201C' + q + '\u201D<br><span style="font-size:11px;opacity:0.6;font-style:normal;">\u2014 ' + a + '</span>';
+  })();
+
   // ── Your personal profile (localStorage) ────────────────────────
   function renderMyProfile() {
     const country  = localStorage.getItem('nava_peace_country');
