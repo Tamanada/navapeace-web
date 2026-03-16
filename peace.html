@@ -440,7 +440,7 @@
     </div>
 
     <!-- SHARE PROGRESS BUTTON -->
-    <button onclick="openShareOverlay()" style="
+    <button id="share-progress-btn" onclick="openShareOverlay()" style="
       display:flex;align-items:center;gap:8px;margin-top:18px;
       background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.3);
       border-radius:28px;color:#fff;font-family:Nasalization,Arial,sans-serif;
@@ -1194,6 +1194,9 @@
     checkNotifications();
     initPush();
     initAndSync(); // ← sync offline votes au démarrage
+
+    // ── Appliquer les traductions ──────────────────────────────────────
+    if (typeof applyLang === 'function') applyLang(detectLang());
 
     // ── Compteurs live : polling 30s ──────────────────────────────────────
     setInterval(loadCounters, 30_000);

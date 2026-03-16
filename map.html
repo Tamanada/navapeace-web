@@ -1144,6 +1144,7 @@
 
   initTimer();
   initMap();
+  if (typeof applyLang === 'function') applyLang(detectLang());
 
   // ── Counter popovers ─────────────────────────────────────────────
   const POPOVER_DATA = {
