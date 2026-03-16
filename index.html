@@ -693,17 +693,9 @@
       localStorage.setItem('nava_peace_age',     age || '');
       localStorage.setItem('nava_peace_gender',  gender || '');
 
-      // Enregistrer le vote du jour + incrémenter le compteur de jours
+      // Marquer comme inscrit (gate pour peace.html) mais NE PAS marquer le vote du jour
+      // → le bouton restera cliquable sur peace.html pour la première action
       localStorage.setItem(STORAGE_KEY, TODAY);
-      localStorage.setItem('nava_peace_action', TODAY); // sync avec peace.html
-      const prevDays = parseInt(localStorage.getItem('nava_peace_days') || '0', 10);
-      localStorage.setItem('nava_peace_days', prevDays + 1);
-      // Log offline-first : vote d'inscription → synced (déjà inséré en DB)
-      try {
-        const _log = JSON.parse(localStorage.getItem('nava_peace_votes_log') || '[]');
-        if (!_log.find(e => e.date === TODAY)) _log.push({ date: TODAY, synced: true });
-        localStorage.setItem('nava_peace_votes_log', JSON.stringify(_log));
-      } catch(e) {}
 
       // Générer et sauvegarder le pseudo si pas encore défini
       if (!localStorage.getItem('nava_peace_pseudo')) {

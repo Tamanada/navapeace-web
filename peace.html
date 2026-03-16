@@ -639,6 +639,8 @@
       const referredBy = localStorage.getItem('nava_peace_referred_by') || null;
 
       let alreadyVotedToday = false;
+      // Détecter premier clic (inscription fraîche : pas encore de nava_peace_days ou == 0)
+      const isFirstEver = !localStorage.getItem('nava_peace_days') || localStorage.getItem('nava_peace_days') === '0';
 
       if (sb) {
         // Enregistrer l'action du jour dans peace_votes
@@ -651,7 +653,8 @@
           if (error) {
             // Code 23505 = unique constraint violation (déjà voté aujourd'hui)
             if (error.code === '23505' || error.message?.includes('unique')) {
-              alreadyVotedToday = true;
+              // Si c'est le tout premier clic (juste après inscription), traiter comme un vote frais
+              alreadyVotedToday = !isFirstEver;
               markVoteSynced(TODAY); // déjà en DB → synced
             } else {
               console.warn('Vote insert error', error);
@@ -684,7 +687,7 @@
 
       // Incrémenter le compteur local de jours consécutifs
       if (!alreadyVotedToday) {
-        const prevDays = parseInt(localStorage.getItem('nava_peace_days') || '1', 10);
+        const prevDays = parseInt(localStorage.getItem('nava_peace_days') || '0', 10);
         localStorage.setItem('nava_peace_days', prevDays + 1);
       }
 
