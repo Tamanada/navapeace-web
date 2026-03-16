@@ -1205,21 +1205,6 @@
     </div>
   </div>
 
-  <!-- AGE DISTRIBUTION -->
-  <div class="card">
-    <p class="section-title" data-i18n="section_age">AGE DISTRIBUTION</p>
-    <div id="age-bars">
-      <p class="no-data">LOADING...</p>
-    </div>
-  </div>
-
-  <!-- GENDER DISTRIBUTION -->
-  <div class="card">
-    <p class="section-title" data-i18n="section_gender">GENDER DISTRIBUTION</p>
-    <div class="gender-row" id="gender-pills">
-      <p class="no-data">LOADING...</p>
-    </div>
-  </div>
 
   <!-- DOVE POPOVER -->
   <div class="dove-overlay" id="doveOverlay" onclick="closeDovePopup(event)">
@@ -1477,88 +1462,6 @@
   loadPseudo();
   loadMessage();
   loadFirstname();
-
-  // ── Age groups ───────────────────────────────────────────────────
-  const AGE_GROUPS = [
-    { label: '≤17',   min: 0,   max: 17  },
-    { label: '18-24', min: 18,  max: 24  },
-    { label: '25-34', min: 25,  max: 34  },
-    { label: '35-49', min: 35,  max: 49  },
-    { label: '50-64', min: 50,  max: 64  },
-    { label: '65+',   min: 65,  max: 999 },
-  ];
-
-  // ── Load from Supabase ───────────────────────────────────────────
-  async function loadStats() {
-    let data = [];
-    try {
-      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      const { data: rows, error } = await sb
-        .from('peace_votes')
-        .select('age, gender')
-        .not('country', 'is', null);
-      if (!error && rows) data = rows;
-    } catch(e) { console.warn('Supabase error', e); }
-
-    renderAge(data);
-    renderGender(data);
-  }
-
-  function renderAge(data) {
-    const withAge = data.filter(r => r.age && r.age > 0);
-    const container = document.getElementById('age-bars');
-    if (withAge.length === 0) {
-      container.innerHTML = '<p class="no-data">NO AGE DATA YET</p>'; return;
-    }
-
-    const counts = AGE_GROUPS.map(g => ({
-      label: g.label,
-      count: withAge.filter(r => r.age >= g.min && r.age <= g.max).length
-    }));
-    const max = Math.max(...counts.map(c => c.count), 1);
-
-    container.innerHTML = counts.map(c => `
-      <div class="bar-row">
-        <span class="bar-label">${c.label}</span>
-        <div class="bar-track">
-          <div class="bar-fill" style="width:${Math.round(c.count/max*100)}%"></div>
-        </div>
-        <span class="bar-count">${c.count}</span>
-      </div>`).join('');
-  }
-
-  function normalizeGender(g) {
-    const v = (g || '').toLowerCase().trim();
-    if (v === 'male'   || v === 'm' || v === 'homme') return 'MALE';
-    if (v === 'female' || v === 'f' || v === 'femme') return 'FEMALE';
-    return null; // ignore anything else
-  }
-
-  function renderGender(data) {
-    const container = document.getElementById('gender-pills');
-    const groups = { MALE: 0, FEMALE: 0 };
-
-    data.forEach(r => {
-      const n = normalizeGender(r.gender);
-      if (n) groups[n]++;
-    });
-
-    const total = groups.MALE + groups.FEMALE;
-    if (total === 0) {
-      container.innerHTML = '<p class="no-data">NO GENDER DATA YET</p>'; return;
-    }
-
-    container.innerHTML = Object.entries(groups)
-      .filter(([, count]) => count > 0)
-      .sort((a, b) => b[1] - a[1])
-      .map(([label, count]) => `
-        <div class="gender-pill">
-          <span class="pct">${Math.round(count / total * 100)}%</span>
-          <span class="lbl">${label}</span>
-        </div>`).join('');
-  }
-
-  loadStats();
 
   // ── MY DOVES ─────────────────────────────────────────────────────
   async function loadMyDoves() {
