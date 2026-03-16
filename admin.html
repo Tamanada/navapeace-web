@@ -208,6 +208,10 @@
     .cfp-btn-ok{background:rgba(58,172,223,0.2);color:rgba(58,172,223,1);border-color:rgba(58,172,223,0.4);}
     .cfp-btn-clear{background:rgba(255,255,255,0.06);color:var(--w60);}
     .cfp-btn-clear:hover{color:var(--white);}
+    .cfp-sort-row{display:flex;gap:4px;margin-bottom:4px;}
+    .cfp-sort-btn{flex:1;padding:5px 6px;font-size:8px;letter-spacing:1px;font-family:var(--font);border-radius:5px;cursor:pointer;border:1px solid var(--glass-border);background:rgba(255,255,255,0.06);color:var(--w60);transition:all .15s;}
+    .cfp-sort-btn:hover{color:var(--white);background:rgba(255,255,255,0.12);}
+    .cfp-sort-btn.cfp-sort-active{background:rgba(58,172,223,0.2);color:rgba(58,172,223,1);border-color:rgba(58,172,223,0.4);}
     .filter-reset-all{font-size:8px;letter-spacing:2px;color:var(--w40);background:none;border:none;cursor:pointer;font-family:var(--font);padding:4px 8px;}
     .filter-reset-all:hover{color:var(--white);}
     .table-wrap{overflow-x:auto;border-radius:var(--radius);}
@@ -1213,6 +1217,33 @@ function renderUsersTable() {
 // ── COLUMN FILTER STATE (Excel-style) ─────────────────────
 const colFilters={status:new Set(),country:new Set(),age:new Set(),gender:new Set(),days:new Set(),firstname:new Set(),pseudo:new Set(),source:new Set(),registered:new Set()};
 let _cfKey=null; // currently open filter column key
+let _sortKey=null, _sortDir=null; // current sort: key + 'asc'|'desc'
+
+// Columns that should sort numerically
+const _numCols=new Set(['age','days']);
+const _dateCols=new Set(['registered']);
+
+function sortTable(key,dir){
+  _sortKey=key; _sortDir=dir;
+  if(_numCols.has(key)){
+    filteredUsers.sort((a,b)=>{
+      const va=Number(a[key])||0, vb=Number(b[key])||0;
+      return dir==='asc'?va-vb:vb-va;
+    });
+  } else if(_dateCols.has(key)){
+    filteredUsers.sort((a,b)=>{
+      const va=a[key]||'', vb=b[key]||'';
+      return dir==='asc'?va.localeCompare(vb):vb.localeCompare(va);
+    });
+  } else {
+    filteredUsers.sort((a,b)=>{
+      const va=(a[key]||'').toString().toLowerCase(), vb=(b[key]||'').toString().toLowerCase();
+      return dir==='asc'?va.localeCompare(vb):vb.localeCompare(va);
+    });
+  }
+  renderUsersTable();
+  closeColFilter();
+}
 
 function getColValues(key){
   switch(key){
@@ -1237,7 +1268,17 @@ function openColFilter(evt,key){
   const vals=getColValues(key);
   const cur=colFilters[key];
   const allSel=cur.size===0;
+  const isNum=_numCols.has(key)||_dateCols.has(key);
+  const ascLabel=isNum?'1 → 9':'A → Z';
+  const descLabel=isNum?'9 → 1':'Z → A';
+  const ascActive=_sortKey===key&&_sortDir==='asc'?' cfp-sort-active':'';
+  const descActive=_sortKey===key&&_sortDir==='desc'?' cfp-sort-active':'';
   popup.innerHTML=`
+    <div class="cfp-sort-row">
+      <button class="cfp-sort-btn${ascActive}" onclick="sortTable('${key}','asc')">↑ ${ascLabel}</button>
+      <button class="cfp-sort-btn${descActive}" onclick="sortTable('${key}','desc')">↓ ${descLabel}</button>
+    </div>
+    <div style="height:1px;background:rgba(255,255,255,0.1);margin:4px 0;"></div>
     <input class="cfp-search" type="search" placeholder="Search…" oninput="cfpSearch(this)">
     <div class="cfp-list">
       <label class="cfp-item all-item"><input type="checkbox" id="cfp-all" ${allSel?'checked':''} onchange="cfpToggleAll('${key}',this.checked)"> (Select All)</label>
@@ -1328,6 +1369,8 @@ function applyFilters(){
     }
     return true;
   });
+  // Re-apply current sort after filtering
+  if(_sortKey&&_sortDir) sortTable(_sortKey,_sortDir);
   // Update ▼ button active states
   Object.keys(colFilters).forEach(k=>{const b=document.getElementById('cfb-'+k);if(b)b.classList.toggle('active',colFilters[k].size>0);});
   renderUsersTable();
