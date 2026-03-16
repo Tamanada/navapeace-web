@@ -652,6 +652,9 @@
                 <th><div class="th-wrap">AGE<button class="col-filter-btn" id="cfb-age" onclick="openColFilter(event,'age')">▼</button></div></th>
                 <th><div class="th-wrap">GENDER<button class="col-filter-btn" id="cfb-gender" onclick="openColFilter(event,'gender')">▼</button></div></th>
                 <th><div class="th-wrap">DAYS<button class="col-filter-btn" id="cfb-days" onclick="openColFilter(event,'days')">▼</button></div></th>
+                <th><div class="th-wrap">REF TODAY<button class="col-filter-btn" id="cfb-reftoday" onclick="openColFilter(event,'refDovesToday')">▼</button></div></th>
+                <th><div class="th-wrap">REF TOTAL<button class="col-filter-btn" id="cfb-reftotal" onclick="openColFilter(event,'refDovesTotal')">▼</button></div></th>
+                <th><div class="th-wrap">SCORE<button class="col-filter-btn" id="cfb-score" onclick="openColFilter(event,'totalScore')">▼</button></div></th>
                 <th>REF CODE</th>
                 <th>REFERRED BY</th>
                 <th><div class="th-wrap">SOURCE<button class="col-filter-btn" id="cfb-source" onclick="openColFilter(event,'source')">▼</button></div></th>
@@ -1070,16 +1073,45 @@ async function loadVotes() {
     document.getElementById('stat-votes').textContent=fmt(votes.length);
     document.getElementById('stat-countries').textContent=fmt(countries);
 
-    allUsers=[...usersMap.values()].map(u=>({
-      uid:u.user_uid, country:u.country||'', age:u.age||'',
-      gender:normalizeGender(u.gender), days:votesCount.get(u.user_uid)||1,
-      ref_code:u.referral_code||'', referred_by:referredByMap.get(u.user_uid)||u.referred_by||'',
-      source:(u.source && u.source!=='web') ? u.source : (u.user_uid && u.user_uid.startsWith('tg_') ? 'telegram' : 'web'),
-      telegram_id:u.telegram_id || (u.user_uid && u.user_uid.startsWith('tg_') ? u.user_uid.slice(3) : ''),
-      registered:firstSeen.get(u.user_uid)||u.created_at,
-      votedToday:votedTodaySet.has(u.user_uid),
-      pseudo:''
-    })).sort((a,b)=>b.days-a.days);
+    // Build referral doves maps: for each ref_code, count votes from referred users
+    const refCodeToUids=new Map(); // ref_code → Set of referred user uids
+    for(const v of votes){
+      if(v.referred_by && v.user_uid){
+        if(!refCodeToUids.has(v.referred_by)) refCodeToUids.set(v.referred_by, new Set());
+        refCodeToUids.get(v.referred_by).add(v.user_uid);
+      }
+    }
+    // Count total votes and today votes from referred users for each ref_code
+    const refDovesMap=new Map(), refDovesTodayMap=new Map();
+    for(const [refCode, uidSet] of refCodeToUids){
+      let total=0, todayCount=0;
+      for(const v of votes){
+        if(uidSet.has(v.user_uid) && v.user_uid !== /* exclude self-referral */ null){
+          total++;
+          if(v.created_at?.startsWith(today)) todayCount++;
+        }
+      }
+      refDovesMap.set(refCode, total);
+      refDovesTodayMap.set(refCode, todayCount);
+    }
+
+    allUsers=[...usersMap.values()].map(u=>{
+      const days=votesCount.get(u.user_uid)||1;
+      const rc=u.referral_code||'';
+      const refDovesTotal=rc?refDovesMap.get(rc)||0:0;
+      const refDovesToday=rc?refDovesTodayMap.get(rc)||0:0;
+      return {
+        uid:u.user_uid, country:u.country||'', age:u.age||'',
+        gender:normalizeGender(u.gender), days,
+        ref_code:rc, referred_by:referredByMap.get(u.user_uid)||u.referred_by||'',
+        source:(u.source && u.source!=='web') ? u.source : (u.user_uid && u.user_uid.startsWith('tg_') ? 'telegram' : 'web'),
+        telegram_id:u.telegram_id || (u.user_uid && u.user_uid.startsWith('tg_') ? u.user_uid.slice(3) : ''),
+        registered:firstSeen.get(u.user_uid)||u.created_at,
+        votedToday:votedTodaySet.has(u.user_uid),
+        refDovesToday, refDovesTotal, totalScore:days+refDovesTotal,
+        pseudo:''
+      };
+    }).sort((a,b)=>b.totalScore-a.totalScore);
 
     filteredUsers=[...allUsers];
     populateFilterSelects();
@@ -1213,6 +1245,9 @@ function renderUsersTable() {
       <td>${u.age||'—'}</td>
       <td>${u.gender||'—'}</td>
       <td><span class="days-badge">${u.days}</span></td>
+      <td style="text-align:center;font-size:10px;color:${u.refDovesToday>0?'#4caf50':'var(--w40)'};">${u.refDovesToday||'—'}</td>
+      <td style="text-align:center;font-size:10px;color:${u.refDovesTotal>0?'#29b6f6':'var(--w40)'};">${u.refDovesTotal||'—'}</td>
+      <td style="text-align:center;"><span class="days-badge" style="background:rgba(255,215,0,0.15);color:#ffd700;">${u.totalScore}</span></td>
       <td class="ref-code">${u.ref_code||'—'}</td>
       <td style="font-size:9px;color:var(--w40);">${u.referred_by||'—'}</td>
       <td style="font-size:9px;">${u.source==='telegram'?'<span style="color:#29b6f6;">TG</span>':'web'}${u.telegram_id?' <span style="color:var(--w30);font-size:8px;">'+u.telegram_id+'</span>':''}</td>
@@ -1226,7 +1261,7 @@ let _cfKey=null; // currently open filter column key
 let _sortKey=null, _sortDir=null; // current sort: key + 'asc'|'desc'
 
 // Columns that should sort numerically
-const _numCols=new Set(['age','days']);
+const _numCols=new Set(['age','days','refDovesToday','refDovesTotal','totalScore']);
 const _dateCols=new Set(['registered']);
 
 function sortTable(key,dir){
@@ -1258,6 +1293,9 @@ function getColValues(key){
     case 'age':      return [...new Set(allUsers.map(u=>String(u.age||'')||'__blank__'))].sort((a,b)=>{if(a==='__blank__')return 1;if(b==='__blank__')return -1;return Number(a)-Number(b);}).map(v=>({v,label:v==='__blank__'?'(Blank)':v}));
     case 'gender':   return [...new Set(allUsers.map(u=>u.gender||'__blank__'))].sort().map(v=>({v,label:v==='__blank__'?'(Blank)':v}));
     case 'days':     return [...new Set(allUsers.map(u=>String(u.days)))].sort((a,b)=>Number(a)-Number(b)).map(v=>({v,label:v+' day'+(v==='1'?'':'s')}));
+    case 'refDovesToday': return [...new Set(allUsers.map(u=>String(u.refDovesToday)))].sort((a,b)=>Number(a)-Number(b)).map(v=>({v,label:v}));
+    case 'refDovesTotal': return [...new Set(allUsers.map(u=>String(u.refDovesTotal)))].sort((a,b)=>Number(a)-Number(b)).map(v=>({v,label:v}));
+    case 'totalScore': return [...new Set(allUsers.map(u=>String(u.totalScore)))].sort((a,b)=>Number(a)-Number(b)).map(v=>({v,label:v}));
     case 'pseudo':   return [{v:'__set__',label:'✓ Has pseudo'},{v:'__unset__',label:'— No pseudo'}];
     case 'firstname':return [{v:'__set__',label:'✓ Has name'},{v:'__unset__',label:'— No name'}];
     case 'source':    return [{v:'web',label:'Web'},{v:'telegram',label:'Telegram'}];
@@ -1483,7 +1521,7 @@ function loadFilterPreset(){
 
 function populateFilterSelects() { /* no-op — using Excel-style column filters */ }
 function exportCSV() {
-  const h=['uid','pseudo','country','age','gender','days','ref_code','referred_by','source','telegram_id','registered'];
+  const h=['uid','pseudo','country','age','gender','days','refDovesToday','refDovesTotal','totalScore','ref_code','referred_by','source','telegram_id','registered'];
   const rows=filteredUsers.map(u=>h.map(k=>`"${(u[k]||'').toString().replace(/"/g,'""')}"`).join(','));
   const blob=new Blob([[h.join(','),...rows].join('\n')],{type:'text/csv'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
