@@ -39,6 +39,7 @@
   <script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/plugins/exporting.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous"></script>
 
   <style>
     *, *::before, *::after {
@@ -72,7 +73,7 @@
       height: 72px;
       object-fit: contain;
       filter: drop-shadow(0 3px 10px rgba(255,255,255,0.4));
-      margin-bottom: 10px;
+      margin-bottom: 20px;
     }
 
     .header h1 {
@@ -504,7 +505,75 @@
     }
 
     /* Share overlay */
-    #share-overlay.open { display: flex !important; }
+    #share-overlay.open { display: block !important; }
+    #share-overlay-close {
+      position: fixed;
+      top: 14px;
+      right: 16px;
+      z-index: 600;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 50%;
+      width: 36px; height: 36px;
+      color: rgba(255,255,255,0.85);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      line-height: 1;
+    }
+    #share-overlay-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 24px;
+      padding: 56px 20px 36px;
+    }
+    .share-story-frame {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .share-story-box {
+      position: relative;
+      height: min(60vh, 480px);
+      aspect-ratio: 9 / 16;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.15),
+                  0 0 0 6px rgba(255,255,255,0.05),
+                  0 20px 56px rgba(0,0,0,0.55);
+    }
+    #share-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .share-res-badge {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(6px);
+      border-radius: 20px;
+      padding: 4px 12px;
+      white-space: nowrap;
+    }
+    .share-buttons-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 260px;
+      flex-shrink: 0;
+    }
+    /* On very narrow screens, make canvas shorter so buttons fit below */
+    @media (max-width: 600px) {
+      .share-story-box { height: min(48vh, 380px); }
+      .share-buttons-panel { width: min(100%, 320px); }
+    }
   </style>
 </head>
 <body>
@@ -577,29 +646,47 @@
   </div>
 
   <!-- SHARE OVERLAY -->
-  <div id="share-overlay" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(10,40,80,0.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);align-items:center;justify-content:center;padding:20px;flex-direction:column;gap:16px;">
-    <div style="background:rgba(30,100,160,0.92);border:1.5px solid rgba(255,255,255,0.35);border-radius:24px;padding:28px 24px;max-width:340px;width:100%;text-align:center;position:relative;">
-      <button onclick="closeShareOverlay()" style="position:absolute;top:14px;right:16px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:20px;cursor:pointer;line-height:1;">✕</button>
-      <p style="font-size:8px;letter-spacing:3px;color:rgba(255,255,255,0.5);margin-bottom:6px;">SHARE</p>
-      <p style="font-size:13px;letter-spacing:3px;color:#fff;margin-bottom:20px;">PEACE MAP</p>
+  <div id="share-overlay" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(8,30,65,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);overflow-y:auto;overflow-x:hidden;">
 
-      <!-- Preview canvas -->
-      <canvas id="share-canvas" style="width:100%;border-radius:12px;display:block;margin-bottom:20px;" width="1080" height="1920"></canvas>
+    <!-- Close button (fixed top-right) -->
+    <button id="share-overlay-close" onclick="closeShareOverlay()">✕</button>
 
-      <!-- Share buttons -->
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <button onclick="shareToInstagram()" style="width:100%;padding:14px;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);border:none;border-radius:12px;color:#fff;font-family:'Nasalization',Arial,sans-serif;font-size:10px;letter-spacing:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.334 3.608 1.308.975.975 1.246 2.242 1.308 3.608.058 1.265.069 1.645.069 4.85s-.011 3.585-.069 4.85c-.062 1.366-.333 2.633-1.308 3.608-.975.975-2.242 1.246-3.608 1.308-1.265.058-1.645.069-4.85.069s-3.585-.011-4.85-.069c-1.366-.062-2.633-.333-3.608-1.308-.975-.975-1.246-2.242-1.308-3.608C2.175 15.585 2.163 15.205 2.163 12s.012-3.584.07-4.85c.062-1.366.333-2.633 1.308-3.608.975-.975 2.242-1.246 3.608-1.308C8.416 2.175 8.796 2.163 12 2.163Zm0-2.163C8.741 0 8.332.014 7.052.072 5.197.157 3.355.673 1.946 2.082.537 3.491.021 5.333 0 7.188-.014 8.468 0 8.877 0 12s-.014 3.532.072 4.812c.157 1.855.673 3.697 2.082 5.106C3.491 23.327 5.333 23.843 7.188 24c1.28.086 1.689.072 4.812.072s3.532.014 4.812-.072c1.855-.157 3.697-.673 5.106-2.082C23.327 20.509 23.843 18.667 24 16.812c.086-1.28.072-1.689.072-4.812s.014-3.532-.072-4.812c-.157-1.855-.673-3.697-2.082-5.106C20.509.673 18.667.157 16.812 0 15.532-.014 15.123 0 12 0Zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324ZM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881Z"/></svg>
+    <!-- Inner layout -->
+    <div id="share-overlay-inner">
+
+      <!-- Instagram Story preview frame -->
+      <div class="share-story-frame">
+        <p style="font-size:7px;letter-spacing:3.5px;color:rgba(255,255,255,0.4);margin:0;text-transform:uppercase;">Preview</p>
+        <div class="share-story-box">
+          <canvas id="share-canvas" width="1080" height="1920"></canvas>
+        </div>
+        <p style="font-size:7px;letter-spacing:2px;color:rgba(255,255,255,0.3);margin:0;text-transform:uppercase;">Instagram Story · 9:16</p>
+      </div>
+
+      <!-- Share buttons panel -->
+      <div class="share-buttons-panel">
+        <div style="text-align:center;margin-bottom:4px;">
+          <p style="font-size:8px;letter-spacing:3px;color:rgba(255,255,255,0.45);margin:0 0 4px;">SHARE</p>
+          <p style="font-size:14px;letter-spacing:3.5px;color:#fff;margin:0;font-weight:300;">PEACE MAP</p>
+        </div>
+
+        <button onclick="shareToInstagram()" style="width:100%;padding:14px 18px;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);border:none;border-radius:14px;color:#fff;font-family:'Nasalization',Arial,sans-serif;font-size:9px;letter-spacing:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.334 3.608 1.308.975.975 1.246 2.242 1.308 3.608.058 1.265.069 1.645.069 4.85s-.011 3.585-.069 4.85c-.062 1.366-.333 2.633-1.308 3.608-.975.975-2.242 1.246-3.608 1.308-1.265.058-1.645.069-4.85.069s-3.585-.011-4.85-.069c-1.366-.062-2.633-.333-3.608-1.308-.975-.975-1.246-2.242-1.308-3.608C2.175 15.585 2.163 15.205 2.163 12s.012-3.584.07-4.85c.062-1.366.333-2.633 1.308-3.608.975-.975 2.242-1.246 3.608-1.308C8.416 2.175 8.796 2.163 12 2.163Zm0-2.163C8.741 0 8.332.014 7.052.072 5.197.157 3.355.673 1.946 2.082.537 3.491.021 5.333 0 7.188-.014 8.468 0 8.877 0 12s-.014 3.532.072 4.812c.157 1.855.673 3.697 2.082 5.106C3.491 23.327 5.333 23.843 7.188 24c1.28.086 1.689.072 4.812.072s3.532.014 4.812-.072c1.855-.157 3.697-.673 5.106-2.082C23.327 20.509 23.843 18.667 24 16.812c.086-1.28.072-1.689.072-4.812s.014-3.532-.072-4.812c-.157-1.855-.673-3.697-2.082-5.106C20.509.673 18.667.157 16.812 0 15.532-.014 15.123 0 12 0Zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324ZM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881Z"/></svg>
           SHARE ON INSTAGRAM
         </button>
-        <button onclick="shareToX()" style="width:100%;padding:14px;background:rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.2);border-radius:12px;color:#fff;font-family:'Nasalization',Arial,sans-serif;font-size:10px;letter-spacing:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.261 5.632 5.903-5.632Zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+
+        <button onclick="shareToX()" style="width:100%;padding:14px 18px;background:rgba(0,0,0,0.75);border:1px solid rgba(255,255,255,0.2);border-radius:14px;color:#fff;font-family:'Nasalization',Arial,sans-serif;font-size:9px;letter-spacing:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.261 5.632 5.903-5.632Zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
           POST ON X
         </button>
-        <button onclick="downloadShareCard()" style="width:100%;padding:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:12px;color:rgba(255,255,255,0.7);font-family:'Nasalization',Arial,sans-serif;font-size:9px;letter-spacing:3px;cursor:pointer;">
+
+        <button onclick="downloadShareCard()" style="width:100%;padding:12px 18px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:14px;color:rgba(255,255,255,0.6);font-family:'Nasalization',Arial,sans-serif;font-size:8px;letter-spacing:3px;cursor:pointer;">
           ↓ DOWNLOAD IMAGE
         </button>
+
+        <p style="font-size:8px;color:rgba(255,255,255,0.3);text-align:center;margin:4px 0 0;line-height:1.5;">On mobile, tap Instagram to open<br>the native share sheet directly.</p>
       </div>
+
     </div>
   </div>
 
@@ -1225,7 +1312,8 @@
   async function openShareOverlay() {
     const overlay = document.getElementById('share-overlay');
     overlay.classList.add('open');
-    overlay.style.display = 'flex';
+    overlay.style.display = 'block';
+    overlay.scrollTop = 0;
     await generateShareCard();
   }
 
@@ -1252,7 +1340,7 @@
     canvas.width = W; canvas.height = H;
 
     // Show spinner while capturing
-    ctx.fillStyle = 'rgba(30,100,160,0.9)';
+    ctx.fillStyle = 'rgba(20,80,140,1)';
     ctx.fillRect(0,0,W,H);
     ctx.fillStyle = '#fff'; ctx.textAlign='center'; ctx.font='40px Arial';
     ctx.fillText('Capturing map…', W/2, H/2);
@@ -1261,23 +1349,46 @@
     let mapDataUrl = null;
     try {
       if (window._mapExporting) {
-        // amCharts export plugin
         mapDataUrl = await window._mapExporting.export('png');
       } else {
-        // Fallback: grab the amCharts canvas element directly
         const chartCanvas = document.querySelector('#chartdiv canvas');
         if (chartCanvas) mapDataUrl = chartCanvas.toDataURL('image/png');
       }
     } catch(e) { console.warn('Map capture error', e); }
 
-    // 2. Load assets in parallel
+    // 2. Generate QR code locally via qrcodejs (renders to hidden DOM canvas → no CORS)
+    let qrImg = null;
+    try {
+      if (typeof QRCode !== 'undefined') {
+        const qrHolder = document.createElement('div');
+        qrHolder.style.cssText = 'position:absolute;left:-9999px;top:-9999px;';
+        document.body.appendChild(qrHolder);
+        await new Promise(resolve => {
+          new QRCode(qrHolder, {
+            text: 'https://nava-peace.app',
+            width: 320, height: 320,
+            colorDark: '#ffffff', colorLight: '#0a3060',
+            correctLevel: QRCode.CorrectLevel.M
+          });
+          // qrcodejs renders synchronously, but give it a tick to finish painting
+          setTimeout(resolve, 80);
+        });
+        const qrCanvas = qrHolder.querySelector('canvas');
+        if (qrCanvas) {
+          qrImg = await loadImage(qrCanvas.toDataURL('image/png'));
+        }
+        document.body.removeChild(qrHolder);
+      }
+    } catch(e) { console.warn('QR error', e); }
+
+    // 3. Load map + logo in parallel
     const [mapImg, logoImg] = await Promise.all([
       mapDataUrl ? loadImage(mapDataUrl) : Promise.resolve(null),
-      loadImage('logo.png').catch(()=>null)
+      loadImage('logo.png').catch(()=>null),
     ]);
 
-    // 3. Draw full portrait card
-    drawPortraitCard(ctx, W, H, mapImg, logoImg);
+    // 4. Draw full portrait card
+    drawPortraitCard(ctx, W, H, mapImg, logoImg, qrImg);
   }
 
   function loadImage(src) {
@@ -1290,115 +1401,159 @@
     });
   }
 
-  function drawPortraitCard(ctx, W, H, mapImg, logoImg) {
-    // ── Background ──
-    const bg = ctx.createRadialGradient(W/2, H*0.2, 0, W/2, H*0.2, H);
-    bg.addColorStop(0, '#6DD5F5');
-    bg.addColorStop(0.45,'#3AACDF');
-    bg.addColorStop(1,   '#0d4f80');
+  function drawPortraitCard(ctx, W, H, mapImg, logoImg, qrImg) {
+    // ── Background gradient ──
+    const bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0,    '#5DC8F0');
+    bg.addColorStop(0.35, '#3AACDF');
+    bg.addColorStop(0.75, '#1a6fb5');
+    bg.addColorStop(1,    '#0a3060');
     ctx.fillStyle = bg; ctx.fillRect(0,0,W,H);
 
-    // Soft circle glows
-    ctx.save(); ctx.globalAlpha=0.06; ctx.fillStyle='#fff';
-    [[W*.85,H*.08,340],[W*.1,H*.3,200],[W*.9,H*.82,250]].forEach(([x,y,r])=>{
+    // Soft glow circles
+    ctx.save(); ctx.globalAlpha=0.07; ctx.fillStyle='#fff';
+    [[W*.88,H*.06,380],[W*.08,H*.28,220],[W*.92,H*.78,280]].forEach(([x,y,r])=>{
       ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
     });
     ctx.restore();
 
     const pad = 60;
-    let y = 120;
+    let y = 50;
 
     // ── Logo ──
     if (logoImg) {
-      const ls=140; ctx.save();
-      ctx.shadowColor='rgba(255,255,255,0.4)'; ctx.shadowBlur=30;
+      const ls=220; ctx.save();
+      ctx.shadowColor='rgba(255,255,255,0.45)'; ctx.shadowBlur=24;
       ctx.drawImage(logoImg, W/2-ls/2, y, ls, ls);
-      ctx.restore(); y+=ls+30;
-    } else { y+=30; }
+      ctx.restore(); y+=ls+70;
+    } else { y+=70; }
 
     // ── Title ──
     ctx.fillStyle='#fff'; ctx.textAlign='center';
-    ctx.font='bold 78px Nasalization,Arial,sans-serif';
-    ctx.fillText('NAVA PEACE', W/2, y); y+=60;
-    ctx.globalAlpha=0.7; ctx.font='32px Nasalization,Arial,sans-serif';
-    ctx.fillText('TODAY HUMANITY CHOOSES PEACE', W/2, y); ctx.globalAlpha=1; y+=50;
+    ctx.font='bold 76px Nasalization,Arial,sans-serif';
+    ctx.fillText('NAVA PEACE', W/2, y); y+=58;
+    ctx.globalAlpha=0.7; ctx.font='30px Nasalization,Arial,sans-serif';
+    ctx.fillText('TODAY HUMANITY CHOOSES PEACE', W/2, y); ctx.globalAlpha=1; y+=44;
+
+    // ── Days since launch ──
+    const c = getCounters();
+    ctx.fillStyle='#fff'; ctx.textAlign='center';
+    ctx.font='bold 42px Nasalization,Arial,sans-serif';
+    ctx.fillText(c.days + '  DAYS SINCE LAUNCH', W/2, y+42);
+    ctx.globalAlpha=1;
+    y += 76;
 
     // ── Separator ──
-    line(ctx,pad,y,W-pad); y+=30;
+    line(ctx,pad,y,W-pad); y+=28;
 
     // ── Counters 2×2 ──
-    const c = getCounters();
     const stats=[
       {num:c.people,    lbl:'PEACE LOVERS'},
       {num:c.countries, lbl:'COUNTRIES'},
       {num:c.doves,     lbl:'🕊 TOTAL DOVES'},
       {num:c.today,     lbl:'ACTIONS TODAY'},
     ];
-    const colW=W/2, rowH=230;
+    const colW=W/2, rowH=210;
     stats.forEach((s,i)=>{
       const col=i%2, row=Math.floor(i/2);
       const cx=colW*col+colW/2, cy=y+row*rowH;
       ctx.save(); ctx.globalAlpha=0.1; ctx.fillStyle='#fff';
-      roundRect(ctx,cx-colW/2+pad/2,cy+10,colW-pad,rowH-20,20); ctx.fill(); ctx.restore();
+      roundRect(ctx,cx-colW/2+pad/2,cy+8,colW-pad,rowH-16,18); ctx.fill(); ctx.restore();
       ctx.fillStyle='#fff'; ctx.textAlign='center';
-      ctx.font='bold 88px Nasalization,Arial,sans-serif';
-      ctx.fillText(s.num, cx, cy+115);
-      ctx.globalAlpha=0.6; ctx.font='27px Nasalization,Arial,sans-serif';
-      ctx.fillText(s.lbl, cx, cy+160); ctx.globalAlpha=1;
+      ctx.font='bold 82px Nasalization,Arial,sans-serif';
+      ctx.fillText(s.num, cx, cy+106);
+      ctx.globalAlpha=0.6; ctx.font='25px Nasalization,Arial,sans-serif';
+      ctx.fillText(s.lbl, cx, cy+148); ctx.globalAlpha=1;
     });
-    // inner grid lines
     ctx.save(); ctx.globalAlpha=0.15; ctx.strokeStyle='#fff'; ctx.lineWidth=1;
-    ctx.beginPath(); ctx.moveTo(W/2,y+15); ctx.lineTo(W/2,y+rowH*2-15); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(W/2,y+12); ctx.lineTo(W/2,y+rowH*2-12); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(pad,y+rowH); ctx.lineTo(W-pad,y+rowH); ctx.stroke();
     ctx.restore();
-    y += rowH*2 + 30;
+    y += rowH*2 + 26;
 
     // ── Separator ──
-    line(ctx,pad,y,W-pad); y+=30;
+    line(ctx,pad,y,W-pad); y+=26;
+
+    // ── JOIN THE PEACE MOVEMENT (above map) ──
+    ctx.fillStyle='#fff'; ctx.textAlign='center';
+    ctx.font='bold 52px Nasalization,Arial,sans-serif';
+    ctx.fillText('JOIN THE PEACE MOVEMENT', W/2, y+52);
+    y += 80;
 
     // ── Real map snapshot ──
-    const mapH = 580;
+    const mapH = 520;
     if (mapImg) {
-      // Draw map with rounded corners
       ctx.save();
-      roundRect(ctx,pad,y,W-pad*2,mapH,24);
+      roundRect(ctx,pad,y,W-pad*2,mapH,22);
       ctx.clip();
-      // Draw the actual map, preserving aspect ratio, centered
       const ar = mapImg.width/mapImg.height;
       let dw=W-pad*2, dh=dw/ar;
       if(dh>mapH){dh=mapH; dw=dh*ar;}
-      const dx=W/2-dw/2, dy=y+(mapH-dh)/2;
-      ctx.drawImage(mapImg, dx, dy, dw, dh);
+      ctx.drawImage(mapImg, W/2-dw/2, y+(mapH-dh)/2, dw, dh);
       ctx.restore();
-      // Subtle border
-      ctx.save(); ctx.globalAlpha=0.3; ctx.strokeStyle='#fff'; ctx.lineWidth=2;
-      roundRect(ctx,pad,y,W-pad*2,mapH,24); ctx.stroke(); ctx.restore();
+      ctx.save(); ctx.globalAlpha=0.25; ctx.strokeStyle='#fff'; ctx.lineWidth=2;
+      roundRect(ctx,pad,y,W-pad*2,mapH,22); ctx.stroke(); ctx.restore();
     } else {
       ctx.save(); ctx.globalAlpha=0.1; ctx.fillStyle='#fff';
-      roundRect(ctx,pad,y,W-pad*2,mapH,24); ctx.fill(); ctx.restore();
+      roundRect(ctx,pad,y,W-pad*2,mapH,22); ctx.fill(); ctx.restore();
       ctx.fillStyle='rgba(255,255,255,0.4)'; ctx.textAlign='center';
-      ctx.font='32px Arial'; ctx.fillText('🗺', W/2, y+mapH/2+12);
+      ctx.font='36px Arial'; ctx.fillText('🗺', W/2, y+mapH/2+14);
     }
-    y += mapH + 40;
+    y += mapH + 32;
 
-    // ── Days since launch ──
-    ctx.fillStyle='#fff'; ctx.textAlign='center';
-    ctx.font='bold 110px Nasalization,Arial,sans-serif';
-    ctx.fillText(c.days, W/2, y+100);
-    ctx.globalAlpha=0.6; ctx.font='28px Nasalization,Arial,sans-serif';
-    ctx.fillText('DAYS SINCE LAUNCH', W/2, y+145); ctx.globalAlpha=1;
-    y += 200;
+    // ── Separator ──
+    line(ctx,pad,y,W-pad); y+=36;
 
-    // ── Footer ──
-    line(ctx,pad,y,W-pad); y+=50;
+    // ── QR code centré, couleurs inversées ──
+    const qrSize = 220;
+    const qrX = W/2 - qrSize/2;
+
+    // Rounded tile behind QR (dark background since QR modules are white)
+    ctx.save();
+    ctx.shadowColor='rgba(0,0,0,0.3)'; ctx.shadowBlur=24;
+    ctx.fillStyle='#0a3060';
+    roundRect(ctx, qrX-16, y-16, qrSize+32, qrSize+32, 20);
+    ctx.fill();
+    ctx.restore();
+
+    // QR code image
+    if (qrImg) {
+      ctx.drawImage(qrImg, qrX, y, qrSize, qrSize);
+    } else {
+      ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.font='bold 24px Arial';
+      ctx.fillText('nava-peace.app', W/2, y+qrSize/2+8);
+    }
+    y += qrSize + 50;
+
+    // ── nava-peace.app ──
     ctx.fillStyle='#fff'; ctx.textAlign='center';
-    ctx.font='bold 38px Nasalization,Arial,sans-serif';
-    ctx.fillText('🌐  nava-peace.app', W/2, y); y+=55;
-    ctx.globalAlpha=0.55; ctx.font='26px Nasalization,Arial,sans-serif';
-    ctx.fillText('#NavaPeace  #Peace  #ChoosePeace', W/2, y); y+=40;
-    ctx.globalAlpha=0.35; ctx.font='22px Nasalization,Arial,sans-serif';
-    ctx.fillText('JOIN THE PEACE MOVEMENT', W/2, y);
+    ctx.font='bold 40px Nasalization,Arial,sans-serif';
+    ctx.fillText('nava-peace.app', W/2, y); y+=50;
+
+    // ── Social handles (lisibles) ──
+    ctx.globalAlpha=0.7; ctx.font='30px Nasalization,Arial,sans-serif';
+    ctx.fillText('@nava.peace.world  ·  @NAVAPEACEWORLD', W/2, y); y+=46;
     ctx.globalAlpha=1;
+
+    // ── Hashtags ──
+    ctx.globalAlpha=0.45; ctx.font='26px Nasalization,Arial,sans-serif';
+    ctx.fillText('#NavaPeace  ·  #Peace  ·  #ChoosePeace', W/2, y);
+    ctx.globalAlpha=1;
+  }
+
+  // Helper: wrap text to fit maxWidth
+  function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+    const words = text.split(' ');
+    let line = '';
+    for (let i=0; i<words.length; i++) {
+      const test = line + words[i] + ' ';
+      if (ctx.measureText(test).width > maxWidth && i > 0) {
+        ctx.fillText(line.trim(), x, y);
+        line = words[i] + ' ';
+        y += lineHeight;
+      } else { line = test; }
+    }
+    ctx.fillText(line.trim(), x, y);
   }
 
   function line(ctx, x1, y, x2) {
