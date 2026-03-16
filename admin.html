@@ -1016,8 +1016,11 @@ async function loadVotes() {
   try {
     // Try with new columns first, fall back to old columns if they don't exist yet
     let COLS = 'user_uid,country,age,gender,created_at,referral_code,referred_by,source,telegram_id';
-    let _test = await sb.from('peace_votes').select(COLS).limit(1);
-    if (_test.error) COLS = 'user_uid,country,age,gender,created_at,referral_code,referred_by';
+    let _hasTgCols = true;
+    try {
+      let _test = await sb.from('peace_votes').select(COLS).limit(1);
+      if (_test.error) { COLS = 'user_uid,country,age,gender,created_at,referral_code,referred_by'; _hasTgCols = false; }
+    } catch(e) { COLS = 'user_uid,country,age,gender,created_at,referral_code,referred_by'; _hasTgCols = false; }
     const STEP = 1000;
 
     // 1. Nombre total de lignes (HEAD — aucune donnée transférée)
