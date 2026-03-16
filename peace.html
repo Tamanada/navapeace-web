@@ -34,6 +34,7 @@
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase_config.js"></script>
+  <script src="block_check.js"></script>
   <script src="lang.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous"></script>
   <style>
@@ -1201,8 +1202,46 @@
       await syncVotesToSupabase();
     }
 
+    // ── Sync streak + doves + refCode depuis Supabase au chargement ──
+    async function syncStreakFromDB() {
+      if (!sb) return;
+      const uid = localStorage.getItem('nava_peace_uid');
+      if (!uid) return;
+      try {
+        const {data:votes} = await sb.from('peace_votes').select('created_at, referral_code')
+          .eq('user_uid', uid).order('created_at',{ascending:false});
+        if (!votes || !votes.length) return;
+
+        // Total doves = nombre de votes
+        const totalDoves = votes.length;
+        localStorage.setItem('nava_peace_days', totalDoves);
+
+        // Streak = jours consécutifs
+        const dayNums = [...new Set(votes.map(v =>
+          Math.floor(new Date(v.created_at).getTime()/86400000)
+        ))].sort((a,b) => b - a);
+        const today = Math.floor(Date.now()/86400000);
+        let streak = 0;
+        if (dayNums[0] >= today - 1) {
+          streak = 1;
+          for (let i = 1; i < dayNums.length; i++) {
+            if (dayNums[i-1] - dayNums[i] === 1) streak++;
+            else break;
+          }
+        }
+        localStorage.setItem('nava_peace_streak', streak);
+
+        // Referral code — récupérer depuis la DB si absent du localStorage
+        const dbRef = votes.find(v => v.referral_code);
+        if (dbRef && dbRef.referral_code) {
+          localStorage.setItem('nava_peace_ref_code', dbRef.referral_code);
+        }
+      } catch(e) { console.warn('syncStreakFromDB error', e); }
+    }
+
     checkDone();
     loadCounters();
+    syncStreakFromDB(); // ← recalcul streak/doves/refCode depuis DB
     checkNotifications();
     initPush();
     initAndSync(); // ← sync offline votes au démarrage
