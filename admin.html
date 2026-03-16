@@ -1073,7 +1073,8 @@ async function loadVotes() {
       uid:u.user_uid, country:u.country||'', age:u.age||'',
       gender:normalizeGender(u.gender), days:votesCount.get(u.user_uid)||1,
       ref_code:u.referral_code||'', referred_by:referredByMap.get(u.user_uid)||u.referred_by||'',
-      source:u.source||'web', telegram_id:u.telegram_id||'',
+      source:(u.source && u.source!=='web') ? u.source : (u.user_uid && u.user_uid.startsWith('tg_') ? 'telegram' : 'web'),
+      telegram_id:u.telegram_id || (u.user_uid && u.user_uid.startsWith('tg_') ? u.user_uid.slice(3) : ''),
       registered:firstSeen.get(u.user_uid)||u.created_at,
       pseudo:''
     })).sort((a,b)=>b.days-a.days);
