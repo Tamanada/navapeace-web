@@ -1272,11 +1272,19 @@ function cfpToggleAll(key,checked){
 function cfpToggleVal(key,val,checked){
   const s=colFilters[key];
   const allVals=getColValues(key).map(x=>x.v);
-  if(s.size===0) allVals.forEach(v=>s.add(v)); // start from "all selected"
+  // If starting from "no filter" (empty = all), expand to explicit set first
+  if(s.size===0) allVals.forEach(v=>s.add(v));
   checked?s.add(val):s.delete(val);
-  if(s.size===allVals.length) s.clear(); // all selected = no filter
+  // If all are selected again, clear = no filter
+  if(s.size===allVals.length) s.clear();
+  // Update "Select All" checkbox + individual checkboxes in popup
   const allCb=document.getElementById('cfp-all');
-  if(allCb) allCb.checked=s.size===0;
+  const isAll=s.size===0;
+  if(allCb) allCb.checked=isAll;
+  // Sync individual checkboxes: when "all" (s empty), all checked; otherwise only those in s
+  document.querySelectorAll('#col-filter-popup .cfp-item[data-label] input').forEach(cb=>{
+    cb.checked=isAll||s.has(cb.value);
+  });
   applyFilters();
 }
 
