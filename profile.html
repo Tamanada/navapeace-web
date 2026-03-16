@@ -1872,8 +1872,8 @@
     var smsURL = 'sms:?body=' + msg;
     document.getElementById('share-sms').href = smsURL;
 
-    // Messenger share – open messenger.com with pre-filled message
-    var messengerURL = 'https://www.messenger.com/new?text=' + encodeURIComponent('The world talks about peace. Let\'s practice it. 🕊 ' + inviteURL);
+    // Messenger share – use m.me deep link (opens Messenger app on mobile)
+    var messengerURL = 'https://m.me/?text=' + encodeURIComponent('The world talks about peace. Let\'s practice it. 🕊 ' + inviteURL);
     var msgrBtn = document.getElementById('share-msngr');
     msgrBtn.href = messengerURL;
     msgrBtn.target = '_blank';
