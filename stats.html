@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en" data-module="module_stats">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.amcharts.com https://telegram.org; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.myshopify.com; frame-ancestors 'none';" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NAVA PEACE – Stats</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="apple-touch-icon" href="favicon.png" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="telegram.js"></script>
+  <script src="module_gate.js"></script>
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://nava-peace.app/stats.html" />
+  <meta property="og:title" content="NAVA PEACE – Global Stats" />
+  <meta property="og:description" content="The world talks about peace. Let's practice it. Join NAVA PEACE today and vote for peace every day." />
+  <meta property="og:image" content="https://nava-peace.app/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="NAVA PEACE Logo" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://nava-peace.app/og-image.png" />
+  <style>
+    @font-face {
+      font-family: 'Nasalization';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('nasalization.woff') format('woff');
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase_config.js"></script>
+  <script src="block_check.js"></script>
+  <script src="lang.js"></script>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box; margin: 0; padding: 0;
+      font-family: 'Nasalization', Arial, sans-serif;
+    }
+
+    body {
+      font-family: 'Nasalization', Arial, sans-serif;
+      background: radial-gradient(ellipse at 50% 30%, #6DD5F5 0%, #3AACDF 45%, #1E8EC4 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px 110px;
+      color: #fff;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .header img {
+      width: 56px; height: 56px;
+      object-fit: contain;
+      filter: drop-shadow(0 3px 10px rgba(255,255,255,0.4));
+      margin-bottom: 6px;
+    }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 400;
+      letter-spacing: 7px;
+      text-shadow: 0 1px 16px rgba(255,255,255,0.4);
+    }
+    .header .tagline {
+      font-size: 14px;
+      letter-spacing: 3.5px;
+      color: #F0EDE4;
+      opacity: 0.8;
+      margin-top: 4px;
+    }
+
+    /* ── CARD ── */
+    .card {
+      width: 100%;
+      max-width: 600px;
+      background: rgba(247,247,241,0.12);
+      border: 1.5px solid rgba(255,255,255,0.35);
+      border-radius: 20px;
+      padding: 16px 20px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 8px 40px rgba(20,80,130,0.2);
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    /* ── STAT COUNTERS GRID ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stat-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 14px;
+      padding: 12px 10px;
+    }
+
+    .stat-box .stat-val {
+      font-size: 32px;
+      letter-spacing: 1px;
+      color: #fff;
+      text-shadow: 0 0 20px rgba(255,255,255,0.4);
+      line-height: 1;
+    }
+
+    .stat-box .stat-label {
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+    }
+
+    /* ── BARS ── */
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .bar-label {
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.75);
+      width: 55px;
+      flex-shrink: 0;
+      text-align: right;
+    }
+    .bar-track {
+      flex: 1;
+      height: 16px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      background: rgba(255,255,255,0.75);
+      border-radius: 8px;
+      transition: width 1s ease;
+      width: 0%;
+    }
+    .bar-count {
+      font-size: 12px;
+      letter-spacing: 1px;
+      color: #fff;
+      width: 32px;
+      flex-shrink: 0;
+      text-align: left;
+    }
+
+    /* ── GENDER PILLS ── */
+    .gender-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .gender-pill {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 12px;
+      padding: 8px 16px;
+      min-width: 90px;
+    }
+    .gender-pill .pct {
+      font-size: 22px;
+      letter-spacing: 1px;
+      color: #fff;
+    }
+    .gender-pill .lbl {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.6);
+    }
+
+    /* ── TOP COUNTRIES ── */
+    .country-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .country-rank {
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      width: 18px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .country-name {
+      font-size: 12px;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.85);
+      flex: 1;
+      text-transform: uppercase;
+    }
+    .country-count {
+      font-size: 13px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .country-bar {
+      flex: 1;
+      max-width: 120px;
+      height: 10px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .country-bar-fill {
+      height: 100%;
+      background: rgba(255,255,255,0.6);
+      border-radius: 5px;
+      transition: width 1s ease;
+    }
+
+    .no-data {
+      text-align: center;
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.45);
+      padding: 8px 0;
+    }
+
+    /* ── BOTTOM NAV ── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background: rgba(20, 90, 140, 0.82);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,0.2);
+      padding: 10px 0 24px;
+      z-index: 200;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      text-decoration: none;
+      color: rgba(255,255,255,0.45);
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-item.active { color: #fff; }
+    .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <img src="logo.png" alt="NAVA PEACE" />
+    <h1>NAVA PEACE</h1>
+    <p class="tagline" data-i18n="stats_tagline">GLOBAL STATS</p>
+  </div>
+
+  <!-- COUNTERS -->
+  <div class="card">
+    <p class="section-title" data-i18n="stats_overview">OVERVIEW</p>
+    <div class="stats-grid">
+      <div class="stat-box">
+        <span class="stat-val" id="st-total">–</span>
+        <span class="stat-label" data-i18n="stats_total_votes">TOTAL VOTES</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-val" id="st-today">–</span>
+        <span class="stat-label" data-i18n="stats_today">TODAY</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-val" id="st-countries">–</span>
+        <span class="stat-label" data-i18n="stats_countries">COUNTRIES</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-val" id="st-users">–</span>
+        <span class="stat-label" data-i18n="stats_users">USERS</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOP COUNTRIES -->
+  <div class="card">
+    <p class="section-title" data-i18n="stats_top_countries">TOP COUNTRIES</p>
+    <div id="top-countries">
+      <p class="no-data">LOADING...</p>
+    </div>
+  </div>
+
+  <!-- GENDER -->
+  <div class="card">
+    <p class="section-title" data-i18n="section_gender">GENDER DISTRIBUTION</p>
+    <div class="gender-row" id="gender-pills">
+      <p class="no-data">LOADING...</p>
+    </div>
+  </div>
+
+  <!-- AGE -->
+  <div class="card">
+    <p class="section-title" data-i18n="section_age">AGE DISTRIBUTION</p>
+    <div id="age-bars">
+      <p class="no-data">LOADING...</p>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="peace.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="12" y1="3" x2="12" y2="21" stroke="currentColor" stroke-width="1.8"/><line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>
+      <span data-i18n="nav_peace">PEACE</span>
+    </a>
+    <a href="map.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
+      <span data-i18n="nav_map">MAP</span>
+    </a>
+    <a href="stats.html" class="nav-item active">
+      <svg viewBox="0 0 24 24"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/></svg>
+      <span data-i18n="nav_stats">STATS</span>
+    </a>
+    <a href="market.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm0 10c-1.66 0-3-1.34-3-3h2c0 .55.45 1 1 1s1-.45 1-1h2c0 1.66-1.34 3-3 3z"/></svg>
+      <span data-i18n="nav_market">MARKET</span>
+    </a>
+    <a href="profile.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+      <span data-i18n="nav_profile">PROFILE</span>
+    </a>
+    <a href="about.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="12" y1="11" x2="12" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="7.5" r="1.2" fill="currentColor"/></svg>
+      <span data-i18n="nav_about">ABOUT</span>
+    </a>
+  </nav>
+
+  <script>
+    const TODAY = new Date().toISOString().split('T')[0];
+    let sb = null;
+    try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }
+    catch(e) { console.warn('Supabase init failed', e); }
+
+    // ── OVERVIEW COUNTERS ──
+    async function loadOverview() {
+      if (!sb) return;
+      try {
+        const d = new Date(); d.setUTCDate(d.getUTCDate() + 1);
+        const TOMORROW = d.toISOString().split('T')[0];
+
+        const [totalR, todayR, usersR] = await Promise.all([
+          sb.from('peace_votes').select('*', { count: 'exact', head: true }),
+          sb.from('peace_votes').select('*', { count: 'exact', head: true })
+            .gte('created_at', TODAY + 'T00:00:00Z')
+            .lt('created_at', TOMORROW + 'T00:00:00Z'),
+          sb.from('peace_messages').select('*', { count: 'exact', head: true }),
+        ]);
+
+        document.getElementById('st-total').textContent = (totalR.count ?? 0).toLocaleString('fr-FR');
+        document.getElementById('st-today').textContent = '+' + (todayR.count ?? 0).toLocaleString('fr-FR');
+        document.getElementById('st-users').textContent = (usersR.count ?? 0).toLocaleString('fr-FR');
+      } catch(e) { console.warn('Overview error', e); }
+
+      // Countries count (distinct)
+      try {
+        const { data } = await sb.from('peace_votes').select('country');
+        if (data) {
+          const unique = new Set(data.map(r => (r.country || '').toUpperCase().trim()).filter(Boolean));
+          document.getElementById('st-countries').textContent = unique.size;
+        }
+      } catch(e) { console.warn('Countries count error', e); }
+    }
+
+    // ── TOP COUNTRIES ──
+    async function loadTopCountries() {
+      if (!sb) return;
+      const container = document.getElementById('top-countries');
+      try {
+        const { data } = await sb.from('peace_votes').select('country');
+        if (!data || !data.length) { container.innerHTML = '<p class="no-data">NO DATA YET</p>'; return; }
+
+        const counts = {};
+        data.forEach(r => {
+          const c = (r.country || '').toUpperCase().trim();
+          if (c) counts[c] = (counts[c] || 0) + 1;
+        });
+
+        const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+        const max = sorted[0] ? sorted[0][1] : 1;
+
+        container.innerHTML = sorted.map(([name, count], i) => `
+          <div class="country-row">
+            <span class="country-rank">${i + 1}</span>
+            <span class="country-name">${name}</span>
+            <div class="country-bar">
+              <div class="country-bar-fill" style="width:${Math.round(count/max*100)}%"></div>
+            </div>
+            <span class="country-count">${count}</span>
+          </div>`).join('');
+      } catch(e) { container.innerHTML = '<p class="no-data">ERROR</p>'; }
+    }
+
+    // ── AGE & GENDER ──
+    const AGE_GROUPS = [
+      { label: '≤17',   min: 0,   max: 17  },
+      { label: '18-24', min: 18,  max: 24  },
+      { label: '25-34', min: 25,  max: 34  },
+      { label: '35-49', min: 35,  max: 49  },
+      { label: '50-64', min: 50,  max: 64  },
+      { label: '65+',   min: 65,  max: 999 },
+    ];
+
+    async function loadDemographics() {
+      if (!sb) return;
+      let data = [];
+      try {
+        const { data: rows, error } = await sb
+          .from('peace_votes')
+          .select('age, gender')
+          .not('country', 'is', null);
+        if (!error && rows) data = rows;
+      } catch(e) { console.warn('Demographics error', e); }
+
+      renderAge(data);
+      renderGender(data);
+    }
+
+    function renderAge(data) {
+      const withAge = data.filter(r => r.age && r.age > 0);
+      const container = document.getElementById('age-bars');
+      if (withAge.length === 0) {
+        container.innerHTML = '<p class="no-data" data-i18n="no_age_data">NO AGE DATA YET</p>'; return;
+      }
+      const counts = AGE_GROUPS.map(g => ({
+        label: g.label,
+        count: withAge.filter(r => r.age >= g.min && r.age <= g.max).length
+      }));
+      const max = Math.max(...counts.map(c => c.count), 1);
+      container.innerHTML = counts.map(c => `
+        <div class="bar-row">
+          <span class="bar-label">${c.label}</span>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:${Math.round(c.count/max*100)}%"></div>
+          </div>
+          <span class="bar-count">${c.count}</span>
+        </div>`).join('');
+    }
+
+    function normalizeGender(g) {
+      const v = (g || '').toLowerCase().trim();
+      if (v === 'male'   || v === 'm' || v === 'homme') return 'MALE';
+      if (v === 'female' || v === 'f' || v === 'femme') return 'FEMALE';
+      return null;
+    }
+
+    function renderGender(data) {
+      const container = document.getElementById('gender-pills');
+      const groups = { MALE: 0, FEMALE: 0 };
+      data.forEach(r => {
+        const n = normalizeGender(r.gender);
+        if (n) groups[n]++;
+      });
+      const total = groups.MALE + groups.FEMALE;
+      if (total === 0) {
+        container.innerHTML = '<p class="no-data" data-i18n="no_gender_data">NO GENDER DATA YET</p>'; return;
+      }
+      container.innerHTML = Object.entries(groups)
+        .filter(([, count]) => count > 0)
+        .sort((a, b) => b[1] - a[1])
+        .map(([label, count]) => `
+          <div class="gender-pill">
+            <span class="pct">${Math.round(count / total * 100)}%</span>
+            <span class="lbl">${label}</span>
+          </div>`).join('');
+    }
+
+    // ── INIT ──
+    loadOverview();
+    loadTopCountries();
+    loadDemographics();
+
+    if (typeof applyLang === 'function') applyLang(detectLang());
+  </script>
+</body>
+</html>
