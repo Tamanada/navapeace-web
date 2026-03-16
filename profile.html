@@ -1872,16 +1872,35 @@
     var smsURL = 'sms:?body=' + msg;
     document.getElementById('share-sms').href = smsURL;
 
-    // Messenger share – use m.me deep link (opens Messenger app on mobile)
-    var messengerURL = 'https://m.me/?text=' + encodeURIComponent('The world talks about peace. Let\'s practice it. 🕊 ' + inviteURL);
+    // Messenger share – copy message to clipboard then open Messenger contact picker
+    var msgrText = 'The world talks about peace. Let\'s practice it. 🕊\nJoin NAVA PEACE today.\n' + inviteURL;
     var msgrBtn = document.getElementById('share-msngr');
-    msgrBtn.href = messengerURL;
-    msgrBtn.target = '_blank';
+    msgrBtn.href = '#';
     msgrBtn.onclick = function(e) {
-      if (NAVA_TG.isTelegram) {
-        e.preventDefault();
-        Telegram.WebApp.openLink(messengerURL);
-      }
+      e.preventDefault();
+      // Copy invite message to clipboard
+      navigator.clipboard.writeText(msgrText).then(function() {
+        // Show brief toast
+        var toast = document.createElement('div');
+        toast.textContent = '✓ Message copied! Paste it in Messenger';
+        toast.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.85);color:#fff;padding:14px 24px;border-radius:12px;font-size:14px;z-index:99999;text-align:center;';
+        document.body.appendChild(toast);
+        setTimeout(function() { toast.remove(); }, 2500);
+        // Open Messenger app
+        var openURL = 'https://m.me/';
+        if (NAVA_TG.isTelegram) {
+          Telegram.WebApp.openLink(openURL);
+        } else {
+          window.open(openURL, '_blank');
+        }
+      }).catch(function() {
+        // Clipboard failed – just open messenger
+        if (NAVA_TG.isTelegram) {
+          Telegram.WebApp.openLink('https://m.me/');
+        } else {
+          window.open('https://m.me/', '_blank');
+        }
+      });
     };
 
     // Facebook share
