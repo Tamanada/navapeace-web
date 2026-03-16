@@ -1048,7 +1048,7 @@ async function loadVotes() {
     // Cas particulier : referred_by peut être absent du 1er vote si l'user
     // a cliqué un lien de référence après son inscription → referredByMap garde
     // le 1er referred_by non-null rencontré (= le plus récent, en DESC).
-    const usersMap=new Map(), votesCount=new Map(), firstSeen=new Map(), referredByMap=new Map();
+    const usersMap=new Map(), votesCount=new Map(), firstSeen=new Map(), referredByMap=new Map(), votedTodaySet=new Set();
     for(const v of votes) {
       if(!v.user_uid) continue;
       votesCount.set(v.user_uid,(votesCount.get(v.user_uid)||0)+1);
@@ -1060,7 +1060,8 @@ async function loadVotes() {
 
     // Stats
     const today=new Date().toISOString().slice(0,10);
-    const todayVotes=votes.filter(v=>v.created_at?.startsWith(today)).length;
+    votes.forEach(v=>{ if(v.created_at?.startsWith(today)&&v.user_uid) votedTodaySet.add(v.user_uid); });
+    const todayVotes=votedTodaySet.size>0?votes.filter(v=>v.created_at?.startsWith(today)).length:0;
     const countries=new Set(votes.map(v=>v.country).filter(Boolean)).size;
 
     document.getElementById('stat-users').textContent=fmt(usersMap.size);
@@ -1076,6 +1077,7 @@ async function loadVotes() {
       source:(u.source && u.source!=='web') ? u.source : (u.user_uid && u.user_uid.startsWith('tg_') ? 'telegram' : 'web'),
       telegram_id:u.telegram_id || (u.user_uid && u.user_uid.startsWith('tg_') ? u.user_uid.slice(3) : ''),
       registered:firstSeen.get(u.user_uid)||u.created_at,
+      votedToday:votedTodaySet.has(u.user_uid),
       pseudo:''
     })).sort((a,b)=>b.days-a.days);
 
@@ -1203,7 +1205,7 @@ function renderUsersTable() {
   document.getElementById('users-tbody').innerHTML=filteredUsers.map((u,i)=>`
     <tr style="cursor:pointer;" onclick="openUserDrawer('${u.uid}')">
       <td class="crown-cell">${adminUsersMap.has(u.uid)?'👑':''}</td>
-      <td style="color:var(--w40);font-size:9px;">${i+1}</td>
+      <td style="font-size:9px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${u.votedToday?'#4caf50':'#ef5350'};margin-right:4px;vertical-align:middle;" title="${u.votedToday?'Voted today':'Not voted today'}"></span>${i+1}</td>
       <td class="uid-cell" title="Click row to manage user">${u.uid.slice(0,14)}…</td>
       <td style="font-size:10px;letter-spacing:1px;color:#fff;font-weight:500;">${u.pseudo||'<span style="color:var(--w40);">—</span>'}</td>
       <td>${statusBadge(u.uid)}</td>
