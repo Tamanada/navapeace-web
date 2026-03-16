@@ -1316,16 +1316,32 @@ function cfpToggleAll(key,checked){
 function cfpToggleVal(key,val,checked){
   const s=colFilters[key];
   const allVals=getColValues(key).map(x=>x.v);
-  // If starting from "no filter" (empty = all), expand to explicit set first
-  if(s.size===0) allVals.forEach(v=>s.add(v));
-  checked?s.add(val):s.delete(val);
-  // If all are selected again, clear = no filter
-  if(s.size===allVals.length) s.clear();
-  // Update "Select All" checkbox + individual checkboxes in popup
+  if(checked){
+    // Adding a value
+    if(s.size===0){
+      // Was "all" (no filter) — switching to single selection means we want ONLY this one
+      // Don't expand — just add the checked one
+      s.add(val);
+    } else {
+      s.add(val);
+      // If all are selected again, clear = no filter
+      if(s.size>=allVals.length) s.clear();
+    }
+  } else {
+    // Removing a value
+    if(s.size===0){
+      // Was "all" — expand to explicit set, then remove
+      allVals.forEach(v=>s.add(v));
+    }
+    s.delete(val);
+    // If nothing left, reset to all
+    if(s.size===0) { /* stays empty = all */ }
+  }
+  // Update "Select All" checkbox
   const allCb=document.getElementById('cfp-all');
   const isAll=s.size===0;
   if(allCb) allCb.checked=isAll;
-  // Sync individual checkboxes: when "all" (s empty), all checked; otherwise only those in s
+  // Sync individual checkboxes
   document.querySelectorAll('#col-filter-popup .cfp-item[data-label] input').forEach(cb=>{
     cb.checked=isAll||s.has(cb.value);
   });
