@@ -2098,6 +2098,9 @@ function applyLang(lang) {
 
   // Close menu if open
   closeLangMenu();
+
+  // Update daily quote if the page has one
+  if (typeof updateDailyQuote === 'function') updateDailyQuote(lang);
 }
 
 // ── Language picker widget ────────────────────────────────────────────
