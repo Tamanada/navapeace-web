@@ -32,6 +32,7 @@
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase_config.js"></script>
+  <script src="block_check.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="lang.js"></script>
   <style>
@@ -47,7 +48,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 28px 16px 110px;
+      padding: 20px 16px 110px;
       color: #fff;
     }
 
@@ -56,25 +57,25 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
     }
 
     .header img {
-      width: 72px; height: 72px;
+      width: 56px; height: 56px;
       object-fit: contain;
       filter: drop-shadow(0 3px 10px rgba(255,255,255,0.4));
-      margin-bottom: 10px;
+      margin-bottom: 6px;
     }
 
     .header h1 {
-      font-size: 36px;
+      font-size: 28px;
       font-weight: 400;
       letter-spacing: 7px;
       text-shadow: 0 1px 16px rgba(255,255,255,0.4);
     }
 
     .header .tagline {
-      font-size: 16px;
+      font-size: 14px;
       letter-spacing: 3.5px;
       color: #F0EDE4;
       opacity: 0.8;
@@ -87,20 +88,20 @@
       max-width: 600px;
       background: rgba(247,247,241,0.12);
       border: 1.5px solid rgba(255,255,255,0.35);
-      border-radius: 24px;
-      padding: 24px 28px;
+      border-radius: 20px;
+      padding: 16px 20px;
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       box-shadow: 0 8px 40px rgba(20,80,130,0.2);
-      margin-bottom: 20px;
+      margin-bottom: 14px;
     }
 
     .section-title {
-      font-size: 13px;
+      font-size: 12px;
       letter-spacing: 3px;
       text-transform: uppercase;
       color: rgba(255,255,255,0.6);
-      margin-bottom: 20px;
+      margin-bottom: 12px;
       text-align: center;
     }
 
@@ -108,8 +109,8 @@
     .bar-row {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 14px;
+      gap: 10px;
+      margin-bottom: 10px;
     }
 
     .bar-label {
@@ -124,7 +125,7 @@
 
     .bar-track {
       flex: 1;
-      height: 22px;
+      height: 18px;
       background: rgba(255,255,255,0.1);
       border-radius: 11px;
       overflow: hidden;
@@ -159,16 +160,16 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       background: rgba(255,255,255,0.12);
       border: 1px solid rgba(255,255,255,0.3);
-      border-radius: 16px;
-      padding: 14px 20px;
-      min-width: 110px;
+      border-radius: 14px;
+      padding: 10px 16px;
+      min-width: 100px;
     }
 
     .gender-pill .pct {
-      font-size: 28px;
+      font-size: 24px;
       letter-spacing: 1px;
       color: #fff;
     }
@@ -185,18 +186,18 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 2px;
     }
 
     .dove-icon {
-      font-size: 44px;
+      font-size: 32px;
       line-height: 1;
       filter: brightness(0) invert(1) drop-shadow(0 0 14px rgba(255,255,255,0.5));
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
 
     .dove-total {
-      font-size: 72px;
+      font-size: 52px;
       letter-spacing: 2px;
       color: #fff;
       text-shadow: 0 0 30px rgba(255,255,255,0.5);
@@ -204,11 +205,11 @@
     }
 
     .dove-label {
-      font-size: 14px;
+      font-size: 12px;
       letter-spacing: 3px;
       text-transform: uppercase;
       color: rgba(255,255,255,0.5);
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
 
     .dove-breakdown {
@@ -218,7 +219,7 @@
       align-items: center;
       width: 100%;
       border-top: 1px solid rgba(255,255,255,0.15);
-      padding-top: 16px;
+      padding-top: 10px;
     }
 
     .dove-part {
@@ -230,7 +231,7 @@
     }
 
     .dove-part .num {
-      font-size: 26px;
+      font-size: 22px;
       letter-spacing: 1px;
       color: rgba(255,255,255,0.9);
     }
@@ -245,7 +246,7 @@
 
     .dove-divider {
       width: 1px;
-      height: 44px;
+      height: 34px;
       background: rgba(255,255,255,0.18);
       flex-shrink: 0;
       margin: 0 10px;
@@ -262,13 +263,13 @@
     .my-badge {
       background: rgba(255,255,255,0.15);
       border: 1.5px solid rgba(255,255,255,0.4);
-      border-radius: 14px;
-      padding: 12px 20px;
+      border-radius: 12px;
+      padding: 8px 16px;
       text-align: center;
     }
 
     .my-badge .val {
-      font-size: 24px;
+      font-size: 20px;
       letter-spacing: 1px;
       color: #fff;
     }
@@ -295,7 +296,7 @@
       align-items: center;
       justify-content: center;
       gap: 14px;
-      margin-bottom: 20px;
+      margin-bottom: 12px;
     }
 
     .card-header .section-title { margin-bottom: 0; }
