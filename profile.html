@@ -1058,7 +1058,7 @@
 
   <!-- STREAK PROGRESS -->
   <div class="card" id="streak-card" style="display:none;">
-    <p class="section-title">🔥 PEACE STREAK</p>
+    <p class="section-title" data-i18n="streak_title">🔥 PEACE STREAK</p>
     <div id="streak-progress-inner"></div>
   </div>
 
@@ -1226,7 +1226,7 @@
         <span style="font-size:22px;filter:brightness(0) invert(1);">🔥</span>
         <span style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.85);font-family:Nasalization,Arial,sans-serif;">
           <span id="dove-streak" style="font-size:22px;font-weight:700;color:#fff;">0</span>
-          <span data-i18n="streak_lbl" style="margin-left:6px;">DAYS IN A ROW</span>
+          <span data-i18n="streak_days_row" style="margin-left:6px;">DAYS IN A ROW</span>
         </span>
       </div>
 
@@ -1636,11 +1636,11 @@
     card.style.display = 'block';
 
     const MILESTONES = [
-      { days:7,  icon:'🌱', name:'SEEDLING',  reward:'Peace Seedling Badge' },
-      { days:14, icon:'🕊', name:'KEEPER',    reward:'Peace Keeper Badge'   },
-      { days:21, icon:'⭐', name:'WARRIOR',   reward:'Peace Warrior Badge'  },
-      { days:28, icon:'🌟', name:'CHAMPION',  reward:'Peace Champion Badge' },
-      { days:30, icon:'🏆', name:'LEGEND',    reward:'Peace Legend Badge'   },
+      { days:7,  icon:'🌱', key:'streak_seedling' },
+      { days:14, icon:'🕊', key:'streak_keeper'   },
+      { days:21, icon:'⭐', key:'streak_warrior'  },
+      { days:28, icon:'🌟', key:'streak_champion' },
+      { days:30, icon:'🏆', key:'streak_legend'   },
     ];
 
     // Trouver la barre active
@@ -1657,6 +1657,7 @@
     const pct        = Math.round(((barCurrent - barStart) / (barEnd - barStart)) * 100);
     const daysLeft   = barEnd - streak;
     const done       = streak >= barEnd;
+    const _du        = t('streak_days_unit');
 
     // Milestones row
     const msHTML = MILESTONES.map(m => {
@@ -1665,24 +1666,24 @@
       return `<div class="streak-milestone ${isDone?'done':''} ${isActive?'active':''}">
         <span class="ms-icon">${m.icon}</span>
         <span class="ms-days">${m.days}</span>
-        <span class="ms-name">${m.name}</span>
+        <span class="ms-name">${t(m.key)}</span>
       </div>`;
     }).join('');
 
     // Message suivant objectif
     const nextMsg = streak >= 30
-      ? `<div class="streak-next-msg">🏆 <strong>PEACE LEGEND</strong> — You've reached the ultimate level!</div>`
-      : `<div class="streak-next-msg">${daysLeft} more day${daysLeft>1?'s':''} to unlock <strong>${currentTarget.name}</strong></div>`;
+      ? `<div class="streak-next-msg">${t('streak_legend_msg')}</div>`
+      : `<div class="streak-next-msg">${tParam('streak_unlock',{n:daysLeft})} <strong>${t(currentTarget.key)}</strong></div>`;
 
     inner.innerHTML = `
       <div class="streak-header">
         <span class="streak-num">${streak}</span>
-        <span class="streak-unit">DAYS IN A ROW</span>
+        <span class="streak-unit">${t('streak_days_row')}</span>
       </div>
       <div class="streak-bar-wrap">
         <div class="streak-bar-label">
-          <span>${barStart} DAYS</span>
-          <span>${barEnd} DAYS</span>
+          <span>${barStart} ${_du}</span>
+          <span>${barEnd} ${_du}</span>
         </div>
         <div class="streak-bar-track">
           <div class="streak-bar-fill" id="streak-fill" style="width:0%"></div>
