@@ -33,6 +33,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase_config.js"></script>
   <script src="lang.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous"></script>
   <style>
     *, *::before, *::after {
       box-sizing: border-box; margin: 0; padding: 0;
@@ -456,7 +457,7 @@
       <div id="inspo-bar" style="height:100%;background:rgba(255,255,255,0.75);width:100%;border-radius:2px;"></div>
     </div>
     <!-- SHARE BUTTON -->
-    <button id="inspo-share-btn" onclick="event.stopPropagation();shareInstagram()"
+    <button id="inspo-share-btn" onclick="event.stopPropagation();openShareOverlay()"
       style="display:flex;align-items:center;gap:8px;
              background:rgba(255,255,255,0.18);border:1.5px solid rgba(255,255,255,0.4);
              border-radius:28px;color:#fff;font-family:Nasalization,Arial,sans-serif;
@@ -470,6 +471,46 @@
       SHARE
     </button>
     <p style="font-size:7px;letter-spacing:3px;color:rgba(255,255,255,0.3);font-family:Nasalization,Arial,sans-serif;">TAP ANYWHERE TO CONTINUE</p>
+  </div>
+
+  <!-- ══ SHARE PROGRESS CARD OVERLAY ════════════════════════ -->
+  <div id="share-overlay" style="display:none;position:fixed;inset:0;z-index:500;
+       background:rgba(8,30,65,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+       overflow-y:auto;overflow-x:hidden;">
+    <button onclick="closeShareOverlay()" style="position:fixed;top:18px;right:18px;z-index:502;
+         width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.25);
+         background:rgba(255,255,255,0.08);color:#fff;font-size:16px;cursor:pointer;
+         display:flex;align-items:center;justify-content:center;">&#10005;</button>
+    <div style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:center;
+         gap:36px;padding:50px 24px 40px;min-height:100vh;">
+      <!-- Story preview frame -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;">
+        <p style="font-size:7px;letter-spacing:3.5px;color:rgba(255,255,255,0.4);margin:0;text-transform:uppercase;">Preview</p>
+        <div style="aspect-ratio:9/16;height:min(60vh,480px);border-radius:18px;overflow:hidden;
+             box-shadow:0 8px 40px rgba(0,0,0,0.35);border:2px solid rgba(255,255,255,0.08);">
+          <canvas id="share-canvas" width="1080" height="1920" style="width:100%;height:100%;display:block;"></canvas>
+        </div>
+        <p style="font-size:7px;letter-spacing:2px;color:rgba(255,255,255,0.3);margin:0;text-transform:uppercase;">Instagram Story &middot; 9:16</p>
+      </div>
+      <!-- Share buttons panel -->
+      <div style="display:flex;flex-direction:column;gap:12px;width:260px;padding-top:28px;">
+        <div style="text-align:center;margin-bottom:4px;">
+          <p style="font-size:8px;letter-spacing:3px;color:rgba(255,255,255,0.45);margin:0 0 4px;">SHARE</p>
+          <p style="font-family:Nasalization,Arial,sans-serif;font-size:14px;letter-spacing:3.5px;color:#fff;margin:0;font-weight:300;">MY PROGRESS</p>
+        </div>
+        <button onclick="shareProgressIG()" style="width:100%;padding:14px 18px;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);border:none;border-radius:14px;color:#fff;font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="none" stroke="white" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="white" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.5"/></svg>
+          SHARE ON INSTAGRAM
+        </button>
+        <button onclick="shareProgressX()" style="width:100%;padding:14px 18px;background:#14171a;border:1.5px solid rgba(255,255,255,0.12);border-radius:14px;color:#fff;font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          POST ON X
+        </button>
+        <button onclick="downloadProgress()" style="width:100%;padding:12px 18px;background:transparent;border:1.5px solid rgba(255,255,255,0.18);border-radius:14px;color:rgba(255,255,255,0.6);font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:3px;cursor:pointer;">
+          &darr; DOWNLOAD IMAGE
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- BOTTOM NAV -->
@@ -812,120 +853,219 @@
       }, 400);
     }
 
-    // ── INSTAGRAM SHARE ──────────────────────────────────────────────────
-    async function generateShareCard() {
-      const canvas  = document.createElement('canvas');
-      canvas.width  = 1080;
-      canvas.height = 1080;
-      const ctx     = canvas.getContext('2d');
-
-      // Background gradient
-      const grad = ctx.createRadialGradient(540, 200, 0, 540, 200, 850);
-      grad.addColorStop(0,   '#6DD5F5');
-      grad.addColorStop(0.5, '#3AACDF');
-      grad.addColorStop(1,   '#1470A0');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, 1080, 1080);
-
-      // Subtle vignette
-      const vig = ctx.createRadialGradient(540, 540, 300, 540, 540, 760);
-      vig.addColorStop(0, 'rgba(0,0,0,0)');
-      vig.addColorStop(1, 'rgba(0,0,0,0.22)');
-      ctx.fillStyle = vig;
-      ctx.fillRect(0, 0, 1080, 1080);
-
-      // Logo (white)
-      await new Promise(res => {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = () => {
-          const tmp = document.createElement('canvas');
-          tmp.width = tmp.height = 200;
-          const tc = tmp.getContext('2d');
-          tc.filter = 'brightness(0) invert(1)';
-          tc.drawImage(img, 0, 0, 200, 200);
-          ctx.drawImage(tmp, 440, 140, 200, 200);
-          res();
-        };
-        img.onerror = res;
-        img.src = 'logo.png';
+    // ── PROGRESS SHARE CARD ────────────────────────────────────────────
+    // Canvas helpers
+    function _loadImg(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image(); img.crossOrigin='anonymous';
+        img.onload=()=>resolve(img); img.onerror=reject; img.src=src;
       });
+    }
+    function _rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+    function _line(ctx,x1,y,x2){ctx.save();ctx.globalAlpha=0.22;ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x1,y);ctx.lineTo(x2,y);ctx.stroke();ctx.restore();}
 
-      // NAVA PEACE
-      ctx.fillStyle = '#ffffff';
-      ctx.textAlign  = 'center';
-      ctx.font = '700 76px Arial, sans-serif';
-      ctx.fillText('NAVA  PEACE', 540, 430);
-
-      // Divider
-      ctx.fillStyle = 'rgba(255,255,255,0.3)';
-      ctx.fillRect(390, 458, 300, 1.5);
-
-      // Quote
-      const { q } = getTodayQuote();
-      ctx.fillStyle = 'rgba(255,255,255,0.9)';
-      ctx.font = 'italic 32px Georgia, serif';
-      const words = ('\u201C' + q + '\u201D').split(' ');
-      let line = '', lines = [], maxW = 780;
-      for (const w of words) {
-        const test = line + (line ? ' ' : '') + w;
-        if (ctx.measureText(test).width > maxW && line) { lines.push(line); line = w; }
-        else line = test;
-      }
-      if (line) lines.push(line);
-      lines.slice(0, 4).forEach((l, i) => ctx.fillText(l, 540, 530 + i * 46));
-
-      // Dove count
-      const days = parseInt(localStorage.getItem('nava_peace_days') || '1');
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '700 110px Arial, sans-serif';
-      ctx.fillText(days, 540, 740);
-      ctx.font = '500 26px Arial, sans-serif';
-      ctx.fillStyle = 'rgba(255,255,255,0.7)';
-      ctx.fillText('ACTIONS FOR PEACE', 540, 785);
-
-      // "I CHOSE PEACE TODAY"
-      ctx.fillStyle = 'rgba(255,255,255,0.55)';
-      ctx.font = '500 22px Arial, sans-serif';
-      const d = new Date();
-      const dateStr = d.toLocaleDateString('en-US', {day:'numeric', month:'long', year:'numeric'}).toUpperCase();
-      ctx.fillText(dateStr, 540, 860);
-
-      // Bottom branding
-      ctx.fillStyle = 'rgba(255,255,255,0.35)';
-      ctx.font = '18px Arial, sans-serif';
-      ctx.fillText('NAVA-PEACE.APP  ·  #CHOOSPEACE  ·  🕊', 540, 990);
-
-      return new Promise(res => canvas.toBlob(res, 'image/png'));
+    // Gather progress data from localStorage + Supabase
+    async function getProgressData() {
+      const d = {
+        pseudo:  localStorage.getItem('nava_peace_pseudo') || 'PEACE LOVER',
+        totalDoves: parseInt(localStorage.getItem('nava_peace_days')||'0',10),
+        streak:  parseInt(localStorage.getItem('nava_peace_streak')||'0',10),
+        refCode: localStorage.getItem('nava_peace_ref_code')||'',
+        friends: 0, refDoves: 0,
+      };
+      const uid = localStorage.getItem('nava_peace_uid');
+      try {
+        if (uid) {
+          const sb2 = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          // Votes + streak
+          const {data:votes} = await sb2.from('peace_votes').select('created_at')
+            .eq('user_uid',uid).order('created_at',{ascending:false});
+          if (votes && votes.length) {
+            d.totalDoves = votes.length;
+            const dayNums=[...new Set(votes.map(v=>Math.floor(new Date(v.created_at).getTime()/86400000)))].sort((a,b)=>b-a);
+            const today=Math.floor(Date.now()/86400000);
+            if(dayNums[0]>=today-1){d.streak=1;for(let i=1;i<dayNums.length;i++){if(dayNums[i-1]-dayNums[i]===1)d.streak++;else break;}}
+            localStorage.setItem('nava_peace_days',d.totalDoves);
+            localStorage.setItem('nava_peace_streak',d.streak);
+          }
+          // Referrals
+          if (d.refCode) {
+            const [pR,fR] = await Promise.all([
+              sb2.from('referral_points').select('id').eq('referral_code',d.refCode),
+              sb2.from('peace_votes').select('id').eq('referred_by',d.refCode),
+            ]);
+            d.refDoves = pR.data?pR.data.length:0;
+            d.friends  = fR.data?fR.data.length:0;
+          }
+        }
+      } catch(e){ console.warn('Progress fetch',e); }
+      return d;
     }
 
-    async function shareInstagram() {
-      const btn = document.getElementById('inspo-share-btn');
-      if (btn) { btn.style.opacity = '0.5'; btn.style.pointerEvents = 'none'; }
-      try {
-        const blob = await generateShareCard();
-        const file = new File([blob], 'nava-peace.png', { type: 'image/png' });
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: 'NAVA PEACE',
-            text: 'I chose peace today 🕊 #NavaPeace #ChoosePeace'
-          });
-        } else {
-          // Fallback : télécharge l'image
-          const url = URL.createObjectURL(blob);
-          const a   = document.createElement('a');
-          a.href    = url;
-          a.download = 'nava-peace.png';
-          a.click();
-          setTimeout(() => URL.revokeObjectURL(url), 1500);
-          showBanner('IMAGE SAVED — OPEN INSTAGRAM TO SHARE 📸');
-        }
-      } catch(e) {
-        if (e.name !== 'AbortError') console.warn('Share error:', e);
-      } finally {
-        if (btn) { btn.style.opacity = ''; btn.style.pointerEvents = ''; }
+    // Generate QR code locally via qrcodejs
+    async function _genQR() {
+      const refCode = localStorage.getItem('nava_peace_ref_code')||'';
+      const url = refCode ? 'https://nava-peace.app/?ref='+refCode : 'https://nava-peace.app';
+      if (typeof QRCode==='undefined') return null;
+      const h = document.createElement('div');
+      h.style.cssText='position:absolute;left:-9999px;top:-9999px;';
+      document.body.appendChild(h);
+      await new Promise(r=>{new QRCode(h,{text:url,width:320,height:320,colorDark:'#ffffff',colorLight:'#0a3060',correctLevel:QRCode.CorrectLevel.M});setTimeout(r,80);});
+      const c=h.querySelector('canvas'); let img=null;
+      if(c) img=await _loadImg(c.toDataURL('image/png'));
+      document.body.removeChild(h); return img;
+    }
+
+    // Generate the share card
+    async function generateShareCard() {
+      const canvas = document.getElementById('share-canvas');
+      const ctx = canvas.getContext('2d');
+      const W=1080,H=1920; canvas.width=W; canvas.height=H;
+      ctx.fillStyle='rgba(20,80,140,1)'; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle='#fff';ctx.textAlign='center';ctx.font='40px Arial';
+      ctx.fillText('Generating…',W/2,H/2);
+
+      const [prog,logoImg,qrImg] = await Promise.all([getProgressData(),_loadImg('logo.png').catch(()=>null),_genQR()]);
+      drawProgressCard(ctx,W,H,prog,logoImg,qrImg);
+    }
+
+    // Main canvas drawing
+    function drawProgressCard(ctx,W,H,data,logoImg,qrImg) {
+      const pad=60;
+      // Background
+      const bg=ctx.createLinearGradient(0,0,0,H);
+      bg.addColorStop(0,'#5DC8F0');bg.addColorStop(0.35,'#3AACDF');
+      bg.addColorStop(0.75,'#1a6fb5');bg.addColorStop(1,'#0a3060');
+      ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+      // Glow circles
+      ctx.save();ctx.globalAlpha=0.07;ctx.fillStyle='#fff';
+      [[W*.88,H*.06,380],[W*.08,H*.28,220],[W*.92,H*.78,280]].forEach(([x,y,r])=>{ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();});
+      ctx.restore();
+
+      let y=50;
+
+      // ── LOGO (same size/position as map card) ──
+      if(logoImg){const ls=220;ctx.save();ctx.shadowColor='rgba(255,255,255,0.45)';ctx.shadowBlur=24;ctx.drawImage(logoImg,W/2-ls/2,y,ls,ls);ctx.restore();y+=ls+70;}else{y+=70;}
+
+      // ── TITLE + PSEUDO ──
+      ctx.fillStyle='#fff';ctx.textAlign='center';
+      ctx.font='bold 72px Nasalization,Arial,sans-serif';
+      ctx.fillText('NAVA PEACE',W/2,y); y+=56;
+      ctx.globalAlpha=0.6;ctx.font='28px Nasalization,Arial,sans-serif';
+      ctx.fillText(data.pseudo.toUpperCase(),W/2,y);ctx.globalAlpha=1; y+=44;
+      _line(ctx,pad,y,W-pad); y+=40;
+
+      // ── TOTAL DOVES (hero) ──
+      ctx.save();ctx.globalAlpha=0.08;ctx.fillStyle='#fff';
+      _rrect(ctx,pad,y,W-pad*2,200,24);ctx.fill();ctx.restore();
+      ctx.fillStyle='#fff';ctx.textAlign='center';
+      ctx.font='bold 140px Nasalization,Arial,sans-serif';
+      ctx.fillText(data.totalDoves.toLocaleString(),W/2,y+140);
+      ctx.globalAlpha=0.6;ctx.font='30px Nasalization,Arial,sans-serif';
+      ctx.fillText('PEACE ACTIONS',W/2,y+185);ctx.globalAlpha=1;
+      y+=220;
+      _line(ctx,pad,y,W-pad); y+=36;
+
+      // ── STREAK ──
+      ctx.fillStyle='#fff';ctx.textAlign='center';
+      ctx.font='bold 90px Nasalization,Arial,sans-serif';
+      ctx.fillText(data.streak,W/2,y+80);
+      ctx.globalAlpha=0.6;ctx.font='28px Nasalization,Arial,sans-serif';
+      ctx.fillText('DAY STREAK',W/2,y+120);ctx.globalAlpha=1;
+      y+=150;
+
+      // Progress bar
+      const bX=pad+20,bW=W-(pad+20)*2,bH=28,bR=14;
+      ctx.save();ctx.globalAlpha=0.15;ctx.fillStyle='#fff';
+      _rrect(ctx,bX,y,bW,bH,bR);ctx.fill();ctx.restore();
+      const pct=Math.min(data.streak/30,1);
+      if(pct>0){const g=ctx.createLinearGradient(bX,0,bX+bW,0);g.addColorStop(0,'#6DD5F5');g.addColorStop(1,'#FFD700');ctx.fillStyle=g;_rrect(ctx,bX,y,bW*pct,bH,bR);ctx.fill();}
+      y+=bH+30;
+
+      // Milestones row
+      const MS=[{d:7,i:'🌱',n:'SEEDLING'},{d:14,i:'🕊',n:'KEEPER'},{d:21,i:'⭐',n:'WARRIOR'},{d:28,i:'🌟',n:'CHAMPION'},{d:30,i:'🏆',n:'LEGEND'}];
+      const msW=(W-pad*2)/MS.length;
+      MS.forEach((m,idx)=>{
+        const cx=pad+msW*idx+msW/2, done=data.streak>=m.d;
+        ctx.globalAlpha=done?1:0.3;ctx.font='44px Arial';ctx.textAlign='center';ctx.fillText(m.i,cx,y+40);
+        ctx.fillStyle='#fff';ctx.font='bold 22px Nasalization,Arial,sans-serif';ctx.fillText(m.d+'',cx,y+75);
+        ctx.font='16px Nasalization,Arial,sans-serif';ctx.globalAlpha=done?0.7:0.25;ctx.fillText(m.n,cx,y+100);
+        ctx.globalAlpha=1;ctx.fillStyle='#fff';
+      });
+      y+=130;
+      _line(ctx,pad,y,W-pad); y+=36;
+
+      // ── REFERRALS (2 tiles) ──
+      const tW=(W-pad*2-30)/2, tH=180;
+      // Left: Friends
+      ctx.save();ctx.globalAlpha=0.1;ctx.fillStyle='#fff';_rrect(ctx,pad,y,tW,tH,20);ctx.fill();ctx.restore();
+      ctx.fillStyle='#fff';ctx.textAlign='center';
+      ctx.font='bold 72px Nasalization,Arial,sans-serif';ctx.fillText(data.friends+'',pad+tW/2,y+100);
+      ctx.globalAlpha=0.6;ctx.font='22px Nasalization,Arial,sans-serif';ctx.fillText('FRIENDS INVITED',pad+tW/2,y+140);ctx.globalAlpha=1;
+      // Right: Referral doves
+      const rx=pad+tW+30;
+      ctx.save();ctx.globalAlpha=0.1;ctx.fillStyle='#fff';_rrect(ctx,rx,y,tW,tH,20);ctx.fill();ctx.restore();
+      ctx.fillStyle='#fff';ctx.textAlign='center';
+      ctx.font='bold 72px Nasalization,Arial,sans-serif';ctx.fillText(data.refDoves+'',rx+tW/2,y+100);
+      ctx.globalAlpha=0.6;ctx.font='22px Nasalization,Arial,sans-serif';ctx.fillText('REFERRAL DOVES',rx+tW/2,y+140);ctx.globalAlpha=1;
+      // Divider
+      ctx.save();ctx.globalAlpha=0.15;ctx.strokeStyle='#fff';ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(pad+tW+15,y+20);ctx.lineTo(pad+tW+15,y+tH-20);ctx.stroke();ctx.restore();
+      y+=tH+30;
+      _line(ctx,pad,y,W-pad); y+=36;
+
+      // ── CTA ──
+      ctx.fillStyle='#fff';ctx.textAlign='center';
+      ctx.font='bold 48px Nasalization,Arial,sans-serif';
+      ctx.fillText('JOIN THE PEACE',W/2,y+48);
+      ctx.fillText('MOVEMENT',W/2,y+106);
+      y+=140;
+
+      // ── QR CODE (centered) ──
+      const qS=240,qX=W/2-qS/2;
+      ctx.save();ctx.shadowColor='rgba(0,0,0,0.3)';ctx.shadowBlur=24;
+      ctx.fillStyle='#0a3060';_rrect(ctx,qX-16,y-16,qS+32,qS+32,20);ctx.fill();ctx.restore();
+      if(qrImg){ctx.drawImage(qrImg,qX,y,qS,qS);}
+      else{ctx.fillStyle='#fff';ctx.font='bold 24px Arial';ctx.fillText('nava-peace.app',W/2,y+qS/2+8);}
+      y+=qS+50;
+
+      // ── FOOTER ──
+      ctx.fillStyle='#fff';ctx.textAlign='center';
+      ctx.font='bold 38px Nasalization,Arial,sans-serif';ctx.fillText('nava-peace.app',W/2,y);y+=50;
+      ctx.globalAlpha=0.7;ctx.font='28px Nasalization,Arial,sans-serif';
+      ctx.fillText('@nava.peace.world  ·  @NAVAPEACEWORLD',W/2,y);y+=46;
+      ctx.globalAlpha=0.45;ctx.font='24px Nasalization,Arial,sans-serif';
+      ctx.fillText('#NavaPeace  ·  #Peace  ·  #ChoosePeace',W/2,y);ctx.globalAlpha=1;
+    }
+
+    // ── Overlay controls ──
+    async function openShareOverlay(){
+      const o=document.getElementById('share-overlay');
+      o.style.display='block';o.scrollTop=0;
+      await generateShareCard();
+    }
+    function closeShareOverlay(){document.getElementById('share-overlay').style.display='none';}
+    document.getElementById('share-overlay')?.addEventListener('click',function(e){if(e.target===this)closeShareOverlay();});
+
+    // ── Share actions ──
+    async function shareProgressIG(){
+      const blob=await new Promise(r=>document.getElementById('share-canvas').toBlob(r,'image/png'));
+      const file=new File([blob],'nava-peace-progress.png',{type:'image/png'});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){
+        try{await navigator.share({files:[file],title:'NAVA PEACE',text:'My peace journey 🕊 #NavaPeace #ChoosePeace'});return;}catch(e){if(e.name==='AbortError')return;}
       }
+      downloadProgress();
+      showBanner('IMAGE SAVED — OPEN INSTAGRAM TO SHARE 📸');
+    }
+    function shareProgressX(){
+      const days=localStorage.getItem('nava_peace_days')||'0';
+      const streak=localStorage.getItem('nava_peace_streak')||'0';
+      const t=encodeURIComponent(`🕊 ${days} peace actions, ${streak}-day streak on NAVA PEACE!\nJoin → nava-peace.app\n#NavaPeace #ChoosePeace`);
+      window.open('https://twitter.com/intent/tweet?text='+t,'_blank');
+    }
+    function downloadProgress(){
+      const a=document.createElement('a');a.href=document.getElementById('share-canvas').toDataURL('image/png');
+      a.download='nava-peace-progress.png';a.click();
     }
 
     // ── OFFLINE-FIRST SYNC ────────────────────────────────────────────────

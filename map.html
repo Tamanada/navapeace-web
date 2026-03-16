@@ -1444,9 +1444,33 @@
     y += 76;
 
     // ── Separator ──
+    line(ctx,pad,y,W-pad); y+=26;
+
+    // ── Real map snapshot (BEFORE counters) ──
+    const mapH = 520;
+    if (mapImg) {
+      ctx.save();
+      roundRect(ctx,pad,y,W-pad*2,mapH,22);
+      ctx.clip();
+      const ar = mapImg.width/mapImg.height;
+      let dw=W-pad*2, dh=dw/ar;
+      if(dh>mapH){dh=mapH; dw=dh*ar;}
+      ctx.drawImage(mapImg, W/2-dw/2, y+(mapH-dh)/2, dw, dh);
+      ctx.restore();
+      ctx.save(); ctx.globalAlpha=0.25; ctx.strokeStyle='#fff'; ctx.lineWidth=2;
+      roundRect(ctx,pad,y,W-pad*2,mapH,22); ctx.stroke(); ctx.restore();
+    } else {
+      ctx.save(); ctx.globalAlpha=0.1; ctx.fillStyle='#fff';
+      roundRect(ctx,pad,y,W-pad*2,mapH,22); ctx.fill(); ctx.restore();
+      ctx.fillStyle='rgba(255,255,255,0.4)'; ctx.textAlign='center';
+      ctx.font='36px Arial'; ctx.fillText('🗺', W/2, y+mapH/2+14);
+    }
+    y += mapH + 28;
+
+    // ── Separator ──
     line(ctx,pad,y,W-pad); y+=28;
 
-    // ── Counters 2×2 ──
+    // ── Counters 2×2 (AFTER map) ──
     const stats=[
       {num:c.people,    lbl:'PEACE LOVERS'},
       {num:c.countries, lbl:'COUNTRIES'},
@@ -1470,36 +1494,6 @@
     ctx.beginPath(); ctx.moveTo(pad,y+rowH); ctx.lineTo(W-pad,y+rowH); ctx.stroke();
     ctx.restore();
     y += rowH*2 + 26;
-
-    // ── Separator ──
-    line(ctx,pad,y,W-pad); y+=26;
-
-    // ── JOIN THE PEACE MOVEMENT (above map) ──
-    ctx.fillStyle='#fff'; ctx.textAlign='center';
-    ctx.font='bold 52px Nasalization,Arial,sans-serif';
-    ctx.fillText('JOIN THE PEACE MOVEMENT', W/2, y+52);
-    y += 80;
-
-    // ── Real map snapshot ──
-    const mapH = 520;
-    if (mapImg) {
-      ctx.save();
-      roundRect(ctx,pad,y,W-pad*2,mapH,22);
-      ctx.clip();
-      const ar = mapImg.width/mapImg.height;
-      let dw=W-pad*2, dh=dw/ar;
-      if(dh>mapH){dh=mapH; dw=dh*ar;}
-      ctx.drawImage(mapImg, W/2-dw/2, y+(mapH-dh)/2, dw, dh);
-      ctx.restore();
-      ctx.save(); ctx.globalAlpha=0.25; ctx.strokeStyle='#fff'; ctx.lineWidth=2;
-      roundRect(ctx,pad,y,W-pad*2,mapH,22); ctx.stroke(); ctx.restore();
-    } else {
-      ctx.save(); ctx.globalAlpha=0.1; ctx.fillStyle='#fff';
-      roundRect(ctx,pad,y,W-pad*2,mapH,22); ctx.fill(); ctx.restore();
-      ctx.fillStyle='rgba(255,255,255,0.4)'; ctx.textAlign='center';
-      ctx.font='36px Arial'; ctx.fillText('🗺', W/2, y+mapH/2+14);
-    }
-    y += mapH + 32;
 
     // ── Separator ──
     line(ctx,pad,y,W-pad); y+=36;
