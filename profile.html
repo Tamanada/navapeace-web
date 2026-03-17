@@ -681,6 +681,13 @@
     .pseudo-btn-row .save-btn { flex: 1; margin: 0; }
     .pseudo-btn-row .edit-btn { padding: 12px 16px; }
 
+    /* ── COLLAPSIBLE CARDS ── */
+    .card-collapse { cursor: pointer; transition: all 0.3s ease; }
+    .card-collapse .card-expanded { display: none; margin-top: 14px; }
+    .card-collapse.open .card-expanded { display: block; }
+    .card-collapse.open { cursor: default; }
+    .card-collapse .section-title { margin-bottom: 8px; }
+
     /* ── PEACE MESSAGE CARD ── */
     .peace-textarea {
       width: 100%;
@@ -1067,56 +1074,63 @@
     <div id="streak-progress-inner"></div>
   </div>
 
-  <!-- MY PEACE MESSAGE -->
-  <div class="card">
+  <!-- MY PEACE MESSAGE (collapsible) -->
+  <div class="card card-collapse" id="msg-card" onclick="toggleCard('msg-card')">
     <p class="section-title" data-i18n="section_message">MY PEACE MESSAGE</p>
-    <textarea id="peace-message-input" class="peace-textarea" maxlength="200"
-              data-i18n-ph="msg_placeholder"
-              oninput="updateCharCount()"></textarea>
-    <p class="char-count"><span id="char-count">0</span>/200</p>
-    <div class="share-row">
-      <span class="share-lbl" data-i18n="share_lbl">Share publicly</span>
-      <label class="toggle-switch">
-        <input type="checkbox" id="share-toggle" />
-        <span class="toggle-slider"></span>
-      </label>
+    <p class="card-preview" id="msg-preview" style="font-size:13px;letter-spacing:1.5px;color:rgba(255,255,255,0.85);line-height:1.6;word-break:break-word;"></p>
+    <div class="card-expanded" id="msg-expanded">
+      <textarea id="peace-message-input" class="peace-textarea" maxlength="200"
+                data-i18n-ph="msg_placeholder"
+                oninput="updateCharCount()" onclick="event.stopPropagation()"></textarea>
+      <p class="char-count"><span id="char-count">0</span>/200</p>
+      <div class="share-row" onclick="event.stopPropagation()">
+        <span class="share-lbl" data-i18n="share_lbl">Share publicly</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="share-toggle" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <button class="save-btn" id="message-save-btn" onclick="event.stopPropagation();saveMessage()"
+              data-i18n="msg_save_btn">SAVE MESSAGE</button>
     </div>
-    <button class="save-btn" id="message-save-btn" onclick="saveMessage()"
-            data-i18n="msg_save_btn">SAVE MESSAGE</button>
   </div>
 
-  <!-- MY IDENTITY -->
-  <div class="card">
+  <!-- MY IDENTITY (collapsible) -->
+  <div class="card card-collapse" id="id-card" onclick="toggleCard('id-card')">
     <p class="section-title" data-i18n="section_identity">MY IDENTITY</p>
-    <div class="pseudo-display">
-      <span class="pseudo-icon">🕊</span>
-      <span class="pseudo-name" id="pseudo-name">...</span>
-      <span class="pseudo-tag" id="pseudo-tag" data-i18n="pseudo_auto_tag">AUTO</span>
-    </div>
-    <div class="pseudo-edit-area" id="pseudo-edit-area" style="display:none">
-      <input id="pseudo-input" type="text" class="pseudo-input" maxlength="30"
-             data-i18n-ph="pseudo_placeholder" />
-      <div class="pseudo-btn-row">
-        <button class="save-btn" onclick="savePseudo()" data-i18n="save_btn">SAVE</button>
-        <button class="edit-btn" onclick="cancelPseudo()" data-i18n="cancel_btn">CANCEL</button>
+    <div class="card-preview">
+      <div class="pseudo-display" style="margin-bottom:0;">
+        <span class="pseudo-icon">🕊</span>
+        <span class="pseudo-name" id="pseudo-name">...</span>
+        <span class="pseudo-tag" id="pseudo-tag" data-i18n="pseudo_auto_tag">AUTO</span>
       </div>
     </div>
-    <button class="edit-btn" id="pseudo-change-btn" onclick="startEditPseudo()"
-            data-i18n="pseudo_change_btn">CHANGE</button>
+    <div class="card-expanded" id="id-expanded">
+      <div class="pseudo-edit-area" id="pseudo-edit-area" style="display:none" onclick="event.stopPropagation()">
+        <input id="pseudo-input" type="text" class="pseudo-input" maxlength="30"
+               data-i18n-ph="pseudo_placeholder" />
+        <div class="pseudo-btn-row">
+          <button class="save-btn" onclick="savePseudo()" data-i18n="save_btn">SAVE</button>
+          <button class="edit-btn" onclick="cancelPseudo()" data-i18n="cancel_btn">CANCEL</button>
+        </div>
+      </div>
+      <button class="edit-btn" id="pseudo-change-btn" onclick="event.stopPropagation();startEditPseudo()"
+              data-i18n="pseudo_change_btn">CHANGE</button>
 
-    <!-- FIRST NAME -->
-    <div style="margin-top:18px;border-top:1px solid rgba(255,255,255,0.1);padding-top:18px;">
-      <p style="font-size:8px;letter-spacing:3px;color:rgba(255,255,255,0.4);margin-bottom:10px;" data-i18n="firstname_label">FIRST NAME <span style="font-size:7px;opacity:0.5;">(OPTIONAL)</span></p>
-      <div id="firstname-display-row" style="display:flex;align-items:center;gap:10px;">
-        <span id="firstname-display" style="font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.85);flex:1;">—</span>
-        <button class="edit-btn" onclick="startEditFirstname()" data-i18n="firstname_change_btn">EDIT</button>
-      </div>
-      <div id="firstname-edit-area" style="display:none;margin-top:10px;">
-        <input id="firstname-input" type="text" class="pseudo-input" maxlength="40"
-               placeholder="Your first name…" autocomplete="given-name" />
-        <div class="pseudo-btn-row" style="margin-top:10px;">
-          <button class="save-btn" onclick="saveFirstname()" data-i18n="save_btn">SAVE</button>
-          <button class="edit-btn" onclick="cancelFirstname()" data-i18n="cancel_btn">CANCEL</button>
+      <!-- FIRST NAME -->
+      <div style="margin-top:18px;border-top:1px solid rgba(255,255,255,0.1);padding-top:18px;" onclick="event.stopPropagation()">
+        <p style="font-size:8px;letter-spacing:3px;color:rgba(255,255,255,0.4);margin-bottom:10px;" data-i18n="firstname_label">FIRST NAME <span style="font-size:7px;opacity:0.5;">(OPTIONAL)</span></p>
+        <div id="firstname-display-row" style="display:flex;align-items:center;gap:10px;">
+          <span id="firstname-display" style="font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.85);flex:1;">—</span>
+          <button class="edit-btn" onclick="startEditFirstname()" data-i18n="firstname_change_btn">EDIT</button>
+        </div>
+        <div id="firstname-edit-area" style="display:none;margin-top:10px;">
+          <input id="firstname-input" type="text" class="pseudo-input" maxlength="40"
+                 placeholder="Your first name…" autocomplete="given-name" />
+          <div class="pseudo-btn-row" style="margin-top:10px;">
+            <button class="save-btn" onclick="saveFirstname()" data-i18n="save_btn">SAVE</button>
+            <button class="edit-btn" onclick="cancelFirstname()" data-i18n="cancel_btn">CANCEL</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1561,6 +1575,9 @@
     document.getElementById('peace-message-input').value = msg;
     document.getElementById('share-toggle').checked = shared;
     updateCharCount();
+    // Update collapsed preview
+    var preview = document.getElementById('msg-preview');
+    if (preview) preview.textContent = msg || '—';
   }
 
   function updateCharCount() {
@@ -1576,6 +1593,8 @@
     const btn = document.getElementById('message-save-btn');
     btn.textContent = t('msg_saved_lbl');
     btn.disabled = true;
+    var preview = document.getElementById('msg-preview');
+    if (preview) preview.textContent = msg || '—';
     await syncMessage();
     setTimeout(() => { btn.textContent = t('msg_save_btn'); btn.disabled = false; }, 2000);
   }
@@ -1627,6 +1646,19 @@
     cancelFirstname();
     await syncMessage();
   }
+
+  // ── COLLAPSIBLE CARDS ──────────────────────────────────────────
+  function toggleCard(id) {
+    var card = document.getElementById(id);
+    if (card.classList.contains('open')) return; // don't close by clicking inside
+    card.classList.add('open');
+  }
+  // Close card when clicking outside
+  document.addEventListener('click', function(e) {
+    document.querySelectorAll('.card-collapse.open').forEach(function(c) {
+      if (!c.contains(e.target)) c.classList.remove('open');
+    });
+  });
 
   loadPseudo();
   loadMessage();
