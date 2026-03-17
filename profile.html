@@ -942,7 +942,7 @@
   <div class="header">
     <img src="logo.png" alt="NAVA PEACE" />
     <h1>NAVA PEACE</h1>
-    <p class="tagline" id="daily-quote" style="font-family:'Nasalization',Arial,sans-serif;font-size:13px;font-weight:bold;letter-spacing:2px;line-height:1.5;max-width:320px;text-align:center;opacity:1;color:#fff;text-transform:uppercase;"></p>
+    <p class="tagline" id="daily-quote" style="font-family:'Nasalization',Arial,sans-serif;font-size:13px;font-weight:bold;letter-spacing:2px;line-height:1.6;max-width:320px;text-align:center;opacity:1;color:#fff;text-transform:uppercase;text-wrap:balance;"></p>
   </div>
 
   <!-- YOUR PROFILE -->
@@ -1463,7 +1463,7 @@
     const dayOfYear = Math.floor((Date.now() - start) / 86400000);
     const { q, a } = quotes[dayOfYear % quotes.length];
     const el = document.getElementById('daily-quote');
-    if (el) el.innerHTML = '\u201C' + q + '\u201D<br><span style="font-size:10px;opacity:0.7;font-style:normal;">\u2014 ' + a + '</span>';
+    if (el) el.innerHTML = '\u201C' + q + '\u201D<br><span style="font-size:9px;letter-spacing:2px;opacity:0.6;font-style:normal;display:inline-block;margin-top:4px;">\u2014 ' + a + '</span>';
   }
   updateDailyQuote();
 
