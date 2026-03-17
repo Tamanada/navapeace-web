@@ -1889,11 +1889,17 @@
     document.getElementById('ref-link-display').textContent = inviteURL;
 
     // QR code
-    new QRCode(document.getElementById('qrcode'), {
-      text: inviteURL, width: 130, height: 130,
-      colorDark: '#1A6E96', colorLight: '#ffffff',
-      correctLevel: QRCode.CorrectLevel.M
-    });
+    try {
+      if (typeof QRCode === 'undefined') { console.error('QRCode lib not loaded'); }
+      var qrEl = document.getElementById('qrcode');
+      console.log('QR element:', qrEl, 'inviteURL:', inviteURL);
+      new QRCode(qrEl, {
+        text: inviteURL, width: 130, height: 130,
+        colorDark: '#1A6E96', colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+      console.log('QR generated OK');
+    } catch(qrErr) { console.error('QR generation failed:', qrErr); }
 
     // Share links
     var waURL = 'https://wa.me/?text=' + msg;
