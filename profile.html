@@ -452,6 +452,9 @@
       border-radius: 12px;
       overflow: hidden;
       padding: 6px;
+      min-width: 142px;
+      min-height: 142px;
+      box-sizing: border-box;
       background: #fff;
     }
 
@@ -1887,7 +1890,7 @@
 
     // QR code
     new QRCode(document.getElementById('qrcode'), {
-      text: inviteURL, width: 110, height: 110,
+      text: inviteURL, width: 130, height: 130,
       colorDark: '#1A6E96', colorLight: '#ffffff',
       correctLevel: QRCode.CorrectLevel.M
     });
