@@ -1880,6 +1880,8 @@
       localStorage.setItem('nava_peace_ref_code', refCode);
     }
 
+    try { // ── main try/catch so QR always renders ──
+
     // Use Telegram-aware share link (t.me/NavaPeaceBot/app?startapp=CODE in TG, nava-peace.app/?ref=CODE on web)
     const inviteURL   = getShareLink(refCode);
     const inviteText  = 'The world talks about peace. Let\'s practice it.\nJoin NAVA PEACE today. 🕊\n' + inviteURL;
@@ -2108,9 +2110,23 @@ Join NAVA PEACE today: " + inviteURL);
 
     // Load peace points
     loadPeacePoints(refCode);
+    } catch(initErr) {
+      console.error('initInvite inner error:', initErr);
+      // Still try to generate QR with whatever refCode we have
+      try {
+        var fallbackCode = localStorage.getItem('nava_peace_ref_code') || 'NAVA';
+        var fallbackURL = getShareLink(fallbackCode);
+        document.getElementById('ref-link-display').textContent = fallbackURL;
+        new QRCode(document.getElementById('qrcode'), {
+          text: fallbackURL, width: 130, height: 130,
+          colorDark: '#1A6E96', colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      } catch(e2) { console.error('Fallback QR also failed:', e2); }
+    }
   }
 
-  initInvite();
+  initInvite().catch(function(err) { console.error('initInvite failed:', err); });
 
   function copyLink() {
     const link = getShareLink();
