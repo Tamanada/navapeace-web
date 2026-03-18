@@ -1057,7 +1057,7 @@ async function loadVotes() {
     // Cas particulier : referred_by peut être absent du 1er vote si l'user
     // a cliqué un lien de référence après son inscription → referredByMap garde
     // le 1er referred_by non-null rencontré (= le plus récent, en DESC).
-    const usersMap=new Map(), votesCount=new Map(), firstSeen=new Map(), referredByMap=new Map(), votedTodaySet=new Set();
+    const usersMap=new Map(), votesCount=new Map(), firstSeen=new Map(), referredByMap=new Map(), refCodeMap=new Map(), votedTodaySet=new Set();
     for(const v of votes) {
       if(!v.user_uid) continue;
       votesCount.set(v.user_uid,(votesCount.get(v.user_uid)||0)+1);
@@ -1065,6 +1065,8 @@ async function loadVotes() {
       usersMap.set(v.user_uid, v);              // idem → vote d'inscription (age/gender)
       if(v.referred_by && !referredByMap.has(v.user_uid))
         referredByMap.set(v.user_uid, v.referred_by); // 1er non-null = le plus récent (DESC)
+      if(v.referral_code && !refCodeMap.has(v.user_uid))
+        refCodeMap.set(v.user_uid, v.referral_code); // 1er non-null = le plus récent (DESC)
     }
 
     // Stats
@@ -1103,7 +1105,7 @@ async function loadVotes() {
 
     allUsers=[...usersMap.values()].map(u=>{
       const days=votesCount.get(u.user_uid)||1;
-      const rc=u.referral_code||'';
+      const rc=refCodeMap.get(u.user_uid)||u.referral_code||'';
       const refDovesTotal=rc?refDovesMap.get(rc)||0:0;
       const refDovesToday=rc?refDovesTodayMap.get(rc)||0:0;
       return {
