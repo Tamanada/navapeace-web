@@ -933,7 +933,17 @@
         document.getElementById('cnt-people').textContent = seenUids.size.toLocaleString('fr-FR');
 
         const rows = Object.entries(countsByCountry).map(([country, count]) => {
-          const coords = COUNTRY_COORDS[country] || {lat:0,lon:0};
+          // Case-insensitive lookup: try exact, then Title Case, then find by lowercase match
+          var coords = COUNTRY_COORDS[country];
+          if (!coords) {
+            var titleCase = country.charAt(0).toUpperCase() + country.slice(1).toLowerCase();
+            coords = COUNTRY_COORDS[titleCase];
+          }
+          if (!coords) {
+            var lc = country.toLowerCase();
+            var key = Object.keys(COUNTRY_COORDS).find(function(k) { return k.toLowerCase() === lc; });
+            coords = key ? COUNTRY_COORDS[key] : {lat:0,lon:0};
+          }
           return { country, user_count: count, lat: coords.lat, lng: coords.lon };
         }).filter(r => r.lat !== 0);
 
