@@ -1522,7 +1522,7 @@
     document.querySelector('.edit-btn').textContent = open ? t('edit_btn') : t('cancel_btn');
   }
 
-  function saveProfile() {
+  async function saveProfile() {
     const country = document.getElementById('edit-country').value.trim().toUpperCase();
     const age     = document.getElementById('edit-age').value.trim();
     const gender  = document.getElementById('edit-gender').value;
@@ -1534,6 +1534,25 @@
     renderMyProfile();
     document.getElementById('edit-form').style.display = 'none';
     document.querySelector('.edit-btn').textContent = t('edit_btn');
+
+    // Sync profile changes to DB (update ALL votes for this user)
+    try {
+      var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      var uid = localStorage.getItem('nava_peace_uid');
+      if (uid) {
+        var updates = {};
+        if (country) updates.country = country;
+        if (age)     updates.age = parseInt(age, 10);
+        if (gender)  updates.gender = gender;
+
+        if (Object.keys(updates).length > 0) {
+          await sb.from('peace_votes')
+            .update(updates)
+            .eq('user_uid', uid);
+          console.log('Profile synced to DB');
+        }
+      }
+    } catch(e) { console.warn('Profile sync to DB failed:', e); }
   }
 
   renderMyProfile();
