@@ -1988,9 +1988,9 @@
           var sbCard = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
           var today = new Date().toISOString().slice(0, 10);
           var results = await Promise.all([
-            sbCard.from('peace_votes').select('*', { count: 'exact', head: true }),
-            sbCard.from('peace_votes').select('*', { count: 'exact', head: true }).gte('created_at', today + 'T00:00:00'),
-            sbCard.from('peace_votes').select('country')
+            sbCard.from('active_votes').select('*', { count: 'exact', head: true }),
+            sbCard.from('active_votes').select('*', { count: 'exact', head: true }).gte('created_at', today + 'T00:00:00'),
+            sbCard.from('active_votes').select('country')
           ]);
           totalCount = results[0].count || 0;
           todayCount = results[1].count || 0;
