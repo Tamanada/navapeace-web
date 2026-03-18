@@ -1927,6 +1927,18 @@
 
     function doShare(targetApp) {
       generateShareCard(inviteURL, refCode).then(function(file) {
+        // Instagram: auto-save image then open Instagram
+        if (targetApp === 'ig') {
+          var link = document.createElement('a');
+          link.download = 'nava-peace-invite.png';
+          link.href = URL.createObjectURL(file);
+          link.click();
+          setTimeout(function() {
+            URL.revokeObjectURL(link.href);
+            openDirectShare('ig');
+          }, 500);
+          return;
+        }
         // Try Web Share API with image (works on mobile browsers, NOT in Telegram WebView)
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           navigator.share({ text: shareText, files: [file] }).catch(function(){});
