@@ -417,6 +417,12 @@
       border-color:rgba(255,180,0,0.55);color:#ffb400;
     }
     .drawer-status-btn.flagged-btn .dsb-check{opacity:1;}
+    .drawer-status-btn.blocked-btn{
+      background:rgba(180,0,0,0.25);
+      border-color:rgba(220,0,0,0.7);color:#ff3030;
+    }
+    .drawer-status-btn.blocked-btn .dsb-check{opacity:1;}
+    .status-blocked{background:rgba(180,0,0,0.2);color:#ff3030;font-weight:bold;}
     .drawer-note-label{font-size:9px;letter-spacing:2px;color:var(--w40);margin-bottom:8px;}
     .drawer-note{
       width:100%;background:rgba(255,255,255,0.06);
@@ -1256,7 +1262,7 @@ function renderUsersTable() {
   document.getElementById('users-footer').textContent=`SHOWING ${filteredUsers.length} OF ${allUsers.length} USERS · CLICK ROW TO MANAGE`;
 }
 // ── COLUMN FILTER STATE (Excel-style) ─────────────────────
-const colFilters={status:new Set(),country:new Set(),age:new Set(),gender:new Set(),days:new Set(),firstname:new Set(),pseudo:new Set(),source:new Set(),registered:new Set()};
+const colFilters={status:new Set(),country:new Set(),age:new Set(),gender:new Set(),days:new Set(),refDovesToday:new Set(),refDovesTotal:new Set(),totalScore:new Set(),firstname:new Set(),pseudo:new Set(),source:new Set(),registered:new Set()};
 let _cfKey=null; // currently open filter column key
 let _sortKey=null, _sortDir=null; // current sort: key + 'asc'|'desc'
 
@@ -1288,7 +1294,7 @@ function sortTable(key,dir){
 
 function getColValues(key){
   switch(key){
-    case 'status':   return [{v:'active',label:'● Active'},{v:'disabled',label:'○ Disabled'}];
+    case 'status':   return [{v:'active',label:'● Active'},{v:'disabled',label:'○ Disabled'},{v:'flagged',label:'⚠ Flagged'},{v:'blocked',label:'🔒 Blocked'}];
     case 'country':  return [...new Set(allUsers.map(u=>u.country||'__blank__'))].sort().map(v=>({v,label:v==='__blank__'?'(Blank)':v}));
     case 'age':      return [...new Set(allUsers.map(u=>String(u.age||'')||'__blank__'))].sort((a,b)=>{if(a==='__blank__')return 1;if(b==='__blank__')return -1;return Number(a)-Number(b);}).map(v=>({v,label:v==='__blank__'?'(Blank)':v}));
     case 'gender':   return [...new Set(allUsers.map(u=>u.gender||'__blank__'))].sort().map(v=>({v,label:v==='__blank__'?'(Blank)':v}));
@@ -1408,6 +1414,9 @@ function applyFilters(){
     if(colFilters.age.size>0&&!colFilters.age.has(String(u.age||'')||'__blank__')) return false;
     if(colFilters.gender.size>0&&!colFilters.gender.has(u.gender||'__blank__')) return false;
     if(colFilters.days.size>0&&!colFilters.days.has(String(u.days))) return false;
+    if(colFilters.refDovesToday.size>0&&!colFilters.refDovesToday.has(String(u.refDovesToday))) return false;
+    if(colFilters.refDovesTotal.size>0&&!colFilters.refDovesTotal.has(String(u.refDovesTotal))) return false;
+    if(colFilters.totalScore.size>0&&!colFilters.totalScore.has(String(u.totalScore))) return false;
     if(colFilters.pseudo.size>0){
       const hasPseudo=!!u.pseudo;
       const wantSet=colFilters.pseudo.has('__set__');
@@ -1837,6 +1846,7 @@ function statusBadge(uid){
     active:'<span class="status-badge status-active">ACTIVE</span>',
     disabled:'<span class="status-badge status-disabled">DISABLED</span>',
     flagged:'<span class="status-badge status-flagged">FLAGGED</span>',
+    blocked:'<span class="status-badge status-blocked">🔒 BLOCKED</span>',
   };
   return map[s]||map.active;
 }
@@ -1884,7 +1894,7 @@ function openUserDrawer(uid){
 }
 
 function _renderDrawerDoves(realCount, status){
-  const isDisabled = status === 'disabled';
+  const isDisabled = status === 'disabled' || status === 'blocked';
   const displayed  = isDisabled ? 0 : realCount;
   const el = document.getElementById('drawer-doves');
   if(!el) return;
@@ -1914,26 +1924,44 @@ function setDrawerStatus(status){
 }
 
 function _applyDrawerStatus(status){
-  ['active','disabled','flagged'].forEach(s=>{
+  ['active','disabled','flagged','blocked'].forEach(s=>{
     document.getElementById('btn-'+s).className='drawer-status-btn';
   });
-  const cls={active:'active-btn',disabled:'disabled-btn',flagged:'flagged-btn'};
+  const cls={active:'active-btn',disabled:'disabled-btn',flagged:'flagged-btn',blocked:'blocked-btn'};
   const el=document.getElementById('btn-'+status);
   if(el) el.classList.add(cls[status]);
   document.getElementById('user-drawer').dataset.status=status;
 }
 
-function saveUserFlag(){
+async function saveUserFlag(){
   if(!drawerUid)return;
   const status=document.getElementById('user-drawer').dataset.status||'active';
   const note=document.getElementById('drawer-note').value.trim();
+  const prevStatus = getUserStatus(drawerUid);
   userFlags[drawerUid]={status,note,updatedAt:new Date().toISOString()};
   localStorage.setItem('nava_user_flags',JSON.stringify(userFlags));
+
+  // Sync blocked status with Supabase
+  try {
+    if(status==='blocked' && prevStatus!=='blocked'){
+      // Insert into blocked_users
+      await sb.from('blocked_users').upsert({
+        user_uid: drawerUid,
+        reason: note || 'Blocked by admin',
+        blocked_at: new Date().toISOString(),
+        blocked_by: 'admin'
+      });
+    } else if(prevStatus==='blocked' && status!=='blocked'){
+      // Remove from blocked_users (unblock)
+      await sb.from('blocked_users').delete().eq('user_uid', drawerUid);
+    }
+  } catch(e){ console.error('blocked_users sync error:', e); }
+
   document.getElementById('user-drawer-overlay').classList.remove('open');
   document.getElementById('user-drawer').classList.remove('open');
   drawerUid=null;
   renderUsersTable();
-  showToast('✓ USER FLAG SAVED');
+  showToast(status==='blocked' ? '🔒 USER BLOCKED' : '✓ USER FLAG SAVED');
 }
 
 // ── UTILS ─────────────────────────────────────────────────
@@ -2307,6 +2335,11 @@ if (_adminExpiry && Date.now() < _adminExpiry) {
       <button class="drawer-status-btn" id="btn-flagged" onclick="setDrawerStatus('flagged')">
         <span class="dsb-icon">⚠️</span>
         <span class="dsb-label">FLAGGED — mark for review</span>
+        <span class="dsb-check">●</span>
+      </button>
+      <button class="drawer-status-btn" id="btn-blocked" onclick="setDrawerStatus('blocked')">
+        <span class="dsb-icon">🔒</span>
+        <span class="dsb-label">BLOCKED — full block access</span>
         <span class="dsb-check">●</span>
       </button>
     </div>
