@@ -1921,48 +1921,30 @@
       });
     } catch(qrErr) { console.error('QR generation failed:', qrErr); }
 
-    // Share links
-    var waURL = 'https://wa.me/?text=' + msg;
-    var waBtn = document.getElementById('share-wa');
-    waBtn.href = waURL;
-    if (NAVA_TG.isTelegram) {
-      waBtn.onclick = function(e) { e.preventDefault(); Telegram.WebApp.openLink(waURL); };
-    }
-    if (NAVA_TG.isTelegram) {
-      // In Telegram: use openTelegramLink for native share
-      document.getElementById('share-tg').href = '#';
-      document.getElementById('share-tg').onclick = function(e) {
-        e.preventDefault();
-        Telegram.WebApp.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(inviteURL) + '&text=' + encodeURIComponent('The world talks about peace. Let\'s practice it.\nJoin NAVA PEACE today. 🕊'));
-      };
-    } else {
-      document.getElementById('share-tg').href = 'https://t.me/share/url?url=' + encodeURIComponent(inviteURL) + '&text=' + encodeURIComponent('The world talks about peace. Let\'s practice it.\nJoin NAVA PEACE today. 🕊');
-    }
-    var twURL = 'https://x.com/intent/tweet?text=' + msg;
-    var twBtn = document.getElementById('share-tw');
-    twBtn.href = twURL;
-    if (NAVA_TG.isTelegram) {
-      twBtn.onclick = function(e) { e.preventDefault(); Telegram.WebApp.openLink(twURL); };
-    }
-    var smsURL = 'sms:?body=' + msg;
-    document.getElementById('share-sms').href = smsURL;
+    // ── Universal share function: generates card + uses Web Share API or overlay ──
+    var shareText = 'The world talks about peace. Let\'s practice it. 🕊\nJoin NAVA PEACE today.\n' + inviteURL;
 
-    // Messenger share – generate invite card image with QR + share
-    var msgrText = 'The world talks about peace. Let\'s practice it. 🕊\nJoin NAVA PEACE today.\n' + inviteURL;
-    var msgrBtn = document.getElementById('share-msngr');
-    msgrBtn.href = '#';
-    msgrBtn.onclick = function(e) {
-      e.preventDefault();
+    function doShare(targetApp) {
       generateShareCard(inviteURL, refCode).then(function(file) {
-        // Try Web Share API with file (works on mobile browsers)
+        // Try Web Share API with image (works on mobile browsers)
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          navigator.share({ text: msgrText, files: [file] }).catch(function(){});
+          navigator.share({ text: shareText, files: [file] }).catch(function(){});
         } else {
-          // Fallback: show card in overlay with save + open Messenger buttons
-          showShareCardOverlay(file, msgrText);
+          // Fallback: show card in overlay
+          showShareCardOverlay(file, shareText, targetApp);
         }
       });
-    };
+    }
+
+    // All share buttons use the same automatic share
+    var shareButtons = ['share-tg', 'share-wa', 'share-tw', 'share-sms', 'share-msngr', 'share-fb', 'share-ig', 'share-email'];
+    shareButtons.forEach(function(id) {
+      var btn = document.getElementById(id);
+      if (btn) {
+        btn.href = '#';
+        btn.onclick = function(e) { e.preventDefault(); doShare(id.replace('share-','')); };
+      }
+    });
 
     // Generate share card canvas with logo, message, QR code
     function generateShareCard(url, code) {
@@ -2038,20 +2020,15 @@
           ctx.drawImage(qrCanvas, qrX + 15, qrY + 15, qrSize - 30, qrSize - 30);
         }
 
-        // URL at bottom
-        ctx.fillStyle = 'rgba(255,255,255,0.6)';
-        ctx.font = '14px Arial, sans-serif';
-        ctx.fillText(url, w/2, 620);
-
         // Scan me text
         ctx.fillStyle = '#fff';
         ctx.font = 'bold 16px Arial, sans-serif';
-        ctx.fillText('SCAN OR TAP TO JOIN', w/2, 655);
+        ctx.fillText('SCAN OR TAP TO JOIN', w/2, 620);
 
-        // Footer
-        ctx.fillStyle = 'rgba(255,255,255,0.4)';
-        ctx.font = '12px Arial, sans-serif';
-        ctx.fillText('nava-peace.app', w/2, h - 30);
+        // Website at bottom
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.font = '14px Arial, sans-serif';
+        ctx.fillText('www.nava-peace.world', w/2, h - 30);
 
         // Export as PNG file
         canvas.toBlob(function(blob) {
@@ -2062,18 +2039,15 @@
     }
 
     // Show share card overlay (for Telegram WebApp / desktop fallback)
-    function showShareCardOverlay(file, text) {
+    function showShareCardOverlay(file, text, targetApp) {
       var imgURL = URL.createObjectURL(file);
       var overlay = document.createElement('div');
       overlay.id = 'share-card-overlay';
       overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;';
       overlay.innerHTML =
-        '<p style="color:#fff;font-size:14px;margin-bottom:12px;text-align:center;font-family:Nasalization,Arial,sans-serif;letter-spacing:2px;text-transform:uppercase;">HOLD THE IMAGE TO SAVE</p>' +
+        '<p style="color:#fff;font-size:13px;margin-bottom:12px;text-align:center;font-family:Nasalization,Arial,sans-serif;letter-spacing:2px;text-transform:uppercase;">HOLD THE IMAGE TO SAVE, THEN SHARE</p>' +
         '<img src="' + imgURL + '" style="max-width:280px;width:100%;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.4);margin-bottom:20px;" />' +
-        '<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">' +
-          '<button id="sco-save" style="background:#25D366;color:#fff;border:none;border-radius:24px;padding:12px 24px;font-size:14px;font-weight:bold;cursor:pointer;letter-spacing:1px;">📥 SAVE IMAGE</button>' +
-          '<button id="sco-open" style="background:#0084FF;color:#fff;border:none;border-radius:24px;padding:12px 24px;font-size:14px;font-weight:bold;cursor:pointer;letter-spacing:1px;">💬 OPEN MESSENGER</button>' +
-        '</div>' +
+        '<button id="sco-save" style="background:#3AACDF;color:#fff;border:none;border-radius:24px;padding:14px 32px;font-size:14px;font-weight:bold;cursor:pointer;letter-spacing:1px;margin-bottom:10px;">📥 SAVE IMAGE</button>' +
         '<button id="sco-close" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;">✕</button>';
       document.body.appendChild(overlay);
 
@@ -2087,16 +2061,6 @@
         this.style.background = '#1A6E96';
       };
 
-      // Open Messenger
-      document.getElementById('sco-open').onclick = function() {
-        var messengerURL = 'https://m.me/';
-        if (NAVA_TG.isTelegram) {
-          Telegram.WebApp.openLink(messengerURL);
-        } else {
-          window.open(messengerURL, '_blank');
-        }
-      };
-
       // Close overlay
       document.getElementById('sco-close').onclick = function() {
         overlay.remove();
@@ -2106,24 +2070,6 @@
         if (e.target === overlay) { overlay.remove(); URL.revokeObjectURL(imgURL); }
       };
     }
-
-    // Facebook share
-    var fbURL = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(inviteURL) + '&quote=' + encodeURIComponent('The world talks about peace. Let\'s practice it. Join NAVA PEACE today. 🕊');
-    var fbBtn = document.getElementById('share-fb');
-    fbBtn.href = fbURL;
-    fbBtn.target = '_blank';
-    fbBtn.onclick = function(e) {
-      if (NAVA_TG.isTelegram) {
-        e.preventDefault();
-        Telegram.WebApp.openLink(fbURL);
-      }
-    };
-
-    // Email share
-    var emailSubject = encodeURIComponent("NAVA PEACE – Join the movement 🕊");
-    var emailBody = encodeURIComponent("The world talks about peace. Join NAVA PEACE today: " + inviteURL);
-    var emailBtn = document.getElementById("share-email");
-    if (emailBtn) emailBtn.href = "mailto:?subject=" + emailSubject + "&body=" + emailBody;
 
     // Load peace points
     loadPeacePoints(refCode);
