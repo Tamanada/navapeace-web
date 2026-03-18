@@ -1198,7 +1198,9 @@
       <!-- Col 4: Facebook + Messenger -->
       <div class="share-col">
         <a class="share-btn fb" id="share-fb" href="#" target="_blank">
-          <div class="share-btn-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></div>
+          <div class="share-btn-icon" style="width:64px;height:64px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:4px;">
+            <span style="font-family:Nasalization,Arial,sans-serif;font-size:6.5px;letter-spacing:1px;color:#fff;text-transform:uppercase;text-align:center;line-height:1.4;font-weight:normal;">NAVA PEACE<br>LET&#39;S MAKE<br><span style="font-size:9px;letter-spacing:1.5px;">PEACE</span><br>GREAT AGAIN</span>
+          </div>
           <span>FACEBOOK</span>
         </a>
         <a class="share-btn msngr" id="share-msngr" href="#">
@@ -1927,13 +1929,13 @@
 
     function doShare(targetApp) {
       generateShareCard(inviteURL, refCode).then(function(file) {
-        // Instagram: always auto-save + open Instagram
-        if (targetApp === 'ig') {
+        // Instagram & X: always auto-save image + open app
+        if (targetApp === 'ig' || targetApp === 'tw') {
           var link = document.createElement('a');
           link.download = 'nava-peace-invite.png';
           link.href = URL.createObjectURL(file);
           link.click();
-          setTimeout(function() { URL.revokeObjectURL(link.href); openDirectShare('ig'); }, 600);
+          setTimeout(function() { URL.revokeObjectURL(link.href); openDirectShare(targetApp); }, 600);
           return;
         }
         // Messenger on Telegram: auto-save image + open m.me
@@ -1963,7 +1965,7 @@
         tg:    'https://t.me/share/url?url=' + encodedURL + '&text=' + encodedShort,
         wa:    'https://wa.me/?text=' + encodedText,
         tw:    'https://x.com/intent/tweet?text=' + encodedText,
-        sms:   'sms:?body=' + encodedText,
+        sms:   (navigator.userAgent.match(/Android/i) ? 'sms:?body=' : 'sms:&body=') + encodedText,
         msngr: NAVA_TG.isTelegram ? 'https://m.me/' : 'fb-messenger://share/?link=' + encodedURL,
         fb:    'https://www.facebook.com/sharer/sharer.php?u=' + encodedURL + '&quote=' + encodedShort,
         ig:    'https://www.instagram.com/nava.peace.world/',
