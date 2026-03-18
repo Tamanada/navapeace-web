@@ -620,7 +620,7 @@
 
     <!-- 🕊 TOTAL DOVES (seul sur la ligne du bas) -->
     <div class="counter-row-bottom" style="border-top:1px solid rgba(255,255,255,0.18);margin-top:16px;padding-top:16px;">
-      <div class="counter-item" id="cnt-doves-item">
+      <div class="counter-item info-trigger" id="cnt-doves-item" onclick="openPopover('doves')">
         <span class="num" id="cnt-doves">—</span>
         <span class="lbl">🕊 TOTAL DOVES</span>
       </div>
@@ -1250,6 +1250,25 @@
       get title() { return t('lbl_today_map'); },
       numId: 'cnt-today',
       get text() { return t('pop_today_text').replace(/\n/g, '<br>'); }
+    },
+    doves: {
+      icon:  '🕊',
+      get title() { return 'TOTAL DOVES'; },
+      numId: 'cnt-doves',
+      buildContent: function(num) {
+        var actions = document.getElementById('cnt-today') ?
+          parseInt((document.getElementById('cnt-people')?.textContent || '0').replace(/[^\d]/g, '')) : 0;
+        return `
+          <div style="margin:10px 0;text-align:center;">
+            <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:14px;margin:8px 0;font-size:13px;line-height:2;">
+              <span style="color:#3AACDF;font-weight:700;font-size:16px;">TOTAL DOVES = ACTIONS + REFERRAL BONUSES</span><br><br>
+              🕊 Each daily vote = <span style="color:#fff;font-weight:700;">1 dove</span><br>
+              🤝 Each referral vote = <span style="color:#fff;font-weight:700;">+1 bonus dove</span> for the inviter<br><br>
+              <span style="color:rgba(255,255,255,0.5);font-size:11px;">Example: You vote (1 dove) + your friend votes via your link (+1 bonus dove) = 2 doves</span>
+            </div>
+            <p style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:10px;">The PEACE page shows "Total Actions" (votes only, no bonuses)</p>
+          </div>`;
+      }
     }
   };
 
