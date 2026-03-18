@@ -1927,19 +1927,30 @@
 
     function doShare(targetApp) {
       generateShareCard(inviteURL, refCode).then(function(file) {
-        // Try Web Share API with image (works on mobile browsers, NOT in Telegram WebView)
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          navigator.share({ text: shareText, files: [file] }).catch(function(){});
-        } else {
-          // Auto-save image first, then open platform link
+        // Instagram: always auto-save + open Instagram
+        if (targetApp === 'ig') {
           var link = document.createElement('a');
           link.download = 'nava-peace-invite.png';
           link.href = URL.createObjectURL(file);
           link.click();
-          setTimeout(function() {
-            URL.revokeObjectURL(link.href);
-            openDirectShare(targetApp);
-          }, 600);
+          setTimeout(function() { URL.revokeObjectURL(link.href); openDirectShare('ig'); }, 600);
+          return;
+        }
+        // Messenger on Telegram: auto-save image + open m.me
+        if (targetApp === 'msngr' && NAVA_TG.isTelegram) {
+          var link = document.createElement('a');
+          link.download = 'nava-peace-invite.png';
+          link.href = URL.createObjectURL(file);
+          link.click();
+          setTimeout(function() { URL.revokeObjectURL(link.href); openDirectShare('msngr'); }, 600);
+          return;
+        }
+        // Try Web Share API with image (works on mobile browsers + PC)
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({ text: shareText, files: [file] }).catch(function(){});
+        } else {
+          // Fallback: direct platform link
+          openDirectShare(targetApp);
         }
       });
     }
@@ -1953,7 +1964,7 @@
         wa:    'https://wa.me/?text=' + encodedText,
         tw:    'https://x.com/intent/tweet?text=' + encodedText,
         sms:   'sms:?body=' + encodedText,
-        msngr: 'fb-messenger://share/?link=' + encodedURL,
+        msngr: NAVA_TG.isTelegram ? 'https://m.me/' : 'fb-messenger://share/?link=' + encodedURL,
         fb:    'https://www.facebook.com/sharer/sharer.php?u=' + encodedURL + '&quote=' + encodedShort,
         ig:    'https://www.instagram.com/nava.peace.world/',
         email: 'mailto:?subject=' + encodeURIComponent('NAVA PEACE – Join the movement 🕊') + '&body=' + encodedText
