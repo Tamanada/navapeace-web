@@ -582,8 +582,27 @@
 
     // ── Vérifier si déjà cliqué aujourd'hui ────────────────────────
     function checkDone() {
+      // 1. Vérification locale rapide
       if (localStorage.getItem(PEACE_KEY) === TODAY) {
-        setDone(false); // déjà voté → countdown direct, sans thank you
+        setDone(false);
+        return;
+      }
+      // 2. Vérification DB (cross-device sync)
+      if (sb) {
+        var uid = localStorage.getItem('nava_peace_uid');
+        if (uid) {
+          var todayStart = new Date(); todayStart.setHours(0,0,0,0);
+          sb.from('peace_votes')
+            .select('id', { count: 'exact', head: true })
+            .eq('user_uid', uid)
+            .gte('created_at', todayStart.toISOString())
+            .then(function(res) {
+              if (res.count && res.count > 0) {
+                localStorage.setItem(PEACE_KEY, TODAY);
+                setDone(false);
+              }
+            }).catch(function(){});
+        }
       }
     }
 
