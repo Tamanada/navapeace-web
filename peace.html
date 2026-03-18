@@ -392,6 +392,66 @@
       align-self: center;
     }
 
+    /* ── INFO POPOVER ── */
+    .info-pop-overlay {
+      display: none;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 99999;
+      justify-content: center; align-items: center;
+    }
+    .info-pop-overlay.open { display: flex; }
+    .info-pop-box {
+      background: linear-gradient(135deg, #0D4F6B, #1A6E96);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 20px;
+      padding: 28px 24px;
+      max-width: 320px;
+      width: 90%;
+      text-align: center;
+      color: #fff;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    }
+    .info-pop-box h3 {
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 16px;
+      letter-spacing: 3px;
+      margin-bottom: 16px;
+    }
+    .info-pop-box .formula {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      padding: 14px;
+      margin: 12px 0;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+    .info-pop-box .formula .val {
+      color: #3AACDF;
+      font-weight: 700;
+      font-size: 15px;
+    }
+    .info-pop-box p {
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.5;
+      margin-top: 10px;
+    }
+    .info-pop-close {
+      margin-top: 16px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: #fff;
+      border-radius: 20px;
+      padding: 8px 24px;
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 11px;
+      letter-spacing: 2px;
+      cursor: pointer;
+    }
+    .cnt-item { cursor: pointer; }
+
     /* ── BOTTOM NAV ── */
     .bottom-nav {
       position: fixed;
@@ -475,12 +535,12 @@
 
     <!-- COUNTERS -->
     <div class="counters">
-      <div class="cnt-item">
+      <div class="cnt-item" onclick="openInfoPop('today')">
         <span class="cnt-num" id="cnt-today">—</span>
         <span class="cnt-lbl" data-i18n="cnt_today_lbl">TODAY</span>
       </div>
       <div class="cnt-sep"></div>
-      <div class="cnt-item">
+      <div class="cnt-item" onclick="openInfoPop('total')">
         <span class="cnt-num" id="cnt-total">—</span>
         <span class="cnt-lbl" data-i18n="cnt_total_lbl">TOTAL ACTIONS</span>
       </div>
@@ -576,6 +636,16 @@
           &darr; DOWNLOAD IMAGE
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- INFO POPOVER -->
+  <div class="info-pop-overlay" id="infoPop" onclick="if(event.target===this)closeInfoPop()">
+    <div class="info-pop-box">
+      <h3 id="info-pop-title"></h3>
+      <div class="formula" id="info-pop-formula"></div>
+      <p id="info-pop-desc"></p>
+      <button class="info-pop-close" onclick="closeInfoPop()">OK</button>
     </div>
   </div>
 
@@ -1304,6 +1374,34 @@
           localStorage.setItem('nava_peace_ref_code', dbRef.referral_code);
         }
       } catch(e) { console.warn('syncStreakFromDB error', e); }
+    }
+
+    // ── Info popover for counters ──
+    function openInfoPop(type) {
+      var title = document.getElementById('info-pop-title');
+      var formula = document.getElementById('info-pop-formula');
+      var desc = document.getElementById('info-pop-desc');
+      var todayVal = document.getElementById('cnt-today').textContent;
+      var totalVal = document.getElementById('cnt-total').textContent;
+
+      if (type === 'today') {
+        title.textContent = '🕊 TODAY';
+        formula.innerHTML =
+          '<span class="val">' + todayVal + '</span> actions today<br>' +
+          '= people who chose peace today';
+        desc.textContent = 'Each person can vote once per day. This counter resets at midnight.';
+      } else {
+        title.textContent = '🕊 TOTAL ACTIONS';
+        formula.innerHTML =
+          '<span class="val">' + totalVal + '</span> total actions<br><br>' +
+          '1 action = 1 person choosing peace for 1 day<br>' +
+          'Every daily click counts as a new action';
+        desc.textContent = 'This is the total number of peace actions since launch. The MAP page shows TOTAL DOVES which also includes referral bonuses.';
+      }
+      document.getElementById('infoPop').classList.add('open');
+    }
+    function closeInfoPop() {
+      document.getElementById('infoPop').classList.remove('open');
     }
 
     checkDone();
