@@ -1357,7 +1357,12 @@ function cfpSearch(input){
 }
 
 function cfpToggleAll(key,checked){
-  colFilters[key].clear();
+  const s=colFilters[key];
+  s.clear();
+  if(!checked){
+    // Deselect all: add a dummy value so filter is active but matches nothing
+    s.add('__none__');
+  }
   document.querySelectorAll('#col-filter-popup .cfp-item[data-label] input').forEach(cb=>cb.checked=checked);
   applyFilters();
 }
