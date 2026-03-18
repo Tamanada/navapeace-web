@@ -875,7 +875,7 @@
       const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       const todayStr = new Date().toISOString().split('T')[0];
       const { data, error } = await sb
-        .from('peace_votes')
+        .from('active_votes')
         .select('user_uid, created_at')
         .gte('created_at', todayStr);
       if (error) throw error;
@@ -896,7 +896,7 @@
 
         // Tous les votes
         const { data, error } = await sb
-          .from('peace_votes')
+          .from('active_votes')
           .select('user_uid, country, created_at, referred_by')
           .not('country', 'is', null);
 

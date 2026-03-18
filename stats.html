@@ -383,8 +383,8 @@
         const TOMORROW = d.toISOString().split('T')[0];
 
         const [totalR, todayR, usersR] = await Promise.all([
-          sb.from('peace_votes').select('*', { count: 'exact', head: true }),
-          sb.from('peace_votes').select('*', { count: 'exact', head: true })
+          sb.from('active_votes').select('*', { count: 'exact', head: true }),
+          sb.from('active_votes').select('*', { count: 'exact', head: true })
             .gte('created_at', TODAY + 'T00:00:00Z')
             .lt('created_at', TOMORROW + 'T00:00:00Z'),
           sb.from('peace_messages').select('*', { count: 'exact', head: true }),
@@ -397,7 +397,7 @@
 
       // Countries count (distinct)
       try {
-        const { data } = await sb.from('peace_votes').select('country');
+        const { data } = await sb.from('active_votes').select('country');
         if (data) {
           const unique = new Set(data.map(r => (r.country || '').toUpperCase().trim()).filter(Boolean));
           document.getElementById('st-countries').textContent = unique.size;
@@ -410,7 +410,7 @@
       if (!sb) return;
       const container = document.getElementById('top-countries');
       try {
-        const { data } = await sb.from('peace_votes').select('country');
+        const { data } = await sb.from('active_votes').select('country');
         if (!data || !data.length) { container.innerHTML = '<p class="no-data">NO DATA YET</p>'; return; }
 
         const counts = {};
@@ -449,7 +449,7 @@
       let data = [];
       try {
         const { data: rows, error } = await sb
-          .from('peace_votes')
+          .from('active_votes')
           .select('age, gender')
           .not('country', 'is', null);
         if (!error && rows) data = rows;
