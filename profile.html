@@ -1927,15 +1927,15 @@
 
     function doShare(targetApp) {
       generateShareCard(inviteURL, refCode).then(function(file) {
-        // Instagram: auto-save image then open Instagram
-        if (targetApp === 'ig') {
+        // Instagram & Email: auto-save image then open app
+        if (targetApp === 'ig' || targetApp === 'email') {
           var link = document.createElement('a');
           link.download = 'nava-peace-invite.png';
           link.href = URL.createObjectURL(file);
           link.click();
           setTimeout(function() {
             URL.revokeObjectURL(link.href);
-            openDirectShare('ig');
+            openDirectShare(targetApp);
           }, 500);
           return;
         }
