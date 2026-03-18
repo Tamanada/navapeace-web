@@ -1253,8 +1253,8 @@ function renderUsersTable() {
       <td>${u.age||'—'}</td>
       <td>${u.gender||'—'}</td>
       <td><span class="days-badge">${u.days}</span></td>
-      <td style="text-align:center;font-size:10px;color:${u.refDovesToday>0?'#4caf50':'var(--w40)'};">${u.refDovesToday||'—'}</td>
-      <td style="text-align:center;font-size:10px;color:${u.refDovesTotal>0?'#29b6f6':'var(--w40)'};">${u.refDovesTotal||'—'}</td>
+      <td style="text-align:center;font-weight:bold;color:${u.refDovesToday>0?'#66ff99':'var(--w40)'};">${u.refDovesToday||'—'}</td>
+      <td style="text-align:center;font-weight:bold;color:${u.refDovesTotal>0?'#fff':'var(--w40)'};">${u.refDovesTotal||'—'}</td>
       <td style="text-align:center;"><span class="days-badge" style="background:rgba(255,215,0,0.15);color:#ffd700;">${u.totalScore}</span></td>
       <td class="ref-code">${u.ref_code||'—'}</td>
       <td style="font-size:9px;color:var(--w40);">${u.referred_by||'—'}</td>
