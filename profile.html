@@ -980,6 +980,50 @@
     <p class="tagline" id="daily-quote" style="font-family:'Nasalization',Arial,sans-serif;font-size:13px;font-weight:bold;letter-spacing:2px;line-height:1.6;max-width:320px;text-align:center;opacity:1;color:#fff;text-transform:uppercase;text-wrap:balance;"></p>
   </div>
 
+  <!-- MY IDENTITY (collapsible) -->
+  <div class="card card-collapse" id="id-card" onclick="toggleCard('id-card')">
+    <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('id-card',true)">
+      <p class="section-title" data-i18n="section_identity">MY IDENTITY</p>
+      <span class="card-chevron">▾</span>
+    </div>
+    <div class="card-preview">
+      <div class="pseudo-display" style="margin-bottom:0;">
+        <span class="pseudo-icon">🕊</span>
+        <span class="pseudo-name" id="pseudo-name">...</span>
+        <span class="pseudo-tag" id="pseudo-tag" data-i18n="pseudo_auto_tag">AUTO</span>
+      </div>
+    </div>
+    <div class="card-expanded" id="id-expanded">
+      <div class="pseudo-edit-area" id="pseudo-edit-area" style="display:none" onclick="event.stopPropagation()">
+        <input id="pseudo-input" type="text" class="pseudo-input" maxlength="30"
+               data-i18n-ph="pseudo_placeholder" />
+        <div class="pseudo-btn-row">
+          <button class="save-btn" onclick="savePseudo()" data-i18n="save_btn">SAVE</button>
+          <button class="edit-btn" onclick="cancelPseudo()" data-i18n="cancel_btn">CANCEL</button>
+        </div>
+      </div>
+      <button class="edit-btn" id="pseudo-change-btn" onclick="event.stopPropagation();startEditPseudo()"
+              data-i18n="pseudo_change_btn">CHANGE</button>
+
+      <!-- FIRST NAME -->
+      <div style="margin-top:18px;border-top:1px solid rgba(255,255,255,0.1);padding-top:18px;" onclick="event.stopPropagation()">
+        <p style="font-size:8px;letter-spacing:3px;color:rgba(255,255,255,0.4);margin-bottom:10px;" data-i18n="firstname_label">FIRST NAME <span style="font-size:7px;opacity:0.5;">(OPTIONAL)</span></p>
+        <div id="firstname-display-row" style="display:flex;align-items:center;gap:10px;">
+          <span id="firstname-display" style="font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.85);flex:1;">—</span>
+          <button class="edit-btn" onclick="startEditFirstname()" data-i18n="firstname_change_btn">EDIT</button>
+        </div>
+        <div id="firstname-edit-area" style="display:none;margin-top:10px;">
+          <input id="firstname-input" type="text" class="pseudo-input" maxlength="40"
+                 placeholder="Your first name…" autocomplete="given-name" />
+          <div class="pseudo-btn-row" style="margin-top:10px;">
+            <button class="save-btn" onclick="saveFirstname()" data-i18n="save_btn">SAVE</button>
+            <button class="edit-btn" onclick="cancelFirstname()" data-i18n="cancel_btn">CANCEL</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- YOUR PROFILE -->
   <div class="card card-collapse" id="my-card" onclick="toggleCard('my-card')">
     <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('my-card',true)">
@@ -1085,6 +1129,30 @@
     </div><!-- end card-body -->
   </div>
 
+  <!-- MY PEACE MESSAGE (collapsible) -->
+  <div class="card card-collapse" id="msg-card" onclick="toggleCard('msg-card')">
+    <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('msg-card',true)">
+      <p class="section-title" data-i18n="section_message">MY PEACE MESSAGE</p>
+      <span class="card-chevron">▾</span>
+    </div>
+    <p class="card-preview" id="msg-preview" style="font-size:13px;letter-spacing:1.5px;color:#fff;line-height:1.6;word-break:break-word;text-align:center;"></p>
+    <div class="card-expanded" id="msg-expanded">
+      <textarea id="peace-message-input" class="peace-textarea" maxlength="200"
+                data-i18n-ph="msg_placeholder"
+                oninput="updateCharCount()" onclick="event.stopPropagation()"></textarea>
+      <p class="char-count"><span id="char-count">0</span>/200</p>
+      <div class="share-row" onclick="event.stopPropagation()">
+        <span class="share-lbl" data-i18n="share_lbl">Share publicly</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="share-toggle" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <button class="save-btn" id="message-save-btn" onclick="event.stopPropagation();saveMessage()"
+              data-i18n="msg_save_btn">SAVE MESSAGE</button>
+    </div>
+  </div>
+
   <!-- MY DOVES -->
   <div class="card card-collapse" id="dove-card" onclick="toggleCard('dove-card')">
     <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('dove-card',true)">
@@ -1119,74 +1187,6 @@
     </div>
     <div class="card-body">
     <div id="streak-progress-inner"></div>
-    </div>
-  </div>
-
-  <!-- MY PEACE MESSAGE (collapsible) -->
-  <div class="card card-collapse" id="msg-card" onclick="toggleCard('msg-card')">
-    <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('msg-card',true)">
-      <p class="section-title" data-i18n="section_message">MY PEACE MESSAGE</p>
-      <span class="card-chevron">▾</span>
-    </div>
-    <p class="card-preview" id="msg-preview" style="font-size:13px;letter-spacing:1.5px;color:#fff;line-height:1.6;word-break:break-word;text-align:center;"></p>
-    <div class="card-expanded" id="msg-expanded">
-      <textarea id="peace-message-input" class="peace-textarea" maxlength="200"
-                data-i18n-ph="msg_placeholder"
-                oninput="updateCharCount()" onclick="event.stopPropagation()"></textarea>
-      <p class="char-count"><span id="char-count">0</span>/200</p>
-      <div class="share-row" onclick="event.stopPropagation()">
-        <span class="share-lbl" data-i18n="share_lbl">Share publicly</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="share-toggle" />
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-      <button class="save-btn" id="message-save-btn" onclick="event.stopPropagation();saveMessage()"
-              data-i18n="msg_save_btn">SAVE MESSAGE</button>
-    </div>
-  </div>
-
-  <!-- MY IDENTITY (collapsible) -->
-  <div class="card card-collapse" id="id-card" onclick="toggleCard('id-card')">
-    <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('id-card',true)">
-      <p class="section-title" data-i18n="section_identity">MY IDENTITY</p>
-      <span class="card-chevron">▾</span>
-    </div>
-    <div class="card-preview">
-      <div class="pseudo-display" style="margin-bottom:0;">
-        <span class="pseudo-icon">🕊</span>
-        <span class="pseudo-name" id="pseudo-name">...</span>
-        <span class="pseudo-tag" id="pseudo-tag" data-i18n="pseudo_auto_tag">AUTO</span>
-      </div>
-    </div>
-    <div class="card-expanded" id="id-expanded">
-      <div class="pseudo-edit-area" id="pseudo-edit-area" style="display:none" onclick="event.stopPropagation()">
-        <input id="pseudo-input" type="text" class="pseudo-input" maxlength="30"
-               data-i18n-ph="pseudo_placeholder" />
-        <div class="pseudo-btn-row">
-          <button class="save-btn" onclick="savePseudo()" data-i18n="save_btn">SAVE</button>
-          <button class="edit-btn" onclick="cancelPseudo()" data-i18n="cancel_btn">CANCEL</button>
-        </div>
-      </div>
-      <button class="edit-btn" id="pseudo-change-btn" onclick="event.stopPropagation();startEditPseudo()"
-              data-i18n="pseudo_change_btn">CHANGE</button>
-
-      <!-- FIRST NAME -->
-      <div style="margin-top:18px;border-top:1px solid rgba(255,255,255,0.1);padding-top:18px;" onclick="event.stopPropagation()">
-        <p style="font-size:8px;letter-spacing:3px;color:rgba(255,255,255,0.4);margin-bottom:10px;" data-i18n="firstname_label">FIRST NAME <span style="font-size:7px;opacity:0.5;">(OPTIONAL)</span></p>
-        <div id="firstname-display-row" style="display:flex;align-items:center;gap:10px;">
-          <span id="firstname-display" style="font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.85);flex:1;">—</span>
-          <button class="edit-btn" onclick="startEditFirstname()" data-i18n="firstname_change_btn">EDIT</button>
-        </div>
-        <div id="firstname-edit-area" style="display:none;margin-top:10px;">
-          <input id="firstname-input" type="text" class="pseudo-input" maxlength="40"
-                 placeholder="Your first name…" autocomplete="given-name" />
-          <div class="pseudo-btn-row" style="margin-top:10px;">
-            <button class="save-btn" onclick="saveFirstname()" data-i18n="save_btn">SAVE</button>
-            <button class="edit-btn" onclick="cancelFirstname()" data-i18n="cancel_btn">CANCEL</button>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
