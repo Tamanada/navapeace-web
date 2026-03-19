@@ -99,12 +99,13 @@
     }
 
     .section-title {
-      font-size: 12px;
+      font-size: 16px;
       letter-spacing: 3px;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.85);
+      color: #fff;
       margin-bottom: 12px;
       text-align: center;
+      font-weight: 600;
     }
 
     /* ── BARS ── */
@@ -542,7 +543,7 @@
       display: flex;
       gap: 0;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
       width: 100%;
     }
 
@@ -701,11 +702,24 @@
     .pseudo-btn-row .edit-btn { padding: 12px 16px; }
 
     /* ── COLLAPSIBLE CARDS ── */
-    .card-collapse { cursor: pointer; transition: all 0.3s ease; }
+    .card-collapse { cursor: pointer; }
+    .card-collapse .card-body { display: none; margin-top: 14px; }
+    .card-collapse.open .card-body { display: block; }
     .card-collapse .card-expanded { display: none; margin-top: 14px; }
     .card-collapse.open .card-expanded { display: block; }
-    .card-collapse.open { cursor: default; }
-    .card-collapse .section-title { margin-bottom: 8px; }
+    .card-collapse .section-title { margin-bottom: 0; }
+    .card-tap-header {
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; padding: 2px 0;
+    }
+    .card-tap-header .section-title { margin-bottom: 0; }
+    .card-chevron {
+      position: absolute; right: 0;
+      font-size: 16px; color: rgba(255,255,255,0.5);
+      transition: transform 0.25s ease; user-select: none;
+    }
+    .card-collapse.open .card-chevron { transform: rotate(180deg); }
 
     /* ── PEACE MESSAGE CARD ── */
     .peace-textarea {
@@ -967,11 +981,13 @@
   </div>
 
   <!-- YOUR PROFILE -->
-  <div class="card" id="my-card">
-    <div class="card-header">
+  <div class="card card-collapse" id="my-card" onclick="toggleCard('my-card')">
+    <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('my-card',true)">
       <p class="section-title" data-i18n="section_profile">YOUR PROFILE</p>
-      <button class="edit-btn" onclick="toggleEdit()" data-i18n="edit_btn">EDIT</button>
+      <span class="card-chevron">▾</span>
     </div>
+    <div class="card-body">
+    <button class="edit-btn" onclick="event.stopPropagation();toggleEdit()" data-i18n="edit_btn" style="display:block;margin:0 auto 14px;">EDIT</button>
     <div class="my-profile" id="my-profile">
       <p class="no-data">VOTE FIRST TO SEE YOUR PROFILE</p>
     </div>
@@ -1066,12 +1082,17 @@
       </div>
       <button class="save-btn" onclick="saveProfile()" data-i18n="save_btn">SAVE</button>
     </div>
+    </div><!-- end card-body -->
   </div>
 
   <!-- MY DOVES -->
-  <div class="card">
-    <p class="section-title" data-i18n="section_doves">MY DOVES</p>
-    <div class="dove-card-inner" onclick="openDovePopup()">
+  <div class="card card-collapse" id="dove-card" onclick="toggleCard('dove-card')">
+    <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('dove-card',true)">
+      <p class="section-title" data-i18n="section_doves">MY DOVES</p>
+      <span class="card-chevron">▾</span>
+    </div>
+    <div class="card-body">
+    <div class="dove-card-inner" onclick="event.stopPropagation();openDovePopup()">
       <span class="dove-icon">🕊</span>
       <span class="dove-total" id="dove-total">—</span>
       <span class="dove-label" data-i18n="dove_total_lbl">TOTAL DOVES</span>
@@ -1087,17 +1108,26 @@
         </div>
       </div>
     </div>
+    </div><!-- end card-body -->
   </div>
 
   <!-- STREAK PROGRESS -->
-  <div class="card" id="streak-card" style="display:none;">
-    <p class="section-title" data-i18n="streak_title">🔥 PEACE STREAK</p>
+  <div class="card card-collapse" id="streak-card" style="display:none;" onclick="toggleCard('streak-card')">
+    <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('streak-card',true)">
+      <p class="section-title" data-i18n="streak_title">🔥 PEACE STREAK</p>
+      <span class="card-chevron">▾</span>
+    </div>
+    <div class="card-body">
     <div id="streak-progress-inner"></div>
+    </div>
   </div>
 
   <!-- MY PEACE MESSAGE (collapsible) -->
   <div class="card card-collapse" id="msg-card" onclick="toggleCard('msg-card')">
-    <p class="section-title" data-i18n="section_message">MY PEACE MESSAGE</p>
+    <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('msg-card',true)">
+      <p class="section-title" data-i18n="section_message">MY PEACE MESSAGE</p>
+      <span class="card-chevron">▾</span>
+    </div>
     <p class="card-preview" id="msg-preview" style="font-size:13px;letter-spacing:1.5px;color:#fff;line-height:1.6;word-break:break-word;text-align:center;"></p>
     <div class="card-expanded" id="msg-expanded">
       <textarea id="peace-message-input" class="peace-textarea" maxlength="200"
@@ -1118,7 +1148,10 @@
 
   <!-- MY IDENTITY (collapsible) -->
   <div class="card card-collapse" id="id-card" onclick="toggleCard('id-card')">
-    <p class="section-title" data-i18n="section_identity">MY IDENTITY</p>
+    <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('id-card',true)">
+      <p class="section-title" data-i18n="section_identity">MY IDENTITY</p>
+      <span class="card-chevron">▾</span>
+    </div>
     <div class="card-preview">
       <div class="pseudo-display" style="margin-bottom:0;">
         <span class="pseudo-icon">🕊</span>
@@ -1158,9 +1191,12 @@
   </div>
 
   <!-- INVITE FRIENDS -->
-  <div class="card" id="invite-card">
-    <p class="section-title" data-i18n="section_invite">INVITE FRIENDS</p>
-
+  <div class="card card-collapse" id="invite-card" onclick="toggleCard('invite-card')">
+    <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('invite-card',true)">
+      <p class="section-title" data-i18n="section_invite">INVITE FRIENDS</p>
+      <span class="card-chevron">▾</span>
+    </div>
+    <div class="card-body">
     <div class="invite-link-row">
       <span id="ref-link-display">GENERATING LINK...</span>
       <button class="copy-btn" onclick="copyLink()" data-i18n="copy_btn">COPY</button>
@@ -1237,6 +1273,7 @@
       </div>
       <button class="ref-see-btn" onclick="openReferralsPopup()" data-i18n="referrals_see_btn">SEE REFERRALS</button>
     </div>
+    </div><!-- end card-body -->
   </div>
 
 
@@ -1732,10 +1769,13 @@
   }
 
   // ── COLLAPSIBLE CARDS ──────────────────────────────────────────
-  function toggleCard(id) {
+  function toggleCard(id, fromHeader) {
     var card = document.getElementById(id);
-    if (card.classList.contains('open')) return; // don't close by clicking inside
-    card.classList.add('open');
+    if (fromHeader) {
+      card.classList.toggle('open');
+    } else {
+      if (!card.classList.contains('open')) card.classList.add('open');
+    }
   }
   // Close card when clicking outside
   document.addEventListener('click', function(e) {
