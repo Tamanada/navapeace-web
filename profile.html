@@ -1239,6 +1239,32 @@
   </div>
 
 
+  <!-- FEEDBACK BUTTON -->
+  <div style="text-align:center;padding:18px 24px 28px;">
+    <p style="font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:1.5px;color:rgba(255,255,255,0.45);text-transform:uppercase;margin:0 0 10px;">
+      🕊 A bug? A suggestion? We listen.
+    </p>
+    <button onclick="openFeedback()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:20px;color:rgba(255,255,255,0.7);font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:2px;text-transform:uppercase;padding:10px 24px;cursor:pointer;transition:all 0.2s;">
+      SEND FEEDBACK
+    </button>
+  </div>
+
+  <!-- FEEDBACK MODAL -->
+  <div id="feedbackOverlay" onclick="closeFeedback(event)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;align-items:center;justify-content:center;">
+    <div onclick="event.stopPropagation()" style="background:linear-gradient(160deg,#0a1628,#0d2240);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:28px 24px;width:88%;max-width:360px;text-align:center;">
+      <p style="font-family:Nasalization,Arial,sans-serif;font-size:11px;letter-spacing:3px;color:#fff;margin:0 0 6px;">FEEDBACK</p>
+      <p style="font-size:9px;color:rgba(255,255,255,0.45);letter-spacing:1px;margin:0 0 18px;font-family:Nasalization,Arial,sans-serif;">SHARE A PROBLEM OR SUGGESTION</p>
+      <textarea id="feedbackText" placeholder="Write your message here..." maxlength="500"
+        style="width:100%;height:120px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.2);border-radius:12px;color:#fff;font-size:12px;padding:12px;resize:none;box-sizing:border-box;font-family:Arial,sans-serif;outline:none;"></textarea>
+      <p id="feedbackCount" style="font-size:9px;color:rgba(255,255,255,0.3);text-align:right;margin:4px 0 16px;font-family:Nasalization,Arial,sans-serif;">0 / 500</p>
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button onclick="closeFeedback()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;color:rgba(255,255,255,0.5);font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:1.5px;padding:10px 20px;cursor:pointer;">CANCEL</button>
+        <button onclick="submitFeedback()" id="feedbackSendBtn" style="background:rgba(100,160,255,0.2);border:1px solid rgba(100,160,255,0.4);border-radius:12px;color:#7ab4ff;font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:1.5px;padding:10px 24px;cursor:pointer;">SEND 🕊</button>
+      </div>
+      <p id="feedbackStatus" style="font-size:9px;color:rgba(255,255,255,0.4);margin:12px 0 0;font-family:Nasalization,Arial,sans-serif;min-height:14px;"></p>
+    </div>
+  </div>
+
   <!-- DOVE POPOVER -->
   <div class="dove-overlay" id="doveOverlay" onclick="closeDovePopup(event)">
     <div class="dove-popup">
@@ -2351,6 +2377,46 @@
       console.warn('Reminder error', e);
       btn.textContent = t('remind_btn');
       btn.disabled = false;
+    }
+  }
+  </script>
+
+  <!-- FEEDBACK JS -->
+  <script>
+  function openFeedback() {
+    document.getElementById('feedbackOverlay').style.display = 'flex';
+    document.getElementById('feedbackText').value = '';
+    document.getElementById('feedbackCount').textContent = '0 / 500';
+    document.getElementById('feedbackStatus').textContent = '';
+    document.getElementById('feedbackSendBtn').disabled = false;
+    document.getElementById('feedbackText').addEventListener('input', function() {
+      document.getElementById('feedbackCount').textContent = this.value.length + ' / 500';
+    });
+  }
+  function closeFeedback(e) {
+    if (!e || e.target === document.getElementById('feedbackOverlay')) {
+      document.getElementById('feedbackOverlay').style.display = 'none';
+    }
+  }
+  async function submitFeedback() {
+    var msg = document.getElementById('feedbackText').value.trim();
+    if (!msg) { document.getElementById('feedbackStatus').textContent = 'Please write a message.'; return; }
+    var uid = localStorage.getItem('nava_peace_uid') || 'anonymous';
+    var btn = document.getElementById('feedbackSendBtn');
+    btn.disabled = true;
+    btn.textContent = '···';
+    try {
+      var sbF = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      var { error } = await sbF.from('feedback').insert({ user_uid: uid, message: msg });
+      if (error) throw error;
+      document.getElementById('feedbackStatus').textContent = '🕊 Message sent. Thank you!';
+      document.getElementById('feedbackStatus').style.color = '#7ab4ff';
+      setTimeout(function() { closeFeedback(); }, 2000);
+    } catch(e) {
+      document.getElementById('feedbackStatus').textContent = 'Error. Please try again.';
+      document.getElementById('feedbackStatus').style.color = '#ff7a7a';
+      btn.disabled = false;
+      btn.textContent = 'SEND 🕊';
     }
   }
   </script>
