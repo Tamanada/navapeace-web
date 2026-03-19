@@ -1240,28 +1240,47 @@
 
 
   <!-- FEEDBACK BUTTON -->
-  <div style="text-align:center;padding:18px 24px 28px;">
-    <p style="font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:1.5px;color:rgba(255,255,255,0.45);text-transform:uppercase;margin:0 0 10px;">
+  <div style="text-align:center;padding:18px 24px 28px;position:relative;">
+    <p id="feedbackInviteText" style="font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:1.5px;color:rgba(255,255,255,0.45);text-transform:uppercase;margin:0 0 10px;">
       🕊 A bug? A suggestion? We listen.
     </p>
-    <button onclick="openFeedback()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:20px;color:rgba(255,255,255,0.7);font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:2px;text-transform:uppercase;padding:10px 24px;cursor:pointer;transition:all 0.2s;">
-      SEND FEEDBACK
-    </button>
+    <div style="position:relative;display:inline-block;">
+      <button id="feedbackMainBtn" onclick="openFeedback()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:20px;color:rgba(255,255,255,0.7);font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:2px;text-transform:uppercase;padding:10px 24px;cursor:pointer;transition:all 0.2s;">
+        SEND FEEDBACK
+      </button>
+      <span id="feedbackBadge" style="display:none;position:absolute;top:-6px;right:-6px;background:#ff5f5f;color:#fff;font-size:9px;font-weight:700;width:18px;height:18px;border-radius:50%;line-height:18px;text-align:center;">!</span>
+    </div>
   </div>
 
   <!-- FEEDBACK MODAL -->
   <div id="feedbackOverlay" onclick="closeFeedback(event)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;align-items:center;justify-content:center;">
-    <div onclick="event.stopPropagation()" style="background:linear-gradient(160deg,#0a1628,#0d2240);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:28px 24px;width:88%;max-width:360px;text-align:center;">
-      <p style="font-family:Nasalization,Arial,sans-serif;font-size:11px;letter-spacing:3px;color:#fff;margin:0 0 6px;">FEEDBACK</p>
-      <p style="font-size:9px;color:rgba(255,255,255,0.45);letter-spacing:1px;margin:0 0 18px;font-family:Nasalization,Arial,sans-serif;">SHARE A PROBLEM OR SUGGESTION</p>
-      <textarea id="feedbackText" placeholder="Write your message here..." maxlength="500"
-        style="width:100%;height:120px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.2);border-radius:12px;color:#fff;font-size:12px;padding:12px;resize:none;box-sizing:border-box;font-family:Arial,sans-serif;outline:none;"></textarea>
-      <p id="feedbackCount" style="font-size:9px;color:rgba(255,255,255,0.3);text-align:right;margin:4px 0 16px;font-family:Nasalization,Arial,sans-serif;">0 / 500</p>
-      <div style="display:flex;gap:10px;justify-content:center;">
-        <button onclick="closeFeedback()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;color:rgba(255,255,255,0.5);font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:1.5px;padding:10px 20px;cursor:pointer;">CANCEL</button>
-        <button onclick="submitFeedback()" id="feedbackSendBtn" style="background:rgba(100,160,255,0.2);border:1px solid rgba(100,160,255,0.4);border-radius:12px;color:#7ab4ff;font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:1.5px;padding:10px 24px;cursor:pointer;">SEND 🕊</button>
+    <div onclick="event.stopPropagation()" style="background:linear-gradient(160deg,#0a1628,#0d2240);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:28px 24px;width:88%;max-width:360px;text-align:center;max-height:85vh;overflow-y:auto;">
+
+      <!-- VIEW: replies list -->
+      <div id="fbViewReplies" style="display:none;">
+        <p style="font-family:Nasalization,Arial,sans-serif;font-size:11px;letter-spacing:3px;color:#fff;margin:0 0 4px;">MESSAGES</p>
+        <p style="font-size:9px;color:rgba(255,255,255,0.4);letter-spacing:1px;margin:0 0 18px;font-family:Nasalization,Arial,sans-serif;">YOUR FEEDBACK & REPLIES</p>
+        <div id="fbRepliesList" style="text-align:left;display:flex;flex-direction:column;gap:12px;margin-bottom:18px;"></div>
+        <div style="display:flex;gap:10px;justify-content:center;">
+          <button onclick="showFbView('new')" style="background:rgba(100,160,255,0.15);border:1px solid rgba(100,160,255,0.4);border-radius:12px;color:#7ab4ff;font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:1.5px;padding:10px 20px;cursor:pointer;">+ NEW MESSAGE</button>
+          <button onclick="closeFeedback()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;color:rgba(255,255,255,0.5);font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:1.5px;padding:10px 20px;cursor:pointer;">CLOSE</button>
+        </div>
       </div>
-      <p id="feedbackStatus" style="font-size:9px;color:rgba(255,255,255,0.4);margin:12px 0 0;font-family:Nasalization,Arial,sans-serif;min-height:14px;"></p>
+
+      <!-- VIEW: new message form -->
+      <div id="fbViewNew">
+        <p style="font-family:Nasalization,Arial,sans-serif;font-size:11px;letter-spacing:3px;color:#fff;margin:0 0 6px;">FEEDBACK</p>
+        <p style="font-size:9px;color:rgba(255,255,255,0.45);letter-spacing:1px;margin:0 0 18px;font-family:Nasalization,Arial,sans-serif;">SHARE A PROBLEM OR SUGGESTION</p>
+        <textarea id="feedbackText" placeholder="Write your message here..." maxlength="500"
+          style="width:100%;height:120px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.2);border-radius:12px;color:#fff;font-size:12px;padding:12px;resize:none;box-sizing:border-box;font-family:Arial,sans-serif;outline:none;"></textarea>
+        <p id="feedbackCount" style="font-size:9px;color:rgba(255,255,255,0.3);text-align:right;margin:4px 0 16px;font-family:Nasalization,Arial,sans-serif;">0 / 500</p>
+        <div style="display:flex;gap:10px;justify-content:center;">
+          <button onclick="closeFeedback()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;color:rgba(255,255,255,0.5);font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:1.5px;padding:10px 20px;cursor:pointer;">CANCEL</button>
+          <button onclick="submitFeedback()" id="feedbackSendBtn" style="background:rgba(100,160,255,0.2);border:1px solid rgba(100,160,255,0.4);border-radius:12px;color:#7ab4ff;font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:1.5px;padding:10px 24px;cursor:pointer;">SEND 🕊</button>
+        </div>
+        <p id="feedbackStatus" style="font-size:9px;color:rgba(255,255,255,0.4);margin:12px 0 0;font-family:Nasalization,Arial,sans-serif;min-height:14px;"></p>
+      </div>
+
     </div>
   </div>
 
@@ -2383,31 +2402,102 @@
 
   <!-- FEEDBACK JS -->
   <script>
-  function openFeedback() {
+  var _sbFeedback = null;
+  function _getSbF() {
+    if (!_sbFeedback) _sbFeedback = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    return _sbFeedback;
+  }
+
+  // Check for unread replies on page load
+  async function checkFeedbackReplies() {
+    var uid = localStorage.getItem('nava_peace_uid');
+    if (!uid) return;
+    try {
+      var { data } = await _getSbF().from('feedback')
+        .select('id,message,reply,created_at')
+        .eq('user_uid', uid)
+        .eq('status', 'replied')
+        .eq('user_seen', false);
+      if (data && data.length > 0) {
+        document.getElementById('feedbackBadge').style.display = 'block';
+        document.getElementById('feedbackInviteText').textContent = '💬 You have a reply from the team!';
+        document.getElementById('feedbackInviteText').style.color = '#7ab4ff';
+        document.getElementById('feedbackMainBtn').style.borderColor = '#7ab4ff';
+        document.getElementById('feedbackMainBtn').style.color = '#7ab4ff';
+        document.getElementById('feedbackMainBtn').textContent = 'VIEW REPLY';
+      }
+    } catch(e) {}
+  }
+
+  function showFbView(view) {
+    document.getElementById('fbViewReplies').style.display = view === 'replies' ? 'block' : 'none';
+    document.getElementById('fbViewNew').style.display = view === 'new' ? 'block' : 'none';
+  }
+
+  async function openFeedback() {
     document.getElementById('feedbackOverlay').style.display = 'flex';
     document.getElementById('feedbackText').value = '';
     document.getElementById('feedbackCount').textContent = '0 / 500';
     document.getElementById('feedbackStatus').textContent = '';
     document.getElementById('feedbackSendBtn').disabled = false;
-    document.getElementById('feedbackText').addEventListener('input', function() {
+    document.getElementById('feedbackSendBtn').textContent = 'SEND 🕊';
+    document.getElementById('feedbackText').oninput = function() {
       document.getElementById('feedbackCount').textContent = this.value.length + ' / 500';
-    });
+    };
+
+    // If there are replies, show them first
+    var uid = localStorage.getItem('nava_peace_uid');
+    if (uid) {
+      var { data } = await _getSbF().from('feedback')
+        .select('id,message,reply,status,created_at')
+        .eq('user_uid', uid)
+        .order('created_at', { ascending: false });
+      if (data && data.length > 0) {
+        // Mark all replied as seen
+        var unseenIds = data.filter(f => f.status === 'replied' && !f.user_seen).map(f => f.id);
+        if (unseenIds.length > 0) {
+          await _getSbF().from('feedback').update({ user_seen: true }).in('id', unseenIds);
+          document.getElementById('feedbackBadge').style.display = 'none';
+          document.getElementById('feedbackInviteText').textContent = '🕊 A bug? A suggestion? We listen.';
+          document.getElementById('feedbackInviteText').style.color = 'rgba(255,255,255,0.45)';
+          document.getElementById('feedbackMainBtn').style.borderColor = 'rgba(255,255,255,0.2)';
+          document.getElementById('feedbackMainBtn').style.color = 'rgba(255,255,255,0.7)';
+          document.getElementById('feedbackMainBtn').textContent = 'SEND FEEDBACK';
+        }
+        // Render messages
+        document.getElementById('fbRepliesList').innerHTML = data.map(function(fb) {
+          var d = new Date(fb.created_at).toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'2-digit' });
+          return '<div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:14px;margin-bottom:4px;">'
+            + '<p style="font-size:9px;color:rgba(255,255,255,0.35);margin:0 0 6px;font-family:Nasalization,Arial,sans-serif;">' + d + '</p>'
+            + '<p style="font-size:12px;color:rgba(255,255,255,0.85);margin:0 0 10px;line-height:1.5;">' + fb.message.replace(/</g,'&lt;') + '</p>'
+            + (fb.reply ? '<div style="background:rgba(100,160,255,0.1);border-left:2px solid #7ab4ff;padding:10px 12px;border-radius:0 8px 8px 0;">'
+                + '<p style="font-size:8px;color:#7ab4ff;letter-spacing:1px;margin:0 0 4px;font-family:Nasalization,Arial,sans-serif;">↩ NAVA TEAM</p>'
+                + '<p style="font-size:12px;color:#fff;margin:0;line-height:1.5;">' + fb.reply.replace(/</g,'&lt;') + '</p>'
+                + '</div>'
+              : '<p style="font-size:9px;color:rgba(255,255,255,0.3);font-family:Nasalization,Arial,sans-serif;margin:0;">Awaiting reply···</p>')
+            + '</div>';
+        }).join('');
+        showFbView('replies');
+        return;
+      }
+    }
+    showFbView('new');
   }
+
   function closeFeedback(e) {
     if (!e || e.target === document.getElementById('feedbackOverlay')) {
       document.getElementById('feedbackOverlay').style.display = 'none';
     }
   }
+
   async function submitFeedback() {
     var msg = document.getElementById('feedbackText').value.trim();
     if (!msg) { document.getElementById('feedbackStatus').textContent = 'Please write a message.'; return; }
     var uid = localStorage.getItem('nava_peace_uid') || 'anonymous';
     var btn = document.getElementById('feedbackSendBtn');
-    btn.disabled = true;
-    btn.textContent = '···';
+    btn.disabled = true; btn.textContent = '···';
     try {
-      var sbF = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      var { error } = await sbF.from('feedback').insert({ user_uid: uid, message: msg });
+      var { error } = await _getSbF().from('feedback').insert({ user_uid: uid, message: msg });
       if (error) throw error;
       document.getElementById('feedbackStatus').textContent = '🕊 Message sent. Thank you!';
       document.getElementById('feedbackStatus').style.color = '#7ab4ff';
@@ -2415,10 +2505,12 @@
     } catch(e) {
       document.getElementById('feedbackStatus').textContent = 'Error. Please try again.';
       document.getElementById('feedbackStatus').style.color = '#ff7a7a';
-      btn.disabled = false;
-      btn.textContent = 'SEND 🕊';
+      btn.disabled = false; btn.textContent = 'SEND 🕊';
     }
   }
+
+  // Run on load
+  window.addEventListener('load', function() { checkFeedbackReplies(); });
   </script>
 </body>
 </html>
