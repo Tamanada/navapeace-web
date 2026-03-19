@@ -396,14 +396,28 @@
         document.getElementById('st-users').textContent = (usersR.count ?? 0).toLocaleString('fr-FR');
       } catch(e) { console.warn('Overview error', e); }
 
-      // Countries count (distinct)
+      // Countries count (unique users, not votes)
       try {
-        const { data } = await sb.from('active_votes').select('country');
+        const { data } = await sb.from('active_votes').select('user_uid, country').order('created_at', { ascending: false });
         if (data) {
-          const unique = new Set(data.map(r => (r.country || '').toUpperCase().trim()).filter(Boolean));
+          const seen = {}; // deduplicate: one entry per user (most recent)
+          data.forEach(r => { if (r.user_uid && !seen[r.user_uid]) seen[r.user_uid] = r; });
+          const unique = new Set(Object.values(seen).map(r => (r.country || '').toUpperCase().trim()).filter(Boolean));
           document.getElementById('st-countries').textContent = unique.size;
         }
       } catch(e) { console.warn('Countries count error', e); }
+    }
+
+    // ── Helper: unique users from active_votes (most recent vote per user) ──
+    async function loadUniqueUsers() {
+      const { data, error } = await sb
+        .from('active_votes')
+        .select('user_uid, country, age, gender')
+        .order('created_at', { ascending: false });
+      if (error || !data) return [];
+      const seen = {};
+      data.forEach(r => { if (r.user_uid && !seen[r.user_uid]) seen[r.user_uid] = r; });
+      return Object.values(seen);
     }
 
     // ── TOP COUNTRIES ──
@@ -411,11 +425,11 @@
       if (!sb) return;
       const container = document.getElementById('top-countries');
       try {
-        const { data } = await sb.from('active_votes').select('country');
-        if (!data || !data.length) { container.innerHTML = '<p class="no-data">NO DATA YET</p>'; return; }
+        const users = await loadUniqueUsers();
+        if (!users.length) { container.innerHTML = '<p class="no-data">NO DATA YET</p>'; return; }
 
         const counts = {};
-        data.forEach(r => {
+        users.forEach(r => {
           const c = (r.country || '').toUpperCase().trim();
           if (c) counts[c] = (counts[c] || 0) + 1;
         });
@@ -449,11 +463,8 @@
       if (!sb) return;
       let data = [];
       try {
-        const { data: rows, error } = await sb
-          .from('active_votes')
-          .select('age, gender')
-          .not('country', 'is', null);
-        if (!error && rows) data = rows;
+        // Unique users only — one entry per user_uid (most recent vote)
+        data = await loadUniqueUsers();
       } catch(e) { console.warn('Demographics error', e); }
 
       renderAge(data);
