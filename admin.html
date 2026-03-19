@@ -547,6 +547,11 @@
         <span class="stat-value" id="stat-countries">—</span>
         <span class="stat-sub">represented</span>
       </div>
+      <div class="stat-card">
+        <span class="stat-label">✅ ACTIVE ACCOUNTS</span>
+        <span class="stat-value" id="stat-active">—</span>
+        <span class="stat-sub">counted in stats</span>
+      </div>
     </div>
 
     <!-- Tabs -->
@@ -835,9 +840,6 @@
    NAVA PEACE ADMIN PANEL
    ══════════════════════════════════════════════════════════ */
 
-// ── CHANGE THIS CODE ──────────────────────────────────────
-const ADMIN_CODE = 'NAVA2024';
-// ─────────────────────────────────────────────────────────
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -911,18 +913,7 @@ async function checkPassword() {
       sessionStorage.setItem('nava_admin_code', _adminCode);
       unlockPanel(); return;
     }
-  } catch(e) { /* RPC not set up yet */ }
-
-  // Fallback: hardcoded master code
-  if (val === ADMIN_CODE) {
-    _resetLS();
-    _adminCode = val; _adminRole = 'super_admin'; _adminName = 'Super Admin';
-    localStorage.setItem('nava_admin_ok',   String(Date.now() + ADMIN_SESSION_MS));
-    localStorage.setItem('nava_admin_role',  _adminRole);
-    localStorage.setItem('nava_admin_name',  _adminName);
-    sessionStorage.setItem('nava_admin_code', _adminCode);
-    unlockPanel(); return;
-  }
+  } catch(e) { console.warn('Admin RPC error', e); }
 
   // Failed attempt
   if (btn) { btn.disabled = false; btn.textContent = 'ENTER →'; }
@@ -1080,6 +1071,12 @@ async function loadVotes() {
     document.getElementById('stat-today-date').textContent=today;
     document.getElementById('stat-votes').textContent=fmt(votes.length);
     document.getElementById('stat-countries').textContent=fmt(countries);
+
+    // Active accounts = unique users in active_votes (blocked excluded)
+    const { data: blockedData } = await sb.from('blocked_users').select('user_uid');
+    const blockedSet = new Set((blockedData||[]).map(b=>b.user_uid));
+    const activeCount = [...usersMap.keys()].filter(uid=>!blockedSet.has(uid)).length;
+    document.getElementById('stat-active').textContent=fmt(activeCount);
 
     // Build referral doves maps: for each ref_code, count votes from referred users
     const refCodeToUids=new Map(); // ref_code → Set of referred user uids

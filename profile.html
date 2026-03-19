@@ -1198,9 +1198,7 @@
       <!-- Col 4: Facebook + Messenger -->
       <div class="share-col">
         <a class="share-btn fb" id="share-fb" href="#" target="_blank">
-          <div class="share-btn-icon" style="overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3px;">
-            <span style="font-family:Nasalization,Arial,sans-serif;font-size:5.5px;letter-spacing:0.5px;color:#fff;text-transform:uppercase;text-align:center;line-height:1.5;font-weight:normal;white-space:nowrap;">NAVA PEACE<br>LET&#39;S MAKE<br><span style="font-size:8px;letter-spacing:1px;">PEACE</span><br>GREAT AGAIN</span>
-          </div>
+          <div class="share-btn-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.268h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z" fill="#fff"/></svg></div>
           <span>FACEBOOK</span>
         </a>
         <a class="share-btn msngr" id="share-msngr" href="#">
@@ -1966,7 +1964,7 @@
         wa:    'https://wa.me/?text=' + encodedText,
         tw:    'https://x.com/intent/tweet?text=' + encodedText,
         sms:   (navigator.userAgent.match(/Android/i) ? 'sms:?body=' : 'sms:&body=') + encodedText,
-        msngr: NAVA_TG.isTelegram ? 'https://m.me/' : 'fb-messenger://share/?link=' + encodedURL,
+        msngr: NAVA_TG.isTelegram ? 'https://www.messenger.com/t/?link=' + encodedURL : 'fb-messenger://share/?link=' + encodedURL,
         fb:    'https://www.facebook.com/sharer/sharer.php?u=' + encodedURL + '&quote=' + encodedShort,
         ig:    'https://www.instagram.com/nava.peace.world/',
         email: 'mailto:?subject=' + encodeURIComponent('NAVA PEACE – Join the movement 🕊') + '&body=' + encodedText
@@ -2205,9 +2203,9 @@
         .select('id')
         .eq('referral_code', refCode);
 
-      // Referred users = rows in peace_votes where referred_by = refCode
+      // Referred users = active (non-blocked) rows where referred_by = refCode
       const { data: friends } = await sb
-        .from('peace_votes')
+        .from('active_votes')
         .select('id')
         .eq('referred_by', refCode);
 
@@ -2263,9 +2261,9 @@
     try {
       const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-      // Unique referred users
+      // Unique referred users (active/non-blocked only)
       const { data: friends } = await sb
-        .from('peace_votes')
+        .from('active_votes')
         .select('user_uid')
         .eq('referred_by', refCode);
 

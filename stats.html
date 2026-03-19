@@ -370,7 +370,8 @@
   </nav>
 
   <script>
-    const TODAY = new Date().toISOString().split('T')[0];
+    const _std = new Date();
+    const TODAY = _std.getFullYear() + '-' + String(_std.getMonth()+1).padStart(2,'0') + '-' + String(_std.getDate()).padStart(2,'0');
     let sb = null;
     try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }
     catch(e) { console.warn('Supabase init failed', e); }
@@ -379,14 +380,14 @@
     async function loadOverview() {
       if (!sb) return;
       try {
-        const d = new Date(); d.setUTCDate(d.getUTCDate() + 1);
-        const TOMORROW = d.toISOString().split('T')[0];
+        const _tsStart = new Date(); _tsStart.setHours(0,0,0,0);
+        const _tsEnd   = new Date(_tsStart); _tsEnd.setDate(_tsEnd.getDate() + 1);
 
         const [totalR, todayR, usersR] = await Promise.all([
           sb.from('active_votes').select('*', { count: 'exact', head: true }),
           sb.from('active_votes').select('*', { count: 'exact', head: true })
-            .gte('created_at', TODAY + 'T00:00:00Z')
-            .lt('created_at', TOMORROW + 'T00:00:00Z'),
+            .gte('created_at', _tsStart.toISOString())
+            .lt('created_at', _tsEnd.toISOString()),
           sb.from('peace_messages').select('*', { count: 'exact', head: true }),
         ]);
 
