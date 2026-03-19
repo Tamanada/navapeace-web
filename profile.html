@@ -1698,7 +1698,7 @@
     updateCharCount();
     // Update collapsed preview
     var preview = document.getElementById('msg-preview');
-    if (preview) preview.textContent = msg || '—';
+    if (preview) { preview.textContent = msg || ''; preview.style.display = msg ? '' : 'none'; }
   }
 
   function updateCharCount() {
@@ -1715,7 +1715,7 @@
     btn.textContent = t('msg_saved_lbl');
     btn.disabled = true;
     var preview = document.getElementById('msg-preview');
-    if (preview) preview.textContent = msg || '—';
+    if (preview) { preview.textContent = msg || ''; preview.style.display = msg ? '' : 'none'; }
     await syncMessage();
     setTimeout(() => { btn.textContent = t('msg_save_btn'); btn.disabled = false; }, 2000);
   }
