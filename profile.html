@@ -36,7 +36,7 @@
   <script src="supabase_config.js"></script>
   <script src="block_check.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="lang.js"></script>
+  <script src="lang.js?v=2"></script>
   <style>
     *, *::before, *::after {
       box-sizing: border-box; margin: 0; padding: 0;
@@ -721,6 +721,31 @@
     }
     .card-collapse.open .card-chevron { transform: rotate(180deg); }
 
+    /* ── CARD TITLE ICON ── */
+    .title-icon {
+      width: 16px; height: 16px;
+      fill: rgba(255,255,255,0.85);
+      vertical-align: middle;
+      margin-right: 8px;
+      flex-shrink: 0;
+      display: inline-block;
+    }
+    .section-title { display: flex; align-items: center; justify-content: center; }
+
+    /* ── ADMIN BADGE ── */
+    .admin-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      margin-top: 10px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1px solid;
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 8px; letter-spacing: 2px;
+      text-transform: uppercase; font-weight: 700;
+    }
+    .admin-badge.super { background: rgba(255,200,50,0.15); border-color: rgba(255,200,50,0.5); color: #ffc832; }
+    .admin-badge.admin { background: rgba(100,160,255,0.15); border-color: rgba(100,160,255,0.4); color: #7ab4ff; }
+
     /* ── PEACE MESSAGE CARD ── */
     .peace-textarea {
       width: 100%;
@@ -983,14 +1008,17 @@
   <!-- MY IDENTITY (collapsible) -->
   <div class="card card-collapse" id="id-card" onclick="toggleCard('id-card')">
     <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('id-card',true)">
-      <p class="section-title" data-i18n="section_identity">MY IDENTITY</p>
+      <p class="section-title"><svg class="title-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><span data-i18n="section_identity">MY IDENTITY</span></p>
       <span class="card-chevron">▾</span>
     </div>
-    <div class="card-preview">
+    <div class="card-preview" style="text-align:center;">
       <div class="pseudo-display" style="margin-bottom:0;">
         <span class="pseudo-icon">🕊</span>
         <span class="pseudo-name" id="pseudo-name">...</span>
         <span class="pseudo-tag" id="pseudo-tag" data-i18n="pseudo_auto_tag">AUTO</span>
+      </div>
+      <div id="admin-badge-wrap" style="display:none;margin-top:10px;">
+        <span id="admin-badge" class="admin-badge"></span>
       </div>
     </div>
     <div class="card-expanded" id="id-expanded">
@@ -1010,7 +1038,7 @@
   <!-- YOUR PROFILE -->
   <div class="card card-collapse" id="my-card" onclick="toggleCard('my-card')">
     <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('my-card',true)">
-      <p class="section-title" data-i18n="section_profile">YOUR PROFILE</p>
+      <p class="section-title"><svg class="title-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg><span data-i18n="section_profile">YOUR PROFILE</span></p>
       <span class="card-chevron">▾</span>
     </div>
     <div class="card-body">
@@ -1115,7 +1143,7 @@
   <!-- MY PEACE MESSAGE (collapsible) -->
   <div class="card card-collapse" id="msg-card" onclick="toggleCard('msg-card')">
     <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('msg-card',true)">
-      <p class="section-title" data-i18n="section_message">MY PEACE MESSAGE</p>
+      <p class="section-title"><svg class="title-icon" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg><span data-i18n="section_message">MY PEACE MESSAGE</span></p>
       <span class="card-chevron">▾</span>
     </div>
     <p class="card-preview" id="msg-preview" style="font-size:13px;letter-spacing:1.5px;color:#fff;line-height:1.6;word-break:break-word;text-align:center;"></p>
@@ -1139,7 +1167,7 @@
   <!-- MY DOVES -->
   <div class="card card-collapse" id="dove-card" onclick="toggleCard('dove-card')">
     <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('dove-card',true)">
-      <p class="section-title" data-i18n="section_doves">MY DOVES</p>
+      <p class="section-title"><svg class="title-icon" viewBox="0 0 24 24"><path d="M22 4s-7-2-10 5c-3-1-5-1-7 1 2 0 3 1 4 2-2 0-3 1-4 3 2-1 3-1 5 0-5 2-7 7-8 9 4-2 7-3 10-2-1 2-1 4 0 6 2-3 3-6 3-9 3-1 6-4 7-5zm-8 8.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg><span data-i18n="section_doves">MY DOVES</span></p>
       <span class="card-chevron">▾</span>
     </div>
     <div class="card-body">
@@ -1165,7 +1193,7 @@
   <!-- STREAK PROGRESS -->
   <div class="card card-collapse" id="streak-card" style="display:none;" onclick="toggleCard('streak-card')">
     <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('streak-card',true)">
-      <p class="section-title" data-i18n="streak_title">🔥 PEACE STREAK</p>
+      <p class="section-title"><svg class="title-icon" viewBox="0 0 24 24"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg><span data-i18n="streak_title">PEACE STREAK</span></p>
       <span class="card-chevron">▾</span>
     </div>
     <div class="card-body">
@@ -1176,7 +1204,7 @@
   <!-- INVITE FRIENDS -->
   <div class="card card-collapse" id="invite-card" onclick="toggleCard('invite-card')">
     <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('invite-card',true)">
-      <p class="section-title" data-i18n="section_invite">INVITE FRIENDS</p>
+      <p class="section-title"><svg class="title-icon" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg><span data-i18n="section_invite">INVITE FRIENDS</span></p>
       <span class="card-chevron">▾</span>
     </div>
     <div class="card-body">
@@ -1737,6 +1765,24 @@
 
   loadPseudo();
   loadMessage();
+
+  // ── ADMIN BADGE ──────────────────────────────────────────────────
+  (function() {
+    var role = localStorage.getItem('nava_admin_role');
+    var expiry = parseInt(localStorage.getItem('nava_admin_ok') || '0', 10);
+    if (!role || !expiry || Date.now() >= expiry) return;
+    var wrap = document.getElementById('admin-badge-wrap');
+    var badge = document.getElementById('admin-badge');
+    if (!wrap || !badge) return;
+    if (role === 'super_admin') {
+      badge.textContent = '⭐ SUPER ADMIN';
+      badge.className = 'admin-badge super';
+    } else {
+      badge.textContent = '🛡 ADMIN';
+      badge.className = 'admin-badge admin';
+    }
+    wrap.style.display = 'block';
+  })();
 
 
   // ── MY DOVES ─────────────────────────────────────────────────────
