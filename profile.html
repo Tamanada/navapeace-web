@@ -567,7 +567,7 @@
       display: none;
       position: fixed;
       inset: 0;
-      z-index: 300;
+      z-index: 600;
       background: rgba(10,50,90,0.4);
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
@@ -619,6 +619,7 @@
     .bottom-nav {
       position: fixed;
       bottom: 0; left: 0; right: 0;
+      z-index: 200;
       display: flex;
       justify-content: space-around;
       align-items: center;
@@ -804,7 +805,7 @@
       display: none;
       position: fixed;
       inset: 0;
-      z-index: 300;
+      z-index: 600;
       background: rgba(10,50,90,0.4);
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
@@ -2212,7 +2213,8 @@
         // ── WEBSITE ──
         ctx.fillStyle = 'rgba(58,172,223,0.6)';
         ctx.font = '11px Arial, sans-serif';
-        ctx.fillText('www.nava-peace.world', w/2, h - 14);
+        var year = new Date().getFullYear();
+        ctx.fillText('www.nava-peace.world  ·  © ' + year + ' NAVA PEACE. All rights reserved.', w/2, h - 14);
 
         // Export
         canvas.toBlob(function(blob) {
