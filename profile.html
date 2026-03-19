@@ -255,7 +255,7 @@
       margin: 0 10px;
     }
 
-    /* ── YOUR PROFILE ── */
+    /* ── MY PROFILE ── */
     .my-profile {
       display: flex;
       gap: 16px;
@@ -1036,16 +1036,16 @@
     </div>
   </div>
 
-  <!-- YOUR PROFILE -->
+  <!-- MY PROFILE -->
   <div class="card card-collapse" id="my-card" onclick="toggleCard('my-card')">
     <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('my-card',true)">
-      <p class="section-title"><svg class="title-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg><span data-i18n="section_profile">YOUR PROFILE</span></p>
+      <p class="section-title"><svg class="title-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg><span data-i18n="section_profile">MY PROFILE</span></p>
       <span class="card-chevron">▾</span>
     </div>
     <div class="card-body">
     <button class="edit-btn" onclick="event.stopPropagation();toggleEdit()" data-i18n="edit_btn" style="display:block;margin:0 auto 14px;">EDIT</button>
     <div class="my-profile" id="my-profile">
-      <p class="no-data">VOTE FIRST TO SEE YOUR PROFILE</p>
+      <p class="no-data">VOTE FIRST TO SEE MY PROFILE</p>
     </div>
 
     <!-- EDIT FORM -->
@@ -1291,11 +1291,11 @@
 
   <!-- FEEDBACK BUTTON -->
   <div style="text-align:center;padding:18px 24px 28px;position:relative;">
-    <p id="feedbackInviteText" style="font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:1.5px;color:rgba(255,255,255,0.45);text-transform:uppercase;margin:0 0 10px;">
+    <p id="feedbackInviteText" style="font-family:Nasalization,Arial,sans-serif;font-size:11px;letter-spacing:1.5px;color:rgba(255,255,255,0.65);text-transform:uppercase;margin:0 0 12px;">
       🕊 A bug? A suggestion? We listen.
     </p>
     <div style="position:relative;display:inline-block;">
-      <button id="feedbackMainBtn" onclick="openFeedback()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:20px;color:rgba(255,255,255,0.7);font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:2px;text-transform:uppercase;padding:10px 24px;cursor:pointer;transition:all 0.2s;">
+      <button id="feedbackMainBtn" onclick="openFeedback()" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.35);border-radius:20px;color:rgba(255,255,255,0.9);font-family:Nasalization,Arial,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:12px 28px;cursor:pointer;transition:all 0.2s;">
         SEND FEEDBACK
       </button>
       <span id="feedbackBadge" style="display:none;position:absolute;top:-6px;right:-6px;background:#ff5f5f;color:#fff;font-size:9px;font-weight:700;width:18px;height:18px;border-radius:50%;line-height:18px;text-align:center;">!</span>
