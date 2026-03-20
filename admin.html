@@ -475,6 +475,33 @@
     .status-disabled{background:rgba(255,80,80,0.15);color:#ff8080;}
     .status-flagged{background:rgba(255,180,0,0.15);color:#ffb400;}
 
+    /* ── SUPABASE TAB ─────────────────────────────── */
+    .sb-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px;}
+    .sb-metric{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--radius-sm);padding:16px;}
+    .sb-metric-label{font-size:8px;letter-spacing:2px;color:var(--w60);margin-bottom:6px;}
+    .sb-metric-value{font-size:20px;font-weight:700;color:var(--white);margin-bottom:8px;}
+    .sb-metric-sub{font-size:8px;letter-spacing:1px;color:var(--w40);}
+    .sb-bar-wrap{background:rgba(255,255,255,0.08);border-radius:4px;height:6px;margin:8px 0 4px;overflow:hidden;}
+    .sb-bar{height:100%;border-radius:4px;transition:width 0.6s ease;}
+    .sb-bar.ok{background:#4ade80;}
+    .sb-bar.warn{background:#fb923c;}
+    .sb-bar.danger{background:#ff5b5b;}
+    .sb-limit{font-size:7px;letter-spacing:1px;color:var(--w40);display:flex;justify-content:space-between;}
+    .sb-tables-wrap{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:20px;}
+    .sb-tables-wrap table{width:100%;border-collapse:collapse;font-size:9px;}
+    .sb-tables-wrap th{font-size:7px;letter-spacing:2px;color:var(--w40);padding:8px 12px;border-bottom:1px solid var(--glass-border);text-align:left;}
+    .sb-tables-wrap td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--w80);}
+    .sb-tables-wrap tr:last-child td{border-bottom:none;}
+    .sb-tables-wrap tr:hover td{background:rgba(255,255,255,0.03);}
+    .sb-pat-wrap{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--radius-sm);padding:16px;margin-bottom:20px;}
+    .sb-pat-wrap input{background:rgba(0,0,0,0.2);border:1px solid var(--glass-border);border-radius:8px;padding:8px 12px;color:var(--white);font-size:10px;font-family:var(--font);letter-spacing:1px;width:100%;margin:8px 0;}
+    .sb-info-box{background:rgba(255,255,255,0.05);border-left:3px solid rgba(255,255,255,0.3);border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:12px;font-size:9px;line-height:1.7;color:var(--w80);}
+    .sb-info-box strong{color:var(--white);letter-spacing:1px;}
+    .sb-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:7px;letter-spacing:1px;}
+    .sb-badge.green{background:rgba(74,222,128,0.15);color:#4ade80;}
+    .sb-badge.orange{background:rgba(251,146,60,0.15);color:#fb923c;}
+    .sb-badge.red{background:rgba(255,91,91,0.15);color:#ff5b5b;}
+
     /* ── RESPONSIVE ───────────────────────────────── */
     @media(max-width:900px){
       .stats-row{grid-template-columns:repeat(2,1fr);}
@@ -566,6 +593,7 @@
       <button class="tab-btn" onclick="showTab('push',this)">🔔 PUSH</button>
       <button class="tab-btn" onclick="showTab('admins',this)">👤 ADMINS</button>
       <button class="tab-btn" onclick="showTab('feedback',this);loadFeedback()">📩 FEEDBACK</button>
+      <button class="tab-btn" onclick="showTab('supabase',this);loadSupabaseMetrics()">🗄 SUPABASE</button>
     </div>
 
     <!-- ══ OVERVIEW ══════════════════════════════════ -->
@@ -844,6 +872,79 @@
       </div>
       <div id="feedback-list" style="display:flex;flex-direction:column;gap:12px;">
         <p style="color:rgba(255,255,255,0.3);font-size:10px;text-align:center;letter-spacing:2px;">LOADING···</p>
+      </div>
+    </div>
+
+    <!-- ══ SUPABASE ══════════════════════════════════ -->
+    <div id="tab-supabase" class="tab-pane">
+      <h2 style="font-size:13px;letter-spacing:3px;margin-bottom:20px;">🗄 SUPABASE USAGE</h2>
+
+      <!-- PAT Section -->
+      <div class="sb-pat-wrap">
+        <div style="font-size:9px;letter-spacing:2px;color:var(--w60);margin-bottom:4px;">🔑 PERSONAL ACCESS TOKEN</div>
+        <div style="font-size:8px;color:var(--w40);margin-bottom:8px;">Required for bandwidth & API metrics. app.supabase.com → Account → Access Tokens</div>
+        <input type="password" id="sb-pat-input" placeholder="sbp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off" />
+        <div style="display:flex;gap:8px;margin-top:4px;">
+          <button onclick="saveSbPat()" style="font-size:8px;letter-spacing:1px;padding:7px 14px;border-radius:8px;border:none;background:rgba(255,255,255,0.15);color:var(--white);cursor:pointer;font-family:var(--font);">SAVE & LOAD</button>
+          <button onclick="clearSbPat()" style="font-size:8px;letter-spacing:1px;padding:7px 14px;border-radius:8px;border:none;background:rgba(255,80,80,0.12);color:#ff8080;cursor:pointer;font-family:var(--font);">CLEAR</button>
+          <span id="sb-pat-status" style="font-size:8px;letter-spacing:1px;color:var(--w40);line-height:30px;"></span>
+        </div>
+      </div>
+
+      <!-- DB Metrics -->
+      <div style="font-size:9px;letter-spacing:2px;color:var(--w60);margin-bottom:12px;">📦 DATABASE</div>
+      <div class="sb-grid" id="sb-db-grid">
+        <div class="sb-metric"><div class="sb-metric-label">DATABASE SIZE</div><div class="sb-metric-value" id="sb-db-size">···</div><div class="sb-bar-wrap"><div class="sb-bar ok" id="sb-db-bar" style="width:0%"></div></div><div class="sb-limit"><span id="sb-db-pct">— %</span><span>LIMIT 500 MB</span></div></div>
+        <div class="sb-metric"><div class="sb-metric-label">TOTAL VOTES</div><div class="sb-metric-value" id="sb-votes-count">···</div><div class="sb-metric-sub" id="sb-votes-sub">peace_votes table</div></div>
+        <div class="sb-metric"><div class="sb-metric-label">ACTIVE USERS</div><div class="sb-metric-value" id="sb-users-count">···</div><div class="sb-metric-sub">peace_messages table</div></div>
+        <div class="sb-metric"><div class="sb-metric-label">MESSAGES / FEEDBACK</div><div class="sb-metric-value" id="sb-msgs-count">···</div><div class="sb-metric-sub">user_feedback table</div></div>
+      </div>
+
+      <!-- API / Bandwidth (PAT required) -->
+      <div style="font-size:9px;letter-spacing:2px;color:var(--w60);margin-bottom:12px;">📡 API & BANDWIDTH <span id="sb-pat-badge" class="sb-badge orange" style="margin-left:8px;">PAT REQUIRED</span></div>
+      <div class="sb-grid" id="sb-api-grid">
+        <div class="sb-metric"><div class="sb-metric-label">API REQUESTS / MONTH</div><div class="sb-metric-value" id="sb-api-reqs">—</div><div class="sb-bar-wrap"><div class="sb-bar ok" id="sb-api-bar" style="width:0%"></div></div><div class="sb-limit"><span id="sb-api-pct">— %</span><span>LIMIT 500K</span></div></div>
+        <div class="sb-metric"><div class="sb-metric-label">BANDWIDTH / MONTH</div><div class="sb-metric-value" id="sb-bandwidth">—</div><div class="sb-bar-wrap"><div class="sb-bar ok" id="sb-bw-bar" style="width:0%"></div></div><div class="sb-limit"><span id="sb-bw-pct">— %</span><span>LIMIT 5 GB</span></div></div>
+        <div class="sb-metric"><div class="sb-metric-label">DB EGRESS / MONTH</div><div class="sb-metric-value" id="sb-egress">—</div><div class="sb-metric-sub">Data read from DB</div></div>
+        <div class="sb-metric"><div class="sb-metric-label">STORAGE USED</div><div class="sb-metric-value" id="sb-storage">—</div><div class="sb-bar-wrap"><div class="sb-bar ok" id="sb-storage-bar" style="width:0%"></div></div><div class="sb-limit"><span id="sb-storage-pct">— %</span><span>LIMIT 1 GB</span></div></div>
+      </div>
+
+      <!-- Table details -->
+      <div style="font-size:9px;letter-spacing:2px;color:var(--w60);margin-bottom:12px;">🗂 TABLES</div>
+      <div class="sb-tables-wrap">
+        <table><thead><tr><th>TABLE</th><th>ROWS</th><th>GROWTH / DAY</th><th>STATUS</th></tr></thead>
+        <tbody id="sb-tables-body"><tr><td colspan="4" style="text-align:center;color:var(--w40);padding:16px;">LOADING···</td></tr></tbody></table>
+      </div>
+
+      <!-- Explanation -->
+      <div style="font-size:9px;letter-spacing:2px;color:var(--w60);margin-bottom:12px;">📖 HOW IT WORKS</div>
+      <div class="sb-info-box">
+        <strong>FREE TIER</strong> — Supabase offre un tier gratuit illimité dans le temps avec des quotas mensuels.<br>
+        Chaque 1er du mois, les compteurs API et bandwidth se réinitialisent automatiquement.
+      </div>
+      <div class="sb-info-box">
+        <strong>BASE DE DONNÉES (500 MB)</strong> — Chaque vote = ~200 bytes. À 1000 votes/jour tu consommes ~6 MB/mois.
+        Avec 10K users actifs tu es à ~60 MB/mois → tu peux tenir <strong>~8 mois</strong> sur le free tier avant d'atteindre 500 MB.
+      </div>
+      <div class="sb-info-box">
+        <strong>BANDWIDTH (5 GB)</strong> — Chaque chargement de map.html lit ~50KB de données Supabase.
+        5 GB = ~100K sessions/mois. Au-delà, les requêtes sont throttlées (pas coupées).
+      </div>
+      <div class="sb-info-box">
+        <strong>API REQUESTS (500K/mois)</strong> — Chaque requête Supabase = 1 appel. Une session type = ~10 appels.
+        500K = ~50K sessions/mois. Si tu dépasses, les requêtes retournent des erreurs 429.
+      </div>
+      <div class="sb-info-box" style="border-left-color:#fb923c;">
+        <strong>🟠 QUAND PASSER AU PRO ($25/mois)</strong><br>
+        • DB > 400 MB <strong>OU</strong> croissance > 50 MB/mois<br>
+        • API requests > 400K/mois régulièrement<br>
+        • Bandwidth > 4 GB/mois<br>
+        • Plus de 200 connexions Realtime simultanées<br>
+        Supabase t'envoie un email automatique à 80% de chaque limite.
+      </div>
+
+      <div style="text-align:center;margin-top:8px;">
+        <a href="https://app.supabase.com" target="_blank" style="font-size:8px;letter-spacing:2px;color:var(--w60);text-decoration:underline;">OPEN SUPABASE DASHBOARD →</a>
       </div>
     </div>
 
@@ -2355,6 +2456,153 @@ async function sendFeedbackReply(id) {
   if (!reply) return;
   await sb.from('feedback').update({ reply: reply, status: 'replied', replied_at: new Date().toISOString() }).eq('id', id);
   loadFeedback();
+}
+
+// ── SUPABASE METRICS ──────────────────────────────────────────────────────
+const SB_PAT_KEY = 'nava_sb_pat';
+
+function _sbProjectRef() {
+  // Extract ref from SUPABASE_URL: https://XXXXX.supabase.co
+  return (typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : '').replace('https://','').split('.')[0];
+}
+
+function _fmtBytes(bytes) {
+  if (!bytes || bytes === 0) return '0 B';
+  const units = ['B','KB','MB','GB'];
+  let i = 0, v = bytes;
+  while (v >= 1024 && i < units.length - 1) { v /= 1024; i++; }
+  return v.toFixed(i > 0 ? 1 : 0) + ' ' + units[i];
+}
+
+function _barClass(pct) {
+  if (pct >= 90) return 'danger';
+  if (pct >= 70) return 'warn';
+  return 'ok';
+}
+
+function _setBar(barId, pctId, pct) {
+  const bar = document.getElementById(barId);
+  const lbl = document.getElementById(pctId);
+  if (!bar || !lbl) return;
+  bar.style.width = Math.min(pct, 100) + '%';
+  bar.className = 'sb-bar ' + _barClass(pct);
+  lbl.textContent = pct.toFixed(1) + ' %';
+  lbl.style.color = pct >= 90 ? '#ff5b5b' : pct >= 70 ? '#fb923c' : 'var(--w40)';
+}
+
+function saveSbPat() {
+  const val = document.getElementById('sb-pat-input').value.trim();
+  if (!val) return;
+  localStorage.setItem(SB_PAT_KEY, val);
+  document.getElementById('sb-pat-status').textContent = '✓ SAVED';
+  document.getElementById('sb-pat-badge').textContent = 'CONNECTED';
+  document.getElementById('sb-pat-badge').className = 'sb-badge green';
+  loadSupabaseMetrics();
+}
+
+function clearSbPat() {
+  localStorage.removeItem(SB_PAT_KEY);
+  document.getElementById('sb-pat-input').value = '';
+  document.getElementById('sb-pat-status').textContent = 'CLEARED';
+  document.getElementById('sb-pat-badge').textContent = 'PAT REQUIRED';
+  document.getElementById('sb-pat-badge').className = 'sb-badge orange';
+}
+
+async function loadSupabaseMetrics() {
+  // Restore PAT field
+  const pat = localStorage.getItem(SB_PAT_KEY) || '';
+  if (pat) {
+    document.getElementById('sb-pat-input').value = pat;
+    document.getElementById('sb-pat-badge').textContent = 'CONNECTED';
+    document.getElementById('sb-pat-badge').className = 'sb-badge green';
+  }
+
+  // ── DB row counts (no PAT needed) ──
+  const tables = [
+    { id:'sb-votes-count',  table:'peace_votes',   label:'peace_votes' },
+    { id:'sb-users-count',  table:'peace_messages', label:'peace_messages' },
+    { id:'sb-msgs-count',   table:'user_feedback',  label:'user_feedback' },
+  ];
+  for (const t of tables) {
+    try {
+      const { count } = await sb.from(t.table).select('*', { count:'exact', head:true });
+      const el = document.getElementById(t.id);
+      if (el) el.textContent = (count || 0).toLocaleString('fr-FR');
+    } catch(e) {}
+  }
+
+  // Estimate DB size from row counts (approx 200B/vote, 150B/message, 300B/feedback)
+  try {
+    const { count: vc } = await sb.from('peace_votes').select('*',{count:'exact',head:true});
+    const { count: mc } = await sb.from('peace_messages').select('*',{count:'exact',head:true});
+    const { count: fc } = await sb.from('user_feedback').select('*',{count:'exact',head:true});
+    const estBytes = (vc||0)*200 + (mc||0)*150 + (fc||0)*300 + 5*1024*1024; // +5MB overhead
+    const pct = (estBytes / (500*1024*1024)) * 100;
+    document.getElementById('sb-db-size').textContent = _fmtBytes(estBytes) + ' ~';
+    document.getElementById('sb-db-sub') && (document.getElementById('sb-db-sub').textContent = 'estimation');
+    _setBar('sb-db-bar','sb-db-pct', pct);
+
+    // Tables detail
+    const tbody = document.getElementById('sb-tables-body');
+    const rows = [
+      { name:'peace_votes',    rows: vc||0, bytesPerRow:200 },
+      { name:'peace_messages', rows: mc||0, bytesPerRow:150 },
+      { name:'user_feedback',  rows: fc||0, bytesPerRow:300 },
+    ];
+    tbody.innerHTML = rows.map(r => {
+      const sz = _fmtBytes(r.rows * r.bytesPerRow);
+      const growthPerDay = r.name === 'peace_votes' ? Math.round((r.rows / Math.max(1, 14)) * 1) : '—';
+      const statusPct = (r.rows * r.bytesPerRow) / (500*1024*1024) * 100;
+      const badge = statusPct < 5 ? '<span class="sb-badge green">OK</span>'
+                  : statusPct < 15 ? '<span class="sb-badge orange">WATCH</span>'
+                  : '<span class="sb-badge red">HIGH</span>';
+      return `<tr><td>${r.name}</td><td>${r.rows.toLocaleString('fr-FR')}</td><td>+${growthPerDay} rows</td><td>${badge} ${sz}</td></tr>`;
+    }).join('');
+  } catch(e) {}
+
+  // ── Management API (PAT needed) ──
+  if (!pat) return;
+  const ref = _sbProjectRef();
+  if (!ref) return;
+
+  try {
+    const res = await fetch(`https://api.supabase.com/v1/projects/${ref}/usage`, {
+      headers: { 'Authorization': `Bearer ${pat}`, 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) {
+      document.getElementById('sb-pat-status').textContent = '⚠ INVALID TOKEN';
+      document.getElementById('sb-pat-badge').textContent = 'ERROR';
+      document.getElementById('sb-pat-badge').className = 'sb-badge red';
+      return;
+    }
+    const usage = await res.json();
+
+    // API requests
+    const apiReqs = usage?.api_requests?.usage || 0;
+    const apiLimit = 500000;
+    document.getElementById('sb-api-reqs').textContent = apiReqs.toLocaleString('fr-FR');
+    _setBar('sb-api-bar','sb-api-pct', (apiReqs/apiLimit)*100);
+
+    // Bandwidth
+    const bwBytes = usage?.egress?.usage || 0;
+    const bwLimit = 5*1024*1024*1024;
+    document.getElementById('sb-bandwidth').textContent = _fmtBytes(bwBytes);
+    _setBar('sb-bw-bar','sb-bw-pct', (bwBytes/bwLimit)*100);
+
+    // DB egress
+    const egress = usage?.db_egress?.usage || 0;
+    document.getElementById('sb-egress').textContent = _fmtBytes(egress);
+
+    // Storage
+    const storageBytes = usage?.storage_size?.usage || 0;
+    const storageLimit = 1024*1024*1024;
+    document.getElementById('sb-storage').textContent = _fmtBytes(storageBytes);
+    _setBar('sb-storage-bar','sb-storage-pct', (storageBytes/storageLimit)*100);
+
+    document.getElementById('sb-pat-status').textContent = '✓ LIVE DATA';
+  } catch(e) {
+    document.getElementById('sb-pat-status').textContent = '⚠ API ERROR';
+  }
 }
 </script>
 
