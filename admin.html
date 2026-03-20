@@ -2,11 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.amcharts.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.myshopify.com; frame-ancestors 'none';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.amcharts.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.myshopify.com https://api.supabase.com; frame-ancestors 'none';" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NAVA PEACE – Admin</title>
   <link rel="icon" type="image/png" href="favicon.png" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/otpauth@9/dist/otpauth.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="supabase_config.js"></script>
   <style>
     @font-face {
@@ -81,6 +83,18 @@
     }
     .lock-btn:hover{opacity:0.88;}
     .lock-error{margin-top:14px;font-size:10px;letter-spacing:2px;color:var(--danger);min-height:16px;}
+
+    /* ── TOTP SCREEN ──────────────────────────────── */
+    #totp-screen{position:fixed;inset:0;z-index:999;background:var(--bg-grad);display:none;align-items:center;justify-content:center;}
+    .totp-digits{display:flex;gap:10px;justify-content:center;margin-bottom:14px;}
+    .totp-digits input{width:38px;height:48px;text-align:center;font-size:20px;letter-spacing:0;border-radius:10px;border:1.5px solid rgba(255,255,255,0.35);background:rgba(255,255,255,0.15);color:var(--white);font-family:var(--font);outline:none;}
+    .totp-digits input:focus{border-color:rgba(255,255,255,0.7);}
+
+    /* ── 2FA SETUP CARD ───────────────────────────── */
+    .totp-card{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--radius-sm);padding:24px;margin-bottom:16px;}
+    .totp-qr-wrap{text-align:center;margin:16px 0;}
+    .totp-qr-wrap img,.totp-qr-wrap canvas{border-radius:12px;background:#fff;padding:8px;display:inline-block;}
+    .totp-secret-text{font-size:9px;letter-spacing:2px;color:var(--w60);word-break:break-all;margin:8px 0 16px;text-align:center;}
 
     /* ── ADMIN LAYOUT ─────────────────────────────── */
     #admin-panel{display:none;flex-direction:column;min-height:100vh;}
@@ -534,6 +548,26 @@
   </div>
 </div>
 
+<!-- ══ TOTP SCREEN ════════════════════════════════════════ -->
+<div id="totp-screen">
+  <div class="lock-card">
+    <div class="lock-dove">🔐</div>
+    <p class="lock-title">2FA VERIFICATION</p>
+    <p class="lock-sub">Google Authenticator · 6-digit code</p>
+    <div class="totp-digits">
+      <input type="tel" maxlength="1" id="td0" oninput="totpDigit(this,1)" onkeydown="totpBack(event,this,null)" />
+      <input type="tel" maxlength="1" id="td1" oninput="totpDigit(this,2)" onkeydown="totpBack(event,this,0)" />
+      <input type="tel" maxlength="1" id="td2" oninput="totpDigit(this,3)" onkeydown="totpBack(event,this,1)" />
+      <input type="tel" maxlength="1" id="td3" oninput="totpDigit(this,4)" onkeydown="totpBack(event,this,2)" />
+      <input type="tel" maxlength="1" id="td4" oninput="totpDigit(this,5)" onkeydown="totpBack(event,this,3)" />
+      <input type="tel" maxlength="1" id="td5" oninput="totpDigit(this,null)" onkeydown="totpBack(event,this,4)" />
+    </div>
+    <button class="lock-btn" onclick="verifyTOTP()">VERIFY →</button>
+    <p class="lock-error" id="totp-err"></p>
+    <p style="font-size:8px;letter-spacing:2px;color:var(--w40);margin-top:12px;cursor:pointer;" onclick="showTotpCancel()">← BACK TO PASSWORD</p>
+  </div>
+</div>
+
 <!-- ══ ADMIN PANEL ════════════════════════════════════════ -->
 <div id="admin-panel" style="display:none;flex-direction:column;min-height:100vh;">
 
@@ -588,7 +622,7 @@
       <button class="tab-btn" onclick="showTab('users',this)">👥 USERS</button>
       <button class="tab-btn" onclick="showTab('messages',this)">💬 MESSAGES</button>
       <button class="tab-btn" onclick="showTab('modules',this)">⚙️ MODULES</button>
-      <button class="tab-btn" onclick="showTab('security',this)">🛡 SECURITY</button>
+      <button class="tab-btn" onclick="showTab('security',this);renderTOTPStatus()">🛡 SECURITY</button>
       <button class="tab-btn" onclick="showTab('referrals',this)">🏆 REFERRALS</button>
       <button class="tab-btn" onclick="showTab('push',this)">🔔 PUSH</button>
       <button class="tab-btn" onclick="showTab('admins',this)">👤 ADMINS</button>
@@ -793,6 +827,45 @@
             </div>
           </div>
 
+          <!-- 2FA Setup -->
+          <div class="g-card sec-card" style="grid-column:1/-1;">
+            <p class="sec-title">🔐 TWO-FACTOR AUTHENTICATION (2FA)</p>
+            <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+              <span style="font-size:9px;letter-spacing:2px;color:var(--w60);">STATUS</span>
+              <span id="totp-status-badge" style="font-size:9px;letter-spacing:2px;color:var(--warn);">✗ NOT CONFIGURED</span>
+            </div>
+
+            <!-- Enabled view -->
+            <div id="totp-enabled-view" style="display:none;">
+              <button onclick="disableTOTP()" style="font-size:8px;letter-spacing:1px;padding:8px 16px;border-radius:8px;border:none;background:var(--danger-bg);color:var(--danger);cursor:pointer;font-family:var(--font);">DISABLE 2FA</button>
+            </div>
+
+            <!-- Setup view -->
+            <div id="totp-setup-view">
+              <button id="totp-start-btn" onclick="startTOTPSetup()" style="font-size:8px;letter-spacing:1px;padding:8px 16px;border-radius:8px;border:none;background:rgba(255,255,255,0.12);color:var(--white);cursor:pointer;font-family:var(--font);">SET UP GOOGLE AUTHENTICATOR →</button>
+
+              <div id="totp-qr-section" style="display:none;margin-top:20px;">
+                <div style="font-size:8px;letter-spacing:1px;color:var(--w60);margin-bottom:12px;">
+                  1. Scan this QR code in Google Authenticator<br>
+                  2. Enter the 6-digit code below to confirm
+                </div>
+                <div class="totp-qr-wrap"><div id="totp-qr-canvas"></div></div>
+                <div class="totp-secret-text" id="totp-secret-display"></div>
+                <div style="font-size:8px;letter-spacing:1px;color:var(--w40);margin-bottom:8px;">OR ENTER MANUALLY ↑</div>
+                <div class="totp-digits" style="justify-content:flex-start;">
+                  <input type="tel" maxlength="1" id="sd0" oninput="setupDigit(this,1)" onkeydown="totpBack(event,this,null)" />
+                  <input type="tel" maxlength="1" id="sd1" oninput="setupDigit(this,2)" onkeydown="totpBack(event,this,0,'s')" />
+                  <input type="tel" maxlength="1" id="sd2" oninput="setupDigit(this,3)" onkeydown="totpBack(event,this,1,'s')" />
+                  <input type="tel" maxlength="1" id="sd3" oninput="setupDigit(this,4)" onkeydown="totpBack(event,this,2,'s')" />
+                  <input type="tel" maxlength="1" id="sd4" oninput="setupDigit(this,5)" onkeydown="totpBack(event,this,3,'s')" />
+                  <input type="tel" maxlength="1" id="sd5" oninput="setupDigit(this,null)" onkeydown="totpBack(event,this,4,'s')" />
+                </div>
+                <p id="totp-setup-err" style="font-size:9px;letter-spacing:1px;color:var(--danger);min-height:16px;margin-top:8px;"></p>
+                <button onclick="confirmTOTPSetup()" style="font-size:8px;letter-spacing:1px;padding:8px 16px;border-radius:8px;border:none;background:rgba(74,222,128,0.15);color:#4ade80;cursor:pointer;font-family:var(--font);margin-top:8px;">CONFIRM & ACTIVATE →</button>
+              </div>
+            </div>
+          </div>
+
           <!-- Security roadmap -->
           <div class="g-card sec-card" style="grid-column:1/-1;">
             <p class="sec-title">🛡 SECURITY ROADMAP — ANTI-CHEAT PROPOSALS</p>
@@ -879,16 +952,10 @@
     <div id="tab-supabase" class="tab-pane">
       <h2 style="font-size:13px;letter-spacing:3px;margin-bottom:20px;">🗄 SUPABASE USAGE</h2>
 
-      <!-- PAT Section -->
-      <div class="sb-pat-wrap">
-        <div style="font-size:9px;letter-spacing:2px;color:var(--w60);margin-bottom:4px;">🔑 PERSONAL ACCESS TOKEN</div>
-        <div style="font-size:8px;color:var(--w40);margin-bottom:8px;">Required for bandwidth & API metrics. app.supabase.com → Account → Access Tokens</div>
-        <input type="password" id="sb-pat-input" placeholder="sbp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off" />
-        <div style="display:flex;gap:8px;margin-top:4px;">
-          <button onclick="saveSbPat()" style="font-size:8px;letter-spacing:1px;padding:7px 14px;border-radius:8px;border:none;background:rgba(255,255,255,0.15);color:var(--white);cursor:pointer;font-family:var(--font);">SAVE & LOAD</button>
-          <button onclick="clearSbPat()" style="font-size:8px;letter-spacing:1px;padding:7px 14px;border-radius:8px;border:none;background:rgba(255,80,80,0.12);color:#ff8080;cursor:pointer;font-family:var(--font);">CLEAR</button>
-          <span id="sb-pat-status" style="font-size:8px;letter-spacing:1px;color:var(--w40);line-height:30px;"></span>
-        </div>
+      <!-- Live refresh -->
+      <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+        <button onclick="loadSupabaseMetrics()" style="font-size:8px;letter-spacing:1px;padding:7px 14px;border-radius:8px;border:none;background:rgba(255,255,255,0.12);color:var(--white);cursor:pointer;font-family:var(--font);">↻ REFRESH</button>
+        <span id="sb-load-status" style="font-size:8px;letter-spacing:1px;color:var(--w40);line-height:30px;margin-left:12px;"></span>
       </div>
 
       <!-- DB Metrics -->
@@ -900,19 +967,17 @@
         <div class="sb-metric"><div class="sb-metric-label">MESSAGES / FEEDBACK</div><div class="sb-metric-value" id="sb-msgs-count">···</div><div class="sb-metric-sub">user_feedback table</div></div>
       </div>
 
-      <!-- API / Bandwidth (PAT required) -->
-      <div style="font-size:9px;letter-spacing:2px;color:var(--w60);margin-bottom:12px;">📡 API & BANDWIDTH <span id="sb-pat-badge" class="sb-badge orange" style="margin-left:8px;">PAT REQUIRED</span></div>
-      <div class="sb-grid" id="sb-api-grid">
-        <div class="sb-metric"><div class="sb-metric-label">API REQUESTS / MONTH</div><div class="sb-metric-value" id="sb-api-reqs">—</div><div class="sb-bar-wrap"><div class="sb-bar ok" id="sb-api-bar" style="width:0%"></div></div><div class="sb-limit"><span id="sb-api-pct">— %</span><span>LIMIT 500K</span></div></div>
-        <div class="sb-metric"><div class="sb-metric-label">BANDWIDTH / MONTH</div><div class="sb-metric-value" id="sb-bandwidth">—</div><div class="sb-bar-wrap"><div class="sb-bar ok" id="sb-bw-bar" style="width:0%"></div></div><div class="sb-limit"><span id="sb-bw-pct">— %</span><span>LIMIT 5 GB</span></div></div>
-        <div class="sb-metric"><div class="sb-metric-label">DB EGRESS / MONTH</div><div class="sb-metric-value" id="sb-egress">—</div><div class="sb-metric-sub">Data read from DB</div></div>
-        <div class="sb-metric"><div class="sb-metric-label">STORAGE USED</div><div class="sb-metric-value" id="sb-storage">—</div><div class="sb-bar-wrap"><div class="sb-bar ok" id="sb-storage-bar" style="width:0%"></div></div><div class="sb-limit"><span id="sb-storage-pct">— %</span><span>LIMIT 1 GB</span></div></div>
+      <!-- Dashboard link for bandwidth/API -->
+      <div style="font-size:9px;letter-spacing:2px;color:var(--w60);margin-bottom:12px;">📡 API & BANDWIDTH</div>
+      <div class="sb-info-box" style="border-left-color:rgba(255,255,255,0.2);margin-bottom:16px;">
+        Les métriques <strong>bandwidth</strong> et <strong>API requests</strong> ne sont pas accessibles via SQL.<br>
+        Consulte le dashboard Supabase pour ces données en temps réel.
       </div>
 
       <!-- Table details -->
       <div style="font-size:9px;letter-spacing:2px;color:var(--w60);margin-bottom:12px;">🗂 TABLES</div>
       <div class="sb-tables-wrap">
-        <table><thead><tr><th>TABLE</th><th>ROWS</th><th>GROWTH / DAY</th><th>STATUS</th></tr></thead>
+        <table><thead><tr><th>TABLE</th><th>ROWS</th><th>SIZE</th><th>STATUS</th></tr></thead>
         <tbody id="sb-tables-body"><tr><td colspan="4" style="text-align:center;color:var(--w40);padding:16px;">LOADING···</td></tr></tbody></table>
       </div>
 
@@ -1010,6 +1075,141 @@ function _startLockoutTick() {
   tick();
 }
 
+// ── TOTP / 2FA ────────────────────────────────────────────
+const TOTP_SECRET_KEY  = 'nava_totp_secret';
+const TOTP_ENABLED_KEY = 'nava_totp_enabled';
+
+function _totpEnabled() { return localStorage.getItem(TOTP_ENABLED_KEY) === '1'; }
+function _totpSecret()  { return localStorage.getItem(TOTP_SECRET_KEY) || ''; }
+
+function _totpVerify(code) {
+  try {
+    const totp = new OTPAuth.TOTP({
+      secret: OTPAuth.Secret.fromBase32(_totpSecret()),
+      digits: 6, period: 30, algorithm: 'SHA1',
+    });
+    return totp.validate({ token: code, window: 1 }) !== null;
+  } catch(e) { return false; }
+}
+
+function _totpGetCode(prefix = 't') {
+  return ['d0','d1','d2','d3','d4','d5'].map(s => (document.getElementById(prefix + s)?.value || '')).join('');
+}
+
+function totpDigit(el, nextIdx) {
+  const prefix = el.id.startsWith('s') ? 's' : 't';
+  if (el.value && nextIdx !== null) document.getElementById(prefix + 'd' + nextIdx)?.focus();
+  if (!el.value && nextIdx === null) {
+    const code = _totpGetCode(prefix);
+    if (code.length === 6 && prefix === 't') verifyTOTP();
+    if (code.length === 6 && prefix === 's') confirmTOTPSetup();
+  }
+}
+
+function setupDigit(el, nextIdx) { totpDigit(el, nextIdx); }
+
+function totpBack(event, el, prevIdx, prefix = 't') {
+  if (event.key === 'Backspace' && !el.value && prevIdx !== null) {
+    document.getElementById(prefix + 'd' + prevIdx)?.focus();
+  }
+}
+
+function verifyTOTP() {
+  const code = _totpGetCode('t');
+  if (code.length < 6) return;
+  if (_totpVerify(code)) {
+    document.getElementById('totp-screen').style.display = 'none';
+    unlockPanel();
+  } else {
+    document.getElementById('totp-err').textContent = '✗ INVALID CODE';
+    ['td0','td1','td2','td3','td4','td5'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+    document.getElementById('td0').focus();
+    setTimeout(() => { document.getElementById('totp-err').textContent = ''; }, 2500);
+  }
+}
+
+function showTotpCancel() {
+  document.getElementById('totp-screen').style.display = 'none';
+  document.getElementById('lock-screen').style.display = 'flex';
+  ['td0','td1','td2','td3','td4','td5'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+}
+
+function renderTOTPStatus() {
+  const enabled = _totpEnabled();
+  const badge = document.getElementById('totp-status-badge');
+  if (badge) {
+    badge.textContent = enabled ? '✓ ENABLED' : '✗ NOT CONFIGURED';
+    badge.style.color = enabled ? '#4ade80' : 'var(--warn)';
+  }
+  const ev = document.getElementById('totp-enabled-view');
+  const sv = document.getElementById('totp-setup-view');
+  if (ev) ev.style.display = enabled ? 'block' : 'none';
+  if (sv) sv.style.display = enabled ? 'none' : 'block';
+}
+
+let _pendingTotpSecret = null;
+
+async function startTOTPSetup() {
+  const secret = new OTPAuth.Secret({ size: 20 });
+  _pendingTotpSecret = secret.base32;
+
+  const totp = new OTPAuth.TOTP({
+    issuer: 'NAVA PEACE',
+    label: 'Admin',
+    algorithm: 'SHA1',
+    digits: 6,
+    period: 30,
+    secret,
+  });
+  const uri = totp.toString();
+
+  // Show QR
+  const wrap = document.getElementById('totp-qr-canvas');
+  wrap.innerHTML = '';
+  new QRCode(wrap, { text: uri, width: 200, height: 200, correctLevel: QRCode.CorrectLevel.M });
+  document.getElementById('totp-secret-display').textContent = _pendingTotpSecret;
+  document.getElementById('totp-qr-section').style.display = 'block';
+  document.getElementById('totp-start-btn').style.display = 'none';
+  document.getElementById('sd0').focus();
+}
+
+function confirmTOTPSetup() {
+  const code = _totpGetCode('s');
+  if (code.length < 6) return;
+  try {
+    const totp = new OTPAuth.TOTP({
+      secret: OTPAuth.Secret.fromBase32(_pendingTotpSecret),
+      digits: 6, period: 30, algorithm: 'SHA1',
+    });
+    if (totp.validate({ token: code, window: 1 }) !== null) {
+      localStorage.setItem(TOTP_SECRET_KEY, _pendingTotpSecret);
+      localStorage.setItem(TOTP_ENABLED_KEY, '1');
+      _pendingTotpSecret = null;
+      document.getElementById('totp-qr-section').style.display = 'none';
+      document.getElementById('totp-start-btn').style.display = 'inline-block';
+      renderTOTPStatus();
+    } else {
+      document.getElementById('totp-setup-err').textContent = '✗ WRONG CODE — TRY AGAIN';
+      ['sd0','sd1','sd2','sd3','sd4','sd5'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+      document.getElementById('sd0').focus();
+    }
+  } catch(e) {
+    document.getElementById('totp-setup-err').textContent = '✗ ERROR: ' + e.message;
+  }
+}
+
+function disableTOTP() {
+  const code = prompt('Enter your current authenticator code to disable 2FA:');
+  if (!code) return;
+  if (_totpVerify(code.trim())) {
+    localStorage.removeItem(TOTP_SECRET_KEY);
+    localStorage.removeItem(TOTP_ENABLED_KEY);
+    renderTOTPStatus();
+  } else {
+    alert('✗ Invalid code. 2FA not disabled.');
+  }
+}
+
 async function checkPassword() {
   if (_isLockedOut()) { _startLockoutTick(); return; }
 
@@ -1027,7 +1227,15 @@ async function checkPassword() {
       localStorage.setItem('nava_admin_role',  _adminRole);
       localStorage.setItem('nava_admin_name',  _adminName);
       sessionStorage.setItem('nava_admin_code', _adminCode);
-      unlockPanel(); return;
+      if (_totpEnabled()) {
+        document.getElementById('lock-screen').style.display = 'none';
+        const ts = document.getElementById('totp-screen');
+        ts.style.display = 'flex';
+        document.getElementById('td0').focus();
+      } else {
+        unlockPanel();
+      }
+      return;
     }
   } catch(e) { console.warn('Admin RPC error', e); }
 
@@ -2459,7 +2667,6 @@ async function sendFeedbackReply(id) {
 }
 
 // ── SUPABASE METRICS ──────────────────────────────────────────────────────
-const SB_PAT_KEY = 'nava_sb_pat';
 
 function _sbProjectRef() {
   // Extract ref from SUPABASE_URL: https://XXXXX.supabase.co
@@ -2490,38 +2697,16 @@ function _setBar(barId, pctId, pct) {
   lbl.style.color = pct >= 90 ? '#ff5b5b' : pct >= 70 ? '#fb923c' : 'var(--w40)';
 }
 
-function saveSbPat() {
-  const val = document.getElementById('sb-pat-input').value.trim();
-  if (!val) return;
-  localStorage.setItem(SB_PAT_KEY, val);
-  document.getElementById('sb-pat-status').textContent = '✓ SAVED';
-  document.getElementById('sb-pat-badge').textContent = 'CONNECTED';
-  document.getElementById('sb-pat-badge').className = 'sb-badge green';
-  loadSupabaseMetrics();
-}
-
-function clearSbPat() {
-  localStorage.removeItem(SB_PAT_KEY);
-  document.getElementById('sb-pat-input').value = '';
-  document.getElementById('sb-pat-status').textContent = 'CLEARED';
-  document.getElementById('sb-pat-badge').textContent = 'PAT REQUIRED';
-  document.getElementById('sb-pat-badge').className = 'sb-badge orange';
-}
 
 async function loadSupabaseMetrics() {
-  // Restore PAT field
-  const pat = localStorage.getItem(SB_PAT_KEY) || '';
-  if (pat) {
-    document.getElementById('sb-pat-input').value = pat;
-    document.getElementById('sb-pat-badge').textContent = 'CONNECTED';
-    document.getElementById('sb-pat-badge').className = 'sb-badge green';
-  }
+  const statusEl = document.getElementById('sb-load-status');
+  if (statusEl) statusEl.textContent = 'LOADING···';
 
-  // ── DB row counts (no PAT needed) ──
+  // ── Row counts ──
   const tables = [
-    { id:'sb-votes-count',  table:'peace_votes',   label:'peace_votes' },
-    { id:'sb-users-count',  table:'peace_messages', label:'peace_messages' },
-    { id:'sb-msgs-count',   table:'user_feedback',  label:'user_feedback' },
+    { id:'sb-votes-count',  table:'peace_votes' },
+    { id:'sb-users-count',  table:'peace_messages' },
+    { id:'sb-msgs-count',   table:'user_feedback' },
   ];
   for (const t of tables) {
     try {
@@ -2531,77 +2716,47 @@ async function loadSupabaseMetrics() {
     } catch(e) {}
   }
 
-  // Estimate DB size from row counts (approx 200B/vote, 150B/message, 300B/feedback)
+  // ── Real DB size via SQL function ──
   try {
-    const { count: vc } = await sb.from('peace_votes').select('*',{count:'exact',head:true});
-    const { count: mc } = await sb.from('peace_messages').select('*',{count:'exact',head:true});
-    const { count: fc } = await sb.from('user_feedback').select('*',{count:'exact',head:true});
-    const estBytes = (vc||0)*200 + (mc||0)*150 + (fc||0)*300 + 5*1024*1024; // +5MB overhead
-    const pct = (estBytes / (500*1024*1024)) * 100;
-    document.getElementById('sb-db-size').textContent = _fmtBytes(estBytes) + ' ~';
-    document.getElementById('sb-db-sub') && (document.getElementById('sb-db-sub').textContent = 'estimation');
-    _setBar('sb-db-bar','sb-db-pct', pct);
+    const { data, error } = await sb.rpc('get_db_stats');
+    if (error) throw error;
+
+    const dbBytes = data?.db_size_bytes || 0;
+    const dbLimit = 500 * 1024 * 1024;
+    document.getElementById('sb-db-size').textContent = _fmtBytes(dbBytes);
+    _setBar('sb-db-bar', 'sb-db-pct', (dbBytes / dbLimit) * 100);
 
     // Tables detail
     const tbody = document.getElementById('sb-tables-body');
-    const rows = [
-      { name:'peace_votes',    rows: vc||0, bytesPerRow:200 },
-      { name:'peace_messages', rows: mc||0, bytesPerRow:150 },
-      { name:'user_feedback',  rows: fc||0, bytesPerRow:300 },
-    ];
-    tbody.innerHTML = rows.map(r => {
-      const sz = _fmtBytes(r.rows * r.bytesPerRow);
-      const growthPerDay = r.name === 'peace_votes' ? Math.round((r.rows / Math.max(1, 14)) * 1) : '—';
-      const statusPct = (r.rows * r.bytesPerRow) / (500*1024*1024) * 100;
-      const badge = statusPct < 5 ? '<span class="sb-badge green">OK</span>'
-                  : statusPct < 15 ? '<span class="sb-badge orange">WATCH</span>'
-                  : '<span class="sb-badge red">HIGH</span>';
-      return `<tr><td>${r.name}</td><td>${r.rows.toLocaleString('fr-FR')}</td><td>+${growthPerDay} rows</td><td>${badge} ${sz}</td></tr>`;
-    }).join('');
-  } catch(e) {}
-
-  // ── Management API (PAT needed) ──
-  if (!pat) return;
-  const ref = _sbProjectRef();
-  if (!ref) return;
-
-  try {
-    const res = await fetch(`https://api.supabase.com/v1/projects/${ref}/usage`, {
-      headers: { 'Authorization': `Bearer ${pat}`, 'Content-Type': 'application/json' }
-    });
-    if (!res.ok) {
-      document.getElementById('sb-pat-status').textContent = '⚠ INVALID TOKEN';
-      document.getElementById('sb-pat-badge').textContent = 'ERROR';
-      document.getElementById('sb-pat-badge').className = 'sb-badge red';
-      return;
+    const rows = (data?.tables || []).filter(r => r.name !== null);
+    if (rows.length) {
+      tbody.innerHTML = rows.map(r => {
+        const rowsPct = (r.size_bytes || 0) / dbLimit * 100;
+        const badge = rowsPct < 5 ? '<span class="sb-badge green">OK</span>'
+                    : rowsPct < 15 ? '<span class="sb-badge orange">WATCH</span>'
+                    : '<span class="sb-badge red">HIGH</span>';
+        return `<tr><td>${r.name}</td><td>${(r.rows||0).toLocaleString('fr-FR')}</td><td>${_fmtBytes(r.size_bytes||0)}</td><td>${badge}</td></tr>`;
+      }).join('');
     }
-    const usage = await res.json();
 
-    // API requests
-    const apiReqs = usage?.api_requests?.usage || 0;
-    const apiLimit = 500000;
-    document.getElementById('sb-api-reqs').textContent = apiReqs.toLocaleString('fr-FR');
-    _setBar('sb-api-bar','sb-api-pct', (apiReqs/apiLimit)*100);
-
-    // Bandwidth
-    const bwBytes = usage?.egress?.usage || 0;
-    const bwLimit = 5*1024*1024*1024;
-    document.getElementById('sb-bandwidth').textContent = _fmtBytes(bwBytes);
-    _setBar('sb-bw-bar','sb-bw-pct', (bwBytes/bwLimit)*100);
-
-    // DB egress
-    const egress = usage?.db_egress?.usage || 0;
-    document.getElementById('sb-egress').textContent = _fmtBytes(egress);
-
-    // Storage
-    const storageBytes = usage?.storage_size?.usage || 0;
-    const storageLimit = 1024*1024*1024;
-    document.getElementById('sb-storage').textContent = _fmtBytes(storageBytes);
-    _setBar('sb-storage-bar','sb-storage-pct', (storageBytes/storageLimit)*100);
-
-    document.getElementById('sb-pat-status').textContent = '✓ LIVE DATA';
+    if (statusEl) statusEl.textContent = '✓ LIVE';
   } catch(e) {
-    document.getElementById('sb-pat-status').textContent = '⚠ API ERROR';
+    // Fallback: estimate from row counts
+    try {
+      const { count: vc } = await sb.from('peace_votes').select('*',{count:'exact',head:true});
+      const { count: mc } = await sb.from('peace_messages').select('*',{count:'exact',head:true});
+      const { count: fc } = await sb.from('user_feedback').select('*',{count:'exact',head:true});
+      const estBytes = (vc||0)*200 + (mc||0)*150 + (fc||0)*300 + 5*1024*1024;
+      document.getElementById('sb-db-size').textContent = _fmtBytes(estBytes) + ' ~';
+      _setBar('sb-db-bar','sb-db-pct', (estBytes/(500*1024*1024))*100);
+      const tbody = document.getElementById('sb-tables-body');
+      tbody.innerHTML = [
+        { name:'peace_votes', rows:vc||0, size:(vc||0)*200 },
+        { name:'peace_messages', rows:mc||0, size:(mc||0)*150 },
+        { name:'user_feedback', rows:fc||0, size:(fc||0)*300 },
+      ].map(r => `<tr><td>${r.name}</td><td>${r.rows.toLocaleString('fr-FR')}</td><td>${_fmtBytes(r.size)} ~</td><td><span class="sb-badge green">OK</span></td></tr>`).join('');
+    } catch(_) {}
+    if (statusEl) statusEl.textContent = '~ ESTIMATED';
   }
 }
 </script>

@@ -1,98 +1,64 @@
 /* ══════════════════════════════════════════════════════
-   NAVA PEACE — MODULE GATE  v2
-   Deux rôles :
-   1. GATE     — bloque la page courante si son module est désactivé
+   NAVA PEACE — MODULE GATE  v3
+   1. GATE     — redirige vers la première page active si le module courant est désactivé
    2. NAV HIDE — masque dans la barre de nav les onglets désactivés
    ══════════════════════════════════════════════════════ */
 
-/* Correspondance module → fichier HTML de la nav */
-var NAVA_NAV_MAP = {
-  module_peace:   'peace.html',
-  module_map:     'map.html',
-  module_market:  'market.html',
-  module_profile: 'profile.html',
-  module_about:   'about.html',
-};
-
 (function () {
 
-  // ── 1. GATE : bloquer la page si son module est désactivé ──
+  var NAV_ORDER = ['module_peace','module_map','module_market','module_profile','module_about'];
+  var NAV_PAGES = {
+    module_peace:   'peace.html',
+    module_map:     'map.html',
+    module_market:  'market.html',
+    module_profile: 'profile.html',
+    module_about:   'about.html',
+  };
+
+  // ── 1. GATE : rediriger si le module courant est désactivé ──
   try {
     var key = document.documentElement.getAttribute('data-module');
     if (key) {
       var mods = JSON.parse(localStorage.getItem('nava_modules') || '{}');
       if (mods[key] === false) {
-
-        // Cacher le body immédiatement (évite le flash de contenu)
-        var hideStyle = document.createElement('style');
-        hideStyle.id = 'module-gate-hide';
-        hideStyle.textContent =
-          'body { opacity: 0 !important; pointer-events: none !important; }';
-        document.head.appendChild(hideStyle);
-
-        document.addEventListener('DOMContentLoaded', function () {
-          var s = document.getElementById('module-gate-hide');
-          if (s) s.remove();
-
-          document.body.innerHTML =
-            '<div style="' +
-              'min-height:100vh;display:flex;flex-direction:column;' +
-              'align-items:center;justify-content:center;gap:20px;padding:48px 32px;' +
-              'font-family:Nasalization,Arial,sans-serif;' +
-              'background:radial-gradient(ellipse at 50% 20%,' +
-                '#6DD5F5 0%,#3AACDF 45%,#1E8EC4 100%);' +
-              'color:#fff;text-align:center;box-sizing:border-box;' +
-            '">' +
-              '<img src="logo.png" alt="NAVA PEACE"' +
-                ' style="width:90px;height:90px;object-fit:contain;' +
-                        'filter:drop-shadow(0 4px 28px rgba(255,255,255,0.50));" />' +
-              '<p style="font-size:11px;letter-spacing:6px;text-transform:uppercase;' +
-                        'opacity:0.55;margin-top:4px;">MODULE OFFLINE</p>' +
-              '<p style="font-size:9px;letter-spacing:2px;opacity:0.38;' +
-                        'max-width:280px;line-height:1.9;">' +
-                'This section has been temporarily disabled by the administrator.' +
-              '</p>' +
-              '<a href="peace.html"' +
-                ' style="margin-top:12px;padding:13px 32px;' +
-                        'background:rgba(255,255,255,0.15);' +
-                        'border:1.5px solid rgba(255,255,255,0.35);' +
-                        'border-radius:12px;color:#fff;text-decoration:none;' +
-                        'font-size:9px;letter-spacing:3px;">' +
-                '\u2190 RETURN' +
-              '</a>' +
-            '</div>';
-        });
-
-        return; // corps remplacé — pas besoin de filtrer la nav
+        // Trouver la première page active
+        var target = null;
+        for (var i = 0; i < NAV_ORDER.length; i++) {
+          var k = NAV_ORDER[i];
+          if (k !== key && mods[k] !== false) {
+            target = NAV_PAGES[k];
+            break;
+          }
+        }
+        if (target) {
+          window.location.replace(target);
+        }
+        return;
       }
     }
   } catch (e) { /* échouer silencieusement */ }
 
   // ── 2. NAV HIDE : masquer les onglets des modules désactivés ──
   function applyNavHide(mods) {
-    Object.keys(NAVA_NAV_MAP).forEach(function (moduleKey) {
-      if (mods[moduleKey] === false) {
-        var href = NAVA_NAV_MAP[moduleKey];
-        document.querySelectorAll('.nav-item[href="' + href + '"]')
-          .forEach(function (el) { el.style.display = 'none'; });
-      } else {
-        var href = NAVA_NAV_MAP[moduleKey];
-        document.querySelectorAll('.nav-item[href="' + href + '"]')
-          .forEach(function (el) { if (el.style.display === 'none') el.style.display = ''; });
+    var keys = Object.keys(NAV_PAGES);
+    for (var i = 0; i < keys.length; i++) {
+      var moduleKey = keys[i];
+      var href = NAV_PAGES[moduleKey];
+      var items = document.querySelectorAll('.nav-item[href="' + href + '"]');
+      for (var j = 0; j < items.length; j++) {
+        items[j].style.display = mods[moduleKey] === false ? 'none' : '';
       }
-    });
+    }
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    // Apply cached settings immediately (fast, synchronous)
+    // Appliquer immédiatement depuis le cache
     try {
       var mods = JSON.parse(localStorage.getItem('nava_modules') || '{}');
       applyNavHide(mods);
     } catch (e) {}
 
-    // ── 3. SUPABASE SYNC : fetch latest settings from server (cross-device) ──
-    // Runs async after paint so it never blocks the page.
-    // SUPABASE_URL and SUPABASE_ANON_KEY are defined in supabase_config.js (loaded in <head>).
+    // ── 3. SUPABASE SYNC ──
     try {
       if (typeof SUPABASE_URL !== 'undefined' && SUPABASE_URL &&
           !SUPABASE_URL.includes('XXXXXXX') &&
@@ -111,23 +77,33 @@ var NAVA_NAV_MAP = {
            if (!Array.isArray(data) || !data[0] || !data[0].value) return;
            var newVal = data[0].value;
            var oldVal = localStorage.getItem('nava_modules') || '{}';
-           if (newVal === oldVal) return; // nothing changed
+           if (newVal === oldVal) return;
 
-           // Si l'admin a sauvegardé localement dans les 60 dernières minutes,
-           // la valeur locale est plus récente → ne pas écraser
            var localTs = parseInt(localStorage.getItem('nava_modules_ts') || '0', 10);
            if (localTs && Date.now() - localTs < 60 * 60 * 1000) return;
 
+           var oldMods = JSON.parse(oldVal);
            localStorage.setItem('nava_modules', newVal);
-
            var newMods = JSON.parse(newVal);
-           // Re-apply nav hide with fresh data
            applyNavHide(newMods);
 
-           // If current page's module was just disabled, gate it now
            var pageKey = document.documentElement.getAttribute('data-module');
-           if (pageKey && newMods[pageKey] === false) {
-             window.location.reload(); // will hit the localStorage gate on reload
+           if (pageKey) {
+             if (newMods[pageKey] === false) {
+               // Module vient d'être désactivé → rediriger
+               var target = null;
+               for (var i = 0; i < NAV_ORDER.length; i++) {
+                 var k = NAV_ORDER[i];
+                 if (k !== pageKey && newMods[k] !== false) {
+                   target = NAV_PAGES[k];
+                   break;
+                 }
+               }
+               if (target) window.location.replace(target);
+             } else if (oldMods[pageKey] === false) {
+               // Module vient d'être ré-activé → reload pour sortir de MODULE OFFLINE
+               window.location.reload();
+             }
            }
          }).catch(function () {});
       }
