@@ -691,31 +691,12 @@
       const referredBy   = localStorage.getItem('nava_peace_referred_by') || null;
       const userUid      = localStorage.getItem('nava_peace_uid') || genUID();
 
-      if (sbClient) {
-        try {
-          const { error } = await sbClient
-            .from('peace_votes')
-            .insert({
-              country, age, gender,
-              referral_code: referralCode,
-              referred_by: referredBy,
-              user_uid: userUid,
-              source: (typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram) ? 'telegram' : 'web',
-              telegram_id: (typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram && NAVA_TG.user) ? String(NAVA_TG.user.id) : null
-            });
-          if (error) console.warn('Supabase insert error:', error.message);
-        } catch (err) {
-          console.warn('Supabase unavailable:', err.message);
-        }
-      }
-
       // Sauvegarder le profil utilisateur
       localStorage.setItem('nava_peace_country', country);
       localStorage.setItem('nava_peace_age',     age || '');
       localStorage.setItem('nava_peace_gender',  gender || '');
 
-      // Marquer comme inscrit (gate pour peace.html) mais NE PAS marquer le vote du jour
-      // → le bouton restera cliquable sur peace.html pour la première action
+      // Marquer comme inscrit (gate pour peace.html)
       localStorage.setItem(STORAGE_KEY, TODAY);
 
       // Générer et sauvegarder le pseudo si pas encore défini

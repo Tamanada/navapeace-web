@@ -34,7 +34,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase_config.js"></script>
   <script src="block_check.js"></script>
-  <script src="lang.js"></script>
+  <script src="lang.js?v=3"></script>
   <style>
     *, *::before, *::after {
       box-sizing: border-box; margin: 0; padding: 0;
@@ -246,6 +246,60 @@
       transition: width 1s ease;
     }
 
+    /* ── LEADERBOARD ── */
+    .lb-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 10px;
+      border-radius: 12px;
+      margin-bottom: 6px;
+      background: rgba(255,255,255,0.06);
+      transition: background 0.2s;
+    }
+    .lb-row.lb-top1 { background: rgba(255,200,50,0.15); border: 1px solid rgba(255,200,50,0.3); }
+    .lb-row.lb-top2 { background: rgba(200,220,255,0.12); border: 1px solid rgba(200,220,255,0.25); }
+    .lb-row.lb-top3 { background: rgba(200,140,60,0.12); border: 1px solid rgba(200,140,60,0.25); }
+    .lb-medal {
+      font-size: 16px;
+      width: 22px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .lb-pseudo {
+      flex: 1;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.9);
+      text-transform: uppercase;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .lb-country {
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .lb-doves {
+      font-size: 13px;
+      color: #fff;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .lb-doves-icon { font-size: 11px; opacity: 0.7; }
+    .lb-you {
+      font-size: 8px;
+      letter-spacing: 1.5px;
+      color: #6DD5F5;
+      background: rgba(109,213,245,0.15);
+      border: 1px solid rgba(109,213,245,0.3);
+      border-radius: 6px;
+      padding: 2px 6px;
+      flex-shrink: 0;
+    }
+
     .no-data {
       text-align: center;
       font-size: 12px;
@@ -325,6 +379,14 @@
     </div>
   </div>
 
+  <!-- LEADERBOARD -->
+  <div class="card">
+    <p class="section-title" data-i18n="stats_leaderboard">🏆 TOP PEACE LOVERS</p>
+    <div id="leaderboard-list">
+      <p class="no-data">LOADING...</p>
+    </div>
+  </div>
+
   <!-- GENDER -->
   <div class="card">
     <p class="section-title" data-i18n="section_gender">GENDER DISTRIBUTION</p>
@@ -383,40 +445,50 @@
         const _tsStart = new Date(); _tsStart.setHours(0,0,0,0);
         const _tsEnd   = new Date(_tsStart); _tsEnd.setDate(_tsEnd.getDate() + 1);
 
-        const [totalR, todayR, usersR] = await Promise.all([
+        const [totalR, todayR] = await Promise.all([
           sb.from('active_votes').select('*', { count: 'exact', head: true }),
           sb.from('active_votes').select('*', { count: 'exact', head: true })
             .gte('created_at', _tsStart.toISOString())
             .lt('created_at', _tsEnd.toISOString()),
-          sb.from('peace_messages').select('*', { count: 'exact', head: true }),
         ]);
 
         document.getElementById('st-total').textContent = (totalR.count ?? 0).toLocaleString('fr-FR');
         document.getElementById('st-today').textContent = '+' + (todayR.count ?? 0).toLocaleString('fr-FR');
-        document.getElementById('st-users').textContent = (usersR.count ?? 0).toLocaleString('fr-FR');
       } catch(e) { console.warn('Overview error', e); }
 
-      // Countries count (unique users, not votes)
+      // Users + Countries count — same deduplicated source for consistency
       try {
         const { data } = await sb.from('active_votes').select('user_uid, country').order('created_at', { ascending: false });
         if (data) {
-          const seen = {}; // deduplicate: one entry per user (most recent)
+          const seen = {};
           data.forEach(r => { if (r.user_uid && !seen[r.user_uid]) seen[r.user_uid] = r; });
-          const unique = new Set(Object.values(seen).map(r => (r.country || '').toUpperCase().trim()).filter(Boolean));
-          document.getElementById('st-countries').textContent = unique.size;
+          const uniqueUsers = Object.values(seen);
+          document.getElementById('st-users').textContent = uniqueUsers.length.toLocaleString('fr-FR');
+          const uniqueCountries = new Set(uniqueUsers.map(r => (r.country || '').toUpperCase().trim()).filter(Boolean));
+          document.getElementById('st-countries').textContent = uniqueCountries.size;
         }
-      } catch(e) { console.warn('Countries count error', e); }
+      } catch(e) { console.warn('Users/Countries count error', e); }
     }
 
-    // ── Helper: unique users from active_votes (most recent vote per user) ──
+    // ── Helper: unique ACTIVE users from active_votes (blocked excluded) ──
+    let _blockedSet = null; // cache pour éviter de refetch à chaque appel
+    async function getBlockedSet() {
+      if (_blockedSet) return _blockedSet;
+      const { data } = await sb.from('blocked_users').select('user_uid');
+      _blockedSet = new Set((data || []).map(b => b.user_uid));
+      return _blockedSet;
+    }
+
     async function loadUniqueUsers() {
-      const { data, error } = await sb
-        .from('active_votes')
-        .select('user_uid, country, age, gender')
-        .order('created_at', { ascending: false });
+      const [{ data, error }, blocked] = await Promise.all([
+        sb.from('active_votes').select('user_uid, country, age, gender').order('created_at', { ascending: false }),
+        getBlockedSet(),
+      ]);
       if (error || !data) return [];
       const seen = {};
-      data.forEach(r => { if (r.user_uid && !seen[r.user_uid]) seen[r.user_uid] = r; });
+      data.forEach(r => {
+        if (r.user_uid && !blocked.has(r.user_uid) && !seen[r.user_uid]) seen[r.user_uid] = r;
+      });
       return Object.values(seen);
     }
 
@@ -520,9 +592,91 @@
           </div>`).join('');
     }
 
+    // ── LEADERBOARD ──
+    async function loadLeaderboard() {
+      if (!sb) return;
+      const container = document.getElementById('leaderboard-list');
+      try {
+        // Exclude blocked users (uses shared cache from getBlockedSet)
+        const blockedSet = await getBlockedSet();
+
+        // Fetch all votes (user_uid + country) — active users only
+        const { data: votes, error: vErr } = await sb
+          .from('peace_votes')
+          .select('user_uid, country');
+        if (vErr || !votes) { container.innerHTML = '<p class="no-data">NO DATA YET</p>'; return; }
+
+        // Count votes per user, skipping blocked accounts
+        const counts = {};
+        const countries = {};
+        votes.forEach(r => {
+          if (!r.user_uid || blockedSet.has(r.user_uid)) return;
+          counts[r.user_uid] = (counts[r.user_uid] || 0) + 1;
+          if (r.country && !countries[r.user_uid]) countries[r.user_uid] = r.country;
+        });
+
+        // Fetch pseudos from peace_messages
+        const { data: msgs } = await sb.from('peace_messages').select('user_uid, pseudo');
+        const pseudoMap = {};
+        (msgs || []).forEach(m => { if (m.user_uid) pseudoMap[m.user_uid] = m.pseudo; });
+
+        const myUid = localStorage.getItem('nava_peace_uid') || '';
+        const MEDALS = ['🥇','🥈','🥉'];
+
+        // Sort by vote count desc, take top 10
+        const sorted = Object.entries(counts)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 10);
+
+        if (!sorted.length) { container.innerHTML = '<p class="no-data">NO DATA YET</p>'; return; }
+
+        const max = sorted[0][1];
+        container.innerHTML = sorted.map(([uid, count], i) => {
+          const pseudo   = pseudoMap[uid] || '🕊 PEACE LOVER';
+          const country  = countries[uid] || '';
+          const flag     = countryToFlag(country);
+          const isMe     = uid === myUid;
+          const rowClass = i === 0 ? 'lb-top1' : i === 1 ? 'lb-top2' : i === 2 ? 'lb-top3' : '';
+          const medal    = MEDALS[i] || `<span style="font-size:11px;color:rgba(255,255,255,0.5)">${i+1}</span>`;
+          return `<div class="lb-row ${rowClass}">
+            <span class="lb-medal">${medal}</span>
+            <span class="lb-pseudo">${pseudo.toUpperCase()}</span>
+            ${flag ? `<span class="lb-country">${flag}</span>` : ''}
+            ${isMe ? '<span class="lb-you">YOU</span>' : ''}
+            <span class="lb-doves"><span class="lb-doves-icon">🕊</span>${count}</span>
+          </div>`;
+        }).join('');
+      } catch(e) { container.innerHTML = '<p class="no-data">ERROR</p>'; console.warn('Leaderboard error', e); }
+    }
+
+    function countryToFlag(name) {
+      if (!name) return '';
+      // Map common country names to ISO 3166-1 alpha-2 codes for flag emoji
+      const MAP = {
+        'FRANCE':'FR','UNITED STATES':'US','GERMANY':'DE','SPAIN':'ES','ITALY':'IT',
+        'UNITED KINGDOM':'GB','BELGIUM':'BE','NETHERLANDS':'NL','PORTUGAL':'PT','BRAZIL':'BR',
+        'CANADA':'CA','AUSTRALIA':'AU','JAPAN':'JP','CHINA':'CN','INDIA':'IN','RUSSIA':'RU',
+        'SOUTH KOREA':'KR','MEXICO':'MX','ARGENTINA':'AR','SOUTH AFRICA':'ZA','EGYPT':'EG',
+        'THAILAND':'TH','VIETNAM':'VN','INDONESIA':'ID','MALAYSIA':'MY','PHILIPPINES':'PH',
+        'PAKISTAN':'PK','BANGLADESH':'BD','NIGERIA':'NG','KENYA':'KE','GHANA':'GH',
+        'UKRAINE':'UA','POLAND':'PL','SWEDEN':'SE','NORWAY':'NO','DENMARK':'DK','FINLAND':'FI',
+        'SWITZERLAND':'CH','AUSTRIA':'AT','GREECE':'GR','TURKEY':'TR','IRAN':'IR','IRAQ':'IQ',
+        'SAUDI ARABIA':'SA','UAE':'AE','ISRAEL':'IL','PALESTINE':'PS','MYANMAR':'MM',
+        'CAMBODIA':'KH','SINGAPORE':'SG','TAIWAN':'TW','HONG KONG':'HK','NEW ZEALAND':'NZ',
+        'BARBADOS':'BB','VATICAN CITY':'VA','ALGERIA':'DZ','UKRAINE':'UA','COLOMBIA':'CO',
+        'CHILE':'CL','PERU':'PE','VENEZUELA':'VE','MOROCCO':'MA','TUNISIA':'TN',
+        'UNITED STATES':'US','USA':'US','UK':'GB',
+      };
+      const code = MAP[name.toUpperCase().trim()];
+      if (!code) return '';
+      // Convert country code to flag emoji using regional indicator letters
+      return code.split('').map(c => String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65)).join('');
+    }
+
     // ── INIT ──
     loadOverview();
     loadTopCountries();
+    loadLeaderboard();
     loadDemographics();
 
     if (typeof applyLang === 'function') applyLang(detectLang());

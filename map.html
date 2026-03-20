@@ -530,22 +530,21 @@
     }
     #share-overlay-inner {
       display: flex;
-      flex-wrap: wrap;
-      align-items: flex-start;
-      justify-content: center;
-      gap: 24px;
-      padding: 56px 20px 36px;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding: 56px 16px 40px;
     }
     .share-story-frame {
-      flex-shrink: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 8px;
+      width: 100%;
     }
     .share-story-box {
       position: relative;
-      height: min(60vh, 480px);
+      height: min(72vh, 570px);
       aspect-ratio: 9 / 16;
       border-radius: 18px;
       overflow: hidden;
@@ -570,16 +569,30 @@
       white-space: nowrap;
     }
     .share-buttons-panel {
+      width: min(100%, 420px);
+    }
+    .share-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .share-grid-btn {
+      padding: 16px 10px;
+      border-radius: 14px;
+      color: #fff;
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 9px;
+      letter-spacing: 2px;
+      cursor: pointer;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      width: 260px;
-      flex-shrink: 0;
-    }
-    /* On very narrow screens, make canvas shorter so buttons fit below */
-    @media (max-width: 600px) {
-      .share-story-box { height: min(48vh, 380px); }
-      .share-buttons-panel { width: min(100%, 320px); }
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      line-height: 1.3;
+      text-align: center;
     }
   </style>
 </head>
@@ -655,7 +668,7 @@
   </div>
 
   <!-- SHARE OVERLAY -->
-  <div id="share-overlay" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(8,30,65,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);overflow-y:auto;overflow-x:hidden;">
+  <div id="share-overlay" style="display:none;position:fixed;inset:0;z-index:700;background:rgba(8,30,65,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);overflow-y:auto;overflow-x:hidden;">
 
     <!-- Close button (fixed top-right) -->
     <button id="share-overlay-close" onclick="closeShareOverlay()">✕</button>
@@ -674,27 +687,34 @@
 
       <!-- Share buttons panel -->
       <div class="share-buttons-panel">
-        <div style="text-align:center;margin-bottom:4px;">
+        <div style="text-align:center;margin-bottom:14px;">
           <p style="font-size:8px;letter-spacing:3px;color:rgba(255,255,255,0.45);margin:0 0 4px;">SHARE</p>
           <p style="font-size:14px;letter-spacing:3.5px;color:#fff;margin:0;font-weight:300;">PEACE MAP</p>
         </div>
 
-        <button onclick="shareToInstagram()" style="width:100%;padding:14px 18px;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);border:none;border-radius:14px;color:#fff;font-family:'Nasalization',Arial,sans-serif;font-size:9px;letter-spacing:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.334 3.608 1.308.975.975 1.246 2.242 1.308 3.608.058 1.265.069 1.645.069 4.85s-.011 3.585-.069 4.85c-.062 1.366-.333 2.633-1.308 3.608-.975.975-2.242 1.246-3.608 1.308-1.265.058-1.645.069-4.85.069s-3.585-.011-4.85-.069c-1.366-.062-2.633-.333-3.608-1.308-.975-.975-1.246-2.242-1.308-3.608C2.175 15.585 2.163 15.205 2.163 12s.012-3.584.07-4.85c.062-1.366.333-2.633 1.308-3.608.975-.975 2.242-1.246 3.608-1.308C8.416 2.175 8.796 2.163 12 2.163Zm0-2.163C8.741 0 8.332.014 7.052.072 5.197.157 3.355.673 1.946 2.082.537 3.491.021 5.333 0 7.188-.014 8.468 0 8.877 0 12s-.014 3.532.072 4.812c.157 1.855.673 3.697 2.082 5.106C3.491 23.327 5.333 23.843 7.188 24c1.28.086 1.689.072 4.812.072s3.532.014 4.812-.072c1.855-.157 3.697-.673 5.106-2.082C23.327 20.509 23.843 18.667 24 16.812c.086-1.28.072-1.689.072-4.812s.014-3.532-.072-4.812c-.157-1.855-.673-3.697-2.082-5.106C20.509.673 18.667.157 16.812 0 15.532-.014 15.123 0 12 0Zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324ZM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881Z"/></svg>
-          SHARE ON INSTAGRAM
-        </button>
+        <div class="share-grid">
+          <button onclick="shareToInstagram()" class="share-grid-btn" style="background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.334 3.608 1.308.975.975 1.246 2.242 1.308 3.608.058 1.265.069 1.645.069 4.85s-.011 3.585-.069 4.85c-.062 1.366-.333 2.633-1.308 3.608-.975.975-2.242 1.246-3.608 1.308-1.265.058-1.645.069-4.85.069s-3.585-.011-4.85-.069c-1.366-.062-2.633-.333-3.608-1.308-.975-.975-1.246-2.242-1.308-3.608C2.175 15.585 2.163 15.205 2.163 12s.012-3.584.07-4.85c.062-1.366.333-2.633 1.308-3.608.975-.975 2.242-1.246 3.608-1.308C8.416 2.175 8.796 2.163 12 2.163Zm0-2.163C8.741 0 8.332.014 7.052.072 5.197.157 3.355.673 1.946 2.082.537 3.491.021 5.333 0 7.188-.014 8.468 0 8.877 0 12s-.014 3.532.072 4.812c.157 1.855.673 3.697 2.082 5.106C3.491 23.327 5.333 23.843 7.188 24c1.28.086 1.689.072 4.812.072s3.532.014 4.812-.072c1.855-.157 3.697-.673 5.106-2.082C23.327 20.509 23.843 18.667 24 16.812c.086-1.28.072-1.689.072-4.812s.014-3.532-.072-4.812c-.157-1.855-.673-3.697-2.082-5.106C20.509.673 18.667.157 16.812 0 15.532-.014 15.123 0 12 0Zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324ZM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881Z"/></svg>
+            INSTAGRAM
+          </button>
 
-        <button onclick="shareToX()" style="width:100%;padding:14px 18px;background:rgba(0,0,0,0.75);border:1px solid rgba(255,255,255,0.2);border-radius:14px;color:#fff;font-family:'Nasalization',Arial,sans-serif;font-size:9px;letter-spacing:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.261 5.632 5.903-5.632Zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-          POST ON X
-        </button>
+          <button onclick="shareToX()" class="share-grid-btn" style="background:rgba(0,0,0,0.75);border:1px solid rgba(255,255,255,0.2);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.261 5.632 5.903-5.632Zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            POST ON X
+          </button>
 
-        <button onclick="shareToFB()" style="width:100%;padding:14px 18px;background:#1877f2;border:none;border-radius:14px;color:#fff;font-family:'Nasalization',Arial,sans-serif;font-size:9px;letter-spacing:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-          SHARE ON FACEBOOK
-        </button>
+          <button onclick="shareToFB()" class="share-grid-btn" style="background:#1877f2;border:none;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            FACEBOOK
+          </button>
 
-        <button onclick="downloadShareCard()" style="width:100%;padding:12px 18px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:14px;color:rgba(255,255,255,0.6);font-family:'Nasalization',Arial,sans-serif;font-size:8px;letter-spacing:3px;cursor:pointer;">
+          <button onclick="shareToMessenger()" class="share-grid-btn" style="background:linear-gradient(135deg,#00c6ff,#0078ff);border:none;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.374 0 0 4.975 0 11.111c0 3.497 1.745 6.616 4.472 8.652V24l4.086-2.242c1.09.301 2.246.464 3.442.464 6.626 0 12-4.974 12-11.111C24 4.975 18.626 0 12 0zm1.193 14.963-3.056-3.259-5.963 3.259 6.554-6.963 3.13 3.259 5.889-3.259-6.554 6.963z"/></svg>
+            MESSENGER
+          </button>
+        </div>
+
+        <button onclick="downloadShareCard()" style="width:100%;padding:13px 18px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:14px;color:rgba(255,255,255,0.6);font-family:'Nasalization',Arial,sans-serif;font-size:8px;letter-spacing:3px;cursor:pointer;">
           ↓ DOWNLOAD IMAGE
         </button>
       </div>
@@ -1633,6 +1653,16 @@
     const rc = localStorage.getItem('nava_peace_ref_code')||'';
     const link = (typeof NAVA_TG!=='undefined'&&NAVA_TG.isTelegram&&rc) ? 'https://t.me/NavaPeaceBot/app?startapp='+rc : rc ? 'https://nava-peace.app/?ref='+rc : 'https://nava-peace.app';
     window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(link),'_blank','width=600,height=400');
+  }
+
+  function shareToMessenger() {
+    const link = getShareLink();
+    // On mobile: open Messenger app directly; on desktop: fallback to FB send dialog
+    if (/Android|iPhone|iPad/i.test(navigator.userAgent)) {
+      window.location.href = 'fb-messenger://share?link=' + encodeURIComponent(link);
+    } else {
+      window.open('https://www.facebook.com/dialog/send?link=' + encodeURIComponent(link) + '&redirect_uri=' + encodeURIComponent(link), '_blank');
+    }
   }
 
   function downloadShareCard() {

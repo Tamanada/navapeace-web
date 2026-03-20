@@ -196,7 +196,7 @@
       pointer-events: none;
       filter: drop-shadow(0 2px 10px rgba(30,100,160,0.25));
       transition: opacity 0.4s;
-      opacity: 0.22;
+      opacity: 0.55;
       position: absolute;
     }
 
@@ -232,14 +232,14 @@
       transform: scale(0.97);
     }
 
-    /* Pulse ring animation */
+    /* Pulse ring animation — démarre du centre */
     .peace-btn::before,
     .peace-btn::after {
       content: '';
       position: absolute;
-      inset: -16px;
+      inset: 50%;
       border-radius: 50%;
-      border: 2px solid rgba(255,255,255,0.4);
+      border: 2px solid rgba(255,255,255,0.6);
       animation: ring-pulse 2.5s ease-out infinite;
     }
 
@@ -248,8 +248,8 @@
     }
 
     @keyframes ring-pulse {
-      0%   { inset: -6px;  opacity: 0.7; }
-      100% { inset: -40px; opacity: 0; }
+      0%   { inset: 50%;  opacity: 0.85; }
+      100% { inset: -55px; opacity: 0; }
     }
 
     /* ── NOTIFICATION BANNER ── */
@@ -734,9 +734,11 @@
         '</div>' +
         // Phase 2 — NEXT ACTION IN + countdown
         '<div class="btn-inner-msg btn-next-wrap" id="btn-next-wrap"' +
-          (fresh ? ' style="display:none;"' : '') + '>' +
+          ' style="' + (fresh ? 'display:none;' : '') + 'cursor:pointer;pointer-events:auto;"' +
+          ' onclick="event.stopPropagation();window.location.href=\'map.html\'">' +
           '<span class="btn-next-label">NEXT ACTION IN</span>' +
           '<span class="btn-next-timer" id="countdown">00:00:00</span>' +
+          '<span style="font-size:10px;letter-spacing:2px;color:rgba(26,95,130,0.6);margin-top:4px;">TAP TO SEE<br>THE MAP</span>' +
         '</div>';
 
       if (fresh) {
@@ -780,20 +782,26 @@
       localStorage.setItem(PEACE_KEY, TODAY);
       logVoteToday(); // ajouter au log offline-first
 
-      const uid        = localStorage.getItem('nava_peace_uid');
-      const referredBy = localStorage.getItem('nava_peace_referred_by') || null;
+      const uid          = localStorage.getItem('nava_peace_uid');
+      const referredBy   = localStorage.getItem('nava_peace_referred_by') || null;
+      const referralCode = localStorage.getItem('nava_peace_ref_code') || null;
+      const age          = parseInt(localStorage.getItem('nava_peace_age'), 10) || null;
+      const gender       = localStorage.getItem('nava_peace_gender') || null;
 
       let alreadyVotedToday = false;
-      // Détecter premier clic (inscription fraîche : pas encore de nava_peace_days ou == 0)
+      // Détecter premier clic (inscription fraîche : welcome dove = 1, pas encore de vote réel)
       const isFirstEver = !localStorage.getItem('nava_peace_days') || localStorage.getItem('nava_peace_days') === '0';
 
       if (sb) {
-        // Enregistrer l'action du jour dans peace_votes
+        // Enregistrer l'action du jour dans peace_votes (avec profil complet)
         try {
           const { error } = await sb.from('peace_votes').insert({
-            user_uid:    uid,
-            country:     country,
-            referred_by: referredBy,
+            user_uid:      uid,
+            country:       country,
+            age:           age,
+            gender:        gender,
+            referral_code: referralCode,
+            referred_by:   referredBy,
             source: (typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram) ? 'telegram' : 'web',
             telegram_id: (typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram && NAVA_TG.user) ? String(NAVA_TG.user.id) : null,
           });
@@ -832,10 +840,10 @@
         }
       } catch(_) {}
 
-      // Incrémenter le compteur local de jours consécutifs
+      // Incrémenter le compteur local (optimiste — sera recalculé par sync DB)
       if (!alreadyVotedToday) {
-        const prevDays = parseInt(localStorage.getItem('nava_peace_days') || '0', 10);
-        localStorage.setItem('nava_peace_days', prevDays + 1);
+        const prevVotes = parseInt(localStorage.getItem('nava_peace_days') || '0', 10);
+        localStorage.setItem('nava_peace_days', prevVotes + 1);
       }
 
       // Si déjà voté aujourd'hui (ex: autre appareil) → countdown direct sans thank you
@@ -1046,7 +1054,8 @@
           const {data:votes} = await sb2.from('peace_votes').select('created_at')
             .eq('user_uid',uid).order('created_at',{ascending:false});
           if (votes && votes.length) {
-            d.totalDoves = votes.length;
+            const _welcomeDove = parseInt(localStorage.getItem('nava_welcome_dove') || '0', 10);
+            d.totalDoves = votes.length + _welcomeDove;
             const dayNums=[...new Set(votes.map(v=>Math.floor(new Date(v.created_at).getTime()/86400000)))].sort((a,b)=>b-a);
             const today=Math.floor(Date.now()/86400000);
             if(dayNums[0]>=today-1){d.streak=1;for(let i=1;i<dayNums.length;i++){if(dayNums[i-1]-dayNums[i]===1)d.streak++;else break;}}
@@ -1350,9 +1359,7 @@
           .eq('user_uid', uid).order('created_at',{ascending:false});
         if (!votes || !votes.length) return;
 
-        // Total doves = nombre de votes
-        const totalDoves = votes.length;
-        localStorage.setItem('nava_peace_days', totalDoves);
+        localStorage.setItem('nava_peace_days', votes.length);
 
         // Streak = jours consécutifs
         const dayNums = [...new Set(votes.map(v =>

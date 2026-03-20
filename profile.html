@@ -732,6 +732,66 @@
     }
     .section-title { display: flex; align-items: center; justify-content: center; }
 
+    /* ── IDENTITY INFO POPUP ── */
+    .id-info-btn {
+      position: absolute;
+      left: 0;
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.85);
+      font-size: 18px;
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    .id-info-btn:hover { color: #fff; }
+    #id-info-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 800;
+      background: rgba(0,0,10,0.75);
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    #id-info-overlay.open { display: flex; }
+    #id-info-card {
+      background: linear-gradient(145deg, rgba(20,55,100,0.98), rgba(10,30,65,0.98));
+      border: 1px solid rgba(109,213,245,0.25);
+      border-radius: 20px;
+      padding: 28px 24px;
+      max-width: 340px;
+      width: 100%;
+      animation: celebPop 0.3s cubic-bezier(.22,1,.36,1) both;
+    }
+    .id-info-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .id-info-row:last-of-type { margin-bottom: 0; }
+    .id-info-icon {
+      font-size: 22px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .id-info-text p:first-child {
+      font-size: 9px;
+      letter-spacing: 2.5px;
+      color: #6DD5F5;
+      margin: 0 0 4px;
+      font-weight: 700;
+    }
+    .id-info-text p:last-child {
+      font-size: 12px;
+      color: rgba(255,255,255,0.75);
+      margin: 0;
+      line-height: 1.55;
+    }
+
     /* ── ADMIN BADGE ── */
     .admin-badge {
       display: inline-flex; align-items: center; gap: 5px;
@@ -993,6 +1053,30 @@
       color:rgba(255,255,255,0.6); margin-top:16px; line-height:1.8;
     }
     .streak-next-msg strong { color:#fff; font-weight:700; }
+
+    /* ── STREAK CELEBRATION ── */
+    @keyframes streakParticle {
+      0%   { transform: translate(0,0) scale(1); opacity:1; }
+      100% { transform: translate(var(--px),var(--py)) scale(0.1); opacity:0; }
+    }
+    @keyframes celebPop {
+      0%   { transform: scale(0.6); opacity:0; }
+      70%  { transform: scale(1.06); opacity:1; }
+      100% { transform: scale(1);   opacity:1; }
+    }
+    @keyframes iconBounce {
+      0%,100% { transform: scale(1); }
+      40%     { transform: scale(1.2); }
+    }
+    .streak-particle {
+      position:absolute; border-radius:50%;
+      top:50%; left:50%; margin:-4px 0 0 -4px;
+      animation: streakParticle 1.4s ease-out forwards;
+      animation-delay: var(--delay);
+      pointer-events:none;
+    }
+    #streakCelebCard { animation: celebPop 0.4s cubic-bezier(.22,1,.36,1) both; }
+    #celebIcon       { animation: iconBounce 0.8s ease 0.4s both; display:inline-block; }
   </style>
 </head>
 <body>
@@ -1009,6 +1093,7 @@
   <!-- MY IDENTITY (collapsible) -->
   <div class="card card-collapse" id="id-card" onclick="toggleCard('id-card')">
     <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('id-card',true)">
+      <button class="id-info-btn" onclick="event.stopPropagation();openIdentityInfo()" title="What is this?">ⓘ</button>
       <p class="section-title"><svg class="title-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><span data-i18n="section_identity">MY IDENTITY</span></p>
       <span class="card-chevron">▾</span>
     </div>
@@ -1380,6 +1465,57 @@
         <p class="ref-empty">···</p>
       </div>
       <button class="dove-popup-close" onclick="closeReferralsPopup()" data-i18n="close_btn">CLOSE</button>
+    </div>
+  </div>
+
+  <!-- IDENTITY INFO POPUP -->
+  <div id="id-info-overlay" onclick="closeIdentityInfo()">
+    <div id="id-info-card" onclick="event.stopPropagation()">
+      <p style="font-size:10px;letter-spacing:3px;color:#6DD5F5;margin:0 0 20px;text-align:center;">YOUR IDENTITY</p>
+
+      <div class="id-info-row">
+        <div class="id-info-icon">👁</div>
+        <div class="id-info-text">
+          <p data-i18n="id_info_visible_title">VISIBLE BY EVERYONE</p>
+          <p data-i18n="id_info_visible_body">Your pseudo is your public name. All NAVA PEACE members can see it in the peace messages feed and the map.</p>
+        </div>
+      </div>
+
+      <div class="id-info-row">
+        <div class="id-info-icon">🕊</div>
+        <div class="id-info-text">
+          <p data-i18n="id_info_msg_title">PEACE MESSAGES</p>
+          <p data-i18n="id_info_msg_body">When you share a peace message, it appears with your pseudo next to it on the world map.</p>
+        </div>
+      </div>
+
+      <div class="id-info-row">
+        <div class="id-info-icon">🔗</div>
+        <div class="id-info-text">
+          <p data-i18n="id_info_invite_title">INVITE & SHARE</p>
+          <p data-i18n="id_info_invite_body">Your pseudo is also shown when you invite friends. You can change it once at any time.</p>
+        </div>
+      </div>
+
+      <button onclick="closeIdentityInfo()" style="margin-top:22px;width:100%;padding:13px;background:rgba(109,213,245,0.15);border:1px solid rgba(109,213,245,0.35);border-radius:12px;color:#6DD5F5;font-family:'Nasalization',Arial,sans-serif;font-size:9px;letter-spacing:2.5px;cursor:pointer;" data-i18n="close_btn">CLOSE</button>
+    </div>
+  </div>
+
+  <!-- STREAK CELEBRATION OVERLAY -->
+  <div id="streakCelebOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,10,0.82);z-index:750;align-items:center;justify-content:center;">
+    <div id="streakCelebCard" style="background:linear-gradient(160deg,#0a1628,#0d2240);border:1px solid rgba(255,255,255,0.2);border-radius:24px;padding:36px 24px 28px;width:88%;max-width:340px;text-align:center;position:relative;overflow:hidden;">
+      <div id="streakParticles" style="position:absolute;inset:0;pointer-events:none;"></div>
+      <div style="position:relative;z-index:1;">
+        <p style="font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:3px;color:#6DD5F5;margin:0 0 10px;">✨ MILESTONE UNLOCKED</p>
+        <div id="celebIcon" style="font-size:54px;line-height:1;margin-bottom:10px;">🏆</div>
+        <p id="celebName" style="font-family:Nasalization,Arial,sans-serif;font-size:20px;letter-spacing:4px;color:#fff;font-weight:700;margin:0 0 22px;">LEGEND</p>
+        <div style="background:rgba(109,213,245,0.1);border:1px solid rgba(109,213,245,0.3);border-radius:16px;padding:18px 16px;margin-bottom:22px;">
+          <p style="font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:2px;color:rgba(255,255,255,0.55);margin:0 0 8px;">🕊 DOVES EARNED</p>
+          <p id="celebDoves" style="font-family:Nasalization,Arial,sans-serif;font-size:46px;font-weight:700;color:#fff;margin:0;line-height:1;">+30</p>
+          <p style="font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:1.5px;color:rgba(255,255,255,0.4);margin:6px 0 0;">FOR YOUR PEACE JOURNEY</p>
+        </div>
+        <button onclick="collectStreakMilestone()" style="background:linear-gradient(135deg,#6DD5F5,#4ab8e8);border:none;border-radius:20px;color:#fff;font-family:Nasalization,Arial,sans-serif;font-size:12px;letter-spacing:3px;padding:14px 0;cursor:pointer;width:100%;font-weight:700;">COLLECT 🕊</button>
+      </div>
     </div>
   </div>
 
@@ -1949,6 +2085,63 @@
         if (fill) fill.style.width = (done ? 100 : pct) + '%';
       });
     });
+
+    // Vérifier si un milestone vient d'être atteint
+    checkStreakCelebration(streak, MILESTONES);
+  }
+
+  // ── STREAK CELEBRATION ───────────────────────────────────────────
+  function checkStreakCelebration(streak, MILESTONES) {
+    const collected = (localStorage.getItem('nava_streak_collected') || '').split(',').map(Number).filter(Boolean);
+    // Find highest uncollected milestone the user has reached
+    var toShow = null;
+    for (var i = 0; i < MILESTONES.length; i++) {
+      if (streak >= MILESTONES[i].days && !collected.includes(MILESTONES[i].days)) toShow = MILESTONES[i];
+    }
+    if (!toShow) return;
+
+    document.getElementById('celebIcon').textContent  = toShow.icon;
+    document.getElementById('celebName').textContent  = t(toShow.key).toUpperCase();
+    document.getElementById('celebDoves').textContent = '+' + toShow.days;
+    document.getElementById('streakCelebOverlay').dataset.milestone = toShow.days;
+
+    // Fireworks particles
+    var container = document.getElementById('streakParticles');
+    container.innerHTML = '';
+    var COLORS = ['#FFD700','#FF6B6B','#6DD5F5','#90EE90','#FF69B4','#FFA500','#ffffff'];
+    for (var j = 0; j < 28; j++) {
+      var el = document.createElement('div');
+      el.className = 'streak-particle';
+      var angle = (j / 28) * 360;
+      var dist  = 70 + Math.random() * 100;
+      el.style.setProperty('--px', (Math.cos(angle * Math.PI/180) * dist) + 'px');
+      el.style.setProperty('--py', (Math.sin(angle * Math.PI/180) * dist) + 'px');
+      el.style.setProperty('--delay', (Math.random() * 0.5) + 's');
+      var sz = (5 + Math.random() * 7) + 'px';
+      el.style.width = sz; el.style.height = sz;
+      el.style.background = COLORS[Math.floor(Math.random() * COLORS.length)];
+      container.appendChild(el);
+    }
+    document.getElementById('streakCelebOverlay').style.display = 'flex';
+  }
+
+  function openIdentityInfo() {
+    document.getElementById('id-info-overlay').classList.add('open');
+    if (typeof applyLang === 'function') applyLang(detectLang());
+  }
+  function closeIdentityInfo() {
+    document.getElementById('id-info-overlay').classList.remove('open');
+  }
+
+  function collectStreakMilestone() {
+    var overlay = document.getElementById('streakCelebOverlay');
+    var milDay  = parseInt(overlay.dataset.milestone || '0');
+    if (milDay) {
+      var prev = (localStorage.getItem('nava_streak_collected') || '').split(',').filter(Boolean);
+      if (!prev.includes(String(milDay))) prev.push(String(milDay));
+      localStorage.setItem('nava_streak_collected', prev.join(','));
+    }
+    overlay.style.display = 'none';
   }
 
   loadMyDoves();
