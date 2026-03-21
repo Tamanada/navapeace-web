@@ -9,12 +9,12 @@
   var KEY = 'nava_discovered';
 
   var SECTIONS = {
-    map:       { icon: '🗺', label: 'PEACE MAP',     msg: 'See the global impact of peace in real time.' },
-    profile:   { icon: '👤', label: 'YOUR PROFILE',  msg: 'Customize your profile and track your journey.' },
-    stats:     { icon: '📊', label: 'YOUR STATS',    msg: 'Follow your streak and your impact over time.' },
-    market:    { icon: '🛒', label: 'NAVA MARKET',   msg: 'Support the mission — every purchase helps.' },
-    messages:  { icon: '💬', label: 'PEACE WALL',    msg: 'Leave a message of peace for the world to read.' },
-    referrals: { icon: '👥', label: 'REFERRALS',     msg: 'Invite friends and multiply the impact of peace.' }
+    map:       { label: 'PEACE MAP',     msg: 'See the global impact of peace in real time.' },
+    profile:   { label: 'YOUR PROFILE',  msg: 'Customize your profile and track your journey.' },
+    stats:     { label: 'YOUR STATS',    msg: 'Follow your streak and your impact over time.' },
+    market:    { label: 'NAVA MARKET',   msg: 'Support the mission — every purchase helps.' },
+    messages:  { label: 'PEACE WALL',    msg: 'Leave a message of peace for the world to read.' },
+    referrals: { label: 'REFERRALS',     msg: 'Invite friends and multiply the impact of peace.' }
   };
 
   /* ── Helpers localStorage ─────────────────────────────────────── */
@@ -43,11 +43,11 @@
     el.id = 'disco-toast';
     el.style.cssText =
       'position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:99999;' +
-      'background:linear-gradient(135deg,rgba(26,95,130,0.97),rgba(30,142,196,0.97));' +
-      'border:1px solid rgba(255,255,255,0.22);border-radius:50px;' +
+      'background:linear-gradient(135deg,rgba(58,172,223,0.97),rgba(30,142,196,0.97));' +
+      'border:1px solid rgba(255,255,255,0.3);border-radius:50px;' +
       'padding:10px 26px;font-family:Nasalization,Arial,sans-serif;' +
       'font-size:9px;letter-spacing:3px;color:#fff;white-space:nowrap;' +
-      'box-shadow:0 4px 24px rgba(0,0,0,0.3);' +
+      'box-shadow:0 4px 24px rgba(58,172,223,0.4);' +
       'opacity:0;transition:opacity 0.4s ease,top 0.4s ease;pointer-events:none;';
     el.textContent = '🕊  +1 DISCOVERY DOVE';
     document.body.appendChild(el);
@@ -74,32 +74,38 @@
     overlay.id = 'disco-overlay';
     overlay.style.cssText =
       'position:fixed;inset:0;z-index:9990;display:flex;align-items:center;justify-content:center;' +
-      'background:rgba(0,30,60,0.35);backdrop-filter:blur(8px);' +
+      'background:rgba(0,20,40,0.4);backdrop-filter:blur(8px);' +
       'opacity:0;transition:opacity 0.35s ease;';
 
     overlay.innerHTML =
       '<div id="disco-card" style="' +
-        'background:linear-gradient(155deg,rgba(58,172,223,0.92),rgba(30,142,196,0.88));' +
-        'border:1px solid rgba(255,255,255,0.35);border-radius:24px;' +
+        'background:linear-gradient(160deg,rgba(58,172,223,0.88),rgba(26,110,150,0.92));' +
+        'border:1px solid rgba(255,255,255,0.3);border-radius:28px;' +
         'padding:36px 28px 28px;max-width:300px;width:88%;text-align:center;' +
         'font-family:Nasalization,Arial,sans-serif;' +
-        'box-shadow:0 24px 60px rgba(0,0,0,0.25);' +
+        'box-shadow:0 20px 60px rgba(0,80,140,0.35),0 0 0 1px rgba(255,255,255,0.08);' +
         'transform:translateY(22px);transition:transform 0.38s ease;' +
       '">' +
-        '<div style="font-size:46px;margin-bottom:6px;">' + info.icon + '</div>' +
-        '<div style="font-size:7px;letter-spacing:5px;color:rgba(255,255,255,0.42);margin-bottom:6px;">SECTION UNLOCKED</div>' +
-        '<div style="font-size:12px;letter-spacing:4px;color:#fff;margin-bottom:14px;">' + info.label + '</div>' +
-        '<div style="font-size:9px;letter-spacing:1px;color:rgba(255,255,255,0.62);line-height:1.75;margin-bottom:22px;">' + info.msg + '</div>' +
+        // Dove image (NAVA style)
+        '<div style="margin-bottom:6px;">' +
+          '<img src="logo.png" style="width:52px;height:52px;object-fit:contain;opacity:0.9;filter:drop-shadow(0 0 8px rgba(255,255,255,0.5));" onerror="this.style.display=\'none\'" />' +
+        '</div>' +
+        '<div style="font-size:7px;letter-spacing:6px;color:rgba(255,255,255,0.55);margin-bottom:6px;text-transform:uppercase;">Section Unlocked</div>' +
+        '<div style="font-size:13px;letter-spacing:4px;color:#fff;margin-bottom:14px;text-transform:uppercase;">' + info.label + '</div>' +
+        '<div style="width:40px;height:1px;background:rgba(255,255,255,0.25);margin:0 auto 14px;"></div>' +
+        '<div style="font-size:9px;letter-spacing:1px;color:rgba(255,255,255,0.72);line-height:1.8;margin-bottom:22px;">' + info.msg + '</div>' +
         '<div style="display:flex;align-items:center;justify-content:center;gap:9px;' +
-          'background:rgba(255,255,255,0.1);border-radius:50px;padding:9px 0;margin-bottom:20px;">' +
-          '<span style="font-size:16px;">🕊</span>' +
-          '<span style="font-size:9px;letter-spacing:3px;color:#fff;">+1 DISCOVERY DOVE</span>' +
+          'background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.18);' +
+          'border-radius:50px;padding:9px 0;margin-bottom:20px;">' +
+          '<span style="font-size:15px;">🕊</span>' +
+          '<span style="font-size:9px;letter-spacing:3px;color:#fff;font-family:Nasalization,Arial,sans-serif;">+1 DISCOVERY DOVE</span>' +
         '</div>' +
         '<button id="disco-btn" style="' +
-          'background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.28);' +
-          'border-radius:50px;padding:12px 0;width:100%;' +
+          'background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);' +
+          'border-radius:50px;padding:13px 0;width:100%;' +
           'font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:5px;' +
           'color:#fff;cursor:pointer;transition:background 0.2s;' +
+          'text-transform:uppercase;' +
         '">CLAIM DOVE</button>' +
       '</div>';
 
@@ -125,11 +131,6 @@
   /* ── API publique ─────────────────────────────────────────────── */
   w.NAVA_DISCOVERY = {
 
-    /**
-     * check(section, sb)
-     * Appeler depuis chaque page après init Supabase.
-     * Si section non découverte → bulle + dove Supabase + toast.
-     */
     check: function (section, sb) {
       var uid = localStorage.getItem('nava_peace_uid');
       if (!uid) return;
@@ -142,11 +143,13 @@
           _set(discovered);
           _award(section, uid, sb);
           _toast();
+          // Incrémenter le compteur local de doves immédiatement
+          var cur = parseInt(localStorage.getItem('nava_peace_days') || '0', 10);
+          localStorage.setItem('nava_peace_days', cur + 1);
         });
       }, 1500);
     },
 
-    /** Nombre de sections découvertes (pour le décompte de doves) */
     count: function () { return Object.keys(_get()).length; }
   };
 

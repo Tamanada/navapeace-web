@@ -2305,14 +2305,16 @@
         canvas.width = w; canvas.height = h;
         var ctx = canvas.getContext('2d');
 
-        // ── BACKGROUND ──
-        // Deep dark gradient
-        var grad = ctx.createLinearGradient(0, 0, 0, h);
-        grad.addColorStop(0,   '#020d18');
-        grad.addColorStop(0.5, '#071e33');
-        grad.addColorStop(1,   '#0a2d4a');
-        ctx.fillStyle = grad;
+        // ── BACKGROUND — Sunrise of Peace ──
         var r = 36;
+        // Sky gradient: dawn gold → sky blue → deep cerulean
+        var grad = ctx.createLinearGradient(0, 0, 0, h);
+        grad.addColorStop(0,    '#E8F8FF');
+        grad.addColorStop(0.18, '#B8E8F8');
+        grad.addColorStop(0.45, '#3AACDF');
+        grad.addColorStop(0.75, '#1A7AAF');
+        grad.addColorStop(1,    '#0D4A72');
+        ctx.fillStyle = grad;
         ctx.beginPath();
         ctx.moveTo(r,0); ctx.lineTo(w-r,0); ctx.quadraticCurveTo(w,0,w,r);
         ctx.lineTo(w,h-r); ctx.quadraticCurveTo(w,h,w-r,h);
@@ -2321,59 +2323,93 @@
         ctx.closePath();
         ctx.fill();
 
-        // Decorative circles (background)
+        // Radiant glow from top center (sun/hope effect)
+        var glow = ctx.createRadialGradient(w/2, 0, 0, w/2, 0, h*0.65);
+        glow.addColorStop(0,   'rgba(255,240,180,0.38)');
+        glow.addColorStop(0.3, 'rgba(255,220,120,0.14)');
+        glow.addColorStop(1,   'rgba(255,220,120,0)');
+        ctx.fillStyle = glow;
+        ctx.fillRect(0, 0, w, h);
+
+        // Decorative light rings (energy)
         ctx.save();
-        ctx.globalAlpha = 0.07;
-        ctx.strokeStyle = '#3AACDF';
-        ctx.lineWidth = 80;
-        ctx.beginPath(); ctx.arc(-40, -40, 220, 0, Math.PI*2); ctx.stroke();
-        ctx.lineWidth = 60;
-        ctx.beginPath(); ctx.arc(w+40, h*0.35, 180, 0, Math.PI*2); ctx.stroke();
-        ctx.lineWidth = 40;
-        ctx.beginPath(); ctx.arc(w*0.15, h*0.85, 140, 0, Math.PI*2); ctx.stroke();
+        ctx.globalAlpha = 0.09;
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 55;
+        ctx.beginPath(); ctx.arc(w/2, -20, 260, 0, Math.PI*2); ctx.stroke();
+        ctx.lineWidth = 30;
+        ctx.beginPath(); ctx.arc(w/2, -20, 340, 0, Math.PI*2); ctx.stroke();
+        ctx.globalAlpha = 0.06;
+        ctx.lineWidth = 50;
+        ctx.strokeStyle = '#FFE88A';
+        ctx.beginPath(); ctx.arc(w/2, -20, 200, 0, Math.PI*2); ctx.stroke();
         ctx.restore();
 
-        // Top accent bar (electric blue)
+        // Floating light particles (energy dots)
+        ctx.save();
+        var dots = [[80,180],[520,220],[60,480],[540,420],[120,650],[480,600],[300,720],[160,350],[440,360]];
+        dots.forEach(function(d) {
+          var gd = ctx.createRadialGradient(d[0],d[1],0,d[0],d[1],8);
+          gd.addColorStop(0,'rgba(255,255,255,0.45)');
+          gd.addColorStop(1,'rgba(255,255,255,0)');
+          ctx.fillStyle=gd;
+          ctx.beginPath(); ctx.arc(d[0],d[1],8,0,Math.PI*2); ctx.fill();
+        });
+        ctx.restore();
+
+        // Top golden accent bar
         var topBar = ctx.createLinearGradient(0,0,w,0);
-        topBar.addColorStop(0,'#3AACDF');
-        topBar.addColorStop(0.5,'#7FD4F5');
-        topBar.addColorStop(1,'#3AACDF');
+        topBar.addColorStop(0,'rgba(255,220,80,0)');
+        topBar.addColorStop(0.3,'#FFD84A');
+        topBar.addColorStop(0.5,'#FFE88A');
+        topBar.addColorStop(0.7,'#FFD84A');
+        topBar.addColorStop(1,'rgba(255,220,80,0)');
         ctx.fillStyle = topBar;
         ctx.fillRect(r, 0, w-2*r, 5);
 
-        // ── DOVE ──
-        ctx.font = '64px serif';
+        // ── DOVE GLOW ──
+        ctx.save();
+        var doveGlow = ctx.createRadialGradient(w/2, 80, 0, w/2, 80, 80);
+        doveGlow.addColorStop(0, 'rgba(255,240,180,0.55)');
+        doveGlow.addColorStop(1, 'rgba(255,240,180,0)');
+        ctx.fillStyle = doveGlow;
+        ctx.beginPath(); ctx.arc(w/2, 80, 80, 0, Math.PI*2); ctx.fill();
+        ctx.restore();
+        ctx.font = '72px serif';
         ctx.textAlign = 'center';
-        ctx.fillText('\u{1F54A}\uFE0F', w/2, 88);
+        ctx.fillText('🕊', w/2, 100);
 
         // ── TITLE ──
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold 48px Arial, sans-serif';
-        ctx.fillText('NAVA  PEACE', w/2, 150);
+        ctx.fillStyle = '#0D3A5C';
+        ctx.font = 'bold 52px Arial, sans-serif';
+        ctx.fillText('NAVA  PEACE', w/2, 168);
 
-        // Blue underline
-        var ul = ctx.createLinearGradient(w/2-100,0,w/2+100,0);
-        ul.addColorStop(0,'rgba(58,172,223,0)');
-        ul.addColorStop(0.5,'#3AACDF');
-        ul.addColorStop(1,'rgba(58,172,223,0)');
-        ctx.strokeStyle = ul; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(w/2-120,163); ctx.lineTo(w/2+120,163); ctx.stroke();
+        // Gold underline
+        var ul = ctx.createLinearGradient(w/2-120,0,w/2+120,0);
+        ul.addColorStop(0,'rgba(255,210,60,0)');
+        ul.addColorStop(0.5,'#FFD84A');
+        ul.addColorStop(1,'rgba(255,210,60,0)');
+        ctx.strokeStyle = ul; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.moveTo(w/2-130,180); ctx.lineTo(w/2+130,180); ctx.stroke();
 
         // ── TAGLINE ──
-        ctx.font = '14px Arial, sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.5)';
-        ctx.fillText('THE WORLD TALKS ABOUT PEACE.', w/2, 190);
-        ctx.fillText("LET'S PRACTICE IT.", w/2, 210);
+        ctx.font = 'bold 15px Arial, sans-serif';
+        ctx.fillStyle = '#0D3A5C';
+        ctx.fillText('THE WORLD TALKS ABOUT PEACE.', w/2, 210);
+        ctx.fillText("LET'S PRACTICE IT.", w/2, 232);
 
-        // ── STATS ──
-        var statY = 245;
-        var boxW = 155, boxH = 90, gap = 17;
+        // ── STATS — vibrant cards ──
+        var statY = 268;
+        var boxW = 155, boxH = 98, gap = 17;
         var startX = (w - 3*boxW - 2*gap) / 2;
 
-        function drawBox(x, y, bw, bh, numTxt, lblTxt, accent) {
-          // Box bg
-          ctx.fillStyle = 'rgba(58,172,223,0.08)';
-          var br = 14;
+        function drawBox(x, y, bw, bh, numTxt, lblTxt, numColor, bgFrom, bgTo) {
+          // Gradient box bg
+          var bg = ctx.createLinearGradient(x, y, x, y+bh);
+          bg.addColorStop(0, bgFrom);
+          bg.addColorStop(1, bgTo);
+          ctx.fillStyle = bg;
+          var br = 16;
           ctx.beginPath();
           ctx.moveTo(x+br,y); ctx.lineTo(x+bw-br,y); ctx.quadraticCurveTo(x+bw,y,x+bw,y+br);
           ctx.lineTo(x+bw,y+bh-br); ctx.quadraticCurveTo(x+bw,y+bh,x+bw-br,y+bh);
@@ -2381,46 +2417,54 @@
           ctx.lineTo(x,y+br); ctx.quadraticCurveTo(x,y,x+br,y);
           ctx.closePath();
           ctx.fill();
-          // Border
-          ctx.strokeStyle = accent;
+          // Soft white border
+          ctx.strokeStyle = 'rgba(255,255,255,0.55)';
           ctx.lineWidth = 1.5;
           ctx.stroke();
           // Number
-          ctx.fillStyle = accent;
-          ctx.font = 'bold 38px Arial, sans-serif';
-          ctx.fillText(numTxt, x+bw/2, y+52);
+          ctx.fillStyle = numColor;
+          ctx.font = 'bold 42px Arial, sans-serif';
+          ctx.fillText(numTxt, x+bw/2, y+58);
           // Label
-          ctx.fillStyle = 'rgba(255,255,255,0.45)';
+          ctx.fillStyle = 'rgba(255,255,255,0.8)';
           ctx.font = '10px Arial, sans-serif';
-          ctx.fillText(lblTxt, x+bw/2, y+72);
+          ctx.fillText(lblTxt, x+bw/2, y+80);
         }
 
-        drawBox(startX,              statY, boxW, boxH, '+'+todayCount,      'TODAY',        '#3AACDF');
-        drawBox(startX+boxW+gap,     statY, boxW, boxH, String(totalCount),  'TOTAL DOVES',  '#FFFFFF');
-        drawBox(startX+2*(boxW+gap), statY, boxW, boxH, String(countriesCount),'COUNTRIES',  '#3AACDF');
+        drawBox(startX,              statY, boxW, boxH, '+'+todayCount,       'TODAY',       '#FFE88A','rgba(255,200,50,0.28)','rgba(255,160,30,0.18)');
+        drawBox(startX+boxW+gap,     statY, boxW, boxH, String(totalCount),   'TOTAL DOVES', '#FFFFFF', 'rgba(255,255,255,0.22)','rgba(255,255,255,0.10)');
+        drawBox(startX+2*(boxW+gap), statY, boxW, boxH, String(countriesCount),'COUNTRIES',  '#B8F0FF', 'rgba(58,172,223,0.30)','rgba(30,120,180,0.20)');
 
         // ── SEPARATOR ──
         var sep = ctx.createLinearGradient(0,0,w,0);
-        sep.addColorStop(0,'rgba(58,172,223,0)');
-        sep.addColorStop(0.2,'rgba(58,172,223,0.6)');
-        sep.addColorStop(0.8,'rgba(58,172,223,0.6)');
-        sep.addColorStop(1,'rgba(58,172,223,0)');
+        sep.addColorStop(0,'rgba(255,255,255,0)');
+        sep.addColorStop(0.2,'rgba(255,255,255,0.4)');
+        sep.addColorStop(0.8,'rgba(255,255,255,0.4)');
+        sep.addColorStop(1,'rgba(255,255,255,0)');
         ctx.strokeStyle=sep; ctx.lineWidth=1;
-        ctx.beginPath(); ctx.moveTo(60,368); ctx.lineTo(w-60,368); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(60,400); ctx.lineTo(w-60,400); ctx.stroke();
 
         // ── JOIN TEXT ──
-        ctx.fillStyle='#3AACDF';
-        ctx.font='bold 13px Arial, sans-serif';
-        ctx.fillText('JOIN THE MOVEMENT', w/2, 400);
+        ctx.fillStyle='#0D3A5C';
+        ctx.font='bold 15px Arial, sans-serif';
+        ctx.fillText('JOIN THE MOVEMENT', w/2, 432);
+
+        // Small doves decoration
+        ctx.font = '18px serif';
+        ctx.fillText('🕊', w/2-130, 435);
+        ctx.fillText('🕊', w/2+130, 435);
 
         // ── QR CODE ──
         var qrCanvas = document.querySelector('#qrcode canvas');
         if (qrCanvas) {
-          var qrSize = 210;
-          var qrX = (w-qrSize)/2, qrY = 420;
-          // White bg
+          var qrSize = 218;
+          var qrX = (w-qrSize)/2, qrY = 450;
+          // White rounded bg with golden glow
+          ctx.save();
+          ctx.shadowColor = 'rgba(255,210,60,0.35)';
+          ctx.shadowBlur = 24;
           ctx.fillStyle = '#FFFFFF';
-          var qrR2 = 16;
+          var qrR2 = 18;
           ctx.beginPath();
           ctx.moveTo(qrX+qrR2,qrY); ctx.lineTo(qrX+qrSize-qrR2,qrY); ctx.quadraticCurveTo(qrX+qrSize,qrY,qrX+qrSize,qrY+qrR2);
           ctx.lineTo(qrX+qrSize,qrY+qrSize-qrR2); ctx.quadraticCurveTo(qrX+qrSize,qrY+qrSize,qrX+qrSize-qrR2,qrY+qrSize);
@@ -2428,22 +2472,27 @@
           ctx.lineTo(qrX,qrY+qrR2); ctx.quadraticCurveTo(qrX,qrY,qrX+qrR2,qrY);
           ctx.closePath();
           ctx.fill();
-          // Blue border
-          ctx.strokeStyle='#3AACDF'; ctx.lineWidth=3; ctx.stroke();
-          ctx.drawImage(qrCanvas, qrX+12, qrY+12, qrSize-24, qrSize-24);
+          ctx.restore();
+          // Golden border
+          ctx.strokeStyle='#FFD84A'; ctx.lineWidth=3.5; ctx.stroke();
+          ctx.drawImage(qrCanvas, qrX+13, qrY+13, qrSize-26, qrSize-26);
         }
 
         // ── SCAN TEXT ──
-        ctx.fillStyle = 'rgba(255,255,255,0.8)';
-        ctx.font = 'bold 13px Arial, sans-serif';
-        ctx.fillText('SCAN OR TAP TO JOIN', w/2, 660);
+        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+        ctx.font = 'bold 14px Arial, sans-serif';
+        ctx.fillText('SCAN OR TAP TO JOIN', w/2, 692);
 
-        // Bottom accent bar
+        // Peace symbols row
+        ctx.font = '14px serif';
+        ctx.fillText('☮️  🕊  ❤️  🌍  🕊  ☮️', w/2, 715);
+
+        // Bottom golden accent bar
         ctx.fillStyle = topBar;
         ctx.fillRect(r, h-5, w-2*r, 5);
 
         // ── WEBSITE ──
-        ctx.fillStyle = 'rgba(58,172,223,0.6)';
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
         ctx.font = '11px Arial, sans-serif';
         var year = new Date().getFullYear();
         ctx.fillText('www.nava-peace.world  ·  © ' + year + ' NAVA PEACE. All rights reserved.', w/2, h - 14);
