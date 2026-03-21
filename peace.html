@@ -703,13 +703,35 @@
         .then(function(res) {
           if (res.count && res.count > 0) {
             // Utilisateur bloqué : afficher message et bloquer toute interaction
+            var _blockedUid = uid;
             document.body.innerHTML =
               '<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;' +
               'justify-content:center;background:radial-gradient(ellipse at 50% 20%,#6DD5F5,#1E8EC4);' +
               'font-family:Nasalization,Arial,sans-serif;color:#fff;text-align:center;padding:40px;">' +
               '<div style="font-size:48px;margin-bottom:24px;">🕊</div>' +
               '<div style="font-size:11px;letter-spacing:5px;margin-bottom:12px;">ACCESS RESTRICTED</div>' +
-              '<div style="font-size:9px;letter-spacing:2px;color:rgba(255,255,255,0.6);">Your account has been suspended.<br>Contact support if you believe this is an error.</div>' +
+              '<div style="font-size:9px;letter-spacing:2px;color:rgba(255,255,255,0.6);margin-bottom:32px;">Your account has been suspended.<br>Contact support if you believe this is an error.</div>' +
+              // Zone de message
+              '<div id="block-contact" style="width:100%;max-width:300px;">' +
+              '<textarea id="block-msg" maxlength="400" placeholder="Write your message to the team…" ' +
+              'style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.3);' +
+              'border-radius:14px;padding:14px;font-family:Nasalization,Arial,sans-serif;font-size:9px;' +
+              'letter-spacing:1px;color:#fff;resize:none;height:100px;outline:none;margin-bottom:12px;"></textarea>' +
+              '<button id="block-send" onclick="(function(){' +
+              'var msg=document.getElementById(\'block-msg\').value.trim();' +
+              'if(!msg)return;' +
+              'var btn=document.getElementById(\'block-send\');' +
+              'btn.disabled=true;btn.textContent=\'···\';' +
+              'var s=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);' +
+              's.from(\'feedback\').insert({user_uid:\'' + uid + '\',message:\'[BLOCKED ACCOUNT] \'+msg})' +
+              '.then(function(){document.getElementById(\'block-contact\').innerHTML=' +
+              '\'<div style=\\\'font-size:9px;letter-spacing:2px;color:rgba(255,255,255,0.8);\\\'>🕊 Message sent. We will review your case.</div>\';})' +
+              '.catch(function(){btn.disabled=false;btn.textContent=\'SEND\';});' +
+              '})()" ' +
+              'style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.35);' +
+              'border-radius:50px;padding:12px 36px;font-family:Nasalization,Arial,sans-serif;' +
+              'font-size:8px;letter-spacing:4px;color:#fff;cursor:pointer;width:100%;">CONTACT TEAM</button>' +
+              '</div>' +
               '</div>';
           }
         }).catch(function(){});
