@@ -1118,6 +1118,7 @@ function verifyTOTP() {
   const code = _totpGetCode('t');
   if (code.length < 6) return;
   if (_totpVerify(code)) {
+    sessionStorage.setItem('nava_admin_totp_ok', '1'); // validé pour cette session
     document.getElementById('totp-screen').style.display = 'none';
     unlockPanel();
   } else {
@@ -1132,6 +1133,10 @@ function showTotpCancel() {
   document.getElementById('totp-screen').style.display = 'none';
   document.getElementById('lock-screen').style.display = 'flex';
   ['td0','td1','td2','td3','td4','td5'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  // Annuler la session si elle était en cours (auto-login interrompu)
+  localStorage.removeItem('nava_admin_ok');
+  sessionStorage.removeItem('nava_admin_totp_ok');
+  sessionStorage.removeItem('nava_admin_code');
 }
 
 function renderTOTPStatus() {
@@ -1263,6 +1268,7 @@ function unlockPanel() {
 }
 function adminLogout() {
   localStorage.removeItem('nava_admin_ok');
+  sessionStorage.removeItem('nava_admin_totp_ok');
   document.getElementById('admin-panel').style.display = 'none';
   document.getElementById('lock-screen').style.display = 'flex';
   document.getElementById('admin-pass').value = '';
@@ -2589,7 +2595,15 @@ if (_adminExpiry && Date.now() < _adminExpiry) {
   _adminRole = localStorage.getItem('nava_admin_role')   || 'super_admin';
   _adminName = localStorage.getItem('nava_admin_name')   || '';
   _adminCode = sessionStorage.getItem('nava_admin_code') || '';
-  unlockPanel();
+  // Si TOTP activé et pas encore vérifié dans cet onglet → demander le code
+  if (_totpEnabled() && !sessionStorage.getItem('nava_admin_totp_ok')) {
+    document.getElementById('lock-screen').style.display = 'none';
+    const ts = document.getElementById('totp-screen');
+    ts.style.display = 'flex';
+    document.getElementById('td0').focus();
+  } else {
+    unlockPanel();
+  }
 } else if (_adminExpiry) {
   // Session expirée → nettoyer
   localStorage.removeItem('nava_admin_ok');
