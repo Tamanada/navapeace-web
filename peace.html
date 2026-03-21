@@ -693,6 +693,28 @@
     try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }
     catch(e) { console.warn('Supabase init failed', e); }
 
+    // ── Vérifier si l'utilisateur est bloqué (côté serveur) ────────
+    (function checkBlocked() {
+      if (!sb) return;
+      var uid = localStorage.getItem('nava_peace_uid');
+      if (!uid) return;
+      sb.from('blocked_users').select('user_uid', { count: 'exact', head: true })
+        .eq('user_uid', uid)
+        .then(function(res) {
+          if (res.count && res.count > 0) {
+            // Utilisateur bloqué : afficher message et bloquer toute interaction
+            document.body.innerHTML =
+              '<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;' +
+              'justify-content:center;background:radial-gradient(ellipse at 50% 20%,#6DD5F5,#1E8EC4);' +
+              'font-family:Nasalization,Arial,sans-serif;color:#fff;text-align:center;padding:40px;">' +
+              '<div style="font-size:48px;margin-bottom:24px;">🕊</div>' +
+              '<div style="font-size:11px;letter-spacing:5px;margin-bottom:12px;">ACCESS RESTRICTED</div>' +
+              '<div style="font-size:9px;letter-spacing:2px;color:rgba(255,255,255,0.6);">Your account has been suspended.<br>Contact support if you believe this is an error.</div>' +
+              '</div>';
+          }
+        }).catch(function(){});
+    })();
+
     // ── Vérifier si déjà cliqué aujourd'hui ────────────────────────
     function checkDone() {
       // 1. Vérification locale rapide
