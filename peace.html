@@ -1377,11 +1377,17 @@
       const uid = localStorage.getItem('nava_peace_uid');
       if (!uid) return;
       try {
-        const {data:votes} = await sb.from('peace_votes').select('created_at, referral_code')
-          .eq('user_uid', uid).order('created_at',{ascending:false});
+        const [{data:votes}, {count:discoCount}] = await Promise.all([
+          sb.from('peace_votes').select('created_at, referral_code')
+            .eq('user_uid', uid).order('created_at',{ascending:false}),
+          sb.from('nava_discoveries').select('id', {count:'exact', head:true})
+            .eq('user_uid', uid)
+        ]);
         if (!votes || !votes.length) return;
 
-        localStorage.setItem('nava_peace_days', votes.length);
+        // Total doves = votes réels + doves de découverte
+        const totalDoves = votes.length + (discoCount || 0);
+        localStorage.setItem('nava_peace_days', totalDoves);
 
         // Streak = jours consécutifs
         const dayNums = [...new Set(votes.map(v =>

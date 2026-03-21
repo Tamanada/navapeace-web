@@ -10,6 +10,9 @@
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#3AACDF" />
   <script src="module_gate.js?v=5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="supabase_config.js"></script>
+  <script src="discovery.js"></script>
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://nava-peace.app/market.html" />
   <meta property="og:title" content="NAVA PEACE – Peace Store" />
@@ -539,6 +542,11 @@
 
     // ── START ────────────────────────────────────────────────────────────
     loadPage(1);
+
+    // ── Discovery dove — première visite MARKET ───────────────────
+    if (window.NAVA_DISCOVERY) {
+      try { NAVA_DISCOVERY.check('market', window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)); } catch(e) {}
+    }
   </script>
 
 </body>

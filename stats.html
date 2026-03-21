@@ -33,6 +33,7 @@
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase_config.js"></script>
+  <script src="discovery.js"></script>
   <script src="block_check.js"></script>
   <script src="lang.js?v=3"></script>
   <style>
@@ -680,6 +681,11 @@
     loadDemographics();
 
     if (typeof applyLang === 'function') applyLang(detectLang());
+
+    // ── Discovery dove — première visite STATS ────────────────────
+    if (window.NAVA_DISCOVERY) {
+      try { NAVA_DISCOVERY.check('stats', window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)); } catch(e) {}
+    }
   </script>
 </body>
 </html>
