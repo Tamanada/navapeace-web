@@ -1306,7 +1306,7 @@ let adminUsersMap = new Map(); // key: user_uid → admin record
 
 // ── LOAD ALL ──────────────────────────────────────────────
 async function loadAll() {
-  await Promise.all([loadVotes(), loadMessages(), loadReferrals(), loadAdminUsers()]);
+  await Promise.all([loadVotes(), loadMessages(), loadReferrals(), loadAdminUsers(), loadUserFlags()]);
   await mergeFirstNames(); // doit tourner après loadVotes (allUsers) et loadMessages
 }
 
@@ -1574,18 +1574,18 @@ function renderUsersTable() {
       <td class="crown-cell">${adminUsersMap.has(u.uid)?'👑':''}</td>
       <td style="font-size:9px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${u.votedToday?'#4caf50':'#ef5350'};margin-right:4px;vertical-align:middle;" title="${u.votedToday?'Voted today':'Not voted today'}"></span>${i+1}</td>
       <td class="uid-cell" title="Click row to manage user">${u.uid.slice(0,14)}…</td>
-      <td style="font-size:10px;letter-spacing:1px;color:#fff;font-weight:500;">${u.pseudo||'<span style="color:var(--w40);">—</span>'}</td>
+      <td style="font-size:10px;letter-spacing:1px;color:#fff;font-weight:500;">${u.pseudo?escHtml(u.pseudo):'<span style="color:var(--w40);">—</span>'}</td>
       <td>${statusBadge(u.uid)}</td>
-      <td>${u.country||'—'}</td>
-      <td>${u.age||'—'}</td>
-      <td>${u.gender||'—'}</td>
-      <td><span class="days-badge">${u.days}</span></td>
+      <td>${escHtml(u.country||'—')}</td>
+      <td>${escHtml(String(u.age||'—'))}</td>
+      <td>${escHtml(u.gender||'—')}</td>
+      <td><span class="days-badge">${parseInt(u.days)||0}</span></td>
       <td style="text-align:center;color:${u.refDovesToday>0?'#fff':'var(--w40)'};">${u.refDovesToday||'—'}</td>
       <td style="text-align:center;color:${u.refDovesTotal>0?'#fff':'var(--w40)'};">${u.refDovesTotal||'—'}</td>
-      <td style="text-align:center;"><span class="days-badge" style="background:rgba(255,215,0,0.15);color:#ffd700;">${u.totalScore}</span></td>
-      <td class="ref-code">${u.ref_code||'—'}</td>
-      <td style="font-size:9px;color:var(--w40);">${u.referred_by||'—'}</td>
-      <td style="font-size:9px;">${u.source==='telegram'?'<span style="color:#29b6f6;">TG</span>':'web'}${u.telegram_id?' <span style="color:var(--w30);font-size:8px;">'+u.telegram_id+'</span>':''}</td>
+      <td style="text-align:center;"><span class="days-badge" style="background:rgba(255,215,0,0.15);color:#ffd700;">${parseInt(u.totalScore)||0}</span></td>
+      <td class="ref-code">${escHtml(u.ref_code||'—')}</td>
+      <td style="font-size:9px;color:var(--w40);">${escHtml(u.referred_by||'—')}</td>
+      <td style="font-size:9px;">${u.source==='telegram'?'<span style="color:#29b6f6;">TG</span>':'web'}${u.telegram_id?' <span style="color:var(--w30);font-size:8px;">'+escHtml(String(u.telegram_id))+'</span>':''}</td>
       <td style="font-size:9px;">${fmtDate(u.registered)}</td>
     </tr>`).join('');
   document.getElementById('users-footer').textContent=`SHOWING ${filteredUsers.length} OF ${allUsers.length} USERS · CLICK ROW TO MANAGE`;
@@ -1914,7 +1914,7 @@ function renderMessages() {
     const u=u_(m.user_uid);
     return `<div class="g-card msg-card${isHidden?' hidden-msg':''}" id="msg-${m.user_uid}">
       <div class="msg-header">
-        <span class="msg-pseudo">🕊 ${m.pseudo||'ANONYMOUS'}</span>
+        <span class="msg-pseudo">🕊 ${escHtml(m.pseudo||'ANONYMOUS')}</span>
         <span class="msg-date">${fmtDate(m.updated_at)}</span>
       </div>
       <p class="msg-body">"${escHtml(m.message||'')}"</p>
@@ -2172,6 +2172,17 @@ async function loadReferrals() {
 let userFlags=JSON.parse(localStorage.getItem('nava_user_flags')||'{}');
 let drawerUid=null;
 
+// Charger les flags depuis Supabase au démarrage (source de vérité)
+async function loadUserFlags(){
+  try {
+    const { data } = await sb.from('user_moderation').select('user_uid,status,note,updated_at');
+    if(data && data.length){
+      data.forEach(r=>{ userFlags[r.user_uid]={status:r.status,note:r.note||'',updatedAt:r.updated_at}; });
+      localStorage.setItem('nava_user_flags',JSON.stringify(userFlags));
+    }
+  } catch(e){ /* table may not exist yet, fallback to localStorage */ }
+}
+
 function getUserStatus(uid){ return (userFlags[uid]&&userFlags[uid].status)||'active'; }
 
 function statusBadge(uid){
@@ -2275,10 +2286,9 @@ async function saveUserFlag(){
   userFlags[drawerUid]={status,note,updatedAt:new Date().toISOString()};
   localStorage.setItem('nava_user_flags',JSON.stringify(userFlags));
 
-  // Sync blocked status with Supabase
+  // Sync tous les statuts vers Supabase
   try {
     if(status==='blocked' && prevStatus!=='blocked'){
-      // Insert into blocked_users
       await sb.from('blocked_users').upsert({
         user_uid: drawerUid,
         reason: note || 'Blocked by admin',
@@ -2286,10 +2296,18 @@ async function saveUserFlag(){
         blocked_by: 'admin'
       });
     } else if(prevStatus==='blocked' && status!=='blocked'){
-      // Remove from blocked_users (unblock)
       await sb.from('blocked_users').delete().eq('user_uid', drawerUid);
     }
-  } catch(e){ console.error('blocked_users sync error:', e); }
+    // Sync flagged / disabled / active → user_moderation
+    if(status !== 'active') {
+      await sb.from('user_moderation').upsert({
+        user_uid: drawerUid, status, note: note||null,
+        updated_at: new Date().toISOString()
+      });
+    } else {
+      await sb.from('user_moderation').delete().eq('user_uid', drawerUid);
+    }
+  } catch(e){ console.error('user moderation sync error:', e); }
 
   document.getElementById('user-drawer-overlay').classList.remove('open');
   document.getElementById('user-drawer').classList.remove('open');
@@ -2642,8 +2660,8 @@ async function loadFeedback(filter) {
           <span style="font-size:8px;letter-spacing:1.5px;color:rgba(255,255,255,0.4);font-family:Nasalization,Arial,sans-serif;">${fb.user_uid} · ${date}</span>
           <span style="font-size:7px;letter-spacing:1.5px;color:${statusColor};font-family:Nasalization,Arial,sans-serif;border:1px solid ${statusColor};padding:2px 8px;border-radius:6px;">${statusLabel}</span>
         </div>
-        <p style="margin:0 0 12px;font-size:12px;color:#fff;line-height:1.5;">${fb.message.replace(/</g,'&lt;')}</p>
-        ${fb.reply ? `<div style="background:rgba(100,160,255,0.08);border-left:2px solid #7ab4ff;padding:8px 12px;border-radius:0 8px 8px 0;margin-bottom:10px;"><p style="margin:0;font-size:11px;color:#7ab4ff;line-height:1.4;">↩ ${fb.reply.replace(/</g,'&lt;')}</p></div>` : ''}
+        <p style="margin:0 0 12px;font-size:12px;color:#fff;line-height:1.5;">${escHtml(fb.message||'')}</p>
+        ${fb.reply ? `<div style="background:rgba(100,160,255,0.08);border-left:2px solid #7ab4ff;padding:8px 12px;border-radius:0 8px 8px 0;margin-bottom:10px;"><p style="margin:0;font-size:11px;color:#7ab4ff;line-height:1.4;">↩ ${escHtml(fb.reply)}</p></div>` : ''}
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           ${fb.status !== 'read' && fb.status !== 'replied' ? `<button onclick="markFeedbackRead('${fb.id}')" style="font-size:8px;letter-spacing:1px;padding:5px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.6);cursor:pointer;font-family:Nasalization,Arial,sans-serif;">MARK READ</button>` : ''}
           <button onclick="openFeedbackReply('${fb.id}')" style="font-size:8px;letter-spacing:1px;padding:5px 12px;border-radius:8px;border:1px solid rgba(100,160,255,0.4);background:rgba(100,160,255,0.1);color:#7ab4ff;cursor:pointer;font-family:Nasalization,Arial,sans-serif;">${fb.reply ? 'EDIT REPLY' : 'REPLY'}</button>

@@ -688,7 +688,9 @@
       const age          = parseInt(document.getElementById('age').value, 10) || null;
       const gender       = document.getElementById('gender').value || null;
       const referralCode = localStorage.getItem('nava_peace_ref_code') || genRefCode();
-      const referredBy   = localStorage.getItem('nava_peace_referred_by') || null;
+      // Bloquer l'auto-référencement (son propre code de parrainage)
+      const _rawRef  = localStorage.getItem('nava_peace_referred_by') || null;
+      const referredBy = (_rawRef && _rawRef !== referralCode) ? _rawRef : null;
       const userUid      = localStorage.getItem('nava_peace_uid') || genUID();
 
       // Sauvegarder le profil utilisateur
