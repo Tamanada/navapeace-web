@@ -2203,76 +2203,184 @@
     var shareText = 'The world talks about peace. Let\'s practice it. 🕊\nJoin NAVA PEACE today.\n' + inviteURL;
     var shareTextShort = 'The world talks about peace. Let\'s practice it. 🕊';
 
+    // ── Textes d'invitation multilingues ──────────────────────────
+    var SHARE_TEXTS = {
+      en: "The world talks about peace. Let's practice it. 🕊\nJoin NAVA PEACE today.\n",
+      fr: "Le monde parle de paix. Pratiquons-la. 🕊\nRejoins NAVA PEACE aujourd'hui.\n",
+      es: "El mundo habla de paz. Vamos a practicarla. 🕊\nÚnete a NAVA PEACE hoy.\n",
+      pt: "O mundo fala de paz. Vamos praticá-la. 🕊\nJunte-se ao NAVA PEACE hoje.\n",
+      de: "Die Welt spricht über Frieden. Lass uns ihn praktizieren. 🕊\nTritt NAVA PEACE heute bei.\n",
+      ar: "العالم يتحدث عن السلام. دعونا نمارسه. 🕊\nانضم إلى NAVA PEACE اليوم.\n",
+      zh: "世界谈论和平，让我们践行它。🕊\n立即加入NAVA PEACE。\n",
+      ru: "Мир говорит о мире. Давайте его практиковать. 🕊\nПрисоединяйся к NAVA PEACE сегодня.\n",
+      th: "โลกพูดถึงสันติภาพ มาร่วมปฏิบัติกัน 🕊\nเข้าร่วม NAVA PEACE วันนี้\n",
+      ja: "世界は平和を語る。実践しましょう。🕊\n今すぐNAVA PEACEに参加。\n",
+      my: "ကမ္ဘာကြီးသည် ငြိမ်းချမ်းရေးကို ပြောသည်။ ကျင့်သုံးကြစို့ 🕊\nNAVA PEACE တွင် ယနေ့ပင် ပါဝင်ပါ\n",
+      hi: "दुनिया शांति की बात करती है। इसे अभ्यास करें। 🕊\nआज ही NAVA PEACE से जुड़ें।\n",
+      uk: "Світ говорить про мир. Давайте його практикувати. 🕊\nДолучайся до NAVA PEACE сьогодні.\n"
+    };
+
+    // ── Share panel — preview + save + multilingue ─────────────────
     function doShare(targetApp) {
+      // Show loading state on button
+      var btn = document.getElementById('share-' + targetApp);
+      var origHtml = btn ? btn.innerHTML : '';
+      if (btn) btn.style.opacity = '0.5';
+
       generateShareCard(inviteURL, refCode).then(function(file) {
-        // Instagram & X: always auto-save image + open app
-        if (targetApp === 'ig' || targetApp === 'tw') {
-          var link = document.createElement('a');
-          link.download = 'nava-peace-invite.png';
-          link.href = URL.createObjectURL(file);
-          link.click();
-          setTimeout(function() { URL.revokeObjectURL(link.href); openDirectShare(targetApp); }, 600);
-          return;
-        }
-        // Email: auto-save image + open mail client with pre-filled body
-        if (targetApp === 'email') {
-          var link = document.createElement('a');
-          link.download = 'nava-peace-invite.png';
-          link.href = URL.createObjectURL(file);
-          link.click();
-          setTimeout(function() {
-            URL.revokeObjectURL(link.href);
-            openDirectShare('email');
-            showToastMsg('🖼 Image saved — attach it to your email!');
-          }, 600);
-          return;
-        }
-        // Messenger on Telegram: auto-save image + open m.me
-        if (targetApp === 'msngr' && NAVA_TG.isTelegram) {
-          var link = document.createElement('a');
-          link.download = 'nava-peace-invite.png';
-          link.href = URL.createObjectURL(file);
-          link.click();
-          setTimeout(function() { URL.revokeObjectURL(link.href); openDirectShare('msngr'); }, 600);
-          return;
-        }
-        // Try Web Share API with image (works on mobile browsers + PC)
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          navigator.share({ text: shareText, files: [file] }).catch(function(){});
-        } else {
-          // Fallback: direct platform link
-          openDirectShare(targetApp);
-        }
+        if (btn) btn.style.opacity = '';
+        var objectURL = URL.createObjectURL(file);
+        showSharePanel(file, objectURL, targetApp);
+      }).catch(function() {
+        if (btn) btn.style.opacity = '';
       });
     }
 
-    function openDirectShare(app) {
-      var encodedText = encodeURIComponent(shareText);
-      var encodedShort = encodeURIComponent(shareTextShort);
-      var encodedURL = encodeURIComponent(inviteURL);
-      var urls = {
-        tg:    'https://t.me/share/url?url=' + encodedURL + '&text=' + encodedShort,
-        wa:    'https://wa.me/?text=' + encodedText,
-        tw:    'https://x.com/intent/tweet?text=' + encodedText,
-        sms:   (navigator.userAgent.match(/Android/i) ? 'sms:?body=' : 'sms:&body=') + encodedText,
-        msngr: NAVA_TG.isTelegram ? 'https://www.messenger.com/t/?link=' + encodedURL : 'fb-messenger://share/?link=' + encodedURL,
-        fb:    'https://www.facebook.com/sharer/sharer.php?u=' + encodedURL + '&quote=' + encodedShort,
-        ig:    'https://www.instagram.com/nava.peace.world/',
-        email: 'mailto:?subject=' + encodeURIComponent('NAVA PEACE – Join the movement 🕊') + '&body=' + encodedText
-      };
-      var url = urls[app];
-      if (!url) return;
+    function showSharePanel(file, objectURL, targetApp) {
+      var userLang = (typeof detectLang === 'function') ? detectLang() : 'en';
+      var isNative = userLang !== 'en';
+      var activeLang = userLang; // start with native
 
-      if (app === 'tg' && NAVA_TG.isTelegram) {
-        Telegram.WebApp.openTelegramLink(url);
-      } else if (NAVA_TG.isTelegram && app !== 'sms' && app !== 'email') {
-        Telegram.WebApp.openLink(url);
-      } else {
-        window.open(url, '_blank', 'width=600,height=500');
+      var old = document.getElementById('share-panel-overlay');
+      if (old) old.remove();
+
+      var overlay = document.createElement('div');
+      overlay.id = 'share-panel-overlay';
+      overlay.style.cssText =
+        'position:fixed;inset:0;z-index:9980;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;' +
+        'background:rgba(0,15,30,0.7);backdrop-filter:blur(8px);' +
+        'opacity:0;transition:opacity 0.3s;';
+
+      function renderPanel() {
+        var text = (SHARE_TEXTS[activeLang] || SHARE_TEXTS.en) + inviteURL;
+        var textShort = (SHARE_TEXTS[activeLang] || SHARE_TEXTS.en).split('\n')[0];
+        var encodedText = encodeURIComponent(text);
+        var encodedURL  = encodeURIComponent(inviteURL);
+
+        overlay.innerHTML =
+          '<div style="background:linear-gradient(180deg,#0a2d4a,#050f1a);border-radius:24px 24px 0 0;' +
+          'width:100%;max-width:520px;padding:24px 20px 32px;font-family:Nasalization,Arial,sans-serif;">' +
+
+          // Header
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">' +
+            '<span style="font-size:10px;letter-spacing:4px;color:rgba(255,255,255,0.5);">SHARE</span>' +
+            '<button id="sp-close" style="background:rgba(255,255,255,0.08);border:none;border-radius:50%;width:30px;height:30px;color:#fff;font-size:16px;cursor:pointer;line-height:30px;">✕</button>' +
+          '</div>' +
+
+          // Card preview + Save
+          '<div style="display:flex;gap:14px;align-items:center;margin-bottom:18px;">' +
+            '<img src="' + objectURL + '" style="width:90px;height:120px;object-fit:cover;border-radius:10px;border:1px solid rgba(58,172,223,0.3);" />' +
+            '<div style="flex:1;">' +
+              '<div style="font-size:8px;letter-spacing:3px;color:rgba(255,255,255,0.45);margin-bottom:8px;">YOUR INVITATION CARD</div>' +
+              '<button id="sp-save" style="width:100%;background:rgba(58,172,223,0.2);border:1px solid rgba(58,172,223,0.5);border-radius:12px;' +
+              'padding:11px 0;font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:3px;color:#3AACDF;cursor:pointer;margin-bottom:8px;">💾 SAVE IMAGE</button>' +
+              '<div style="font-size:7px;letter-spacing:1px;color:rgba(255,255,255,0.35);line-height:1.6;">Save then paste the image<br>into WhatsApp, IG, Email...</div>' +
+            '</div>' +
+          '</div>' +
+
+          // Language toggle (only if user has non-EN lang)
+          (isNative ?
+            '<div style="display:flex;gap:8px;margin-bottom:14px;">' +
+              '<button id="sp-lang-native" style="flex:1;padding:8px 0;border-radius:50px;font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:2px;cursor:pointer;' +
+              'background:' + (activeLang!=='en'?'rgba(58,172,223,0.25)':'rgba(255,255,255,0.06)') + ';' +
+              'border:1px solid ' + (activeLang!=='en'?'rgba(58,172,223,0.6)':'rgba(255,255,255,0.12)') + ';color:#fff;">' +
+              (userLang.toUpperCase()) + '</button>' +
+              '<button id="sp-lang-en" style="flex:1;padding:8px 0;border-radius:50px;font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:2px;cursor:pointer;' +
+              'background:' + (activeLang==='en'?'rgba(58,172,223,0.25)':'rgba(255,255,255,0.06)') + ';' +
+              'border:1px solid ' + (activeLang==='en'?'rgba(58,172,223,0.6)':'rgba(255,255,255,0.12)') + ';color:#fff;">EN</button>' +
+            '</div>'
+          : '') +
+
+          // Share text preview
+          '<div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px;margin-bottom:16px;position:relative;">' +
+            '<div id="sp-text" style="font-size:9px;letter-spacing:1px;color:rgba(255,255,255,0.75);line-height:1.7;white-space:pre-wrap;word-break:break-all;">' + text + '</div>' +
+            '<button id="sp-copy" style="position:absolute;top:8px;right:8px;background:rgba(58,172,223,0.2);border:1px solid rgba(58,172,223,0.4);border-radius:8px;padding:4px 10px;font-family:Nasalization,Arial,sans-serif;font-size:7px;letter-spacing:2px;color:#3AACDF;cursor:pointer;">COPY</button>' +
+          '</div>' +
+
+          // Platform buttons
+          '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">' +
+            _spBtn('tg',    '✈️', 'TELEGRAM', 'https://t.me/share/url?url='+encodedURL+'&text='+encodeURIComponent(textShort)) +
+            _spBtn('wa',    '💬', 'WHATSAPP', 'https://wa.me/?text='+encodedText) +
+            _spBtn('tw',    '𝕏',  'X',        'https://x.com/intent/tweet?text='+encodedText) +
+            _spBtn('fb',    'f',  'FACEBOOK', 'https://www.facebook.com/sharer/sharer.php?u='+encodedURL) +
+            _spBtn('email', '✉️', 'EMAIL',    'mailto:?subject='+encodeURIComponent('NAVA PEACE 🕊')+'&body='+encodedText) +
+            _spBtn('sms',   '💌', 'SMS',      'sms:?&body='+encodeURIComponent(textShort+'\n'+inviteURL)) +
+            _spBtn('msngr', 'm', 'MESSENGER','https://www.facebook.com/dialog/send?link='+encodedURL+'&app_id=317673945436802&redirect_uri='+encodedURL) +
+            _spBtn('ig',    '📷', 'INSTAGRAM','https://www.instagram.com/') +
+          '</div>' +
+          '</div>';
+
+        // Events
+        document.getElementById('sp-close').onclick = closePanel;
+        document.getElementById('sp-save').onclick = function() {
+          var a = document.createElement('a');
+          a.download = 'nava-peace-invite.png'; a.href = objectURL; a.click();
+        };
+        document.getElementById('sp-copy').onclick = function() {
+          navigator.clipboard.writeText(text).then(function() {
+            document.getElementById('sp-copy').textContent = '✓';
+            setTimeout(function() { document.getElementById('sp-copy').textContent = 'COPY'; }, 1500);
+          });
+        };
+        if (isNative) {
+          document.getElementById('sp-lang-native').onclick = function() { activeLang = userLang; renderPanel(); };
+          document.getElementById('sp-lang-en').onclick    = function() { activeLang = 'en';      renderPanel(); };
+        }
+        // Platform buttons
+        overlay.querySelectorAll('[data-sp-app]').forEach(function(b) {
+          b.onclick = function() {
+            var url = b.getAttribute('data-sp-url');
+            if (!url) return;
+            // Try Web Share API with file first (works on some browsers)
+            if ((b.getAttribute('data-sp-app')==='wa'||b.getAttribute('data-sp-app')==='tg') &&
+                navigator.canShare && navigator.canShare({ files: [file] })) {
+              navigator.share({ text: text, files: [file] }).catch(function() {
+                _openURL(url, b.getAttribute('data-sp-app'));
+              });
+            } else {
+              _openURL(url, b.getAttribute('data-sp-app'));
+            }
+          };
+        });
+        // Auto-click target app if one was specified
+        if (targetApp) {
+          var tb = overlay.querySelector('[data-sp-app="'+targetApp+'"]');
+          if (tb) { setTimeout(function() { tb.click(); targetApp = null; }, 200); }
+        }
       }
+
+      function _spBtn(id, icon, label, url) {
+        return '<button data-sp-app="'+id+'" data-sp-url="'+url+'" style="' +
+          'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:14px;' +
+          'padding:10px 0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;">' +
+          '<span style="font-size:18px;">' + icon + '</span>' +
+          '<span style="font-family:Nasalization,Arial,sans-serif;font-size:6px;letter-spacing:1.5px;color:rgba(255,255,255,0.5);">' + label + '</span>' +
+        '</button>';
+      }
+
+      function _openURL(url, app) {
+        if ((app==='tg') && NAVA_TG.isTelegram) {
+          Telegram.WebApp.openTelegramLink(url);
+        } else if (NAVA_TG.isTelegram && app!=='sms' && app!=='email') {
+          Telegram.WebApp.openLink(url);
+        } else {
+          window.open(url, '_blank');
+        }
+      }
+
+      function closePanel() {
+        overlay.style.opacity = '0';
+        setTimeout(function() { overlay.remove(); URL.revokeObjectURL(objectURL); }, 300);
+      }
+
+      overlay.onclick = function(e) { if (e.target === overlay) closePanel(); };
+
+      document.body.appendChild(overlay);
+      renderPanel();
+      requestAnimationFrame(function() { overlay.style.opacity = '1'; });
     }
 
-    // Bind all share buttons
+    // Bind all share buttons → open share panel
     ['tg','wa','tw','sms','msngr','fb','ig','email'].forEach(function(app) {
       var btn = document.getElementById('share-' + app);
       if (btn) {
