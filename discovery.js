@@ -74,16 +74,16 @@
     overlay.id = 'disco-overlay';
     overlay.style.cssText =
       'position:fixed;inset:0;z-index:9990;display:flex;align-items:center;justify-content:center;' +
-      'background:rgba(0,0,0,0.52);backdrop-filter:blur(6px);' +
+      'background:rgba(0,30,60,0.35);backdrop-filter:blur(8px);' +
       'opacity:0;transition:opacity 0.35s ease;';
 
     overlay.innerHTML =
       '<div id="disco-card" style="' +
-        'background:linear-gradient(155deg,rgba(26,95,130,0.97),rgba(12,55,85,0.97));' +
-        'border:1px solid rgba(255,255,255,0.16);border-radius:24px;' +
+        'background:linear-gradient(155deg,rgba(58,172,223,0.92),rgba(30,142,196,0.88));' +
+        'border:1px solid rgba(255,255,255,0.35);border-radius:24px;' +
         'padding:36px 28px 28px;max-width:300px;width:88%;text-align:center;' +
         'font-family:Nasalization,Arial,sans-serif;' +
-        'box-shadow:0 24px 60px rgba(0,0,0,0.5);' +
+        'box-shadow:0 24px 60px rgba(0,0,0,0.25);' +
         'transform:translateY(22px);transition:transform 0.38s ease;' +
       '">' +
         '<div style="font-size:46px;margin-bottom:6px;">' + info.icon + '</div>' +
