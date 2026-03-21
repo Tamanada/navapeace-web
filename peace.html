@@ -805,8 +805,10 @@
       logVoteToday(); // ajouter au log offline-first
 
       const uid          = localStorage.getItem('nava_peace_uid');
-      const referredBy   = localStorage.getItem('nava_peace_referred_by') || null;
       const referralCode = localStorage.getItem('nava_peace_ref_code') || null;
+      // Bloquer l'auto-référencement (son propre code = fraude)
+      const _rawRef      = localStorage.getItem('nava_peace_referred_by') || null;
+      const referredBy   = (_rawRef && _rawRef !== referralCode) ? _rawRef : null;
       const age          = parseInt(localStorage.getItem('nava_peace_age'), 10) || null;
       const gender       = localStorage.getItem('nava_peace_gender') || null;
 
