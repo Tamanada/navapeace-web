@@ -1427,31 +1427,45 @@
       <p class="dove-popup-title" data-i18n="popup_my_doves">MY DOVES</p>
       <span class="dove-popup-total" id="pop-dove-total">—</span>
 
-      <div class="dove-bar-wrap">
-        <div class="dove-bar-track">
-          <div class="dove-bar-own" id="pop-bar-own" style="width:0%"></div>
-          <div class="dove-bar-ref" id="pop-bar-ref" style="width:0%"></div>
+      <!-- 4 catégories de doves -->
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.08);border-radius:12px;padding:10px 16px;">
+          <span style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.7);">🕊 PERSONAL ACTIONS</span>
+          <span id="pop-cat-personal" style="font-size:18px;font-weight:700;color:#fff;">0</span>
         </div>
-        <div class="dove-bar-legend">
-          <span>🕊 <span id="pop-leg-own">0</span> <span data-i18n="popup_own_lbl">OWN ACTIONS</span></span>
-          <span><span id="pop-leg-ref">0</span> <span data-i18n="popup_ref_lbl">REFERRAL</span> 🕊</span>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.08);border-radius:12px;padding:10px 16px;">
+          <span style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.7);">🔍 DISCOVERY DOVES</span>
+          <span id="pop-cat-discovery" style="font-size:18px;font-weight:700;color:#3AACDF;">0</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.08);border-radius:12px;padding:10px 16px;">
+          <span style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.7);">🔥 STREAK DOVES</span>
+          <span id="pop-cat-streak" style="font-size:18px;font-weight:700;color:#FFA500;">0</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.08);border-radius:12px;padding:10px 16px;">
+          <span style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.7);">👥 REFERRAL DOVES</span>
+          <span id="pop-cat-referral" style="font-size:18px;font-weight:700;color:#6DD5F5;">0</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(58,172,223,0.2);border:1px solid rgba(58,172,223,0.4);border-radius:12px;padding:12px 16px;margin-top:4px;">
+          <span style="font-size:12px;letter-spacing:3px;color:#fff;font-weight:700;">🕊 TOTAL GLOBAL</span>
+          <span id="pop-cat-total" style="font-size:22px;font-weight:700;color:#fff;">0</span>
         </div>
       </div>
 
       <!-- Streak consécutif -->
       <div id="streak-row" style="display:none;align-items:center;justify-content:center;gap:10px;
-           background:rgba(255,255,255,0.1);border-radius:12px;padding:12px 20px;margin-bottom:14px;">
-        <span style="font-size:22px;filter:brightness(0) invert(1);">🔥</span>
+           background:rgba(255,165,0,0.15);border-radius:12px;padding:10px 20px;margin-bottom:14px;">
+        <span style="font-size:18px;">🔥</span>
         <span style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.85);font-family:Nasalization,Arial,sans-serif;">
-          <span id="dove-streak" style="font-size:22px;font-weight:700;color:#fff;">0</span>
-          <span data-i18n="streak_days_row" style="margin-left:6px;">DAYS IN A ROW</span>
+          <span id="dove-streak" style="font-size:20px;font-weight:700;color:#FFA500;">0</span>
+          <span style="margin-left:6px;color:rgba(255,255,255,0.7);">DAYS IN A ROW</span>
         </span>
       </div>
 
-      <p class="dove-popup-desc">
-        Each day you choose peace<br>= <strong style="color:#fff;">+1 Dove</strong><br><br>
-        Each friend's daily action<br>= <strong style="color:#fff;">+1 Dove</strong> for you<br><br>
-        Doves are your peace impact score.
+      <p class="dove-popup-desc" style="font-size:10px;line-height:1.8;">
+        🕊 <strong>Personal</strong> — 1 dove / day you vote<br>
+        🔍 <strong>Discovery</strong> — 1 dove / new section found<br>
+        🔥 <strong>Streak</strong> — bonus doves at 7, 14, 21, 28 days<br>
+        👥 <strong>Referral</strong> — 1 dove / friend's daily action
       </p>
       <button class="dove-popup-close" onclick="closeDovePopup()" data-i18n="close_btn">CLOSE</button>
     </div>
@@ -1967,7 +1981,8 @@
           .order('created_at', { ascending: false });
         if (voteData && voteData.length > 0) {
           ownActions = voteData.length;
-          localStorage.setItem('nava_peace_days', ownActions);
+          // Stocker le nombre de votes réels séparément (utilisé par initVotesLog dans peace.html)
+          localStorage.setItem('nava_peace_vote_count', ownActions);
           // Calcul du streak consécutif (jours UTC sans interruption)
           const dayNums = [...new Set(voteData.map(v =>
             Math.floor(new Date(v.created_at).getTime() / 86400000)
@@ -1985,22 +2000,55 @@
       }
     } catch(e) { console.warn('Own actions load error', e); }
 
+    // Discovery doves
+    let discoveryDoves = 0;
+    try {
+      if (uid2) {
+        const sbD = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { count: dc } = await sbD.from('nava_discoveries')
+          .select('id', { count: 'exact', head: true }).eq('user_uid', uid2);
+        discoveryDoves = dc || 0;
+      }
+    } catch(e) {}
+
+    // Streak doves
+    let streakDoves = 0;
+    try {
+      if (uid2) {
+        const sbS = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { data: sr } = await sbS.from('nava_streak_rewards')
+          .select('doves_awarded').eq('user_uid', uid2);
+        streakDoves = (sr || []).reduce((s, r) => s + (r.doves_awarded || 0), 0);
+      }
+    } catch(e) {}
+
+    // Referral doves
     let referralDoves = 0;
     try {
       if (refCode) {
         const sb2 = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const { data } = await sb2
-          .from('referral_points')
-          .select('id')
-          .eq('referral_code', refCode);
+        const { data } = await sb2.from('referral_points')
+          .select('id').eq('referral_code', refCode);
         referralDoves = data ? data.length : 0;
       }
     } catch(e) { console.warn('Dove load error', e); }
 
-    const total = ownActions + referralDoves;
+    const total = ownActions + discoveryDoves + streakDoves + referralDoves;
+    localStorage.setItem('nava_peace_vote_count', ownActions); // votes réels uniquement
+    localStorage.setItem('nava_peace_days', total);            // total doves (affichage)
+
+    // Mettre à jour les compteurs globaux
     document.getElementById('dove-total').textContent = total;
     document.getElementById('dove-own').textContent   = ownActions;
     document.getElementById('dove-ref').textContent   = referralDoves;
+
+    // Mettre à jour les 4 catégories
+    const _setEl = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+    _setEl('pop-cat-personal',  ownActions);
+    _setEl('pop-cat-discovery', discoveryDoves);
+    _setEl('pop-cat-streak',    streakDoves);
+    _setEl('pop-cat-referral',  referralDoves);
+    _setEl('pop-cat-total',     total);
 
     // Afficher le streak consécutif dans le popup
     const streakEl = document.getElementById('dove-streak');
@@ -2456,18 +2504,28 @@
         ctx.fillStyle = topBar;
         ctx.fillRect(r, 0, w-2*r, 4);
 
-        // ── LOGO (image) — async load then draw rest ──
-        var logoImg = new Image();
-        logoImg.onload = function() {
-          ctx.save();
-          ctx.shadowColor = 'rgba(58,172,223,0.7)';
-          ctx.shadowBlur = 48;
-          ctx.drawImage(logoImg, cx-75, cy-75, 150, 150);
-          ctx.restore();
-          drawCardRest();
-        };
-        logoImg.onerror = drawCardRest;
-        logoImg.src = 'logo.png';
+        // ── LOGO (image) — fetch as data URL to avoid canvas taint ──
+        fetch('logo.png')
+          .then(function(r) { return r.blob(); })
+          .then(function(blob) {
+            var reader = new FileReader();
+            reader.onload = function() {
+              var logoImg = new Image();
+              logoImg.onload = function() {
+                ctx.save();
+                ctx.shadowColor = 'rgba(58,172,223,0.7)';
+                ctx.shadowBlur = 48;
+                ctx.drawImage(logoImg, cx-75, cy-75, 150, 150);
+                ctx.restore();
+                drawCardRest();
+              };
+              logoImg.onerror = drawCardRest;
+              logoImg.src = reader.result;
+            };
+            reader.onerror = drawCardRest;
+            reader.readAsDataURL(blob);
+          })
+          .catch(drawCardRest);
 
         function drawCardRest() {
           ctx.textAlign = 'center';
@@ -2556,14 +2614,10 @@
           ctx.fillText('www.nava-peace.world  ·  © '+year+' NAVA PEACE', cx, h-14);
 
           canvas.toBlob(function(blob) {
+            if (!blob) { console.error('canvas.toBlob returned null'); return; }
             resolve(new File([blob], 'nava-peace-invite.png', { type:'image/png' }));
           }, 'image/png');
         }
-
-        // Export
-        canvas.toBlob(function(blob) {
-          resolve(new File([blob], 'nava-peace-invite.png', { type: 'image/png' }));
-        }, 'image/png');
       });
     }
 
@@ -2665,38 +2719,39 @@
     try {
       const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-      // Unique referred users (active/non-blocked only)
-      const { data: friends } = await sb
-        .from('active_votes')
+      // Unique referred users from peace_votes
+      const { data: friendsRaw } = await sb
+        .from('peace_votes')
         .select('user_uid')
         .eq('referred_by', refCode);
-
-      // Count dove-actions per referred user
-      const { data: ptData } = await sb
-        .from('referral_points')
-        .select('user_uid')
-        .eq('referral_code', refCode);
+      // Deduplicate
+      const seenUids = new Set();
+      const friends = (friendsRaw || []).filter(f => {
+        if (!f.user_uid || seenUids.has(f.user_uid)) return false;
+        seenUids.add(f.user_uid); return true;
+      });
 
       if (!friends || friends.length === 0) {
         list.innerHTML = `<p class="ref-empty">${t('referrals_empty').replace(/\n/g,'<br>')}</p>`;
         return;
       }
 
+      // Count votes per referred user directly from peace_votes (most reliable)
+      const uidsForCount = friends.map(f => f.user_uid).filter(Boolean);
+      const { data: votesData } = await sb
+        .from('peace_votes')
+        .select('user_uid')
+        .in('user_uid', uidsForCount)
+        .eq('referred_by', refCode);
+
       // Doves per referred user_uid
       const dovesPerUser = {};
-      (ptData || []).forEach(pt => {
-        dovesPerUser[pt.user_uid] = (dovesPerUser[pt.user_uid] || 0) + 1;
-      });
-
-      // Deduplicate by user_uid
-      const seen = new Set();
-      const unique = [];
-      friends.forEach(f => {
-        if (!seen.has(f.user_uid)) { seen.add(f.user_uid); unique.push(f); }
+      (votesData || []).forEach(v => {
+        dovesPerUser[v.user_uid] = (dovesPerUser[v.user_uid] || 0) + 1;
       });
 
       // Fetch pseudos from peace_messages
-      const uids = unique.map(f => f.user_uid).filter(Boolean);
+      const uids = friends.map(f => f.user_uid).filter(Boolean);
       const { data: msgData } = await sb
         .from('peace_messages')
         .select('user_uid, pseudo')
@@ -2704,7 +2759,7 @@
       const pseudoMap = {};
       (msgData || []).forEach(m => { if (m.pseudo) pseudoMap[m.user_uid] = m.pseudo; });
 
-      list.innerHTML = unique.map(f => {
+      list.innerHTML = friends.map(f => {
         const doves  = dovesPerUser[f.user_uid] || 0;
         const pseudo = pseudoMap[f.user_uid]
           ? '🕊 ' + pseudoMap[f.user_uid]
