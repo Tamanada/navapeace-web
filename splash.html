@@ -395,7 +395,22 @@
                      window.Telegram.WebApp.initDataUnsafe &&
                      window.Telegram.WebApp.initDataUnsafe.user;
         if (!tgUser || !tgUser.id) {
-          _runSplashLogic();
+          // Not inside Telegram — block access
+          document.body.innerHTML = [
+            '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;',
+            'height:100vh;background:#050F1A;color:#fff;font-family:Nasalization,Arial,sans-serif;',
+            'text-align:center;padding:30px;">',
+            '<img src="logo.png" style="width:80px;margin-bottom:20px;opacity:0.9;">',
+            '<div style="font-size:22px;letter-spacing:4px;color:#64D2FF;margin-bottom:8px;">NAVA PEACE</div>',
+            '<div style="font-size:11px;letter-spacing:3px;color:rgba(255,255,255,0.5);margin-bottom:32px;">MAKE PEACE. MAKE CHANGE.</div>',
+            '<div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.7);margin-bottom:24px;line-height:2;">',
+            'THIS APP IS ONLY AVAILABLE<br>INSIDE TELEGRAM</div>',
+            '<a href="https://t.me/NavaPeaceBot" style="display:inline-block;padding:14px 32px;',
+            'background:linear-gradient(135deg,#3AACDF,#1E8EC4);color:#fff;border-radius:12px;',
+            'text-decoration:none;font-family:Nasalization,Arial,sans-serif;font-size:11px;letter-spacing:3px;">',
+            '🕊 OPEN IN TELEGRAM</a>',
+            '</div>'
+          ].join('');
           return;
         }
         var expectedUID = 'tg_' + tgUser.id;
