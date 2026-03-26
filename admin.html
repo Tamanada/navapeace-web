@@ -580,6 +580,7 @@
     </div>
     <div class="adm-header-right">
       <span class="adm-uid-tag" id="adm-uid-tag"></span>
+      <span id="adm-refresh-badge" style="font-size:7px;letter-spacing:1.5px;color:rgba(100,210,255,0.5);"></span>
       <button class="adm-logout-btn" onclick="adminLogout()">LOGOUT</button>
     </div>
   </header>
@@ -1257,6 +1258,23 @@ async function checkPassword() {
     setTimeout(() => { if (!_isLockedOut()) err.textContent = ''; }, 3000);
   }
 }
+var _autoRefreshTimer = null;
+
+function _startAutoRefresh() {
+  if (_autoRefreshTimer) clearInterval(_autoRefreshTimer);
+  _autoRefreshTimer = setInterval(async function() {
+    await loadAll();
+    renderOverview();
+    renderStats();
+    _updateRefreshBadge();
+  }, 60000); // every 60s
+}
+
+function _updateRefreshBadge() {
+  var el = document.getElementById('adm-refresh-badge');
+  if (el) el.textContent = 'UPDATED ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+}
+
 function unlockPanel() {
   document.getElementById('lock-screen').style.display = 'none';
   const p = document.getElementById('admin-panel');
@@ -1264,9 +1282,11 @@ function unlockPanel() {
   const uid = localStorage.getItem('nava_peace_uid') || '';
   if (uid) document.getElementById('adm-uid-tag').textContent = uid.slice(0,14)+'…';
   buildModules();
-  loadAll();
+  loadAll().then(function() { renderOverview(); renderStats(); _updateRefreshBadge(); });
+  _startAutoRefresh();
 }
 function adminLogout() {
+  if (_autoRefreshTimer) { clearInterval(_autoRefreshTimer); _autoRefreshTimer = null; }
   localStorage.removeItem('nava_admin_ok');
   sessionStorage.removeItem('nava_admin_totp_ok');
   document.getElementById('admin-panel').style.display = 'none';
