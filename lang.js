@@ -2271,7 +2271,7 @@ document.addEventListener('click', (e) => {
   style.textContent = `
     #lang-switcher {
       position: fixed;
-      top: 14px;
+      top: 56px;
       right: 14px;
       z-index: 500;
     }
