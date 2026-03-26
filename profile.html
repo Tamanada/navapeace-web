@@ -11,7 +11,7 @@
   <meta name="theme-color" content="#3AACDF" />
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="telegram.js"></script>
-  <script src="module_gate.js?v=5"></script>
+  <script src="module_gate.js?v=6"></script>
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://nava-peace.app/profile.html" />
@@ -1427,31 +1427,45 @@
       <p class="dove-popup-title" data-i18n="popup_my_doves">MY DOVES</p>
       <span class="dove-popup-total" id="pop-dove-total">—</span>
 
-      <div class="dove-bar-wrap">
-        <div class="dove-bar-track">
-          <div class="dove-bar-own" id="pop-bar-own" style="width:0%"></div>
-          <div class="dove-bar-ref" id="pop-bar-ref" style="width:0%"></div>
+      <!-- 4 catégories de doves -->
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.08);border-radius:12px;padding:10px 16px;">
+          <span style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.7);">🕊 PERSONAL ACTIONS</span>
+          <span id="pop-cat-personal" style="font-size:18px;font-weight:700;color:#fff;">0</span>
         </div>
-        <div class="dove-bar-legend">
-          <span>🕊 <span id="pop-leg-own">0</span> <span data-i18n="popup_own_lbl">OWN ACTIONS</span></span>
-          <span><span id="pop-leg-ref">0</span> <span data-i18n="popup_ref_lbl">REFERRAL</span> 🕊</span>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.08);border-radius:12px;padding:10px 16px;">
+          <span style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.7);">🔍 DISCOVERY DOVES</span>
+          <span id="pop-cat-discovery" style="font-size:18px;font-weight:700;color:#3AACDF;">0</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.08);border-radius:12px;padding:10px 16px;">
+          <span style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.7);">🔥 STREAK DOVES</span>
+          <span id="pop-cat-streak" style="font-size:18px;font-weight:700;color:#FFA500;">0</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.08);border-radius:12px;padding:10px 16px;">
+          <span style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.7);">👥 REFERRAL DOVES</span>
+          <span id="pop-cat-referral" style="font-size:18px;font-weight:700;color:#6DD5F5;">0</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(58,172,223,0.2);border:1px solid rgba(58,172,223,0.4);border-radius:12px;padding:12px 16px;margin-top:4px;">
+          <span style="font-size:12px;letter-spacing:3px;color:#fff;font-weight:700;">🕊 TOTAL GLOBAL</span>
+          <span id="pop-cat-total" style="font-size:22px;font-weight:700;color:#fff;">0</span>
         </div>
       </div>
 
       <!-- Streak consécutif -->
       <div id="streak-row" style="display:none;align-items:center;justify-content:center;gap:10px;
-           background:rgba(255,255,255,0.1);border-radius:12px;padding:12px 20px;margin-bottom:14px;">
-        <span style="font-size:22px;filter:brightness(0) invert(1);">🔥</span>
+           background:rgba(255,165,0,0.15);border-radius:12px;padding:10px 20px;margin-bottom:14px;">
+        <span style="font-size:18px;">🔥</span>
         <span style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.85);font-family:Nasalization,Arial,sans-serif;">
-          <span id="dove-streak" style="font-size:22px;font-weight:700;color:#fff;">0</span>
-          <span data-i18n="streak_days_row" style="margin-left:6px;">DAYS IN A ROW</span>
+          <span id="dove-streak" style="font-size:20px;font-weight:700;color:#FFA500;">0</span>
+          <span style="margin-left:6px;color:rgba(255,255,255,0.7);">DAYS IN A ROW</span>
         </span>
       </div>
 
-      <p class="dove-popup-desc">
-        Each day you choose peace<br>= <strong style="color:#fff;">+1 Dove</strong><br><br>
-        Each friend's daily action<br>= <strong style="color:#fff;">+1 Dove</strong> for you<br><br>
-        Doves are your peace impact score.
+      <p class="dove-popup-desc" style="font-size:10px;line-height:1.8;">
+        🕊 <strong>Personal</strong> — 1 dove / day you vote<br>
+        🔍 <strong>Discovery</strong> — 1 dove / new section found<br>
+        🔥 <strong>Streak</strong> — bonus doves at 7, 14, 21, 28 days<br>
+        👥 <strong>Referral</strong> — 1 dove / friend's daily action
       </p>
       <button class="dove-popup-close" onclick="closeDovePopup()" data-i18n="close_btn">CLOSE</button>
     </div>
@@ -1967,7 +1981,8 @@
           .order('created_at', { ascending: false });
         if (voteData && voteData.length > 0) {
           ownActions = voteData.length;
-          localStorage.setItem('nava_peace_days', ownActions);
+          // Stocker le nombre de votes réels séparément (utilisé par initVotesLog dans peace.html)
+          localStorage.setItem('nava_peace_vote_count', ownActions);
           // Calcul du streak consécutif (jours UTC sans interruption)
           const dayNums = [...new Set(voteData.map(v =>
             Math.floor(new Date(v.created_at).getTime() / 86400000)
@@ -1985,22 +2000,55 @@
       }
     } catch(e) { console.warn('Own actions load error', e); }
 
+    // Discovery doves
+    let discoveryDoves = 0;
+    try {
+      if (uid2) {
+        const sbD = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { count: dc } = await sbD.from('nava_discoveries')
+          .select('id', { count: 'exact', head: true }).eq('user_uid', uid2);
+        discoveryDoves = dc || 0;
+      }
+    } catch(e) {}
+
+    // Streak doves
+    let streakDoves = 0;
+    try {
+      if (uid2) {
+        const sbS = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { data: sr } = await sbS.from('nava_streak_rewards')
+          .select('doves_awarded').eq('user_uid', uid2);
+        streakDoves = (sr || []).reduce((s, r) => s + (r.doves_awarded || 0), 0);
+      }
+    } catch(e) {}
+
+    // Referral doves
     let referralDoves = 0;
     try {
       if (refCode) {
         const sb2 = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const { data } = await sb2
-          .from('referral_points')
-          .select('id')
-          .eq('referral_code', refCode);
+        const { data } = await sb2.from('referral_points')
+          .select('id').eq('referral_code', refCode);
         referralDoves = data ? data.length : 0;
       }
     } catch(e) { console.warn('Dove load error', e); }
 
-    const total = ownActions + referralDoves;
+    const total = ownActions + discoveryDoves + streakDoves + referralDoves;
+    localStorage.setItem('nava_peace_vote_count', ownActions); // votes réels uniquement
+    localStorage.setItem('nava_peace_days', total);            // total doves (affichage)
+
+    // Mettre à jour les compteurs globaux
     document.getElementById('dove-total').textContent = total;
     document.getElementById('dove-own').textContent   = ownActions;
     document.getElementById('dove-ref').textContent   = referralDoves;
+
+    // Mettre à jour les 4 catégories
+    const _setEl = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+    _setEl('pop-cat-personal',  ownActions);
+    _setEl('pop-cat-discovery', discoveryDoves);
+    _setEl('pop-cat-streak',    streakDoves);
+    _setEl('pop-cat-referral',  referralDoves);
+    _setEl('pop-cat-total',     total);
 
     // Afficher le streak consécutif dans le popup
     const streakEl = document.getElementById('dove-streak');
@@ -2220,23 +2268,12 @@
       uk: "Світ говорить про мир. Давайте його практикувати. 🕊\nДолучайся до NAVA PEACE сьогодні.\n"
     };
 
-    // ── Share panel — preview + save + multilingue ─────────────────
+    // ── Share panel — multilingue (sans carte image) ─────────────────
     function doShare(targetApp) {
-      // Show loading state on button
-      var btn = document.getElementById('share-' + targetApp);
-      var origHtml = btn ? btn.innerHTML : '';
-      if (btn) btn.style.opacity = '0.5';
-
-      generateShareCard(inviteURL, refCode).then(function(file) {
-        if (btn) btn.style.opacity = '';
-        var objectURL = URL.createObjectURL(file);
-        showSharePanel(file, objectURL, targetApp);
-      }).catch(function() {
-        if (btn) btn.style.opacity = '';
-      });
+      showSharePanel(targetApp);
     }
 
-    function showSharePanel(file, objectURL, targetApp) {
+    function showSharePanel(targetApp) {
       var userLang = (typeof detectLang === 'function') ? detectLang() : 'en';
       var isNative = userLang !== 'en';
       var activeLang = userLang; // start with native
@@ -2267,16 +2304,6 @@
             '<button id="sp-close" style="background:rgba(255,255,255,0.08);border:none;border-radius:50%;width:30px;height:30px;color:#fff;font-size:16px;cursor:pointer;line-height:30px;">✕</button>' +
           '</div>' +
 
-          // Card preview + Save
-          '<div style="display:flex;gap:14px;align-items:center;margin-bottom:18px;">' +
-            '<img src="' + objectURL + '" style="width:90px;height:120px;object-fit:cover;border-radius:10px;border:1px solid rgba(58,172,223,0.3);" />' +
-            '<div style="flex:1;">' +
-              '<div style="font-size:8px;letter-spacing:3px;color:rgba(255,255,255,0.45);margin-bottom:8px;">YOUR INVITATION CARD</div>' +
-              '<button id="sp-save" style="width:100%;background:rgba(58,172,223,0.2);border:1px solid rgba(58,172,223,0.5);border-radius:12px;' +
-              'padding:11px 0;font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:3px;color:#3AACDF;cursor:pointer;margin-bottom:8px;">💾 SAVE IMAGE</button>' +
-              '<div style="font-size:7px;letter-spacing:1px;color:rgba(255,255,255,0.35);line-height:1.6;">Save then paste the image<br>into WhatsApp, IG, Email...</div>' +
-            '</div>' +
-          '</div>' +
 
           // Language toggle (only if user has non-EN lang)
           (isNative ?
@@ -2312,10 +2339,6 @@
 
         // Events
         document.getElementById('sp-close').onclick = closePanel;
-        document.getElementById('sp-save').onclick = function() {
-          var a = document.createElement('a');
-          a.download = 'nava-peace-invite.png'; a.href = objectURL; a.click();
-        };
         document.getElementById('sp-copy').onclick = function() {
           navigator.clipboard.writeText(text).then(function() {
             document.getElementById('sp-copy').textContent = '✓';
@@ -2389,181 +2412,149 @@
       }
     });
 
-    // Generate share card with live stats + QR
+    // Generate share card — 3 tiers: Logo+Title / QR+Invitation / URLs
     function generateShareCard(url, code) {
-      return new Promise(async function(resolve) {
-        // Fetch live stats
-        var todayCount = 0, totalCount = 0, countriesCount = 0;
-        try {
-          var sbCard = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-          var today = new Date().toISOString().slice(0, 10);
-          var results = await Promise.all([
-            sbCard.from('active_votes').select('*', { count: 'exact', head: true }),
-            sbCard.from('active_votes').select('*', { count: 'exact', head: true }).gte('created_at', today + 'T00:00:00'),
-            sbCard.from('active_votes').select('country')
-          ]);
-          totalCount = results[0].count || 0;
-          todayCount = results[1].count || 0;
-          var cs = new Set((results[2].data || []).map(function(v) { return v.country; }).filter(Boolean));
-          countriesCount = cs.size;
-        } catch(e) { console.warn('Stats fetch for card failed', e); }
+      return new Promise(function(resolve) {
 
-        var w = 600, h = 800;
+        var w = 600, h = 860;
         var canvas = document.createElement('canvas');
         canvas.width = w; canvas.height = h;
         var ctx = canvas.getContext('2d');
+        var cx = w / 2;
 
-        // ── BACKGROUND — Deep Blue Hypnotic ──
-        var r = 36;
-        var grad = ctx.createRadialGradient(w/2, h*0.3, 0, w/2, h*0.3, h*0.85);
-        grad.addColorStop(0,   '#1E6E9A');
-        grad.addColorStop(0.4, '#0F4060');
-        grad.addColorStop(1,   '#050F1A');
+        // ── BACKGROUND ──
+        var cr = 36;
+        var grad = ctx.createRadialGradient(cx, h*0.25, 0, cx, h*0.5, h);
+        grad.addColorStop(0, '#1E6E9A');
+        grad.addColorStop(0.45, '#0F4060');
+        grad.addColorStop(1, '#050F1A');
         ctx.fillStyle = grad;
         ctx.beginPath();
-        ctx.moveTo(r,0); ctx.lineTo(w-r,0); ctx.quadraticCurveTo(w,0,w,r);
-        ctx.lineTo(w,h-r); ctx.quadraticCurveTo(w,h,w-r,h);
-        ctx.lineTo(r,h); ctx.quadraticCurveTo(0,h,0,h-r);
-        ctx.lineTo(0,r); ctx.quadraticCurveTo(0,0,r,0);
-        ctx.closePath();
-        ctx.fill();
-
-        // Hypnotic concentric rings centered on logo
-        var cx = w/2, cy = 220;
-        ctx.save();
-        [120,170,220,275,335].forEach(function(rad, i) {
-          ctx.beginPath();
-          ctx.arc(cx, cy, rad, 0, Math.PI*2);
-          ctx.strokeStyle = 'rgba(58,172,223,' + (0.18 - i*0.03) + ')';
-          ctx.lineWidth = i === 0 ? 2 : 1;
-          ctx.stroke();
-        });
-        ctx.restore();
-
-        // Central blue glow behind logo
-        var logoGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, 130);
-        logoGlow.addColorStop(0, 'rgba(58,172,223,0.22)');
-        logoGlow.addColorStop(1, 'rgba(58,172,223,0)');
-        ctx.fillStyle = logoGlow;
-        ctx.beginPath(); ctx.arc(cx, cy, 130, 0, Math.PI*2); ctx.fill();
+        ctx.moveTo(cr,0); ctx.lineTo(w-cr,0); ctx.quadraticCurveTo(w,0,w,cr);
+        ctx.lineTo(w,h-cr); ctx.quadraticCurveTo(w,h,w-cr,h);
+        ctx.lineTo(cr,h); ctx.quadraticCurveTo(0,h,0,h-cr);
+        ctx.lineTo(0,cr); ctx.quadraticCurveTo(0,0,cr,0);
+        ctx.closePath(); ctx.fill();
 
         // Top accent bar
-        var topBar = ctx.createLinearGradient(0,0,w,0);
-        topBar.addColorStop(0,'rgba(58,172,223,0)');
-        topBar.addColorStop(0.4,'#3AACDF');
-        topBar.addColorStop(0.6,'#7FD4F5');
-        topBar.addColorStop(1,'rgba(58,172,223,0)');
-        ctx.fillStyle = topBar;
-        ctx.fillRect(r, 0, w-2*r, 4);
+        var barGrad = ctx.createLinearGradient(0,0,w,0);
+        barGrad.addColorStop(0,'rgba(58,172,223,0)');
+        barGrad.addColorStop(0.5,'#3AACDF');
+        barGrad.addColorStop(1,'rgba(58,172,223,0)');
+        ctx.fillStyle = barGrad;
+        ctx.fillRect(cr, 0, w-2*cr, 4);
 
-        // ── LOGO (image) — async load then draw rest ──
-        var logoImg = new Image();
-        logoImg.onload = function() {
-          ctx.save();
-          ctx.shadowColor = 'rgba(58,172,223,0.7)';
-          ctx.shadowBlur = 48;
-          ctx.drawImage(logoImg, cx-75, cy-75, 150, 150);
-          ctx.restore();
-          drawCardRest();
-        };
-        logoImg.onerror = drawCardRest;
-        logoImg.src = 'logo.png';
+        // Generate QR into hidden div
+        var qrDiv = document.createElement('div');
+        qrDiv.style.cssText = 'position:fixed;left:-9999px;top:-9999px;';
+        document.body.appendChild(qrDiv);
+        try {
+          new QRCode(qrDiv, {
+            text: url, width: 300, height: 300,
+            colorDark: '#0a2a40', colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+          });
+        } catch(qe) {}
 
-        function drawCardRest() {
+        // Fetch logo as data URL (no canvas taint)
+        fetch('logo.png')
+          .then(function(res) { return res.blob(); })
+          .then(function(blob) {
+            var fr = new FileReader();
+            fr.onload = function() {
+              var logoImg = new Image();
+              logoImg.onload = function() { drawCard(logoImg); };
+              logoImg.onerror = function() { drawCard(null); };
+              logoImg.src = fr.result;
+            };
+            fr.onerror = function() { drawCard(null); };
+            fr.readAsDataURL(blob);
+          })
+          .catch(function() { drawCard(null); });
+
+        function rRect(x, y, rw, rh, r) {
+          ctx.beginPath();
+          ctx.moveTo(x+r,y); ctx.lineTo(x+rw-r,y); ctx.quadraticCurveTo(x+rw,y,x+rw,y+r);
+          ctx.lineTo(x+rw,y+rh-r); ctx.quadraticCurveTo(x+rw,y+rh,x+rw-r,y+rh);
+          ctx.lineTo(x+r,y+rh); ctx.quadraticCurveTo(x,y+rh,x,y+rh-r);
+          ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+          ctx.closePath();
+        }
+
+        function drawCard(logoImg) {
           ctx.textAlign = 'center';
 
-          // ── NAVA PEACE title ──
+          // ── TIER 1 — Logo + Title ──
+          var logoSize = 130, logoY = 28;
+          if (logoImg) {
+            ctx.save();
+            ctx.shadowColor = 'rgba(58,172,223,0.8)';
+            ctx.shadowBlur = 50;
+            ctx.drawImage(logoImg, cx - logoSize/2, logoY, logoSize, logoSize);
+            ctx.restore();
+          }
           ctx.fillStyle = '#FFFFFF';
-          ctx.font = 'bold 50px Arial, sans-serif';
-          ctx.fillText('NAVA  PEACE', cx, 340);
+          ctx.font = 'bold 46px Nasalization, Arial, sans-serif';
+          ctx.fillText('NAVA PEACE', cx, logoY + logoSize + 46);
 
-          // Blue underline
-          var ul = ctx.createLinearGradient(cx-110,0,cx+110,0);
+          var ul = ctx.createLinearGradient(cx-130,0,cx+130,0);
           ul.addColorStop(0,'rgba(58,172,223,0)');
           ul.addColorStop(0.5,'#3AACDF');
           ul.addColorStop(1,'rgba(58,172,223,0)');
-          ctx.strokeStyle=ul; ctx.lineWidth=1.5;
-          ctx.beginPath(); ctx.moveTo(cx-110,352); ctx.lineTo(cx+110,352); ctx.stroke();
+          ctx.strokeStyle = ul; ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(cx-130, logoY+logoSize+60); ctx.lineTo(cx+130, logoY+logoSize+60);
+          ctx.stroke();
 
-          // ── SLOGAN ──
-          ctx.fillStyle = 'rgba(255,255,255,0.9)';
-          ctx.font = 'bold 18px Arial, sans-serif';
-          ctx.fillText('MAKE PEACE. MAKE CHANGE.', cx, 385);
+          ctx.fillStyle = 'rgba(255,255,255,0.85)';
+          ctx.font = '15px Nasalization, Arial, sans-serif';
+          ctx.fillText('MAKE PEACE. MAKE CHANGE.', cx, logoY + logoSize + 86);
 
-          // ── STATS — minimal, clean ──
-          var statY=418, bW=170, bH=82, gap=20;
-          var sX=(w-2*bW-gap)/2;
+          // ── TIER 2 — Invitation + QR ──
+          var t2y = logoY + logoSize + 124;
+          var pseudo = (localStorage.getItem('nava_peace_pseudo') || 'A PEACE MEMBER').toUpperCase();
 
-          function drawBox(x, y, num, lbl) {
-            ctx.fillStyle='rgba(58,172,223,0.12)';
-            var br=14;
-            ctx.beginPath();
-            ctx.moveTo(x+br,y); ctx.lineTo(x+bW-br,y); ctx.quadraticCurveTo(x+bW,y,x+bW,y+br);
-            ctx.lineTo(x+bW,y+bH-br); ctx.quadraticCurveTo(x+bW,y+bH,x+bW-br,y+bH);
-            ctx.lineTo(x+br,y+bH); ctx.quadraticCurveTo(x,y+bH,x,y+bH-br);
-            ctx.lineTo(x,y+br); ctx.quadraticCurveTo(x,y,x+br,y);
-            ctx.closePath(); ctx.fill();
-            ctx.strokeStyle='rgba(58,172,223,0.45)'; ctx.lineWidth=1; ctx.stroke();
-            ctx.fillStyle='#FFFFFF';
-            ctx.font='bold 40px Arial, sans-serif';
-            ctx.fillText(num, x+bW/2, y+50);
-            ctx.fillStyle='rgba(255,255,255,0.45)';
-            ctx.font='10px Arial, sans-serif';
-            ctx.fillText(lbl, x+bW/2, y+68);
-          }
+          ctx.fillStyle = 'rgba(255,255,255,0.6)';
+          ctx.font = '13px Nasalization, Arial, sans-serif';
+          ctx.fillText('YOU ARE INVITED BY', cx, t2y);
 
-          drawBox(sX,        statY, String(totalCount),    'TOTAL DOVES');
-          drawBox(sX+bW+gap, statY, String(countriesCount),'COUNTRIES');
+          ctx.fillStyle = '#3AACDF';
+          ctx.font = 'bold 24px Nasalization, Arial, sans-serif';
+          ctx.fillText(pseudo, cx, t2y + 36);
 
-          // ── SEPARATOR ──
-          var sep=ctx.createLinearGradient(0,0,w,0);
-          sep.addColorStop(0,'rgba(58,172,223,0)');
-          sep.addColorStop(0.2,'rgba(58,172,223,0.5)');
-          sep.addColorStop(0.8,'rgba(58,172,223,0.5)');
-          sep.addColorStop(1,'rgba(58,172,223,0)');
-          ctx.strokeStyle=sep; ctx.lineWidth=1;
-          ctx.beginPath(); ctx.moveTo(60,536); ctx.lineTo(w-60,536); ctx.stroke();
+          ctx.fillStyle = 'rgba(255,255,255,0.6)';
+          ctx.font = '13px Nasalization, Arial, sans-serif';
+          ctx.fillText('TO JOIN NAVA PEACE', cx, t2y + 68);
 
-          // ── QR CODE ──
-          var qrCanvas=document.querySelector('#qrcode canvas');
+          var qrSize = 280, qrPad = 16;
+          var qrX = cx - qrSize/2, qrY = t2y + 88;
+          var qrCanvas = qrDiv.querySelector('canvas');
           if (qrCanvas) {
-            var qrSize=210, qrX=(w-qrSize)/2, qrY=554;
-            ctx.fillStyle='#FFFFFF';
-            var qrR2=16;
-            ctx.beginPath();
-            ctx.moveTo(qrX+qrR2,qrY); ctx.lineTo(qrX+qrSize-qrR2,qrY); ctx.quadraticCurveTo(qrX+qrSize,qrY,qrX+qrSize,qrY+qrR2);
-            ctx.lineTo(qrX+qrSize,qrY+qrSize-qrR2); ctx.quadraticCurveTo(qrX+qrSize,qrY+qrSize,qrX+qrSize-qrR2,qrY+qrSize);
-            ctx.lineTo(qrX+qrR2,qrY+qrSize); ctx.quadraticCurveTo(qrX,qrY+qrSize,qrX,qrY+qrSize-qrR2);
-            ctx.lineTo(qrX,qrY+qrR2); ctx.quadraticCurveTo(qrX,qrY,qrX+qrR2,qrY);
-            ctx.closePath(); ctx.fill();
-            ctx.strokeStyle='#3AACDF'; ctx.lineWidth=2.5; ctx.stroke();
-            ctx.drawImage(qrCanvas, qrX+12, qrY+12, qrSize-24, qrSize-24);
+            ctx.fillStyle = '#FFFFFF';
+            rRect(qrX - qrPad, qrY - qrPad, qrSize + qrPad*2, qrSize + qrPad*2, 20);
+            ctx.fill();
+            ctx.strokeStyle = '#3AACDF'; ctx.lineWidth = 3;
+            rRect(qrX - qrPad, qrY - qrPad, qrSize + qrPad*2, qrSize + qrPad*2, 20);
+            ctx.stroke();
+            ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
           }
+          if (document.body.contains(qrDiv)) document.body.removeChild(qrDiv);
 
-          // ── SCAN TEXT ──
-          ctx.fillStyle='rgba(255,255,255,0.7)';
-          ctx.font='12px Arial, sans-serif';
-          ctx.fillText('SCAN OR TAP TO JOIN', cx, 788);
+          // ── TIER 3 — URLs ──
+          var t3y = qrY + qrSize + qrPad + 44;
+          ctx.fillStyle = 'rgba(58,172,223,0.9)';
+          ctx.font = '15px Nasalization, Arial, sans-serif';
+          ctx.fillText('www.nava-peace.world', cx, t3y);
+          ctx.fillText('www.nava-peace.app', cx, t3y + 30);
 
-          // Bottom bar
-          ctx.fillStyle=topBar;
-          ctx.fillRect(r, h-4, w-2*r, 4);
-
-          // ── WEBSITE ──
-          ctx.fillStyle='rgba(58,172,223,0.5)';
-          ctx.font='10px Arial, sans-serif';
-          var year=new Date().getFullYear();
-          ctx.fillText('www.nava-peace.world  ·  © '+year+' NAVA PEACE', cx, h-14);
+          ctx.fillStyle = barGrad;
+          ctx.fillRect(cr, h-4, w-2*cr, 4);
 
           canvas.toBlob(function(blob) {
+            if (!blob) { console.error('toBlob returned null'); return; }
             resolve(new File([blob], 'nava-peace-invite.png', { type:'image/png' }));
           }, 'image/png');
         }
-
-        // Export
-        canvas.toBlob(function(blob) {
-          resolve(new File([blob], 'nava-peace-invite.png', { type: 'image/png' }));
-        }, 'image/png');
       });
     }
 
@@ -2665,38 +2656,39 @@
     try {
       const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-      // Unique referred users (active/non-blocked only)
-      const { data: friends } = await sb
-        .from('active_votes')
+      // Unique referred users from peace_votes
+      const { data: friendsRaw } = await sb
+        .from('peace_votes')
         .select('user_uid')
         .eq('referred_by', refCode);
-
-      // Count dove-actions per referred user
-      const { data: ptData } = await sb
-        .from('referral_points')
-        .select('user_uid')
-        .eq('referral_code', refCode);
+      // Deduplicate
+      const seenUids = new Set();
+      const friends = (friendsRaw || []).filter(f => {
+        if (!f.user_uid || seenUids.has(f.user_uid)) return false;
+        seenUids.add(f.user_uid); return true;
+      });
 
       if (!friends || friends.length === 0) {
         list.innerHTML = `<p class="ref-empty">${t('referrals_empty').replace(/\n/g,'<br>')}</p>`;
         return;
       }
 
+      // Count votes per referred user directly from peace_votes (most reliable)
+      const uidsForCount = friends.map(f => f.user_uid).filter(Boolean);
+      const { data: votesData } = await sb
+        .from('peace_votes')
+        .select('user_uid')
+        .in('user_uid', uidsForCount)
+        .eq('referred_by', refCode);
+
       // Doves per referred user_uid
       const dovesPerUser = {};
-      (ptData || []).forEach(pt => {
-        dovesPerUser[pt.user_uid] = (dovesPerUser[pt.user_uid] || 0) + 1;
-      });
-
-      // Deduplicate by user_uid
-      const seen = new Set();
-      const unique = [];
-      friends.forEach(f => {
-        if (!seen.has(f.user_uid)) { seen.add(f.user_uid); unique.push(f); }
+      (votesData || []).forEach(v => {
+        dovesPerUser[v.user_uid] = (dovesPerUser[v.user_uid] || 0) + 1;
       });
 
       // Fetch pseudos from peace_messages
-      const uids = unique.map(f => f.user_uid).filter(Boolean);
+      const uids = friends.map(f => f.user_uid).filter(Boolean);
       const { data: msgData } = await sb
         .from('peace_messages')
         .select('user_uid, pseudo')
@@ -2704,7 +2696,7 @@
       const pseudoMap = {};
       (msgData || []).forEach(m => { if (m.pseudo) pseudoMap[m.user_uid] = m.pseudo; });
 
-      list.innerHTML = unique.map(f => {
+      list.innerHTML = friends.map(f => {
         const doves  = dovesPerUser[f.user_uid] || 0;
         const pseudo = pseudoMap[f.user_uid]
           ? '🕊 ' + pseudoMap[f.user_uid]

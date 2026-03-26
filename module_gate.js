@@ -6,10 +6,11 @@
 
 (function () {
 
-  var NAV_ORDER = ['module_peace','module_map','module_market','module_profile','module_about'];
+  var NAV_ORDER = ['module_peace','module_map','module_stats','module_market','module_profile','module_about'];
   var NAV_PAGES = {
     module_peace:   'peace.html',
     module_map:     'map.html',
+    module_stats:   'stats.html',
     module_market:  'market.html',
     module_profile: 'profile.html',
     module_about:   'about.html',
@@ -79,9 +80,6 @@
            var oldVal = localStorage.getItem('nava_modules') || '{}';
            if (newVal === oldVal) return;
 
-           var localTs = parseInt(localStorage.getItem('nava_modules_ts') || '0', 10);
-           if (localTs && Date.now() - localTs < 60 * 60 * 1000) return;
-
            var oldMods = JSON.parse(oldVal);
            localStorage.setItem('nava_modules', newVal);
            var newMods = JSON.parse(newVal);
@@ -90,7 +88,7 @@
            var pageKey = document.documentElement.getAttribute('data-module');
            if (pageKey) {
              if (newMods[pageKey] === false) {
-               // Module vient d'être désactivé → rediriger
+               // Module désactivé → rediriger
                var target = null;
                for (var i = 0; i < NAV_ORDER.length; i++) {
                  var k = NAV_ORDER[i];
@@ -100,10 +98,13 @@
                  }
                }
                if (target) window.location.replace(target);
-             } else if (oldMods[pageKey] === false) {
-               // Module vient d'être ré-activé → reload pour sortir de MODULE OFFLINE
+             } else {
+               // Modules changed → reload to re-run gate check with fresh values
                window.location.reload();
              }
+           } else {
+             // Not on a module page — reload to refresh nav
+             window.location.reload();
            }
          }).catch(function () {});
       }

@@ -2,13 +2,15 @@
 <html lang="en" data-module="module_splash">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://telegram.org; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; frame-ancestors 'none';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://telegram.org https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; frame-ancestors 'none';" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NAVA PEACE — Born To Grow</title>
   <link rel="icon" type="image/png" href="favicon.png" />
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase_config.js"></script>
   <script src="telegram.js"></script>
-  <script src="module_gate.js?v=5"></script>
+  <script src="module_gate.js?v=6"></script>
   <!-- Open Graph -->
   <meta property="og:type"        content="website" />
   <meta property="og:url"         content="https://nava-peace.app/splash.html" />
@@ -356,12 +358,119 @@
     localStorage.removeItem('nava_modules');
     localStorage.removeItem('nava_modules_ts');
 
-    // Telegram returning user → skip splash animation, go directly
-    if (NAVA_TG.isTelegram && localStorage.getItem('nava_peace_country')) {
-      var _today = new Date().toISOString().split('T')[0];
-      var _dest = (localStorage.getItem('nava_peace_voted') === _today) ? 'map.html' : 'peace.html';
-      window.location.replace(_dest);
+    // ── AUTO-RESTORE SESSION (domain change / cleared localStorage) ────────
+    // Bloque toute navigation jusqu'à ce que le check Supabase soit terminé
+    var _sessionCheckDone = false;
+
+    function _runSplashLogic() {
+      if (_sessionCheckDone) return; // déjà lancé
+      _sessionCheckDone = true;
+
+      // Returning user already in localStorage
+      if (NAVA_TG.isTelegram && localStorage.getItem('nava_peace_country')) {
+        var _today = new Date().toISOString().split('T')[0];
+        var _dest = (localStorage.getItem('nava_peace_voted') === _today) ? 'map.html' : 'peace.html';
+        window.location.replace(_dest);
+        return;
+      }
+
+      // Lance l'animation splash (nouveau visiteur ou session à restaurer)
+      _startSplashAnimation();
     }
+
+    (function restoreSession() {
+      if (localStorage.getItem('nava_peace_country')) {
+        // Déjà restauré — laisse _runSplashLogic décider
+        setTimeout(_runSplashLogic, 0);
+        return;
+      }
+
+      // Sur mobile Telegram, initDataUnsafe.user peut être vide avant ready()
+      if (window.Telegram && window.Telegram.WebApp) {
+        try { window.Telegram.WebApp.ready(); } catch(e) {}
+      }
+
+      function _doRestore() {
+        var tgUser = window.Telegram && window.Telegram.WebApp &&
+                     window.Telegram.WebApp.initDataUnsafe &&
+                     window.Telegram.WebApp.initDataUnsafe.user;
+        if (!tgUser || !tgUser.id) {
+          _runSplashLogic();
+          return;
+        }
+        var expectedUID = 'tg_' + tgUser.id;
+      try {
+        var sbr = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Cherche d'abord dans peace_votes (utilisateurs ayant voté)
+        sbr.from('peace_votes')
+          .select('referral_code, referred_by, country, age, gender, created_at')
+          .eq('user_uid', expectedUID)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .then(function(res) {
+            if (res.data && res.data.length > 0) {
+              var row = res.data[0];
+              localStorage.setItem('nava_peace_uid', expectedUID);
+              // country peut être null en DB → on met 'XX' pour signaler "inscrit"
+              localStorage.setItem('nava_peace_country', row.country || 'XX');
+              if (row.referral_code) localStorage.setItem('nava_peace_ref_code',    row.referral_code);
+              if (row.age)           localStorage.setItem('nava_peace_age',         row.age);
+              if (row.gender)        localStorage.setItem('nava_peace_gender',      row.gender);
+              if (row.referred_by)   localStorage.setItem('nava_peace_referred_by', row.referred_by);
+              // Restaurer la date du dernier vote pour éviter la boucle peace.html→index.html
+              if (row.created_at) {
+                var lastVoteDate = row.created_at.split('T')[0];
+                localStorage.setItem('nava_peace_voted', lastVoteDate);
+              }
+              // Restaurer le peace message depuis peace_messages
+              sbr.from('peace_messages').select('pseudo, message')
+                .eq('user_uid', expectedUID).limit(1)
+                .then(function(pm) {
+                  if (pm.data && pm.data[0]) {
+                    if (pm.data[0].pseudo)  localStorage.setItem('nava_peace_pseudo',  pm.data[0].pseudo);
+                    if (pm.data[0].message) localStorage.setItem('nava_peace_message', pm.data[0].message);
+                  }
+                  window.location.replace('peace.html');
+                })
+                .catch(function() { window.location.replace('peace.html'); });
+              return;
+              return;
+            }
+            // Aucun vote trouvé — peut-être inscrit mais pas encore voté
+            // Cherche dans nava_discoveries pour confirmer l'inscription
+            return sbr.from('nava_discoveries')
+              .select('user_uid')
+              .eq('user_uid', expectedUID)
+              .limit(1)
+              .then(function(res2) {
+                if (res2.data && res2.data.length > 0) {
+                  // Inscrit mais pas voté → va directement à peace.html
+                  localStorage.setItem('nava_peace_uid', expectedUID);
+                  window.location.replace('peace.html');
+                  return;
+                }
+                // Vraiment nouveau → animation normale
+                _runSplashLogic();
+              });
+          })
+          .catch(function() { _runSplashLogic(); }); // erreur réseau → animation normale
+      } catch(e) { _runSplashLogic(); }
+      } // end _doRestore
+
+      // Sur mobile, initDataUnsafe.user peut être vide à t=0 — on attend 300ms
+      var tgUserImmediate = window.Telegram && window.Telegram.WebApp &&
+                            window.Telegram.WebApp.initDataUnsafe &&
+                            window.Telegram.WebApp.initDataUnsafe.user;
+      if (tgUserImmediate && tgUserImmediate.id) {
+        _doRestore(); // PC / déjà disponible
+      } else {
+        setTimeout(_doRestore, 350); // Mobile : attend que WebApp soit prêt
+      }
+
+      // Timeout sécurité global : si rien ne s'est passé en 5s → animation normale
+      setTimeout(function() { _runSplashLogic(); }, 5000);
+    })();
+    // ──────────────────────────────────────────────────────────────────────
     // 12 languages — flag · translation
     const translations = [
       { flag: '🇬🇧', lang: 'EN', text: 'BORN TO GROW'          },
@@ -497,7 +606,7 @@
     ];
 
     // ── SPLASH LOGIC ──────────────────────────────────────────────────
-    (function () {
+    function _startSplashAnimation() {
       var uid = localStorage.getItem('nava_peace_uid');
       var isRegistered = uid && localStorage.getItem('nava_peace_country');
 
@@ -568,7 +677,7 @@
             }, 1200); // 1.2s per word
 
           }, 1200); // after fade-out
-        }, 3000);   // after logo visible
+        }, 4000);   // after logo visible
 
         return;
       }
@@ -657,9 +766,9 @@
           }, 2500);
 
         }, 1400); // fade-out terminé
-      }, 3000);   // logo + hero pleinement visibles
+      }, 4000);   // logo + hero pleinement visibles
 
-    })();
+    } // end _startSplashAnimation
   </script>
 </body>
 </html>

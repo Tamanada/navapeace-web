@@ -1040,7 +1040,7 @@ let _adminRole = '';
 let _adminName = '';
 
 // ── RATE LIMITING & SESSION ───────────────────────────────
-const ADMIN_SESSION_MS  = 8 * 60 * 60 * 1000; // 8 h
+const ADMIN_SESSION_MS  = 30 * 60 * 1000; // 30 min
 const MAX_ATTEMPTS      = 5;
 const LOCKOUT_MS        = 15 * 60 * 1000;      // 15 min
 const LOGIN_STATE_KEY   = 'nava_admin_ls';

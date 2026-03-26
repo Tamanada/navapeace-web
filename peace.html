@@ -13,7 +13,7 @@
   <script src="telegram.js"></script>
   <!-- Splash gate : redirige vers splash.html à chaque nouvelle session -->
   <script>if (!sessionStorage.getItem('nava_splash_shown')) { window.location.replace('splash.html'); }</script>
-  <script src="module_gate.js?v=5"></script>
+  <script src="module_gate.js?v=6"></script>
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://nava-peace.app/peace.html" />
@@ -168,11 +168,11 @@
     /* ── PEACE BUTTON ── */
     .peace-btn {
       position: relative;
-      width: 140px;
-      height: 140px;
+      width: min(220px, 58vw);
+      height: min(220px, 58vw);
       border-radius: 50%;
       border: none;
-      background: rgba(255,255,255,0.9);
+      background: transparent;
       color: rgba(255,255,255,0.85);
       font-family: 'Nasalization', Arial, sans-serif;
       font-size: 52px;
@@ -181,34 +181,32 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow:
-        0 0 0 12px rgba(255,255,255,0.15),
-        0 0 0 24px rgba(255,255,255,0.07),
-        0 8px 40px rgba(255,255,255,0.3);
+      box-shadow: none;
       transition: transform 0.15s, box-shadow 0.3s;
       outline: none;
     }
 
     .peace-btn .btn-logo {
-      width: 90px;
-      height: 90px;
+      width: 100%;
+      height: 100%;
       object-fit: contain;
       pointer-events: none;
-      filter: drop-shadow(0 2px 10px rgba(30,100,160,0.25));
       transition: opacity 0.4s;
-      opacity: 0.55;
+      opacity: 1;
       position: absolute;
     }
 
     /* ── BUTTON HINT TEXT ── */
     .btn-hint {
       position: absolute;
-      font-size: 11px;
+      font-size: 17px;
       font-weight: 700;
+      font-family: 'Nasalization', Arial, sans-serif;
       letter-spacing: 2px;
-      color: #1A5F82;
+      color: #ffffff;
+      text-shadow: 0 1px 8px rgba(0,40,100,0.9), 0 0 16px rgba(0,0,0,0.5);
       text-align: center;
-      line-height: 2.1;
+      line-height: 1.8;
       text-transform: uppercase;
       pointer-events: none;
       z-index: 2;
@@ -338,59 +336,33 @@
     /* Phase 1 — THANK YOU / PEACE LOVER */
     .btn-thank-wrap { animation: zoomInSlow 3s cubic-bezier(0.22,1,0.36,1) forwards; }
     .btn-inner-line1 {
-      font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase;
-      color: #1A5F82; font-weight: 700; line-height: 1.5;
+      font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+      font-family: 'Nasalization', Arial, sans-serif;
+      color: #ffffff; font-weight: 700; line-height: 1.5;
+      text-shadow: 0 1px 6px rgba(0,40,100,0.8);
     }
     .btn-inner-line2 {
-      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
-      color: rgba(26,95,130,0.75); font-weight: 700; line-height: 1.5;
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      font-family: 'Nasalization', Arial, sans-serif;
+      color: rgba(255,255,255,0.85); font-weight: 700; line-height: 1.5;
+      text-shadow: 0 1px 6px rgba(0,40,100,0.8);
     }
 
     /* Phase 2 — NEXT ACTION IN + timer */
     .btn-next-wrap { animation: zoomInSlow 3s cubic-bezier(0.22,1,0.36,1) forwards; }
     .btn-next-label {
-      font-size: 8px; letter-spacing: 2px; text-transform: uppercase;
-      color: rgba(26,95,130,0.60);
+      font-size: 13px; letter-spacing: 2px; text-transform: uppercase;
+      font-family: 'Nasalization', Arial, sans-serif;
+      color: rgba(255,255,255,0.85);
+      text-shadow: 0 1px 4px rgba(0,40,100,0.8);
     }
     .btn-next-timer {
-      font-size: 17px; letter-spacing: 3px;
-      color: #1A5F82; font-weight: 700; margin-top: 2px;
+      font-size: 26px; letter-spacing: 3px;
+      font-family: 'Nasalization', Arial, sans-serif;
+      color: #ffffff; font-weight: 700; margin-top: 2px;
+      text-shadow: 0 1px 6px rgba(0,40,100,0.8);
     }
 
-    /* ── COUNTERS ── */
-    .counters {
-      display: flex;
-      gap: 24px;
-      justify-content: center;
-    }
-
-    .cnt-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .cnt-num {
-      font-size: 28px;
-      letter-spacing: 2px;
-      color: #fff;
-      text-shadow: 0 0 20px rgba(255,255,255,0.5);
-    }
-
-    .cnt-lbl {
-      font-size: 10px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: rgba(240,237,228,0.7);
-    }
-
-    .cnt-sep {
-      width: 1px;
-      height: 40px;
-      background: rgba(255,255,255,0.25);
-      align-self: center;
-    }
 
     /* ── INFO POPOVER ── */
     .info-pop-overlay {
@@ -450,7 +422,6 @@
       letter-spacing: 2px;
       cursor: pointer;
     }
-    .cnt-item { cursor: pointer; }
 
     /* ── BOTTOM NAV ── */
     .bottom-nav {
@@ -521,7 +492,7 @@
 
     <!-- BUTTON -->
     <button class="peace-btn" id="peaceBtn" onclick="choosePeace()">
-      <img src="logo.png" alt="NAVA PEACE" class="btn-logo" id="btnLogo" />
+      <img src="dove-btn.png" alt="NAVA PEACE" class="btn-logo" id="btnLogo" />
       <span class="btn-hint" id="btnHint" data-i18n-html="press_hint">PRESS<br>TO CHOOSE<br>PEACE</span>
     </button>
 
@@ -533,18 +504,6 @@
       <span class="done-timer" id="countdown">00:00:00</span>
     </div>
 
-    <!-- COUNTERS -->
-    <div class="counters">
-      <div class="cnt-item" onclick="openInfoPop('today')">
-        <span class="cnt-num" id="cnt-today">—</span>
-        <span class="cnt-lbl" data-i18n="cnt_today_lbl">TODAY</span>
-      </div>
-      <div class="cnt-sep"></div>
-      <div class="cnt-item" onclick="openInfoPop('total')">
-        <span class="cnt-num" id="cnt-total">—</span>
-        <span class="cnt-lbl" data-i18n="cnt_total_lbl">TOTAL ACTIONS</span>
-      </div>
-    </div>
 
     <!-- SHARE PROGRESS BUTTON -->
     <button id="share-progress-btn" onclick="openShareOverlay()" style="
@@ -632,6 +591,14 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
           SHARE ON FACEBOOK
         </button>
+        <button onclick="shareProgressWA()" style="width:100%;padding:14px 18px;background:#25D366;border:none;border-radius:14px;color:#fff;font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          SHARE ON WHATSAPP
+        </button>
+        <button onclick="shareProgressTG()" style="width:100%;padding:14px 18px;background:#229ED9;border:none;border-radius:14px;color:#fff;font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+          SHARE ON TELEGRAM
+        </button>
         <button onclick="downloadProgress()" style="width:100%;padding:12px 18px;background:transparent;border:1.5px solid rgba(255,255,255,0.18);border-radius:14px;color:rgba(255,255,255,0.6);font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:3px;cursor:pointer;">
           &darr; DOWNLOAD IMAGE
         </button>
@@ -684,7 +651,7 @@
     const country      = localStorage.getItem('nava_peace_country') || null;
 
     // Si pas encore enregistré → inscription d'abord
-    if (!localStorage.getItem('nava_peace_voted')) {
+    if (!localStorage.getItem('nava_peace_uid')) {
       window.location.replace('index.html');
     }
 
@@ -769,20 +736,20 @@
 
       // Contenu du bouton : logo + deux phases superposées
       btn.innerHTML =
-        '<img src="logo.png" alt="NAVA" class="btn-logo" style="opacity:0.20;position:absolute;"/>' +
+        '<img src="dove-btn.png" alt="NAVA" class="btn-logo" style="opacity:0.30;position:absolute;inset:0;width:100%;height:100%;object-fit:contain;"/>' +
         // Phase 1 — THANK YOU PEACE LOVER
         '<div class="btn-inner-msg btn-thank-wrap" id="btn-thank-wrap"' +
           (fresh ? '' : ' style="display:none;"') + '>' +
-          '<span class="btn-inner-line1">THANK YOU</span>' +
-          '<span class="btn-inner-line2">PEACE LOVER</span>' +
+          '<span class="btn-inner-line1">' + (typeof t==='function'?t('btn_thank_you'):'THANK YOU') + '</span>' +
+          '<span class="btn-inner-line2">' + (typeof t==='function'?t('btn_peace_lover'):'PEACE LOVER') + '</span>' +
         '</div>' +
         // Phase 2 — NEXT ACTION IN + countdown
         '<div class="btn-inner-msg btn-next-wrap" id="btn-next-wrap"' +
           ' style="' + (fresh ? 'display:none;' : '') + 'cursor:pointer;pointer-events:auto;"' +
           ' onclick="event.stopPropagation();window.location.href=\'map.html\'">' +
-          '<span class="btn-next-label">NEXT ACTION IN</span>' +
+          '<span class="btn-next-label">' + (typeof t==='function'?t('next_action_in'):'NEXT ACTION IN') + '</span>' +
           '<span class="btn-next-timer" id="countdown">00:00:00</span>' +
-          '<span style="font-size:10px;letter-spacing:2px;color:rgba(26,95,130,0.6);margin-top:4px;">TAP TO SEE<br>THE MAP</span>' +
+          '<span style="font-size:15px;letter-spacing:2px;font-family:\'Nasalization\',Arial,sans-serif;color:rgba(255,255,255,0.9);margin-top:4px;text-shadow:0 1px 4px rgba(0,40,100,0.8);">' + (typeof t==='function'?t('tap_to_see_map'):'TAP TO SEE\nTHE MAP').replace(/\n/g,'<br>') + '</span>' +
         '</div>';
 
       if (fresh) {
@@ -836,7 +803,7 @@
 
       let alreadyVotedToday = false;
       // Détecter premier clic (inscription fraîche : welcome dove = 1, pas encore de vote réel)
-      const isFirstEver = !localStorage.getItem('nava_peace_days') || localStorage.getItem('nava_peace_days') === '0';
+      const isFirstEver = !localStorage.getItem('nava_peace_vote_count') || localStorage.getItem('nava_peace_vote_count') === '0';
 
       if (sb) {
         // Enregistrer l'action du jour dans peace_votes (avec profil complet)
@@ -868,7 +835,7 @@
         // Récompenser le parrain si applicable (seulement si vote réel)
         if (referredBy && !alreadyVotedToday) {
           try {
-            await sb.from('referral_points').insert({ referral_code: referredBy });
+            await sb.from('referral_points').insert({ referral_code: referredBy, user_uid: uid });
           } catch(e) { console.warn('Referral point error', e); }
         }
       }
@@ -888,40 +855,18 @@
 
       // Incrémenter le compteur local (optimiste — sera recalculé par sync DB)
       if (!alreadyVotedToday) {
-        const prevVotes = parseInt(localStorage.getItem('nava_peace_days') || '0', 10);
-        localStorage.setItem('nava_peace_days', prevVotes + 1);
+        const prevVotes = parseInt(localStorage.getItem('nava_peace_vote_count') || '0', 10);
+        localStorage.setItem('nava_peace_vote_count', prevVotes + 1);
+        const prevTotal = parseInt(localStorage.getItem('nava_peace_days') || '0', 10);
+        localStorage.setItem('nava_peace_days', prevTotal + 1);
       }
 
       // Si déjà voté aujourd'hui (ex: autre appareil) → countdown direct sans thank you
       setDone(!alreadyVotedToday);
-      await loadCounters();
     }
 
-    // ── Charger les compteurs depuis peace_votes ────────────────────
-    // Utilise l'API count Supabase (HEAD request, pas de transfert de données)
-    // → exact peu importe le nombre de lignes, pas de limite à 1 000 rows.
-    async function loadCounters() {
-      if (!sb) return;
-      try {
-        // Filtre "aujourd'hui" basé sur minuit local (cohérent avec TODAY local)
-        const _tsStart = new Date(); _tsStart.setHours(0,0,0,0);
-        const _tsEnd   = new Date(_tsStart); _tsEnd.setDate(_tsEnd.getDate() + 1);
-
-        const [{ count: total }, { count: todayCount }] = await Promise.all([
-          // Total all-time
-          sb.from('active_votes')
-            .select('*', { count: 'exact', head: true }),
-          // Actions du jour (minuit local → minuit local lendemain)
-          sb.from('active_votes')
-            .select('*', { count: 'exact', head: true })
-            .gte('created_at', _tsStart.toISOString())
-            .lt('created_at', _tsEnd.toISOString()),
-        ]);
-
-        document.getElementById('cnt-total').textContent = (total ?? 0).toLocaleString('fr-FR');
-        document.getElementById('cnt-today').textContent = '+' + (todayCount ?? 0).toLocaleString('fr-FR');
-      } catch(e) { console.warn('Counter error', e); }
-    }
+    // Compteurs retirés de l'interface — fonction conservée pour compatibilité
+    function loadCounters() { /* compteurs supprimés */ }
 
     // ── Countdown to next midnight ──────────────────────────────────
     function startCountdown() {
@@ -932,20 +877,11 @@
         next.setHours(0, 0, 0, 0);
         const diff = next - now;
 
-        // ── Minuit atteint → nouveau jour → réactiver le bouton ──
+        // ── Minuit atteint → nouveau jour → rechargement propre ──
         if (diff <= 0) {
           clearInterval(_countdownInterval);
           localStorage.removeItem(PEACE_KEY);
-          const btn = document.getElementById('peaceBtn');
-          if (btn) {
-            btn.innerHTML =
-              '<img src="logo.png" alt="NAVA PEACE" class="btn-logo" id="btnLogo" />' +
-              '<span class="btn-hint" data-i18n-html="press_hint">PRESS<br>TO CHOOSE<br>PEACE</span>';
-            btn.disabled = false;
-            // Force reflow → redémarre les animations ::before / ::after (pulse rings)
-            void btn.offsetWidth;
-            if (typeof applyLang === 'function') applyLang(detectLang());
-          }
+          window.location.reload();
           return;
         }
 
@@ -960,6 +896,18 @@
       _countdownInterval = setInterval(tick, 1000);
     }
     let _countdownInterval = null;
+
+    // ── Détection nouveau jour quand l'app est rouverte (mobile sleep) ──
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'visible') {
+        const nowDay = new Date().toISOString().split('T')[0];
+        if (nowDay !== TODAY) {
+          // Nouveau jour UTC → rechargement propre
+          localStorage.removeItem(PEACE_KEY);
+          window.location.reload();
+        }
+      }
+    });
 
     // ── NOTIFICATION BANNER ────────────────────────────────────────────
     async function checkNotifications() {
@@ -1100,11 +1048,13 @@
           const {data:votes} = await sb2.from('peace_votes').select('created_at')
             .eq('user_uid',uid).order('created_at',{ascending:false});
           if (votes && votes.length) {
-            const _welcomeDove = parseInt(localStorage.getItem('nava_welcome_dove') || '0', 10);
-            d.totalDoves = votes.length + _welcomeDove;
             const dayNums=[...new Set(votes.map(v=>Math.floor(new Date(v.created_at).getTime()/86400000)))].sort((a,b)=>b-a);
             const today=Math.floor(Date.now()/86400000);
             if(dayNums[0]>=today-1){d.streak=1;for(let i=1;i<dayNums.length;i++){if(dayNums[i-1]-dayNums[i]===1)d.streak++;else break;}}
+            // Inclure les discovery doves dans le total
+            const {count:_dc} = await sb2.from('nava_discoveries').select('id',{count:'exact',head:true}).eq('user_uid',uid);
+            localStorage.setItem('nava_peace_vote_count', votes.length);
+            d.totalDoves = votes.length + (_dc || 0);
             localStorage.setItem('nava_peace_days',d.totalDoves);
             localStorage.setItem('nava_peace_streak',d.streak);
           }
@@ -1279,15 +1229,29 @@
       showBanner('IMAGE SAVED — OPEN INSTAGRAM TO SHARE 📸');
     }
     function shareProgressX(){
-      const days=localStorage.getItem('nava_peace_days')||'0';
       const streak=localStorage.getItem('nava_peace_streak')||'0';
       const link=getShareLink();
-      const t=encodeURIComponent(`🕊 ${days} peace actions, ${streak}-day streak on NAVA PEACE!\nJoin → ${link}\n#NavaPeace #ChoosePeace`);
-      window.open('https://twitter.com/intent/tweet?text='+t,'_blank');
+      const txt=encodeURIComponent('🕊 I just chose PEACE on NAVA PEACE! '+streak+'-day streak!\nJoin me → '+link+'\n#NavaPeace #ChoosePeace #Peace');
+      const url='https://twitter.com/intent/tweet?text='+txt;
+      if(typeof NAVA_TG!=='undefined'&&NAVA_TG.isTelegram){Telegram.WebApp.openLink(url);}else{window.open(url,'_blank');}
     }
     function shareProgressFB(){
       const link=getShareLink();
-      window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(link),'_blank','width=600,height=400');
+      const url='https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(link);
+      if(typeof NAVA_TG!=='undefined'&&NAVA_TG.isTelegram){Telegram.WebApp.openLink(url);}else{window.open(url,'_blank','width=600,height=400');}
+    }
+    function shareProgressWA(){
+      const streak=localStorage.getItem('nava_peace_streak')||'0';
+      const link=getShareLink();
+      const txt=encodeURIComponent('🕊 Today I choose PEACE! '+streak+'-day streak on NAVA PEACE.\nJoin me → '+link);
+      const url='https://wa.me/?text='+txt;
+      if(typeof NAVA_TG!=='undefined'&&NAVA_TG.isTelegram){Telegram.WebApp.openLink(url);}else{window.open(url,'_blank');}
+    }
+    function shareProgressTG(){
+      const link=getShareLink();
+      const txt=encodeURIComponent('🕊 Today I choose PEACE! Join me on NAVA PEACE → '+link);
+      const url='https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+txt;
+      if(typeof NAVA_TG!=='undefined'&&NAVA_TG.isTelegram){Telegram.WebApp.openLink(url);}else{window.open(url,'_blank');}
     }
     function downloadProgress(){
       const a=document.createElement('a');a.href=document.getElementById('share-canvas').toDataURL('image/png');
@@ -1295,40 +1259,33 @@
     }
 
     // ── OFFLINE-FIRST SYNC ────────────────────────────────────────────────
-    // Migre les votes localStorage → Supabase au démarrage
-    // Fonctionne pour les données existantes ET les futurs votes offline
+    // Le log est reconstruit depuis la DB à chaque démarrage (source de vérité).
+    // Seul le vote du jour peut être en attente de sync si réseau indisponible.
     // ─────────────────────────────────────────────────────────────────────
 
     const VOTES_LOG_KEY = 'nava_peace_votes_log'; // [{date:'YYYY-MM-DD', synced:bool}]
 
-    /* ── 1. Initialise le log (migration des données existantes) ── */
-    function initVotesLog() {
+    /* ── 1. Reconstruit le log depuis la DB (élimine les faux votes) ── */
+    async function rebuildVotesLogFromDB() {
+      if (!sb) return;
       const uid = localStorage.getItem('nava_peace_uid');
       if (!uid) return;
-
-      let log = [];
-      try { log = JSON.parse(localStorage.getItem(VOTES_LOG_KEY) || '[]'); } catch(e) {}
-
-      const localDays = parseInt(localStorage.getItem('nava_peace_days') || '0', 10);
-      if (localDays <= 0 || log.length >= localDays) return; // déjà migré
-
-      // Générer les dates manquantes en remontant depuis aujourd'hui
-      const existingDates = new Set(log.map(e => e.date));
-      const lastVoteDate  = localStorage.getItem(PEACE_KEY) || TODAY;
-      const msPerDay      = 86400000;
-      const lastMs        = new Date(lastVoteDate).getTime();
-
-      let added = 0;
-      for (let i = 0; added < (localDays - log.length) && i < 365; i++) {
-        const d = new Date(lastMs - i * msPerDay).toISOString().split('T')[0];
-        if (!existingDates.has(d)) {
-          log.push({ date: d, synced: false });
-          existingDates.add(d);
-          added++;
+      try {
+        const { data: votes } = await sb.from('peace_votes')
+          .select('created_at')
+          .eq('user_uid', uid)
+          .order('created_at', { ascending: true });
+        if (!votes) return;
+        // Construire un log propre basé uniquement sur les vrais votes DB
+        const dbDates = new Set(votes.map(v => v.created_at.split('T')[0]));
+        const log = Array.from(dbDates).map(date => ({ date, synced: true }));
+        // Conserver le vote du jour s'il a été fait localement mais pas encore en DB
+        if (localStorage.getItem(PEACE_KEY) === TODAY && !dbDates.has(TODAY)) {
+          log.push({ date: TODAY, synced: false });
         }
-      }
-      log.sort((a, b) => a.date.localeCompare(b.date));
-      localStorage.setItem(VOTES_LOG_KEY, JSON.stringify(log));
+        log.sort((a, b) => a.date.localeCompare(b.date));
+        localStorage.setItem(VOTES_LOG_KEY, JSON.stringify(log));
+      } catch(e) { console.warn('rebuildVotesLog error', e); }
     }
 
     /* ── 2. Enregistre le vote du jour dans le log ── */
@@ -1349,7 +1306,7 @@
       localStorage.setItem(VOTES_LOG_KEY, JSON.stringify(log));
     }
 
-    /* ── 4. Sync les votes non-synced vers Supabase ── */
+    /* ── 4. Sync les votes non-synced vers Supabase (vote offline uniquement) ── */
     async function syncVotesToSupabase() {
       if (!sb) return;
       const uid     = localStorage.getItem('nava_peace_uid');
@@ -1359,41 +1316,41 @@
 
       let log = [];
       try { log = JSON.parse(localStorage.getItem(VOTES_LOG_KEY) || '[]'); } catch(e) {}
-      const unsynced = log.filter(e => !e.synced);
+      // Uniquement les votes non-synced ET dont la date est <= aujourd'hui
+      const unsynced = log.filter(e => !e.synced && e.date <= TODAY);
       if (unsynced.length === 0) return;
 
-      let syncedCount = 0;
       for (const entry of unsynced) {
         try {
-          // Insérer avec la date exacte du vote (midi UTC pour éviter ambiguïté timezone)
           const created_at = entry.date + 'T12:00:00.000Z';
           const { error } = await sb.from('peace_votes').insert({
-            user_uid:     uid,
-            country:      ctry,
+            user_uid:      uid,
+            country:       ctry,
             referral_code: refCode,
-            created_at:   created_at,
+            created_at:    created_at,
             source: (typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram) ? 'telegram' : 'web',
             telegram_id: (typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram && NAVA_TG.user) ? String(NAVA_TG.user.id) : null,
           });
-          // Succès ou doublon (déjà en DB) → marquer synced
           if (!error || error.code === '23505' || error.message?.includes('unique')) {
             markVoteSynced(entry.date);
-            syncedCount++;
           }
-        } catch(e) { /* réseau indisponible — on réessaiera au prochain chargement */ }
-      }
-
-      if (syncedCount > 0) {
-        console.log(`[NAVA] ${syncedCount} vote(s) synced to Supabase`);
-        loadCounters(); // rafraîchir les compteurs après sync
+        } catch(e) { /* réseau indisponible — réessai au prochain chargement */ }
       }
     }
 
-    /* ── 5. Point d'entrée : init + sync au démarrage ── */
+    /* ── 5. Point d'entrée : rebuild depuis DB puis sync offline ── */
     async function initAndSync() {
-      initVotesLog();
-      await syncVotesToSupabase();
+      await rebuildVotesLogFromDB(); // ← reconstruit proprement depuis DB
+      await syncVotesToSupabase();   // ← sync uniquement le vote offline si besoin
     }
+
+    // Streak milestones → streak doves awarded
+    const STREAK_MILESTONES = [
+      { days: 7,  doves: 2  },
+      { days: 14, doves: 5  },
+      { days: 21, doves: 8  },
+      { days: 28, doves: 10 }
+    ];
 
     // ── Sync streak + doves + refCode depuis Supabase au chargement ──
     async function syncStreakFromDB() {
@@ -1401,17 +1358,21 @@
       const uid = localStorage.getItem('nava_peace_uid');
       if (!uid) return;
       try {
-        const [{data:votes}, {count:discoCount}] = await Promise.all([
+        const [
+          {data:votes},
+          {count:discoCount},
+          {data:streakRewards},
+          refCode
+        ] = await Promise.all([
           sb.from('peace_votes').select('created_at, referral_code')
             .eq('user_uid', uid).order('created_at',{ascending:false}),
           sb.from('nava_discoveries').select('id', {count:'exact', head:true})
-            .eq('user_uid', uid)
+            .eq('user_uid', uid),
+          sb.from('nava_streak_rewards').select('streak_days, doves_awarded')
+            .eq('user_uid', uid),
+          Promise.resolve(localStorage.getItem('nava_peace_ref_code'))
         ]);
         if (!votes || !votes.length) return;
-
-        // Total doves = votes réels + doves de découverte
-        const totalDoves = votes.length + (discoCount || 0);
-        localStorage.setItem('nava_peace_days', totalDoves);
 
         // Streak = jours consécutifs
         const dayNums = [...new Set(votes.map(v =>
@@ -1427,6 +1388,38 @@
           }
         }
         localStorage.setItem('nava_peace_streak', streak);
+
+        // Streak doves déjà attribués
+        const alreadyClaimed = new Set((streakRewards||[]).map(r => r.streak_days));
+        let streakDovesTotal = (streakRewards||[]).reduce((s,r) => s + (r.doves_awarded||0), 0);
+
+        // Vérifier si de nouveaux jalons sont atteints → attribuer automatiquement
+        for (const m of STREAK_MILESTONES) {
+          if (streak >= m.days && !alreadyClaimed.has(m.days)) {
+            try {
+              const { error } = await sb.from('nava_streak_rewards').insert({
+                user_uid: uid, streak_days: m.days, doves_awarded: m.doves
+              });
+              if (!error) {
+                streakDovesTotal += m.doves;
+                alreadyClaimed.add(m.days);
+                // Toast discret
+                const t = document.createElement('div');
+                t.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(255,165,0,0.92);color:#fff;padding:10px 22px;border-radius:20px;font-size:12px;letter-spacing:2px;z-index:9999;pointer-events:none;';
+                t.textContent = '🔥 STREAK DOVE +' + m.doves + ' (' + m.days + ' DAYS)';
+                document.body.appendChild(t);
+                setTimeout(() => t.remove(), 3500);
+              }
+            } catch(e) {}
+          }
+        }
+        localStorage.setItem('nava_streak_doves', streakDovesTotal);
+
+        // Stocker le nombre de votes réels séparément (utilisé par initVotesLog)
+        localStorage.setItem('nava_peace_vote_count', votes.length);
+        // Total global = votes + découvertes + streak doves
+        const totalDoves = votes.length + (discoCount || 0) + streakDovesTotal;
+        localStorage.setItem('nava_peace_days', totalDoves);
 
         // Referral code — récupérer depuis la DB si absent du localStorage
         const dbRef = votes.find(v => v.referral_code);
@@ -1465,7 +1458,6 @@
     }
 
     checkDone();
-    loadCounters();
     syncStreakFromDB(); // ← recalcul streak/doves/refCode depuis DB
     checkNotifications();
     initPush();
@@ -1476,18 +1468,6 @@
     // Traduire le bouton share (contient SVG, donc pas data-i18n)
     var _spl = document.getElementById('share-peace-label');
     if (_spl && typeof t === 'function') _spl.textContent = t('share_peace');
-
-    // ── Compteurs live : polling 30s ──────────────────────────────────────
-    setInterval(loadCounters, 30_000);
-
-    // ── Compteurs live : Supabase Realtime (mise à jour instantanée) ──────
-    if (sb) {
-      sb.channel('nava_votes_rt')
-        .on('postgres_changes',
-            { event: 'INSERT', schema: 'public', table: 'peace_votes' },
-            () => loadCounters())
-        .subscribe();
-    }
 
     // ── WEB PUSH ────────────────────────────────────────────────────────────
     const VAPID_PUBLIC_KEY = 'BJ05qnJnaYlLAhvlO4s1CDbh42eD7PYuNDgk33AgzBQ6mhRMDNcPqPj138WWZqA_hAon8CAN9RpYA5yikWEi8p4';
