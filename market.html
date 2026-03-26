@@ -2,26 +2,18 @@
 <html lang="en" data-module="module_market">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.amcharts.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.myshopify.com; frame-ancestors 'none';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; frame-ancestors 'none';" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NAVA PEACE – Market</title>
+  <title>NAVA PEACE – Cards</title>
   <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#3AACDF" />
+  <meta name="theme-color" content="#050F1A" />
   <script src="module_gate.js?v=6"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="supabase_config.js"></script>
-  <script src="discovery.js"></script>
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://nava-peace.app/market.html" />
-  <meta property="og:title" content="NAVA PEACE – Peace Store" />
-  <meta property="og:description" content="The world talks about peace. Let's practice it. Join NAVA PEACE today and vote for peace every day." />
-  <meta property="og:image" content="https://nava-peace.app/og-image.png" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:image" content="https://nava-peace.app/og-image.png" />
+  <script src="block_check.js"></script>
+  <script src="lang.js"></script>
   <style>
     @font-face {
       font-family: 'Nasalization';
@@ -30,22 +22,17 @@
       font-display: swap;
       src: url('nasalization.woff') format('woff');
     }
-  </style>
-  <script src="lang.js"></script>
-  <style>
-    *, *::before, *::after {
-      box-sizing: border-box; margin: 0; padding: 0;
-      font-family: 'Nasalization', Arial, sans-serif;
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Nasalization', Arial, sans-serif; }
 
     body {
-      background: radial-gradient(ellipse at 50% 30%, #6DD5F5 0%, #3AACDF 45%, #1E8EC4 100%);
-      min-height: 100vh;
+      background: radial-gradient(ellipse at 50% 0%, #0F3A5A 0%, #050F1A 60%);
+      min-height: 100dvh;
+      color: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px 14px 110px;
-      color: #fff;
+      padding: 0 0 72px;
+      overflow-x: hidden;
     }
 
     /* ── HEADER ── */
@@ -53,285 +40,315 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-bottom: 16px;
+      padding: 22px 20px 14px;
+      gap: 4px;
     }
-    .header img {
-      width: 60px; height: 60px;
-      object-fit: contain;
-      filter: drop-shadow(0 3px 10px rgba(255,255,255,0.4));
-      margin-bottom: 6px;
-    }
-    .header h1 {
-      font-size: 28px;
-      letter-spacing: 7px;
-      text-shadow: 0 1px 16px rgba(255,255,255,0.4);
-    }
-    .header .tagline {
-      font-size: 11px;
-      letter-spacing: 4px;
-      color: rgba(255,255,255,0.65);
-      margin-top: 4px;
-      text-transform: uppercase;
-    }
+    .header img { width: 52px; height: 52px; object-fit: contain; filter: drop-shadow(0 3px 14px rgba(255,255,255,0.3)); }
+    .header h1 { font-size: 22px; letter-spacing: 6px; color: #fff; }
+    .header .tagline { font-size: 10px; letter-spacing: 4px; color: rgba(100,210,255,0.8); text-transform: uppercase; }
 
-    /* ── SEARCH BAR ── */
-    .search-wrap {
-      width: 100%;
-      max-width: 600px;
-      margin-bottom: 18px;
-      position: relative;
-    }
-    .search-wrap input {
-      width: 100%;
-      padding: 12px 18px 12px 44px;
-      border-radius: 16px;
-      border: 1.5px solid rgba(255,255,255,0.35);
-      background: rgba(255,255,255,0.14);
-      color: #fff;
-      font-family: 'Nasalization', Arial, sans-serif;
-      font-size: 12px;
-      letter-spacing: 1.5px;
-      outline: none;
-      text-transform: uppercase;
-    }
-    .search-wrap input::placeholder { color: rgba(255,255,255,0.4); }
-    .search-wrap input:focus { border-color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.2); }
-    .search-wrap .search-icon {
-      position: absolute;
-      left: 14px; top: 50%;
-      transform: translateY(-50%);
-      font-size: 18px;
-      opacity: 0.5;
-      pointer-events: none;
-    }
-
-    /* ── GRID ── */
-    .grid {
-      width: 100%;
-      max-width: 600px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+    /* ── USER CARD BANNER ── */
+    #my-card-banner {
+      width: calc(100% - 32px);
+      max-width: 480px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(100,210,255,0.2);
+      border-radius: 14px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
       gap: 12px;
+      margin-bottom: 14px;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.6);
     }
+    #my-card-banner .banner-label { flex: 1; }
+    #my-card-banner .banner-name { color: #64D2FF; font-size: 11px; }
+    #my-card-banner .banner-mult { color: rgba(255,255,255,0.4); font-size: 9px; }
 
-    /* ── PRODUCT CARD ── */
-    .product-card {
-      background: rgba(247,247,241,0.13);
-      border: 1.5px solid rgba(255,255,255,0.35);
-      border-radius: 20px;
-      overflow: hidden;
+    /* ── CARDS LIST ── */
+    .cards-list {
+      width: 100%;
+      max-width: 480px;
+      padding: 0 16px;
       display: flex;
       flex-direction: column;
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      box-shadow: 0 4px 24px rgba(20,80,130,0.18);
-      transition: transform 0.18s, box-shadow 0.18s;
+      gap: 14px;
     }
-    .product-card:active { transform: scale(0.97); }
 
-    .product-img {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      object-fit: cover;
-      display: block;
-      background: rgba(255,255,255,0.08);
+    /* ── PEACE CARD ── */
+    .peace-card {
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1.5px solid rgba(255,255,255,0.1);
+      background: linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%);
+      backdrop-filter: blur(12px);
+      transition: transform 0.15s;
     }
-    .product-img-placeholder {
-      width: 100%;
-      aspect-ratio: 1 / 1;
+    .peace-card.owned {
+      border-color: rgba(100,255,160,0.35);
+      background: linear-gradient(135deg, rgba(100,255,160,0.08) 0%, rgba(20,80,50,0.08) 100%);
+    }
+    .peace-card.free-card {
+      border-color: rgba(100,210,255,0.25);
+    }
+
+    .card-inner {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+    }
+
+    /* badge image */
+    .card-img-wrap {
+      flex-shrink: 0;
+      width: 72px;
+      height: 72px;
+      border-radius: 14px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.05);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 40px;
-      background: rgba(255,255,255,0.08);
+    }
+    .card-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .card-img-fallback {
+      font-size: 28px;
+      text-align: center;
     }
 
-    .product-body {
-      padding: 12px 12px 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      flex: 1;
-    }
+    /* card info */
+    .card-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 
-    .product-title {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
+    .card-name {
+      font-size: 12px;
+      letter-spacing: 2px;
       color: #fff;
-      text-transform: uppercase;
-      line-height: 1.4;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
+      white-space: nowrap;
       overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .product-price {
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .card-mult {
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: #64D2FF;
+      background: rgba(100,210,255,0.12);
+      border: 1px solid rgba(100,210,255,0.25);
+      border-radius: 6px;
+      padding: 2px 7px;
+    }
+    .card-price-wrap { display: flex; flex-direction: column; gap: 1px; }
+    .card-price-single {
       font-size: 13px;
       letter-spacing: 1px;
-      color: rgba(255,255,255,0.7);
-    }
-    .product-price .from {
-      font-size: 9px;
-      letter-spacing: 2px;
-      opacity: 0.6;
-      display: block;
-      margin-bottom: 1px;
-    }
-    .product-price .amount {
-      font-size: 16px;
       color: #fff;
-      text-shadow: 0 0 12px rgba(255,255,255,0.3);
     }
-
-    .product-buy {
-      display: block;
-      width: 100%;
-      padding: 9px 4px;
-      border: none;
-      border-radius: 12px;
-      background: linear-gradient(135deg, rgba(255,255,255,0.88) 0%, #E7E1D4 100%);
-      color: #1A6E96;
-      font-family: 'Nasalization', Arial, sans-serif;
+    .card-price-bundle {
       font-size: 9px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      text-align: center;
-      text-decoration: none;
-      cursor: pointer;
-      box-shadow: 0 2px 12px rgba(255,255,255,0.18);
-      transition: opacity 0.2s;
-      margin-top: auto;
+      letter-spacing: 1px;
+      color: rgba(255,210,80,0.8);
     }
-    .product-buy:hover { opacity: 0.88; }
+    .card-price-free {
+      font-size: 13px;
+      letter-spacing: 2px;
+      color: #64FFAA;
+    }
 
-    /* ── SKELETON ── */
-    .skeleton {
-      background: rgba(247,247,241,0.13);
-      border: 1.5px solid rgba(255,255,255,0.2);
-      border-radius: 20px;
+    /* stock bar */
+    .card-stock-wrap {
+      padding: 0 16px 12px;
+    }
+    .stock-bar-bg {
+      height: 3px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 3px;
       overflow: hidden;
+      margin-bottom: 4px;
     }
-    .skeleton-img {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      background: rgba(255,255,255,0.1);
-      animation: shimmer 1.4s ease-in-out infinite;
+    .stock-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #64D2FF, #3AACDF);
+      transition: width 0.6s ease;
     }
-    .skeleton-body { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-    .skeleton-line {
-      height: 10px;
-      border-radius: 6px;
-      background: rgba(255,255,255,0.1);
-      animation: shimmer 1.4s ease-in-out infinite;
+    .stock-label {
+      font-size: 8px;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.35);
     }
-    .skeleton-line.short { width: 55%; }
-    @keyframes shimmer {
-      0%, 100% { opacity: 0.5; }
-      50%       { opacity: 1; }
+    .stock-label span { color: rgba(255,255,255,0.55); }
+
+    /* buy / owned button */
+    .card-btn-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      flex-shrink: 0;
     }
 
-    /* ── PAGINATION ── */
-    .pagination {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      margin-top: 22px;
-      justify-content: center;
-    }
-    .page-btn {
-      padding: 10px 22px;
-      border-radius: 14px;
-      border: 1.5px solid rgba(255,255,255,0.35);
-      background: rgba(255,255,255,0.14);
+    .btn-buy {
+      background: linear-gradient(135deg, #3AACDF 0%, #1E8EC4 100%);
+      border: none;
+      border-radius: 10px;
       color: #fff;
       font-family: 'Nasalization', Arial, sans-serif;
-      font-size: 11px;
+      font-size: 9px;
       letter-spacing: 2px;
-      text-transform: uppercase;
+      padding: 8px 14px;
       cursor: pointer;
-      transition: background 0.2s;
+      white-space: nowrap;
+      transition: opacity 0.2s, transform 0.1s;
     }
-    .page-btn:hover:not(:disabled) { background: rgba(255,255,255,0.25); }
-    .page-btn:disabled { opacity: 0.35; cursor: default; }
-    .page-info {
-      font-size: 11px;
-      letter-spacing: 2px;
-      color: rgba(255,255,255,0.55);
+    .btn-buy:active { transform: scale(0.95); opacity: 0.8; }
+    .btn-buy.bundle {
+      background: linear-gradient(135deg, #D4A017 0%, #B8860B 100%);
+      font-size: 8px;
+      padding: 6px 10px;
     }
 
-    /* ── EMPTY / ERROR ── */
-    .status-msg {
-      width: 100%;
-      max-width: 600px;
-      text-align: center;
-      padding: 48px 20px;
-      font-size: 12px;
+    .btn-owned {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(100,255,160,0.12);
+      border: 1px solid rgba(100,255,160,0.3);
+      border-radius: 10px;
+      color: #64FFAA;
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 9px;
       letter-spacing: 2px;
-      color: rgba(255,255,255,0.5);
-      text-transform: uppercase;
-      line-height: 2;
+      padding: 8px 12px;
     }
+
+    .btn-free {
+      background: linear-gradient(135deg, #64FFAA 0%, #32CC80 100%);
+      border: none;
+      border-radius: 10px;
+      color: #050F1A;
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 9px;
+      letter-spacing: 2px;
+      padding: 8px 14px;
+    }
+
+    /* tier accent line */
+    .card-accent {
+      height: 2px;
+      width: 100%;
+    }
+
+    /* skeleton */
+    .card-skeleton {
+      height: 106px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.05);
+      animation: shimmer 1.4s ease-in-out infinite;
+    }
+    @keyframes shimmer {
+      0%,100% { opacity: 0.4; }
+      50%      { opacity: 0.8; }
+    }
+
+    /* ── INTRO BOX ── */
+    .intro-box {
+      width: calc(100% - 32px);
+      max-width: 480px;
+      background: rgba(100,210,255,0.07);
+      border: 1px solid rgba(100,210,255,0.18);
+      border-radius: 14px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+    .intro-box p {
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.8;
+    }
+    .intro-box strong { color: #64D2FF; }
 
     /* ── BOTTOM NAV ── */
     .bottom-nav {
       position: fixed;
       bottom: 0; left: 0; right: 0;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      background: rgba(20, 90, 140, 0.82);
+      height: 62px;
+      background: rgba(5,15,26,0.95);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border-top: 1px solid rgba(255,255,255,0.2);
-      padding: 10px 0 24px;
-      z-index: 200;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      z-index: 100;
     }
     .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      color: rgba(255,255,255,0.4);
       text-decoration: none;
-      color: rgba(255,255,255,0.45);
-      font-size: 9px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
+      font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase;
       transition: color 0.2s;
     }
-    .nav-item.active { color: #fff; }
+    .nav-item.active { color: #64D2FF; }
     .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
+
+    /* lang button */
+    #lang-btn {
+      position: fixed; top: 14px; right: 14px; z-index: 200;
+      background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 20px; padding: 5px 11px;
+      color: #fff; font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 9px; letter-spacing: 2px; cursor: pointer;
+    }
   </style>
 </head>
 <body>
 
+  <button id="lang-btn" onclick="cycleLang()">🇬🇧 EN</button>
+
   <!-- HEADER -->
   <div class="header">
-    <a href="https://www.nava-peace.world" target="_blank" style="text-decoration:none;color:inherit;display:contents;" onclick="if(typeof NAVA_TG!=='undefined'&&NAVA_TG.isTelegram){event.preventDefault();Telegram.WebApp.openLink('https://www.nava-peace.world');}">
     <img src="logo.png" alt="NAVA PEACE" />
     <h1>NAVA PEACE</h1>
-    </a>
-    <p class="tagline" data-i18n="market_tagline">PEACE STORE</p>
+    <p class="tagline" data-i18n="market_tagline">PEACE CARDS</p>
   </div>
 
-  <!-- SEARCH -->
-  <div class="search-wrap">
-    <span class="search-icon">🔍</span>
-    <input type="text" id="searchInput" data-i18n-ph="market_search" placeholder="SEARCH PRODUCTS…" oninput="onSearch()" />
+  <!-- INTRO -->
+  <div class="intro-box">
+    <p data-i18n="cards_intro">Each card <strong>multiplies your dove impact</strong>.<br>Limited supply — first come, first served.</p>
   </div>
 
-  <!-- PRODUCT GRID -->
-  <div class="grid" id="grid"></div>
+  <!-- MY CARD BANNER -->
+  <div id="my-card-banner" style="display:none;">
+    <div style="font-size:22px;" id="banner-icon">🕊</div>
+    <div class="banner-label">
+      <div style="font-size:9px;letter-spacing:2px;color:rgba(255,255,255,0.4);margin-bottom:2px;" data-i18n="cards_my_card">MY CARD</div>
+      <div class="banner-name" id="banner-name">—</div>
+      <div class="banner-mult" id="banner-mult"></div>
+    </div>
+  </div>
 
-  <!-- STATUS (empty/error) -->
-  <div class="status-msg" id="statusMsg" style="display:none;"></div>
-
-  <!-- PAGINATION -->
-  <div class="pagination" id="pagination" style="display:none;">
-    <button class="page-btn" id="btnPrev" onclick="goPrev()" disabled data-i18n="market_prev">← PREV</button>
-    <span class="page-info" id="pageInfo"></span>
-    <button class="page-btn" id="btnNext" onclick="goNext()" data-i18n="market_next">NEXT →</button>
+  <!-- CARDS LIST -->
+  <div class="cards-list" id="cards-list">
+    <!-- skeletons -->
+    <div class="card-skeleton"></div>
+    <div class="card-skeleton"></div>
+    <div class="card-skeleton"></div>
+    <div class="card-skeleton"></div>
   </div>
 
   <!-- BOTTOM NAV -->
@@ -363,191 +380,191 @@
   </nav>
 
   <script>
-    // ── SHOPIFY STOREFRONT CONFIG ────────────────────────────────────────
-    const SHOP_DOMAIN   = 'nava-peace-3.myshopify.com';
-    const STOREFRONT_TOKEN = '6a47eda1ea32142478476e62dcca294c';
-    const GRAPHQL_URL   = `https://${SHOP_DOMAIN}/api/2026-01/graphql.json`;
-    const ITEMS_PER_PAGE = 20;
+    var sb = (typeof supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined')
+      ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-    // ── STATE ────────────────────────────────────────────────────────────
-    let cursors      = [null];   // cursors[0]=null (page1), cursors[1]=cursor after page1, …
-    let currentPage  = 1;
-    let hasNextPage  = false;
-    let allProducts  = [];
-    let searchTimer  = null;
+    var uid = localStorage.getItem('nava_peace_uid');
 
-    // ── GRAPHQL QUERY ────────────────────────────────────────────────────
-    function buildQuery(first, after) {
-      const afterArg = after ? `, after: "${after}"` : '';
-      return `{
-        products(first: ${first}${afterArg}) {
-          pageInfo { hasNextPage endCursor }
-          edges {
-            node {
-              id
-              title
-              handle
-              featuredImage { url altText }
-              priceRange {
-                minVariantPrice { amount currencyCode }
-              }
-            }
-          }
-        }
-      }`;
+    // Tier accent colors
+    var TIER_COLORS = {
+      'PEACE_LOVER':      '#64D2FF',
+      'PEACE_GARDENER':   '#64FFAA',
+      'PEACE_GUARDIAN':   '#3AACDF',
+      'PEACE_GUIDE':      '#7B9FFF',
+      'PEACE_ILLUMINATOR':'#BF7FFF',
+      'PEACE_LEGEND':     '#FFD040',
+      'ANGEL_OF_PEACE':   '#FF8FB0',
+      'PEACE_POWER':      '#FF6B6B',
+    };
+
+    var TIER_ICONS = {
+      'PEACE_LOVER':      '🕊',
+      'PEACE_GARDENER':   '🌱',
+      'PEACE_GUARDIAN':   '🛡️',
+      'PEACE_GUIDE':      '🌟',
+      'PEACE_ILLUMINATOR':'✨',
+      'PEACE_LEGEND':     '👑',
+      'ANGEL_OF_PEACE':   '😇',
+      'PEACE_POWER':      '⚡',
+    };
+
+    function fmtStock(sold, total) {
+      if (!total) return null;
+      var remaining = total - (sold || 0);
+      if (remaining < 0) remaining = 0;
+      return remaining.toLocaleString();
     }
 
-    // ── FETCH ────────────────────────────────────────────────────────────
-    async function loadPage(page) {
-      currentPage = page;
-      renderSkeletons();
-
-      const cursor = cursors[page - 1] ?? null;
-
-      try {
-        const res = await fetch(GRAPHQL_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Shopify-Storefront-Access-Token': STOREFRONT_TOKEN
-          },
-          body: JSON.stringify({ query: buildQuery(ITEMS_PER_PAGE, cursor) })
-        });
-
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const json = await res.json();
-
-        if (json.errors) throw new Error(json.errors[0].message);
-
-        const conn = json.data.products;
-        hasNextPage = conn.pageInfo.hasNextPage;
-
-        // Store next cursor
-        if (hasNextPage && !cursors[page]) {
-          cursors[page] = conn.pageInfo.endCursor;
-        }
-
-        allProducts = conn.edges.map(e => e.node);
-        renderProducts(filterProducts(allProducts));
-        renderPagination();
-
-      } catch (err) {
-        showStatus(t('market_error') || 'Failed to load products.');
-        console.warn('Market load error', err);
-      }
+    function pct(sold, total) {
+      if (!total) return 0;
+      return Math.min(100, ((sold || 0) / total) * 100);
     }
 
-    // ── SEARCH ───────────────────────────────────────────────────────────
-    function filterProducts(products) {
-      const q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
-      if (!q) return products;
-      return products.filter(p => (p.title || '').toLowerCase().includes(q));
-    }
-
-    function onSearch() {
-      clearTimeout(searchTimer);
-      searchTimer = setTimeout(() => renderProducts(filterProducts(allProducts)), 280);
-    }
-
-    // ── RENDER ───────────────────────────────────────────────────────────
-    function renderSkeletons() {
-      document.getElementById('statusMsg').style.display = 'none';
-      document.getElementById('grid').innerHTML = Array(6).fill(0).map(() => `
-        <div class="skeleton">
-          <div class="skeleton-img"></div>
-          <div class="skeleton-body">
-            <div class="skeleton-line"></div>
-            <div class="skeleton-line short"></div>
-            <div class="skeleton-line short"></div>
-          </div>
-        </div>`).join('');
-    }
-
-    function renderProducts(products) {
-      const grid = document.getElementById('grid');
-      if (!products || products.length === 0) {
-        grid.innerHTML = '';
-        showStatus(t('market_empty') || 'No products found.');
+    function renderCards(cards, ownedCodes) {
+      var list = document.getElementById('cards-list');
+      if (!cards || cards.length === 0) {
+        list.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.4);font-size:11px;padding:40px 0;">No cards found.</p>';
         return;
       }
-      document.getElementById('statusMsg').style.display = 'none';
-      grid.innerHTML = products.map(p => productCard(p)).join('');
+
+      // Update banner with highest owned card
+      var owned = cards.filter(c => ownedCodes.has(c.code)).sort((a,b) => b.sort_order - a.sort_order);
+      if (owned.length > 0) {
+        var top = owned[0];
+        var banner = document.getElementById('my-card-banner');
+        banner.style.display = 'flex';
+        document.getElementById('banner-icon').textContent = TIER_ICONS[top.code] || '🕊';
+        document.getElementById('banner-name').textContent = top.name;
+        document.getElementById('banner-mult').textContent = '×' + top.multiplier + ' MULTIPLIER';
+      }
+
+      list.innerHTML = cards.map(function(c) {
+        var isOwned  = ownedCodes.has(c.code);
+        var isFree   = !c.price_usd || c.price_usd === 0;
+        var color    = TIER_COLORS[c.code] || '#64D2FF';
+        var icon     = TIER_ICONS[c.code] || '🕊';
+        var remaining= fmtStock(c.stock_sold, c.stock_total);
+        var soldPct  = pct(c.stock_sold, c.stock_total);
+        var imgSrc   = 'cards/' + c.code + '.png';
+
+        // Price display
+        var priceHtml = '';
+        if (isFree) {
+          priceHtml = '<span class="card-price-free">FREE</span>';
+        } else {
+          priceHtml = '<div class="card-price-wrap">'
+            + '<span class="card-price-single">$' + c.price_usd + '</span>'
+            + (c.bundle_price_usd ? '<span class="card-price-bundle">BUNDLE $' + c.bundle_price_usd + '</span>' : '')
+            + '</div>';
+        }
+
+        // Button
+        var btnHtml = '';
+        if (isOwned) {
+          btnHtml = '<div class="btn-owned">✓ YOURS</div>';
+        } else if (isFree) {
+          btnHtml = '<button class="btn-free" onclick="claimFree(\'' + c.code + '\')">CLAIM</button>';
+        } else {
+          btnHtml = '<div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;">'
+            + '<button class="btn-buy" onclick="buyCard(\'' + c.code + '\',false)">BUY $' + c.price_usd + '</button>'
+            + (c.bundle_price_usd ? '<button class="btn-buy bundle" onclick="buyCard(\'' + c.code + '\',true)">BUNDLE $' + c.bundle_price_usd + '</button>' : '')
+            + '</div>';
+        }
+
+        // Stock section
+        var stockHtml = '';
+        if (c.stock_total) {
+          var avail = (c.stock_total - (c.stock_sold || 0)).toLocaleString();
+          stockHtml = '<div class="card-stock-wrap">'
+            + '<div class="stock-bar-bg"><div class="stock-bar-fill" style="width:' + soldPct + '%;background:linear-gradient(90deg,' + color + '88,' + color + ');"></div></div>'
+            + '<div class="stock-label"><span>' + avail + '</span> AVAILABLE</div>'
+            + '</div>';
+        } else {
+          stockHtml = '<div class="card-stock-wrap"><div class="stock-label" style="color:rgba(100,255,160,0.5);">UNLIMITED</div></div>';
+        }
+
+        return '<div class="peace-card' + (isOwned ? ' owned' : '') + (isFree ? ' free-card' : '') + '">'
+          + '<div class="card-accent" style="background:linear-gradient(90deg,' + color + '60,transparent);"></div>'
+          + '<div class="card-inner">'
+          +   '<div class="card-img-wrap">'
+          +     '<img src="' + imgSrc + '" alt="' + c.name + '" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'block\';">'
+          +     '<div class="card-img-fallback" style="display:none;">' + icon + '</div>'
+          +   '</div>'
+          +   '<div class="card-info">'
+          +     '<div class="card-name">' + c.name + '</div>'
+          +     '<div class="card-meta">'
+          +       '<span class="card-mult" style="color:' + color + ';border-color:' + color + '44;background:' + color + '18;">×' + c.multiplier + '</span>'
+          +       priceHtml
+          +     '</div>'
+          +   '</div>'
+          +   '<div class="card-btn-wrap">' + btnHtml + '</div>'
+          + '</div>'
+          + stockHtml
+          + '</div>';
+      }).join('');
     }
 
-    function productCard(p) {
-      const price    = p.priceRange?.minVariantPrice?.amount
-                       ? parseFloat(p.priceRange.minVariantPrice.amount).toFixed(2)
-                       : '—';
-      const currency = p.priceRange?.minVariantPrice?.currencyCode || '';
-      const imgUrl   = p.featuredImage?.url || '';
-      const imgAlt   = escHtml(p.featuredImage?.altText || p.title);
-      const buyUrl   = `https://${SHOP_DOMAIN}/products/${p.handle}`;
-      const fromLbl  = t('market_from') || 'FROM';
+    async function loadCards() {
+      if (!sb) {
+        renderCards([], new Set());
+        return;
+      }
+      try {
+        // Load all cards
+        var cardsRes = await sb.from('nava_badges').select('*').order('sort_order');
+        var cards = cardsRes.data || [];
 
-      return `
-        <div class="product-card">
-          ${imgUrl
-            ? `<img class="product-img" src="${escHtml(imgUrl)}" alt="${imgAlt}" loading="lazy" />`
-            : `<div class="product-img-placeholder">🕊</div>`
-          }
-          <div class="product-body">
-            <p class="product-title">${escHtml(p.title)}</p>
-            <div class="product-price">
-              <span class="from">${fromLbl}</span>
-              <span class="amount">${currency} ${price}</span>
-            </div>
-            <a class="product-buy" href="${buyUrl}" target="_blank" rel="noopener"
-               data-i18n="market_buy">🛍 SHOP</a>
-          </div>
-        </div>`;
+        // Load user's owned cards
+        var ownedCodes = new Set(['PEACE_LOVER']); // everyone has it
+        if (uid) {
+          var ownedRes = await sb.from('user_badges').select('badge_code').eq('user_uid', uid);
+          (ownedRes.data || []).forEach(function(r) { ownedCodes.add(r.badge_code); });
+        }
+
+        renderCards(cards, ownedCodes);
+      } catch(e) {
+        console.warn('Cards load error', e);
+        document.getElementById('cards-list').innerHTML =
+          '<p style="text-align:center;color:rgba(255,100,100,0.7);font-size:10px;padding:40px 0;letter-spacing:2px;">CONNECTION ERROR</p>';
+      }
     }
 
-    // ── PAGINATION ───────────────────────────────────────────────────────
-    function renderPagination() {
-      const pag = document.getElementById('pagination');
-      const hasPrev = currentPage > 1;
-      if (!hasPrev && !hasNextPage) { pag.style.display = 'none'; return; }
-
-      pag.style.display = 'flex';
-      document.getElementById('btnPrev').disabled = !hasPrev;
-      document.getElementById('btnNext').disabled = !hasNextPage;
-      document.getElementById('pageInfo').textContent = `PAGE ${currentPage}`;
+    async function claimFree(code) {
+      if (!uid || !sb) return;
+      try {
+        await sb.from('user_badges').upsert({ user_uid: uid, badge_code: code }, { onConflict: 'user_uid,badge_code' });
+        loadCards();
+      } catch(e) { console.warn('Claim error', e); }
     }
 
-    function goPrev() {
-      if (currentPage <= 1) return;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      loadPage(currentPage - 1);
+    async function buyCard(code, isBundle) {
+      // TODO: Call Supabase Edge Function → Stripe Checkout
+      // For now: show coming soon
+      alert('Stripe checkout coming soon!\n\nCard: ' + code + (isBundle ? '\nBundle' : ''));
     }
 
-    function goNext() {
-      if (!hasNextPage) return;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      loadPage(currentPage + 1);
+    // ── Lang button ──────────────────────────────────────────────────────
+    var LANGS = ['en','fr','es','ar','zh','hi','pt','ru','ja','ko','th','de','it'];
+    function cycleLang() {
+      if (typeof window.NAVA_LANG === 'undefined') return;
+      var idx = LANGS.indexOf(window.NAVA_LANG);
+      var next = LANGS[(idx + 1) % LANGS.length];
+      if (typeof setLang === 'function') { setLang(next); updateLangBtn(); }
+    }
+    function updateLangBtn() {
+      var FLAGS = {en:'🇬🇧',fr:'🇫🇷',es:'🇪🇸',ar:'🇸🇦',zh:'🇨🇳',hi:'🇮🇳',pt:'🇧🇷',ru:'🇷🇺',ja:'🇯🇵',ko:'🇰🇷',th:'🇹🇭',de:'🇩🇪',it:'🇮🇹'};
+      var l = window.NAVA_LANG || 'en';
+      var btn = document.getElementById('lang-btn');
+      if (btn) btn.textContent = (FLAGS[l] || '🌐') + ' ' + l.toUpperCase();
     }
 
-    // ── HELPERS ──────────────────────────────────────────────────────────
-    function showStatus(msg) {
-      const el = document.getElementById('statusMsg');
-      el.style.display = 'block';
-      el.textContent = msg;
-      document.getElementById('pagination').style.display = 'none';
-    }
-
-    function escHtml(str) {
-      return String(str || '')
-        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-
-    // ── START ────────────────────────────────────────────────────────────
-    loadPage(1);
-
-    // ── Discovery dove — première visite MARKET ───────────────────
-    if (window.NAVA_DISCOVERY) {
-      try { NAVA_DISCOVERY.check('market', window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)); } catch(e) {}
-    }
+    // ── Init ─────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+      updateLangBtn();
+      loadCards();
+      // Discovery dove
+      try { NAVA_DISCOVERY.check('market', sb); } catch(e) {}
+    });
   </script>
-
 </body>
 </html>
