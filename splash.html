@@ -390,14 +390,14 @@
         try { window.Telegram.WebApp.ready(); } catch(e) {}
       }
 
+      var _blocked = false;
       function _doRestore() {
-        var isInTelegram = window.Telegram && window.Telegram.WebApp &&
-                           typeof window.Telegram.WebApp.initData === 'string' &&
-                           window.Telegram.WebApp.initData.length > 0;
-        var tgUser = window.Telegram && window.Telegram.WebApp &&
+        // Only block if Telegram WebApp SDK is completely absent (regular browser)
+        var hasTelegramSDK = !!(window.Telegram && window.Telegram.WebApp);
+        var tgUser = hasTelegramSDK &&
                      window.Telegram.WebApp.initDataUnsafe &&
                      window.Telegram.WebApp.initDataUnsafe.user;
-        if (!isInTelegram && (!tgUser || !tgUser.id)) {
+        if (!hasTelegramSDK) {
           // Not inside Telegram — block access
           document.body.innerHTML = [
             '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;',
@@ -414,6 +414,7 @@
             '🕊 OPEN IN TELEGRAM</a>',
             '</div>'
           ].join('');
+          _blocked = true;
           return;
         }
         var expectedUID = 'tg_' + tgUser.id;
@@ -486,7 +487,7 @@
       }
 
       // Timeout sécurité global : si rien ne s'est passé en 5s → animation normale
-      setTimeout(function() { _runSplashLogic(); }, 5000);
+      setTimeout(function() { if (!_blocked) _runSplashLogic(); }, 5000);
     })();
     // ──────────────────────────────────────────────────────────────────────
     // 12 languages — flag · translation
