@@ -391,10 +391,13 @@
       }
 
       function _doRestore() {
+        var isInTelegram = window.Telegram && window.Telegram.WebApp &&
+                           typeof window.Telegram.WebApp.initData === 'string' &&
+                           window.Telegram.WebApp.initData.length > 0;
         var tgUser = window.Telegram && window.Telegram.WebApp &&
                      window.Telegram.WebApp.initDataUnsafe &&
                      window.Telegram.WebApp.initDataUnsafe.user;
-        if (!tgUser || !tgUser.id) {
+        if (!isInTelegram && (!tgUser || !tgUser.id)) {
           // Not inside Telegram — block access
           document.body.innerHTML = [
             '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;',
