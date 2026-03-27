@@ -405,32 +405,51 @@
       }
 
       var _blocked = false;
+      function _showBlockPage() {
+        document.body.style.background = '#050F1A';
+        document.body.innerHTML = [
+          '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;',
+          'height:100vh;background:#050F1A;color:#fff;font-family:Nasalization,Arial,sans-serif;',
+          'text-align:center;padding:30px;">',
+          '<img src="logo.png" style="width:80px;margin-bottom:20px;opacity:0.9;">',
+          '<div style="font-size:22px;letter-spacing:4px;color:#64D2FF;margin-bottom:8px;">NAVA PEACE</div>',
+          '<div style="font-size:11px;letter-spacing:3px;color:rgba(255,255,255,0.5);margin-bottom:32px;">MAKE PEACE. MAKE CHANGE.</div>',
+          '<div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.7);margin-bottom:24px;line-height:2;">',
+          'THIS APP IS ONLY AVAILABLE<br>INSIDE TELEGRAM</div>',
+          '<a href="https://t.me/NavaPeaceBot" style="display:inline-block;padding:14px 32px;',
+          'background:linear-gradient(135deg,#3AACDF,#1E8EC4);color:#fff;border-radius:12px;',
+          'text-decoration:none;font-family:Nasalization,Arial,sans-serif;font-size:11px;letter-spacing:3px;">',
+          '🕊 OPEN IN TELEGRAM</a>',
+          '</div>'
+        ].join('');
+        _blocked = true;
+      }
       function _doRestore() {
-        // Only block if Telegram WebApp SDK is completely absent (regular browser)
+        // Use initData string — empty in browser, non-empty inside Telegram
         var hasTelegramSDK = !!(window.Telegram && window.Telegram.WebApp);
-        var tgUser = hasTelegramSDK &&
+        var initData = hasTelegramSDK ? (window.Telegram.WebApp.initData || '') : '';
+        var isTelegram = !!initData;
+        var tgUser = isTelegram &&
                      window.Telegram.WebApp.initDataUnsafe &&
                      window.Telegram.WebApp.initDataUnsafe.user;
-        if (!hasTelegramSDK) {
-          // Not inside Telegram — block access
-          document.body.innerHTML = [
-            '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;',
-            'height:100vh;background:#050F1A;color:#fff;font-family:Nasalization,Arial,sans-serif;',
-            'text-align:center;padding:30px;">',
-            '<img src="logo.png" style="width:80px;margin-bottom:20px;opacity:0.9;">',
-            '<div style="font-size:22px;letter-spacing:4px;color:#64D2FF;margin-bottom:8px;">NAVA PEACE</div>',
-            '<div style="font-size:11px;letter-spacing:3px;color:rgba(255,255,255,0.5);margin-bottom:32px;">MAKE PEACE. MAKE CHANGE.</div>',
-            '<div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.7);margin-bottom:24px;line-height:2;">',
-            'THIS APP IS ONLY AVAILABLE<br>INSIDE TELEGRAM</div>',
-            '<a href="https://t.me/NavaPeaceBot" style="display:inline-block;padding:14px 32px;',
-            'background:linear-gradient(135deg,#3AACDF,#1E8EC4);color:#fff;border-radius:12px;',
-            'text-decoration:none;font-family:Nasalization,Arial,sans-serif;font-size:11px;letter-spacing:3px;">',
-            '🕊 OPEN IN TELEGRAM</a>',
-            '</div>'
-          ].join('');
-          _blocked = true;
+
+        if (!isTelegram) {
+          // Not inside Telegram — block unless user has a session already
+          if (!localStorage.getItem('nava_peace_country')) {
+            _showBlockPage();
+            return;
+          }
+          // Has a session but browsing outside Telegram → show splash normally
+          _runSplashLogic();
           return;
         }
+
+        // In Telegram but user not yet available (mobile slow init) → retry
+        if (!tgUser || !tgUser.id) {
+          setTimeout(_doRestore, 300);
+          return;
+        }
+
         var expectedUID = 'tg_' + tgUser.id;
       try {
         var sbr = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -490,17 +509,22 @@
       } catch(e) { _runSplashLogic(); }
       } // end _doRestore
 
-      // Sur mobile, initDataUnsafe.user peut être vide à t=0 — on attend 300ms
-      var tgUserImmediate = window.Telegram && window.Telegram.WebApp &&
-                            window.Telegram.WebApp.initDataUnsafe &&
-                            window.Telegram.WebApp.initDataUnsafe.user;
-      if (tgUserImmediate && tgUserImmediate.id) {
-        _doRestore(); // PC / déjà disponible
+      // Si pas dans Telegram → vérifier immédiatement (pas de délai nécessaire)
+      // Si dans Telegram → attendre que initData soit prêt (mobile peut être lent)
+      var initDataNow = !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData);
+      if (!initDataNow) {
+        _doRestore(); // Browser or Telegram not ready — check immediately
       } else {
-        setTimeout(_doRestore, 350); // Mobile : attend que WebApp soit prêt
+        var tgUserImmediate = window.Telegram.WebApp.initDataUnsafe &&
+                              window.Telegram.WebApp.initDataUnsafe.user;
+        if (tgUserImmediate && tgUserImmediate.id) {
+          _doRestore(); // Telegram PC / user already available
+        } else {
+          setTimeout(_doRestore, 350); // Telegram mobile : wait for WebApp to be ready
+        }
       }
 
-      // Timeout sécurité global : si rien ne s'est passé en 5s → animation normale
+      // Safety timeout : if nothing happened in 5s → show splash normally
       setTimeout(function() { if (!_blocked) _runSplashLogic(); }, 5000);
     })();
     // ──────────────────────────────────────────────────────────────────────
