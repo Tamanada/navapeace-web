@@ -1,6 +1,6 @@
 /* =================================================================
-   NAVA PEACE — share-card.js  v2
-   Invite card generation + bottom sheet + multi-platform sharing
+   NAVA PEACE — share-card.js  v3
+   Stats invite card + bottom sheet + multi-platform sharing
    ================================================================= */
 (function () {
   var BOT_URL  = 'https://t.me/NavaPeaceBot';
@@ -65,30 +65,27 @@
   ];
 
   function enc(s){ return encodeURIComponent(s); }
-
   function _open(url){
     if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.openLink) window.Telegram.WebApp.openLink(url);
     else window.open(url,'_blank');
   }
-
   function _native(file,url){
     if(!navigator.canShare||!navigator.canShare({files:[file]})) return false;
     navigator.share({files:[file],title:'NAVA PEACE',text:'Join me on NAVA PEACE',url:url}).catch(function(){});
     return true;
   }
-
   function _save(file){
     var u=URL.createObjectURL(file);
     var a=document.createElement('a'); a.href=u; a.download='nava-peace-invite.png';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(function(){URL.revokeObjectURL(u);},1000);
   }
-
   function _hint(app,step){
     var el=document.getElementById('ns-hint');
     if(el) el.innerHTML='CARD SAVED - OPEN <b>'+app+'</b> - '+step;
   }
 
+  /* QR loader */
   function _loadQR(cb){
     if(window.QRCode){cb();return;}
     var s=document.createElement('script');
@@ -96,74 +93,212 @@
     s.onload=cb; document.head.appendChild(s);
   }
 
-  function _genCard(refUrl, pseudo){
+  /* Fetch stats from Supabase */
+  async function _fetchStats(){
+    var stats = { lovers:0, countries:0, doves:0, today:0, days:0 };
+    try {
+      var sb = (typeof supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined')
+        ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+      if (!sb) return stats;
+
+      var today = new Date().toISOString().split('T')[0];
+
+      var r1 = await sb.from('peace_votes').select('user_uid', {count:'exact',head:true});
+      stats.doves = r1.count || 0;
+
+      var r2 = await sb.rpc('count_distinct_users');
+      stats.lovers = r2.data || 0;
+      if (!r2.data) {
+        var r2b = await sb.from('peace_votes').select('user_uid');
+        var uids = new Set((r2b.data||[]).map(function(r){return r.user_uid;}));
+        stats.lovers = uids.size;
+      }
+
+      var r3 = await sb.from('peace_votes').select('country');
+      var ctries = new Set((r3.data||[]).filter(function(r){return r.country;}).map(function(r){return r.country;}));
+      stats.countries = ctries.size;
+
+      var r4 = await sb.from('peace_votes').select('id', {count:'exact',head:true}).gte('created_at', today+'T00:00:00Z');
+      stats.today = r4.count || 0;
+
+      // Days since launch (from admin_settings or fallback)
+      var r5 = await sb.from('admin_settings').select('value').eq('key','launch_date').single();
+      var launchDate = r5.data ? r5.data.value.replace(/"/g,'') : '2026-03-08';
+      var diff = Math.floor((Date.now() - new Date(launchDate).getTime()) / 86400000);
+      stats.days = Math.max(0, diff);
+
+    } catch(e){ console.warn('stats fetch error', e); }
+    return stats;
+  }
+
+  /* Draw world map dots + peace words */
+  function _drawMap(c, x, y, w, h) {
+    // Glass panel
+    c.save();
+    c.beginPath();
+    var r=10;
+    c.moveTo(x+r,y); c.lineTo(x+w-r,y); c.quadraticCurveTo(x+w,y,x+w,y+r);
+    c.lineTo(x+w,y+h-r); c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+    c.lineTo(x+r,y+h); c.quadraticCurveTo(x,y+h,x,y+h-r);
+    c.lineTo(x,y+r); c.quadraticCurveTo(x,y,x+r,y); c.closePath();
+    c.fillStyle='rgba(255,255,255,0.12)';
+    c.fill();
+    c.strokeStyle='rgba(255,255,255,0.2)';
+    c.lineWidth=1.5; c.stroke();
+    c.clip();
+
+    // Peace words scattered geographically
+    var words = [
+      {t:'PEACE',   px:0.55, py:0.30, s:13},
+      {t:'PAIX',    px:0.42, py:0.28, s:11},
+      {t:'PAZ',     px:0.28, py:0.50, s:12},
+      {t:'PAZ',     px:0.35, py:0.62, s:10},
+      {t:'AMANI',   px:0.52, py:0.60, s:11},
+      {t:'SHALOM',  px:0.60, py:0.40, s:10},
+      {t:'\u548C\u5E73', px:0.78, py:0.32, s:14},
+      {t:'\u5E73\u548C', px:0.82, py:0.45, s:11},
+      {t:'\u548C\u5E73', px:0.72, py:0.55, s:10},
+      {t:'\u0936\u093E\u0928\u094D\u0924\u093F', px:0.68, py:0.42, s:10},
+      {t:'\u0635\u0644\u062D', px:0.57, py:0.38, s:11},
+    ];
+    words.forEach(function(w2){
+      c.font = w2.s+'px Nasalization,Arial,sans-serif';
+      c.fillStyle = 'rgba(255,255,255,0.35)';
+      c.textAlign = 'left';
+      c.fillText(w2.t, x + w2.px*w, y + w2.py*h);
+    });
+
+    // Country dots
+    var dots = [
+      {px:0.45,py:0.30,r:18},{px:0.78,py:0.35,r:14},{px:0.28,py:0.48,r:12},
+      {px:0.68,py:0.45,r:10},{px:0.55,py:0.58,r:9},{px:0.85,py:0.28,r:8},
+      {px:0.35,py:0.32,r:7},{px:0.60,py:0.25,r:6},{px:0.72,py:0.60,r:6},
+      {px:0.20,py:0.55,r:5},{px:0.50,py:0.70,r:5},
+    ];
+    dots.forEach(function(d){
+      c.beginPath();
+      c.arc(x+d.px*w, y+d.py*h, d.r, 0, Math.PI*2);
+      c.fillStyle='rgba(255,255,255,0.18)';
+      c.fill();
+      c.strokeStyle='rgba(255,255,255,0.35)';
+      c.lineWidth=1.5; c.stroke();
+    });
+
+    c.restore();
+  }
+
+  /* Draw stat box */
+  function _drawStat(c, x, y, w, h, value, label) {
+    var r=10;
+    c.beginPath();
+    c.moveTo(x+r,y); c.lineTo(x+w-r,y); c.quadraticCurveTo(x+w,y,x+w,y+r);
+    c.lineTo(x+w,y+h-r); c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+    c.lineTo(x+r,y+h); c.quadraticCurveTo(x,y+h,x,y+h-r);
+    c.lineTo(x,y+r); c.quadraticCurveTo(x,y,x+r,y); c.closePath();
+    c.fillStyle='rgba(255,255,255,0.12)';
+    c.fill();
+    c.strokeStyle='rgba(255,255,255,0.18)';
+    c.lineWidth=1; c.stroke();
+
+    c.textAlign='center';
+    var cx2=x+w/2, cy2=y+h/2;
+    c.font='bold 36px Nasalization,Arial,sans-serif';
+    c.fillStyle='#FFFFFF';
+    c.fillText(String(value), cx2, cy2+4);
+    c.font='9px Nasalization,Arial,sans-serif';
+    c.fillStyle='rgba(255,255,255,0.55)';
+    c.fillText(label.toUpperCase(), cx2, cy2+24);
+  }
+
+  /* Generate card */
+  function _genCard(refUrl, stats){
     return new Promise(function(resolve){
       _loadQR(function(){
-        var W=600,H=860,cx=W/2,cr=36;
+        var W=480, H=780, pad=24, cr=20;
         var cv=document.createElement('canvas'); cv.width=W; cv.height=H;
         var c=cv.getContext('2d');
 
-        var bg=c.createRadialGradient(cx,H*.25,0,cx,H*.5,H);
-        bg.addColorStop(0,'#1E6E9A'); bg.addColorStop(.45,'#0F4060'); bg.addColorStop(1,'#050F1A');
+        // Background gradient
+        var bg=c.createLinearGradient(0,0,0,H);
+        bg.addColorStop(0,'#3AACDF');
+        bg.addColorStop(0.5,'#1E6E9A');
+        bg.addColorStop(1,'#0A2A40');
         c.beginPath(); c.moveTo(cr,0); c.lineTo(W-cr,0); c.quadraticCurveTo(W,0,W,cr);
         c.lineTo(W,H-cr); c.quadraticCurveTo(W,H,W-cr,H); c.lineTo(cr,H);
         c.quadraticCurveTo(0,H,0,H-cr); c.lineTo(0,cr); c.quadraticCurveTo(0,0,cr,0);
         c.closePath(); c.fillStyle=bg; c.fill();
 
-        var bar=c.createLinearGradient(0,0,W,0);
-        bar.addColorStop(0,'rgba(100,210,255,.8)'); bar.addColorStop(.5,'rgba(255,255,255,.9)'); bar.addColorStop(1,'rgba(100,210,255,.8)');
-        c.fillStyle=bar;
-        c.beginPath(); c.moveTo(cr,0); c.lineTo(W-cr,0); c.quadraticCurveTo(W,0,W,cr); c.lineTo(W,8); c.lineTo(0,8); c.lineTo(0,cr); c.quadraticCurveTo(0,0,cr,0); c.closePath(); c.fill();
-        c.fillRect(0,H-8,W,8);
-
-        var qd=document.createElement('div'); qd.style.cssText='position:fixed;left:-9999px;top:-9999px;width:300px;height:300px;';
+        // QR div (hidden)
+        var qd=document.createElement('div'); qd.style.cssText='position:fixed;left:-9999px;top:-9999px;width:200px;height:200px;';
         document.body.appendChild(qd);
-        try{ new QRCode(qd,{text:refUrl,width:300,height:300,colorDark:'#0a2a40',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M}); }catch(e){}
+        try{ new QRCode(qd,{text:refUrl,width:200,height:200,colorDark:'#0A2A40',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M}); }catch(e){}
 
         fetch(LOGO_URL).then(function(r){return r.blob();}).then(function(b){
           var fr=new FileReader(); fr.onload=function(ev){
-            var img=new Image(); img.onload=function(){_draw(c,W,H,cx,img,qd,pseudo,cv,resolve);};
-            img.onerror=function(){_draw(c,W,H,cx,null,qd,pseudo,cv,resolve);};
+            var img=new Image();
+            img.onload=function(){ _drawCard(c,W,H,pad,img,qd,stats,refUrl,cv,resolve); };
+            img.onerror=function(){ _drawCard(c,W,H,pad,null,qd,stats,refUrl,cv,resolve); };
             img.src=ev.target.result;
           }; fr.readAsDataURL(b);
-        }).catch(function(){_draw(c,W,H,cx,null,qd,pseudo,cv,resolve);});
+        }).catch(function(){ _drawCard(c,W,H,pad,null,qd,stats,refUrl,cv,resolve); });
       });
     });
   }
 
-  function _draw(c,W,H,cx,logo,qd,pseudo,cv,resolve){
-    c.textAlign='center'; var y=60;
-    if(logo){ c.drawImage(logo,cx-65,y,130,130); y+=148; } else { y+=30; }
-    c.font='bold 46px Nasalization,Arial,sans-serif'; c.fillStyle='#FFF'; c.fillText('NAVA PEACE',cx,y); y+=16;
-    var ug=c.createLinearGradient(cx-140,0,cx+140,0);
-    ug.addColorStop(0,'transparent'); ug.addColorStop(.5,'rgba(100,210,255,.9)'); ug.addColorStop(1,'transparent');
-    c.fillStyle=ug; c.fillRect(cx-140,y,280,2); y+=22;
-    c.font='15px Nasalization,Arial,sans-serif'; c.fillStyle='rgba(100,210,255,.85)'; c.fillText('MAKE PEACE. MAKE CHANGE.',cx,y); y+=50;
-    c.font='14px Nasalization,Arial,sans-serif'; c.fillStyle='rgba(255,255,255,.55)'; c.fillText('YOU ARE INVITED BY',cx,y); y+=36;
-    c.font='bold 32px Nasalization,Arial,sans-serif'; c.fillStyle='#64D2FF'; c.fillText((pseudo||'PEACE SEEKER').toUpperCase(),cx,y); y+=28;
-    c.font='14px Nasalization,Arial,sans-serif'; c.fillStyle='rgba(255,255,255,.55)'; c.fillText('TO JOIN NAVA PEACE',cx,y); y+=36;
+  function _drawCard(c,W,H,pad,logo,qd,stats,refUrl,cv,resolve){
+    c.textAlign='center';
+    var y=pad+16;
+
+    // Logo
+    if(logo){ c.drawImage(logo, W/2-40, y, 80, 80); y+=90; }
+    else { y+=20; }
+
+    // NAVA PEACE
+    c.font='bold 32px Nasalization,Arial,sans-serif';
+    c.fillStyle='#FFFFFF';
+    c.fillText('NAVA PEACE', W/2, y); y+=22;
+
+    // Tagline
+    c.font='10px Nasalization,Arial,sans-serif';
+    c.fillStyle='rgba(255,255,255,0.7)';
+    c.fillText('TODAY HUMANITY CHOOSES PEACE', W/2, y); y+=28;
+
+    // Days since launch
+    c.font='bold 14px Nasalization,Arial,sans-serif';
+    c.fillStyle='rgba(255,255,255,0.9)';
+    c.fillText(stats.days+' DAYS SINCE LAUNCH', W/2, y); y+=20;
+
+    // World map
+    var mapH=140;
+    _drawMap(c, pad, y, W-pad*2, mapH);
+    y+=mapH+16;
+
+    // Stats grid (2x2)
+    var gw=(W-pad*2-10)/2, gh=70;
+    _drawStat(c, pad,      y, gw, gh, stats.lovers,   'PEACE LOVERS');
+    _drawStat(c, pad+gw+10,y, gw, gh, stats.countries,'COUNTRIES');
+    y+=gh+10;
+    _drawStat(c, pad,      y, gw, gh, stats.doves,    'TOTAL DOVES');
+    _drawStat(c, pad+gw+10,y, gw, gh, '+'+stats.today,'ACTIONS TODAY');
+    y+=gh+20;
+
+    // QR code
     var qc=qd.querySelector('canvas');
     if(qc){
-      var qs=280,qx=cx-qs/2-12,qy=y-8,qw=qs+24,qh=qs+24,qr=20;
-      c.fillStyle='#FFF';
-      c.beginPath(); c.moveTo(qx+qr,qy); c.lineTo(qx+qw-qr,qy); c.quadraticCurveTo(qx+qw,qy,qx+qw,qy+qr);
-      c.lineTo(qx+qw,qy+qh-qr); c.quadraticCurveTo(qx+qw,qy+qh,qx+qw-qr,qy+qh);
-      c.lineTo(qx+qr,qy+qh); c.quadraticCurveTo(qx,qy+qh,qx,qy+qh-qr);
+      var qs=140, qx=W/2-qs/2-8, qy=y-8, qw2=qs+16, qh2=qs+16, qr=12;
+      c.fillStyle='#FFFFFF';
+      c.beginPath(); c.moveTo(qx+qr,qy); c.lineTo(qx+qw2-qr,qy); c.quadraticCurveTo(qx+qw2,qy,qx+qw2,qy+qr);
+      c.lineTo(qx+qw2,qy+qh2-qr); c.quadraticCurveTo(qx+qw2,qy+qh2,qx+qw2-qr,qy+qh2);
+      c.lineTo(qx+qr,qy+qh2); c.quadraticCurveTo(qx,qy+qh2,qx,qy+qh2-qr);
       c.lineTo(qx,qy+qr); c.quadraticCurveTo(qx,qy,qx+qr,qy); c.closePath(); c.fill();
-      c.strokeStyle='rgba(100,210,255,.5)'; c.lineWidth=3;
-      c.beginPath(); c.moveTo(qx+qr,qy); c.lineTo(qx+qw-qr,qy); c.quadraticCurveTo(qx+qw,qy,qx+qw,qy+qr);
-      c.lineTo(qx+qw,qy+qh-qr); c.quadraticCurveTo(qx+qw,qy+qh,qx+qw-qr,qy+qh);
-      c.lineTo(qx+qr,qy+qh); c.quadraticCurveTo(qx,qy+qh,qx,qy+qh-qr);
-      c.lineTo(qx,qy+qr); c.quadraticCurveTo(qx,qy,qx+qr,qy); c.closePath(); c.stroke();
-      c.drawImage(qc,qx+12,qy+12,qs,qs); y+=qh+24;
-    } else { y+=40; }
+      c.drawImage(qc, qx+8, qy+8, qs, qs);
+    }
+
     document.body.removeChild(qd);
-    c.font='15px Nasalization,Arial,sans-serif'; c.fillStyle='rgba(100,210,255,.8)';
-    c.fillText('www.nava-peace.world',cx,y); y+=26;
-    c.fillText('www.nava-peace.app',cx,y);
-    cv.toBlob(function(b){ resolve(new File([b],'nava-peace-invite.png',{type:'image/png'})); },'image/png');
+    cv.toBlob(function(b){ resolve(new File([b],'nava-peace-share.png',{type:'image/png'})); },'image/png');
   }
 
+  /* Bottom sheet */
   function _showSheet(file,refUrl){
     var prev=URL.createObjectURL(file);
     var ov=document.createElement('div'); ov.id='nava-share-overlay';
@@ -172,9 +307,9 @@
     }).join('');
     ov.innerHTML='<div id="nava-share-sheet">'
       +'<div class="ns-handle"></div>'
-      +'<p class="ns-title">SHARE YOUR INVITE CARD</p>'
+      +'<p class="ns-title">SHARE THIS CARD</p>'
       +'<div id="ns-card-wrap"><img src="'+prev+'" /></div>'
-      +'<button id="ns-save-btn">Download SAVE TO GALLERY</button>'
+      +'<button id="ns-save-btn">Download  SAVE TO GALLERY</button>'
       +'<div class="ns-grid">'+btns+'</div>'
       +'<p id="ns-hint">TAP A PLATFORM - CARD SAVED AUTOMATICALLY</p>'
       +'</div>';
@@ -197,16 +332,20 @@
     setTimeout(function(){ if(ov.parentNode) ov.parentNode.removeChild(ov); if(prev) URL.revokeObjectURL(prev); },150);
   }
 
+  /* Main entry point */
   async function open(){
     var refCode = localStorage.getItem('nava_peace_ref_code');
-    var pseudo  = localStorage.getItem('nava_peace_pseudo') || 'PEACE SEEKER';
     var refUrl  = refCode ? (APP_URL+'?startapp='+refCode) : BOT_URL;
+
+    // Loading sheet
     var ld=document.createElement('div'); ld.id='nava-share-overlay';
-    ld.innerHTML='<div id="nava-share-sheet"><div class="ns-handle"></div><p class="ns-title">GENERATING YOUR CARD...</p><div id="ns-card-wrap"><div class="ns-loader">Dove PREPARING INVITE CARD</div></div></div>';
+    ld.innerHTML='<div id="nava-share-sheet"><div class="ns-handle"></div><p class="ns-title">GENERATING CARD...</p><div id="ns-card-wrap"><div class="ns-loader">Loading stats...</div></div></div>';
     ld.addEventListener('click',function(e){ if(e.target===ld&&ld.parentNode) ld.parentNode.removeChild(ld); });
     document.body.appendChild(ld);
+
     try{
-      var file=await _genCard(refUrl,pseudo);
+      var stats = await _fetchStats();
+      var file  = await _genCard(refUrl, stats);
       if(ld.parentNode) ld.parentNode.removeChild(ld);
       _showSheet(file,refUrl);
     }catch(e){
@@ -215,5 +354,5 @@
     }
   }
 
-  window.NAVA_SHARE={open:open};
+  window.NAVA_SHARE = { open: open };
 })();
