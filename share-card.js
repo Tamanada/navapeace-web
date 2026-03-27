@@ -7,6 +7,18 @@
   var APP_URL  = 'https://t.me/NavaPeaceBot/app';
   var LOGO_URL = 'logo.png';
 
+  var MESSAGES = [
+    'PEACE IS CONTAGIOUS \u2014 SPREAD IT',
+    'SILENCE IS NOT PEACE. SHARE YOURS.',
+    'EVERY SHARE IS AN ACT OF PEACE',
+    'BE THE PEACE THE WORLD NEEDS',
+    'LET THE WORLD KNOW WHERE YOU STAND',
+    'PEACE NEEDS VOICES. USE YOURS.',
+    'THE MOVEMENT GROWS WITH YOU',
+    'ONE MORE VOICE FOR PEACE TODAY',
+    'PEACE NEEDS YOU TO BE VISIBLE',
+  ];
+
   /* Styles */
   var css = document.createElement('style');
   css.textContent = '#nava-share-overlay{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.65);display:flex;flex-direction:column;justify-content:flex-end;animation:nsOvIn .2s ease}'
@@ -212,6 +224,7 @@
 
   /* Generate card */
   function _genCard(refUrl, stats){
+    var msg = MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
     return new Promise(function(resolve){
       _loadQR(function(){
         var W=480, H=780, pad=24, cr=20;
@@ -236,16 +249,16 @@
         fetch(LOGO_URL).then(function(r){return r.blob();}).then(function(b){
           var fr=new FileReader(); fr.onload=function(ev){
             var img=new Image();
-            img.onload=function(){ _drawCard(c,W,H,pad,img,qd,stats,refUrl,cv,resolve); };
-            img.onerror=function(){ _drawCard(c,W,H,pad,null,qd,stats,refUrl,cv,resolve); };
+            img.onload=function(){ _drawCard(c,W,H,pad,img,qd,stats,msg,refUrl,cv,resolve); };
+            img.onerror=function(){ _drawCard(c,W,H,pad,null,qd,stats,msg,refUrl,cv,resolve); };
             img.src=ev.target.result;
           }; fr.readAsDataURL(b);
-        }).catch(function(){ _drawCard(c,W,H,pad,null,qd,stats,refUrl,cv,resolve); });
+        }).catch(function(){ _drawCard(c,W,H,pad,null,qd,stats,msg,refUrl,cv,resolve); });
       });
     });
   }
 
-  function _drawCard(c,W,H,pad,logo,qd,stats,refUrl,cv,resolve){
+  function _drawCard(c,W,H,pad,logo,qd,stats,msg,refUrl,cv,resolve){
     c.textAlign='center';
     var y=pad+16;
 
@@ -266,7 +279,12 @@
     // Days since launch
     c.font='bold 14px Nasalization,Arial,sans-serif';
     c.fillStyle='rgba(255,255,255,0.9)';
-    c.fillText(stats.days+' DAYS SINCE LAUNCH', W/2, y); y+=20;
+    c.fillText(stats.days+' DAYS SINCE LAUNCH', W/2, y); y+=28;
+
+    // Random message banner
+    c.font='bold 11px Nasalization,Arial,sans-serif';
+    c.fillStyle='#64D2FF';
+    c.fillText(msg, W/2, y); y+=18;
 
     // World map
     var mapH=140;
