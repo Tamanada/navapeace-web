@@ -380,7 +380,21 @@
 
     (function restoreSession() {
       if (localStorage.getItem('nava_peace_country')) {
-        // Déjà restauré — laisse _runSplashLogic décider
+        // Déjà restauré — sync pseudo en arrière-plan depuis DB
+        var _uid = localStorage.getItem('nava_peace_uid');
+        if (_uid && typeof SUPABASE_URL !== 'undefined' && window.supabase) {
+          try {
+            var _sbg = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            _sbg.from('peace_messages').select('pseudo, message')
+              .eq('user_uid', _uid).limit(1)
+              .then(function(r) {
+                if (r.data && r.data[0]) {
+                  if (r.data[0].pseudo)  localStorage.setItem('nava_peace_pseudo',  r.data[0].pseudo);
+                  if (r.data[0].message) localStorage.setItem('nava_peace_message', r.data[0].message);
+                }
+              }).catch(function(){});
+          } catch(e) {}
+        }
         setTimeout(_runSplashLogic, 0);
         return;
       }
