@@ -34,6 +34,7 @@
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase_config.js"></script>
+  <script src="share-card.js"></script>
   <script src="discovery.js"></script>
   <script src="block_check.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -1295,6 +1296,14 @@
       <span class="card-chevron">▾</span>
     </div>
     <div class="card-body">
+    <button onclick="window.NAVA_SHARE && window.NAVA_SHARE.open()" style="
+      width:100%;padding:14px;border-radius:14px;border:none;cursor:pointer;
+      background:linear-gradient(135deg,#3AACDF,#1E6E9A);
+      color:#fff;font-family:Nasalization,Arial,sans-serif;
+      font-size:11px;letter-spacing:3px;margin-bottom:14px;
+      display:flex;align-items:center;justify-content:center;gap:8px;">
+      🕊 SHARE MY INVITE CARD
+    </button>
     <div class="invite-link-row">
       <span id="ref-link-display">GENERATING LINK...</span>
       <button class="copy-btn" onclick="copyLink()" data-i18n="copy_btn">COPY</button>

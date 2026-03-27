@@ -36,6 +36,7 @@
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase_config.js"></script>
+  <script src="share-card.js"></script>
   <script src="block_check.js"></script>
   <script src="lang.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous"></script>
@@ -1210,6 +1211,7 @@
 
     // ── Overlay controls ──
     async function openShareOverlay(){
+      if (window.NAVA_SHARE) { window.NAVA_SHARE.open(); return; }
       const o=document.getElementById('share-overlay');
       o.style.display='block';o.scrollTop=0;
       await generateShareCard();
