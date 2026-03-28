@@ -6,25 +6,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NAVA PEACE — Born To Grow</title>
   <link rel="icon" type="image/png" href="favicon.png" />
-  <!-- FIRST script — no network, no SDK needed, runs instantly -->
+  <!-- FIRST script — no network, no SDK, runs instantly, just sets a class -->
   <script>
   (function(){
-    // Telegram passes tgWebAppData in the hash when opening a mini-app.
-    // TelegramWebviewProxy is set by the native app before any script loads.
     var h = window.location.hash || '';
     var isTg = h.indexOf('tgWebAppData') !== -1 ||
                h.indexOf('tgWebAppVersion') !== -1 ||
                !!window.TelegramWebviewProxy;
     window._NAVA_IN_TG = isTg;
-    if (!isTg) {
-      // Inject CSS before body renders — splash hidden, block visible
-      var st = document.createElement('style');
-      st.id = 'tg-block-css';
-      st.textContent =
-        '#tg-block{display:flex!important}' +
-        '.stage,.enter-link,.ticker-wrap{display:none!important}';
-      document.head.appendChild(st);
-    }
+    if (isTg) document.documentElement.classList.add('in-tg');
   })();
   </script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -327,13 +317,23 @@
       .daily-msg-date { font-size: 9px; }
     }
 
+    /* ── TELEGRAM GATE — static CSS, zero injection, zero flash ── */
+    /* Default (browser): block page visible, splash hidden        */
+    #tg-block { display: flex; }
+    .stage, .enter-link, .ticker-wrap { display: none !important; }
+    /* Telegram confirmed (html.in-tg): block hidden, splash shown */
+    html.in-tg #tg-block         { display: none !important; }
+    html.in-tg .stage            { display: flex !important; }
+    html.in-tg .enter-link       { display: block; }
+    html.in-tg .ticker-wrap      { display: flex !important; }
+
   </style>
 </head>
 <body style="background:#050F1A;">
 
   <!-- Telegram-only block page — hidden by default, shown via CSS injected in <head> when not in Telegram -->
   <div id="tg-block" style="display:none;position:fixed;inset:0;z-index:9999;flex-direction:column;align-items:center;justify-content:center;background:#050F1A;color:#fff;font-family:Arial,sans-serif;text-align:center;padding:30px;">
-    <img src="logo.png" style="width:80px;margin-bottom:20px;opacity:0.9;" onerror="this.style.display='none'">
+    <img src="logo.png" style="width:80px;height:80px;object-fit:contain;margin-bottom:20px;opacity:0.9;" onerror="this.style.display='none'">
     <div style="font-size:22px;letter-spacing:4px;color:#64D2FF;margin-bottom:8px;">NAVA PEACE</div>
     <div style="font-size:11px;letter-spacing:3px;color:rgba(255,255,255,0.5);margin-bottom:32px;">MAKE PEACE. MAKE CHANGE.</div>
     <div style="font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.8);margin-bottom:32px;line-height:2;">THIS APP IS ONLY AVAILABLE<br>INSIDE TELEGRAM</div>
@@ -409,14 +409,12 @@
     }
 
     (function restoreSession() {
-      // Re-check with SDK now that it's loaded (handles edge cases where hash was empty)
+      // Re-check with SDK (handles edge cases where hash was empty on mobile)
       if (!window._NAVA_IN_TG) {
         var tgSDK = window.Telegram && window.Telegram.WebApp;
         if (tgSDK && tgSDK.initData) {
-          // SDK confirms Telegram — remove block CSS, restore splash
           window._NAVA_IN_TG = true;
-          var bl = document.getElementById('tg-block-css');
-          if (bl) bl.parentNode.removeChild(bl);
+          document.documentElement.classList.add('in-tg');
           document.body.style.background = '';
         } else {
           return; // Confirmed not Telegram
