@@ -7,6 +7,21 @@
   <title>NAVA PEACE — Born To Grow</title>
   <link rel="icon" type="image/png" href="favicon.png" />
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Early Telegram check — runs before body renders, zero flash -->
+  <script>
+  (function(){
+    var tg = window.Telegram && window.Telegram.WebApp;
+    window._NAVA_IN_TG = !!(tg && tg.initData);
+    if (!window._NAVA_IN_TG) {
+      var st = document.createElement('style');
+      st.id = 'tg-block-css';
+      st.textContent =
+        '#tg-block{display:flex!important}' +
+        '.stage,.enter-link,.ticker-wrap{display:none!important}';
+      document.head.appendChild(st);
+    }
+  })();
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase_config.js"></script>
   <script src="telegram.js"></script>
@@ -310,6 +325,15 @@
 </head>
 <body style="background:#050F1A;">
 
+  <!-- Telegram-only block page — hidden by default, shown via CSS injected in <head> when not in Telegram -->
+  <div id="tg-block" style="display:none;position:fixed;inset:0;z-index:9999;flex-direction:column;align-items:center;justify-content:center;background:#050F1A;color:#fff;font-family:Arial,sans-serif;text-align:center;padding:30px;">
+    <img src="logo.png" style="width:80px;margin-bottom:20px;opacity:0.9;" onerror="this.style.display='none'">
+    <div style="font-size:22px;letter-spacing:4px;color:#64D2FF;margin-bottom:8px;">NAVA PEACE</div>
+    <div style="font-size:11px;letter-spacing:3px;color:rgba(255,255,255,0.5);margin-bottom:32px;">MAKE PEACE. MAKE CHANGE.</div>
+    <div style="font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.8);margin-bottom:32px;line-height:2;">THIS APP IS ONLY AVAILABLE<br>INSIDE TELEGRAM</div>
+    <a href="https://t.me/NavaPeaceBot/app" target="_blank" style="display:inline-block;padding:14px 32px;cursor:pointer;background:linear-gradient(135deg,#3AACDF,#1E8EC4);color:#fff;border-radius:12px;text-decoration:none;font-size:13px;letter-spacing:3px;">🕊 OPEN IN TELEGRAM</a>
+  </div>
+
   <!-- Optional: enter app link -->
   <a class="enter-link" href="peace.html">ENTER →</a>
 
@@ -379,33 +403,9 @@
     }
 
     (function restoreSession() {
-      // ── TELEGRAM CHECK FIRST — always, before any localStorage logic ──────
-      var _hasTgSDK   = !!(window.Telegram && window.Telegram.WebApp);
-      var _initData   = _hasTgSDK ? (window.Telegram.WebApp.initData || '') : '';
-      var _isTelegram = !!_initData;
-
-      if (!_isTelegram) {
-        // Not inside Telegram — block immediately, no flash, no redirect
-        document.body.style.cssText = 'margin:0;padding:0;background:#050F1A;';
-        document.body.innerHTML = [
-          '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;',
-          'height:100vh;background:#050F1A;color:#fff;font-family:Arial,sans-serif;',
-          'text-align:center;padding:30px;">',
-          '<img src="logo.png" style="width:80px;margin-bottom:20px;opacity:0.9;"',
-          ' onerror="this.style.display=\'none\'">',
-          '<div style="font-size:22px;letter-spacing:4px;color:#64D2FF;margin-bottom:8px;">NAVA PEACE</div>',
-          '<div style="font-size:11px;letter-spacing:3px;color:rgba(255,255,255,0.5);margin-bottom:32px;">MAKE PEACE. MAKE CHANGE.</div>',
-          '<div style="font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.8);margin-bottom:32px;line-height:2;">',
-          'THIS APP IS ONLY AVAILABLE<br>INSIDE TELEGRAM</div>',
-          '<a href="https://t.me/NavaPeaceBot/app" target="_blank"',
-          ' style="display:inline-block;padding:14px 32px;cursor:pointer;z-index:9999;',
-          'background:linear-gradient(135deg,#3AACDF,#1E8EC4);color:#fff;border-radius:12px;',
-          'text-decoration:none;font-family:Arial,sans-serif;font-size:13px;letter-spacing:3px;">',
-          '🕊 OPEN IN TELEGRAM</a>',
-          '</div>'
-        ].join('');
-        return; // Stop ALL other logic — no timers, no redirects
-      }
+      // Block page is already shown via CSS injected in <head> if not in Telegram.
+      // Just stop here — no timers, no redirects needed for browser users.
+      if (!window._NAVA_IN_TG) return;
 
       // ── IN TELEGRAM — restore blue splash background ───────────────────────
       document.body.style.background = '';
@@ -434,7 +434,6 @@
       }
 
       // New user in Telegram — restore session from DB
-      var _blocked = false;
       function _doRestore() {
         // Re-check initData (might now be available after ready())
         var initData = window.Telegram.WebApp.initData || '';
@@ -517,7 +516,7 @@
       }
 
       // Safety timeout: if nothing happened in 5s → show splash normally
-      setTimeout(function() { if (!_blocked) _runSplashLogic(); }, 5000);
+      setTimeout(function() { _runSplashLogic(); }, 5000);
     })();
     // ──────────────────────────────────────────────────────────────────────
     // 12 languages — flag · translation
