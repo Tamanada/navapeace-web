@@ -669,6 +669,8 @@
 
     // ── SPLASH LOGIC ──────────────────────────────────────────────────
     function _startSplashAnimation() {
+      // Not in Telegram → block page shown via CSS, don't start splash (avoids click capture)
+      if (!NAVA_TG.isTelegram && !window._NAVA_IN_TG) return;
       var uid = localStorage.getItem('nava_peace_uid');
       var isRegistered = uid && localStorage.getItem('nava_peace_country');
 
