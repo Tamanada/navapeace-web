@@ -308,7 +308,7 @@
 
   </style>
 </head>
-<body>
+<body style="background:#050F1A;">
 
   <!-- Optional: enter app link -->
   <a class="enter-link" href="peace.html">ENTER →</a>
@@ -407,7 +407,8 @@
         return; // Stop ALL other logic — no timers, no redirects
       }
 
-      // ── IN TELEGRAM ────────────────────────────────────────────────────────
+      // ── IN TELEGRAM — restore blue splash background ───────────────────────
+      document.body.style.background = '';
       if (window.Telegram && window.Telegram.WebApp) {
         try { window.Telegram.WebApp.ready(); } catch(e) {}
       }
