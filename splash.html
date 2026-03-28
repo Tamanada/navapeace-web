@@ -17,8 +17,8 @@
     if (isTg) {
       document.documentElement.classList.add('in-tg');
     } else {
-      // Not Telegram — redirect to simple block page before body renders
-      window.location.replace('browser-block.html');
+      // Not Telegram — redirect directly to Telegram bot page
+      window.location.replace('https://t.me/NavaPeaceBot/app');
     }
   })();
   </script>
