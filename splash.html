@@ -12,12 +12,13 @@
     var h = window.location.hash || '';
     var isTg = h.indexOf('tgWebAppData') !== -1 ||
                h.indexOf('tgWebAppVersion') !== -1 ||
-               !!window.TelegramWebviewProxy;
+               !!window.TelegramWebviewProxy ||
+               !!localStorage.getItem('nava_peace_country') ||
+               (localStorage.getItem('nava_peace_uid') || '').indexOf('tg_') === 0;
     window._NAVA_IN_TG = isTg;
     if (isTg) {
       document.documentElement.classList.add('in-tg');
     } else {
-      // Not Telegram — redirect directly to Telegram bot page
       window.location.replace('https://t.me/NavaPeaceBot/app');
     }
   })();

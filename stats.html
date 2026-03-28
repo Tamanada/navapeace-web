@@ -1,6 +1,18 @@
 <!DOCTYPE html>
 <html lang="en" data-module="module_stats">
 <head>
+  <!-- Telegram-only guard -->
+  <script>
+  (function(){
+    var h = window.location.hash || '';
+    var isTg = h.indexOf('tgWebAppData') !== -1 ||
+               h.indexOf('tgWebAppVersion') !== -1 ||
+               !!window.TelegramWebviewProxy ||
+               !!localStorage.getItem('nava_peace_country') ||
+               (localStorage.getItem('nava_peace_uid') || '').indexOf('tg_') === 0;
+    if (!isTg) window.location.replace('https://t.me/NavaPeaceBot/app');
+  })();
+  </script>
   <meta charset="UTF-8" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.amcharts.com https://telegram.org; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.myshopify.com; frame-ancestors 'none';" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
