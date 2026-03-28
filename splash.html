@@ -6,13 +6,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NAVA PEACE — Born To Grow</title>
   <link rel="icon" type="image/png" href="favicon.png" />
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <!-- Early Telegram check — runs before body renders, zero flash -->
+  <!-- FIRST script — no network, no SDK needed, runs instantly -->
   <script>
   (function(){
-    var tg = window.Telegram && window.Telegram.WebApp;
-    window._NAVA_IN_TG = !!(tg && tg.initData);
-    if (!window._NAVA_IN_TG) {
+    // Telegram passes tgWebAppData in the hash when opening a mini-app.
+    // TelegramWebviewProxy is set by the native app before any script loads.
+    var h = window.location.hash || '';
+    var isTg = h.indexOf('tgWebAppData') !== -1 ||
+               h.indexOf('tgWebAppVersion') !== -1 ||
+               !!window.TelegramWebviewProxy;
+    window._NAVA_IN_TG = isTg;
+    if (!isTg) {
+      // Inject CSS before body renders — splash hidden, block visible
       var st = document.createElement('style');
       st.id = 'tg-block-css';
       st.textContent =
@@ -22,6 +27,7 @@
     }
   })();
   </script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase_config.js"></script>
   <script src="telegram.js"></script>
@@ -403,9 +409,19 @@
     }
 
     (function restoreSession() {
-      // Block page is already shown via CSS injected in <head> if not in Telegram.
-      // Just stop here — no timers, no redirects needed for browser users.
-      if (!window._NAVA_IN_TG) return;
+      // Re-check with SDK now that it's loaded (handles edge cases where hash was empty)
+      if (!window._NAVA_IN_TG) {
+        var tgSDK = window.Telegram && window.Telegram.WebApp;
+        if (tgSDK && tgSDK.initData) {
+          // SDK confirms Telegram — remove block CSS, restore splash
+          window._NAVA_IN_TG = true;
+          var bl = document.getElementById('tg-block-css');
+          if (bl) bl.parentNode.removeChild(bl);
+          document.body.style.background = '';
+        } else {
+          return; // Confirmed not Telegram
+        }
+      }
 
       // ── IN TELEGRAM — restore blue splash background ───────────────────────
       document.body.style.background = '';
