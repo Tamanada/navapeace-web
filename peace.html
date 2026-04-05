@@ -181,8 +181,8 @@
     /* ── PEACE BUTTON ── */
     .peace-btn {
       position: relative;
-      width: min(190px, 50vw, 24vh);
-      height: min(190px, 50vw, 24vh);
+      width: min(285px, 70vw, 40vh);
+      height: min(285px, 70vw, 40vh);
       border-radius: 50%;
       border: none;
       background: transparent;
@@ -518,20 +518,8 @@
     </div>
 
 
-    <!-- SHARE PROGRESS BUTTON -->
-    <button id="share-progress-btn" onclick="openShareOverlay()" style="
-      display:flex;align-items:center;gap:8px;margin-top:0;
-      background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.3);
-      border-radius:28px;color:#fff;font-family:Nasalization,Arial,sans-serif;
-      font-size:9px;letter-spacing:3px;padding:11px 24px;cursor:pointer;
-      transition:background 0.2s;">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
-        <polyline points="16 6 12 2 8 6"/>
-        <line x1="12" y1="2" x2="12" y2="15"/>
-      </svg>
-      <span id="share-peace-label">SHARE PEACE</span>
-    </button>
+    <!-- SHARE PROGRESS BUTTON — disabled -->
+    <button id="share-progress-btn" onclick="openShareOverlay()" style="display:none;"></button>
 
   </div>
 
@@ -550,20 +538,7 @@
     <div style="width:180px;height:2px;background:rgba(255,255,255,0.2);border-radius:2px;overflow:hidden;margin-bottom:24px;">
       <div id="inspo-bar" style="height:100%;background:rgba(255,255,255,0.75);width:100%;border-radius:2px;"></div>
     </div>
-    <!-- SHARE BUTTON -->
-    <button id="inspo-share-btn" onclick="event.stopPropagation();openShareOverlay()"
-      style="display:flex;align-items:center;gap:8px;
-             background:rgba(255,255,255,0.18);border:1.5px solid rgba(255,255,255,0.4);
-             border-radius:28px;color:#fff;font-family:Nasalization,Arial,sans-serif;
-             font-size:10px;letter-spacing:3px;padding:12px 26px;cursor:pointer;
-             transition:background 0.2s;margin-bottom:18px;">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-        <circle cx="12" cy="12" r="4"/>
-        <circle cx="17.5" cy="6.5" r="1.5" fill="white" stroke="none"/>
-      </svg>
-      SHARE
-    </button>
+    <!-- SHARE BUTTON — disabled -->
     <p style="font-size:7px;letter-spacing:3px;color:rgba(255,255,255,0.3);font-family:Nasalization,Arial,sans-serif;">TAP ANYWHERE TO CONTINUE</p>
   </div>
 

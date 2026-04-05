@@ -442,86 +442,103 @@
 
     .copy-btn:hover { opacity: 0.85; }
 
-    .qr-share-layout {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      margin-bottom: 20px;
-    }
-
-    .share-col {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      align-items: center;
-    }
-
+    /* ── QR (enlarged) ── */
     .qr-wrap {
       display: flex;
       justify-content: center;
-      flex-shrink: 0;
+      margin-bottom: 20px;
     }
 
     .qr-wrap > div {
-      border-radius: 12px;
+      border-radius: 16px;
       overflow: hidden;
-      padding: 6px;
-      min-width: 142px;
-      min-height: 142px;
+      padding: 10px;
+      min-width: 222px;
+      min-height: 222px;
       box-sizing: border-box;
       background: #fff;
     }
 
-    .share-row {
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
-      gap: 14px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
+    /* ── Custom invite message ── */
+    .invite-msg-wrap {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 16px;
     }
 
-    .share-btn {
+    .invite-msg-header {
       display: flex;
-      flex-direction: column;
+      justify-content: space-between;
       align-items: center;
-      gap: 3px;
-      text-decoration: none;
-      color: rgba(255,255,255,0.75);
-      font-family: 'Nasalization', Arial, sans-serif;
-      font-size: 6px;
-      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .invite-msg-header > span {
+      font-size: 8px;
+      letter-spacing: 2.5px;
+      color: rgba(255,255,255,0.5);
       text-transform: uppercase;
-      transition: color 0.2s, transform 0.2s;
     }
 
-    .share-btn-icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 11px;
+    .random-msg-btn {
+      background: rgba(58,172,223,0.18);
+      border: 1px solid rgba(58,172,223,0.4);
+      border-radius: 20px;
+      color: #3AACDF;
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 7px;
+      letter-spacing: 1.5px;
+      padding: 5px 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .random-msg-btn:hover { background: rgba(58,172,223,0.32); }
+
+    .invite-msg-textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 10px;
+      color: #fff;
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 11px;
+      letter-spacing: 1px;
+      padding: 10px 12px;
+      resize: none;
+      min-height: 68px;
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+
+    .invite-msg-textarea:focus { border-color: rgba(58,172,223,0.6); }
+    .invite-msg-textarea::placeholder { color: rgba(255,255,255,0.28); }
+
+    /* ── Share card button ── */
+    .share-card-btn {
+      width: 100%;
+      padding: 15px;
+      border-radius: 14px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(135deg, #3AACDF, #1E6E9A);
+      color: #fff;
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 11px;
+      letter-spacing: 3px;
+      margin-bottom: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.28);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      transition: background 0.2s, transform 0.2s;
+      gap: 8px;
+      transition: opacity 0.2s;
     }
 
-    .share-btn svg {
-      width: 18px;
-      height: 18px;
-      fill: #fff;
-    }
-
-    .share-btn:hover .share-btn-icon {
-      background: rgba(255,255,255,0.24);
-      transform: scale(1.06);
-    }
-
-    .share-btn:hover { color: #fff; }
+    .share-card-btn:hover { opacity: 0.88; }
+    .share-card-btn:disabled { opacity: 0.5; cursor: default; }
 
     .points-box {
       display: flex;
@@ -1308,73 +1325,30 @@
       <span class="card-chevron">▾</span>
     </div>
     <div class="card-body">
-    <button onclick="window.NAVA_SHARE && window.NAVA_SHARE.open()" style="
-      width:100%;padding:14px;border-radius:14px;border:none;cursor:pointer;
-      background:linear-gradient(135deg,#3AACDF,#1E6E9A);
-      color:#fff;font-family:Nasalization,Arial,sans-serif;
-      font-size:11px;letter-spacing:3px;margin-bottom:14px;
-      display:flex;align-items:center;justify-content:center;gap:8px;">
-      🕊 SHARE MY INVITE CARD
+
+    <!-- Custom invitation message -->
+    <div class="invite-msg-wrap">
+      <div class="invite-msg-header">
+        <span data-i18n="invite_msg_label">MY INVITATION MESSAGE</span>
+        <button class="random-msg-btn" onclick="randomInviteMsg()">✨ <span data-i18n="btn_random_msg">RANDOM</span></button>
+      </div>
+      <textarea id="invite-custom-msg" class="invite-msg-textarea" maxlength="160"></textarea>
+    </div>
+
+    <!-- QR code (centered, large) -->
+    <div class="qr-wrap">
+      <div id="qrcode"></div>
+    </div>
+
+    <!-- Share my invite card button -->
+    <button id="share-card-main-btn" class="share-card-btn" onclick="window.NAVA_SHARE && window.NAVA_SHARE.open()">
+      🕊 <span data-i18n="share_invite_btn">SHARE MY INVITE CARD</span>
     </button>
+
     <div class="invite-link-row">
       <span id="ref-link-display">GENERATING LINK...</span>
       <button class="copy-btn" onclick="copyLink()" data-i18n="copy_btn">COPY</button>
     </div>
-
-    <div class="qr-share-layout">
-      <!-- Col 1: Telegram + WhatsApp -->
-      <div class="share-col">
-        <a class="share-btn tg" id="share-tg" href="#" target="_blank">
-          <div class="share-btn-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></div>
-          <span>TELEGRAM</span>
-        </a>
-        <a class="share-btn wa" id="share-wa" href="#" target="_blank">
-          <div class="share-btn-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg></div>
-          <span>WHATSAPP</span>
-        </a>
-      </div>
-
-      <!-- Col 2: X + SMS -->
-      <div class="share-col">
-        <a class="share-btn tw" id="share-tw" href="#" target="_blank">
-          <div class="share-btn-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></div>
-          <span>X</span>
-        </a>
-        <a class="share-btn sms" id="share-sms" href="#">
-          <div class="share-btn-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg></div>
-          <span>SMS</span>
-        </a>
-      </div>
-
-      <!-- Col 3: QR code -->
-      <div class="qr-wrap">
-        <div id="qrcode"></div>
-      </div>
-
-      <!-- Col 4: Facebook + Messenger -->
-      <div class="share-col">
-        <a class="share-btn fb" id="share-fb" href="#" target="_blank">
-          <div class="share-btn-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.268h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z" fill="#fff"/></svg></div>
-          <span>FACEBOOK</span>
-        </a>
-        <a class="share-btn msngr" id="share-msngr" href="#">
-          <div class="share-btn-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M.001 11.639C.001 4.949 5.241 0 12.001 0S24 4.95 24 11.639c0 6.689-5.24 11.638-12 11.638-1.21 0-2.38-.16-3.47-.46a.96.96 0 00-.64.05l-2.39 1.05a.96.96 0 01-1.35-.85l-.07-2.14a.97.97 0 00-.32-.68A11.39 11.389 0 01.002 11.64zm8.32-2.19l-3.52 5.6c-.35.53.32 1.139.82.75l3.79-2.87c.29-.22.69-.22.98 0l2.8 2.1c.88.66 2.13.37 2.65-.6l3.52-5.6c.35-.53-.32-1.13-.82-.75l-3.79 2.87c-.29.22-.69.22-.98 0l-2.8-2.1c-.88-.66-2.13-.37-2.65.6z"/></svg></div>
-          <span>MESSENGER</span>
-        </a>
-      </div>
-
-      <!-- Col 5: Instagram + Email -->
-      <div class="share-col">
-        <a class="share-btn ig" id="share-ig" href="https://www.instagram.com/nava.peace.world/" target="_blank">
-          <div class="share-btn-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.334 3.608 1.308.975.975 1.246 2.242 1.308 3.608.058 1.265.069 1.645.069 4.85s-.011 3.585-.069 4.85c-.062 1.366-.333 2.633-1.308 3.608-.975.975-2.242 1.246-3.608 1.308-1.265.058-1.645.069-4.85.069s-3.585-.011-4.85-.069c-1.366-.062-2.633-.333-3.608-1.308-.975-.975-1.246-2.242-1.308-3.608C2.175 15.585 2.163 15.205 2.163 12s.012-3.584.07-4.85c.062-1.366.333-2.633 1.308-3.608.975-.975 2.242-1.246 3.608-1.308C8.416 2.175 8.796 2.163 12 2.163Zm0-2.163C8.741 0 8.332.014 7.052.072 5.197.157 3.355.673 1.946 2.082.537 3.491.021 5.333 0 7.188-.014 8.468 0 8.877 0 12s-.014 3.532.072 4.812c.157 1.855.673 3.697 2.082 5.106C3.491 23.327 5.333 23.843 7.188 24c1.28.086 1.689.072 4.812.072s3.532.014 4.812-.072c1.855-.157 3.697-.673 5.106-2.082C23.327 20.509 23.843 18.667 24 16.812c.086-1.28.072-1.689.072-4.812s.014-3.532-.072-4.812c-.157-1.855-.673-3.697-2.082-5.106C20.509.673 18.667.157 16.812 0 15.532-.014 15.123 0 12 0Zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324ZM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881Z"/></svg></div>
-          <span>INSTA</span>
-        </a>
-        <a class="share-btn email" id="share-email" href="#">
-          <div class="share-btn-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div>
-          <span>EMAIL</span>
-        </a>
-      </div>
-        </div>
 
     <div class="points-box">
       <div class="points-row-dual">
@@ -2258,15 +2232,115 @@
     // Show link
     document.getElementById('ref-link-display').textContent = inviteURL;
 
-    // QR code
+    // QR code (enlarged)
     try {
       var qrEl = document.getElementById('qrcode');
       new QRCode(qrEl, {
-        text: inviteURL, width: 130, height: 130,
+        text: inviteURL, width: 202, height: 202,
         colorDark: '#1A6E96', colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.M
       });
     } catch(qrErr) { console.error('QR generation failed:', qrErr); }
+
+    // ── Custom message textarea — initialized after SHARE_TEXTS is defined below ──
+    var userLang = (typeof detectLang === 'function') ? detectLang() : 'en';
+
+    // ── Random peace messages (multilingual) ──────────────────────
+    var RANDOM_PEACE_MSGS = {
+      en: [
+        "Peace is not a dream — it's a daily choice. Join me 🕊",
+        "Every action for peace counts. Let's build this together.",
+        "I choose peace every day. Will you join me?",
+        "The world changes one peaceful action at a time.",
+        "Be the change — vote for peace with me today.",
+        "Peace starts with us. Let's make it real.",
+        "Join the global peace movement. Your voice matters.",
+        "Together we are stronger. Together we choose peace."
+      ],
+      fr: [
+        "La paix n'est pas un rêve — c'est un choix quotidien. Rejoins-moi 🕊",
+        "Chaque action pour la paix compte. Construisons ça ensemble.",
+        "Je choisis la paix chaque jour. Tu viens avec moi ?",
+        "Le monde change une action de paix à la fois.",
+        "Sois le changement — vote pour la paix avec moi.",
+        "La paix commence avec nous. Rendons-la réelle.",
+        "Rejoins le mouvement mondial pour la paix.",
+        "Ensemble on est plus forts. Ensemble on choisit la paix."
+      ],
+      es: [
+        "La paz no es un sueño — es una elección diaria. Únete a mí 🕊",
+        "Cada acción por la paz cuenta. Construyamos esto juntos.",
+        "Elijo la paz cada día. ¿Te unes a mí?",
+        "El mundo cambia una acción de paz a la vez.",
+        "Sé el cambio — vota por la paz conmigo hoy.",
+        "La paz empieza con nosotros. Hagámosla real.",
+        "Únete al movimiento global de paz.",
+        "Juntos somos más fuertes. Juntos elegimos la paz."
+      ],
+      pt: [
+        "A paz não é um sonho — é uma escolha diária. Junte-se a mim 🕊",
+        "Cada ação pela paz conta. Vamos construir isso juntos.",
+        "Escolho a paz todo dia. Vai vir comigo?",
+        "O mundo muda uma ação de paz de cada vez.",
+        "Seja a mudança — vote pela paz comigo hoje.",
+        "A paz começa com a gente. Vamos torná-la real.",
+        "Junte-se ao movimento global de paz.",
+        "Juntos somos mais fortes. Juntos escolhemos a paz."
+      ],
+      de: [
+        "Frieden ist kein Traum — es ist eine tägliche Wahl. Mach mit 🕊",
+        "Jede Friedensaktion zählt. Lass uns das gemeinsam aufbauen.",
+        "Ich wähle jeden Tag den Frieden. Machst du mit?",
+        "Die Welt verändert sich durch Friedenshandlungen.",
+        "Sei der Wandel — stimme heute mit mir für Frieden.",
+        "Frieden beginnt bei uns. Machen wir ihn real.",
+        "Schließ dich der globalen Friedensbewegung an.",
+        "Zusammen sind wir stärker. Zusammen wählen wir Frieden."
+      ],
+      ar: [
+        "السلام ليس حلماً — إنه اختيار يومي. انضم إليّ 🕊",
+        "كل عمل من أجل السلام مهم. دعونا نبنيه معاً.",
+        "أختار السلام كل يوم. هل ستنضم إليّ؟",
+        "العالم يتغير بعمل سلام واحد في كل مرة.",
+        "كن التغيير — صوت للسلام معي اليوم.",
+        "السلام يبدأ بنا. لنجعله حقيقياً.",
+        "انضم إلى حركة السلام العالمية.",
+        "معاً أقوى. معاً نختار السلام."
+      ],
+      zh: [
+        "和平不是梦想——它是每日的选择。加入我 🕊",
+        "每一个和平行动都很重要。让我们共同构建。",
+        "我每天选择和平。你愿意加入我吗？",
+        "世界一次改变一个和平行动。",
+        "成为改变——今天和我一起为和平投票。",
+        "和平从我们开始。让我们让它成真。",
+        "加入全球和平运动。",
+        "在一起我们更强大。在一起我们选择和平。"
+      ],
+      ru: [
+        "Мир — это не мечта, это ежедневный выбор. Присоединяйся 🕊",
+        "Каждое действие ради мира важно. Давай строить это вместе.",
+        "Я каждый день выбираю мир. Присоединишься?",
+        "Мир меняется одним мирным действием за раз.",
+        "Будь переменой — голосуй за мир со мной.",
+        "Мир начинается с нас. Давай сделаем его реальным.",
+        "Присоединяйся к глобальному движению за мир.",
+        "Вместе мы сильнее. Вместе выбираем мир."
+      ]
+    };
+
+    function randomInviteMsg() {
+      var lang = (typeof detectLang === 'function') ? detectLang() : 'en';
+      var msgs = RANDOM_PEACE_MSGS[lang] || RANDOM_PEACE_MSGS.en;
+      var rand = msgs[Math.floor(Math.random() * msgs.length)];
+      var el = document.getElementById('invite-custom-msg');
+      if (el) {
+        el.style.transition = 'opacity 0.25s';
+        el.style.opacity = '0';
+        setTimeout(function() { el.value = rand; el.style.opacity = '1'; }, 250);
+      }
+    }
+    window.randomInviteMsg = randomInviteMsg;
 
     // ── Share: Web Share API with image on mobile, direct links everywhere ──
     var shareText = 'The world talks about peace. Let\'s practice it. 🕊\nJoin NAVA PEACE today.\n' + inviteURL;
@@ -2289,11 +2363,189 @@
       uk: "Світ говорить про мир. Давайте його практикувати. 🕊\nДолучайся до NAVA PEACE сьогодні.\n"
     };
 
-    // ── Share panel — multilingue (sans carte image) ─────────────────
-    function doShare(targetApp) {
-      showSharePanel(targetApp);
+    // ── Init custom message textarea now that SHARE_TEXTS is defined ──
+    var _defMsg = (SHARE_TEXTS[userLang] || SHARE_TEXTS.en).split('\n')[0];
+    var _msgEl = document.getElementById('invite-custom-msg');
+    if (_msgEl) { _msgEl.placeholder = _defMsg; _msgEl.value = _defMsg; }
+
+    // ── New card-first share flow ─────────────────────────────────
+    window.NAVA_SHARE = { open: openInviteCardFlow };
+
+    async function openInviteCardFlow() {
+      var btn = document.getElementById('share-card-main-btn');
+      if (btn) { btn.disabled = true; btn.querySelector('span') && (btn.querySelector('span').textContent = '⏳'); }
+      try {
+        var file = await generateShareCard(inviteURL, refCode);
+        var objURL = URL.createObjectURL(file);
+        showCardShareSheet(objURL, file);
+      } catch(e) {
+        console.error('Card generation error:', e);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          var sp = btn.querySelector('span');
+          if (sp && typeof t === 'function') sp.textContent = t('share_invite_btn') || 'SHARE MY INVITE CARD';
+          else if (sp) sp.textContent = 'SHARE MY INVITE CARD';
+        }
+      }
     }
 
+    function showCardShareSheet(imgURL, imgFile) {
+      var old = document.getElementById('card-share-sheet');
+      if (old) { old.remove(); }
+
+      var userLang = (typeof detectLang === 'function') ? detectLang() : 'en';
+
+      var GALLERY_MSGS = {
+        en: 'YOUR CARD IS READY — CHOOSE WHERE TO SHARE',
+        fr: 'VOTRE CARTE EST PRÊTE — CHOISISSEZ OÙ PARTAGER',
+        es: 'TU TARJETA ESTÁ LISTA — ELIGE DÓNDE COMPARTIR',
+        pt: 'SEU CARTÃO ESTÁ PRONTO — ESCOLHA ONDE COMPARTILHAR',
+        de: 'DEINE KARTE IST BEREIT — WÄHLE WO TEILEN',
+        ar: 'بطاقتك جاهزة — اختر أين تشارك',
+        zh: '你的卡片已准备好 — 选择分享到哪里',
+        ru: 'ВАША КАРТА ГОТОВА — ВЫБЕРИТЕ ГДЕ ПОДЕЛИТЬСЯ',
+        ja: 'カードが準備できました — 共有先を選んでください',
+        hi: 'आपका कार्ड तैयार है — शेयर करने का स्थान चुनें',
+        uk: 'ВАША КАРТКА ГОТОВА — ОБЕРІТЬ ДЕ ПОДІЛИТИСЯ'
+      };
+      var GALLERY_SAVED = {
+        en: '🖼 YOUR INVITE CARD IS IN YOUR GALLERY!',
+        fr: '🖼 VOTRE CARTE D\'INVITATION EST DANS VOTRE GALERIE !',
+        es: '🖼 ¡TU TARJETA DE INVITACIÓN ESTÁ EN TU GALERÍA!',
+        pt: '🖼 SEU CARTÃO DE CONVITE ESTÁ NA SUA GALERIA!',
+        de: '🖼 DEINE EINLADUNGSKARTE IST IN DEINER GALERIE!',
+        ar: '🖼 بطاقة دعوتك في معرض صورك!',
+        zh: '🖼 你的邀请卡已保存到相册！',
+        ru: '🖼 ВАША КАРТОЧКА ПРИГЛАШЕНИЯ В ГАЛЕРЕЕ!',
+        ja: '🖼 招待カードがギャラリーに保存されました！',
+        hi: '🖼 आपका आमंत्रण कार्ड गैलरी में है!',
+        uk: '🖼 ВАША КАРТКА ЗАПРОШЕННЯ У ГАЛЕРЕЇ!'
+      };
+
+      var galleryMsg  = GALLERY_MSGS[userLang]  || GALLERY_MSGS.en;
+      var gallerySaved = GALLERY_SAVED[userLang] || GALLERY_SAVED.en;
+
+      var sheet = document.createElement('div');
+      sheet.id  = 'card-share-sheet';
+      sheet.style.cssText =
+        'position:fixed;inset:0;z-index:9990;display:flex;flex-direction:column;' +
+        'align-items:center;justify-content:flex-end;' +
+        'background:rgba(0,10,25,0.75);backdrop-filter:blur(12px);' +
+        '-webkit-backdrop-filter:blur(12px);' +
+        'opacity:0;transition:opacity 0.3s;';
+
+      function _appBtn(icon, label) {
+        return '<div style="display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;" data-css-app="' + label.toLowerCase() + '">' +
+          '<div style="width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;' +
+          'background:rgba(255,255,255,0.09);border:1px solid rgba(255,255,255,0.15);font-size:24px;">' + icon + '</div>' +
+          '<span style="font-family:Nasalization,Arial;font-size:6px;letter-spacing:1.5px;color:rgba(255,255,255,0.5);">' + label + '</span>' +
+        '</div>';
+      }
+
+      sheet.innerHTML =
+        '<div style="background:linear-gradient(180deg,#0a2d4a,#050f1a);border-radius:24px 24px 0 0;' +
+        'width:100%;max-width:520px;padding:22px 20px 36px;font-family:Nasalization,Arial,sans-serif;">' +
+
+        // Header
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
+          '<span style="font-size:9px;letter-spacing:3.5px;color:rgba(255,255,255,0.45);" data-i18n="share_your_card">SHARE YOUR INVITE CARD</span>' +
+          '<button id="css-close" style="background:rgba(255,255,255,0.08);border:none;border-radius:50%;width:30px;height:30px;color:#fff;font-size:16px;cursor:pointer;line-height:30px;display:flex;align-items:center;justify-content:center;">✕</button>' +
+        '</div>' +
+
+        // Card preview
+        '<div style="display:flex;justify-content:center;margin-bottom:16px;">' +
+          '<img src="' + imgURL + '" style="width:140px;border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,0.5);" />' +
+        '</div>' +
+
+        // Message
+        '<p id="css-gallery-msg" style="text-align:center;font-size:8px;letter-spacing:1.5px;color:rgba(58,172,223,0.9);margin-bottom:20px;">' + galleryMsg + '</p>' +
+
+        // App buttons (5 platforms)
+        '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;">' +
+          _appBtn('💬', 'WHATSAPP') +
+          _appBtn('📷', 'INSTAGRAM') +
+          _appBtn('𝕏',  'X') +
+          _appBtn('f',  'FACEBOOK') +
+          _appBtn('💬', 'MESSENGER') +
+        '</div>' +
+
+        // Save to gallery button
+        '<button id="css-save-btn" style="width:100%;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.2);' +
+        'background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.65);' +
+        'font-family:Nasalization,Arial;font-size:8px;letter-spacing:2px;cursor:pointer;">' +
+        '💾 SAVE TO GALLERY</button>' +
+        '</div>';
+
+      // Platform URL builder
+      function _openApp(appName) {
+        var customMsg = (document.getElementById('invite-custom-msg') || {}).value || '';
+        var shareText = (customMsg || (SHARE_TEXTS[userLang] || SHARE_TEXTS.en).split('\n')[0]) + '\n' + inviteURL;
+        var enc = encodeURIComponent(shareText);
+        var encURL = encodeURIComponent(inviteURL);
+        var urls = {
+          whatsapp:  'https://wa.me/?text=' + enc,
+          instagram: null, // image-based, handled via native share or gallery
+          x:         'https://x.com/intent/tweet?text=' + enc,
+          facebook:  'https://www.facebook.com/sharer/sharer.php?u=' + encURL,
+          messenger: 'https://www.facebook.com/dialog/send?link=' + encURL + '&app_id=317673945436802&redirect_uri=' + encURL
+        };
+
+        // Try native share with file first (saves to gallery + opens native sheet)
+        if (navigator.canShare && navigator.canShare({ files: [imgFile] })) {
+          navigator.share({ files: [imgFile], title: 'NAVA PEACE 🕊', text: shareText })
+            .then(function() {
+              document.getElementById('css-gallery-msg').textContent = gallerySaved;
+            })
+            .catch(function(err) {
+              if (err.name !== 'AbortError') { fallbackShare(appName, urls); }
+            });
+        } else {
+          fallbackShare(appName, urls);
+        }
+      }
+
+      function fallbackShare(appName, urls) {
+        // Download image first
+        var a = document.createElement('a');
+        a.href = imgURL; a.download = 'nava-peace-invite.png'; a.click();
+        document.getElementById('css-gallery-msg').textContent = gallerySaved;
+        var url = urls[appName];
+        if (url) {
+          setTimeout(function() {
+            if (typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram && appName !== 'sms') {
+              Telegram.WebApp.openLink(url);
+            } else {
+              window.open(url, '_blank');
+            }
+          }, 800);
+        }
+      }
+
+      function closeSheet() {
+        sheet.style.opacity = '0';
+        setTimeout(function() { sheet.remove(); URL.revokeObjectURL(imgURL); }, 300);
+      }
+
+      // Bind events after DOM inserted
+      document.body.appendChild(sheet);
+      requestAnimationFrame(function() { sheet.style.opacity = '1'; });
+
+      sheet.querySelector('#css-close').onclick = closeSheet;
+      sheet.onclick = function(e) { if (e.target === sheet) closeSheet(); };
+
+      sheet.querySelector('#css-save-btn').onclick = function() {
+        var a = document.createElement('a');
+        a.href = imgURL; a.download = 'nava-peace-invite.png'; a.click();
+        document.getElementById('css-gallery-msg').textContent = gallerySaved;
+      };
+
+      sheet.querySelectorAll('[data-css-app]').forEach(function(el) {
+        el.onclick = function() { _openApp(el.getAttribute('data-css-app')); };
+      });
+    }
+
+    // ── Old showSharePanel (kept for backwards compat, not used) ───
     function showSharePanel(targetApp) {
       var userLang = (typeof detectLang === 'function') ? detectLang() : 'en';
       var isNative = userLang !== 'en';
@@ -2424,40 +2676,32 @@
       requestAnimationFrame(function() { overlay.style.opacity = '1'; });
     }
 
-    // Bind all share buttons → open share panel
-    ['tg','wa','tw','sms','msngr','fb','ig','email'].forEach(function(app) {
-      var btn = document.getElementById('share-' + app);
-      if (btn) {
-        btn.href = '#';
-        btn.onclick = function(e) { e.preventDefault(); doShare(app); };
-      }
-    });
+    // (share buttons removed — card-first flow via window.NAVA_SHARE.open)
 
-    // Generate share card — 3 tiers: Logo+Title / QR+Invitation / URLs
+    // Generate share card — Logo/Title | Personal msg + QR | Live peace map
     function generateShareCard(url, code) {
       return new Promise(function(resolve) {
 
-        var w = 600, h = 860;
+        var w = 600, h = 920;
         var canvas = document.createElement('canvas');
         canvas.width = w; canvas.height = h;
         var ctx = canvas.getContext('2d');
         var cx = w / 2;
+        var cr = 36;
 
         // ── BACKGROUND ──
-        var cr = 36;
-        var grad = ctx.createRadialGradient(cx, h*0.25, 0, cx, h*0.5, h);
+        var grad = ctx.createRadialGradient(cx, h*0.3, 0, cx, h*0.5, h);
         grad.addColorStop(0, '#1E6E9A');
         grad.addColorStop(0.45, '#0F4060');
         grad.addColorStop(1, '#050F1A');
         ctx.fillStyle = grad;
         ctx.beginPath();
         ctx.moveTo(cr,0); ctx.lineTo(w-cr,0); ctx.quadraticCurveTo(w,0,w,cr);
-        ctx.lineTo(w,h-cr); ctx.quadraticCurveTo(w,h,w-cr,h);
-        ctx.lineTo(cr,h); ctx.quadraticCurveTo(0,h,0,h-cr);
+        ctx.lineTo(w,h); ctx.lineTo(0,h);
         ctx.lineTo(0,cr); ctx.quadraticCurveTo(0,0,cr,0);
         ctx.closePath(); ctx.fill();
 
-        // Top accent bar
+        // Accent bar top
         var barGrad = ctx.createLinearGradient(0,0,w,0);
         barGrad.addColorStop(0,'rgba(58,172,223,0)');
         barGrad.addColorStop(0.5,'#3AACDF');
@@ -2471,22 +2715,19 @@
         document.body.appendChild(qrDiv);
         try {
           new QRCode(qrDiv, {
-            text: url, width: 300, height: 300,
+            text: url, width: 260, height: 260,
             colorDark: '#0a2a40', colorLight: '#ffffff',
             correctLevel: QRCode.CorrectLevel.H
           });
         } catch(qe) {}
 
-        // Fetch logo as data URL (no canvas taint)
         fetch('logo.png')
-          .then(function(res) { return res.blob(); })
+          .then(function(r) { return r.blob(); })
           .then(function(blob) {
             var fr = new FileReader();
             fr.onload = function() {
-              var logoImg = new Image();
-              logoImg.onload = function() { drawCard(logoImg); };
-              logoImg.onerror = function() { drawCard(null); };
-              logoImg.src = fr.result;
+              var img = new Image(); img.onload = function() { drawCard(img); }; img.onerror = function() { drawCard(null); };
+              img.src = fr.result;
             };
             fr.onerror = function() { drawCard(null); };
             fr.readAsDataURL(blob);
@@ -2502,74 +2743,145 @@
           ctx.closePath();
         }
 
+        function wrapText(text, maxW, font) {
+          ctx.font = font;
+          var words = text.split(' ');
+          var lines = [];
+          var cur = '';
+          words.forEach(function(w) {
+            var test = cur ? cur + ' ' + w : w;
+            if (ctx.measureText(test).width > maxW && cur) { lines.push(cur); cur = w; }
+            else { cur = test; }
+          });
+          if (cur) lines.push(cur);
+          return lines;
+        }
+
         function drawCard(logoImg) {
           ctx.textAlign = 'center';
 
           // ── TIER 1 — Logo + Title ──
-          var logoSize = 130, logoY = 28;
+          var logoSize = 110, logoY = 24;
           if (logoImg) {
             ctx.save();
-            ctx.shadowColor = 'rgba(58,172,223,0.8)';
-            ctx.shadowBlur = 50;
+            ctx.shadowColor = 'rgba(58,172,223,0.8)'; ctx.shadowBlur = 50;
             ctx.drawImage(logoImg, cx - logoSize/2, logoY, logoSize, logoSize);
             ctx.restore();
           }
           ctx.fillStyle = '#FFFFFF';
-          ctx.font = 'bold 46px Nasalization, Arial, sans-serif';
-          ctx.fillText('NAVA PEACE', cx, logoY + logoSize + 46);
+          ctx.font = 'bold 42px Nasalization, Arial, sans-serif';
+          ctx.fillText('NAVA PEACE', cx, logoY + logoSize + 42);
 
-          var ul = ctx.createLinearGradient(cx-130,0,cx+130,0);
-          ul.addColorStop(0,'rgba(58,172,223,0)');
-          ul.addColorStop(0.5,'#3AACDF');
-          ul.addColorStop(1,'rgba(58,172,223,0)');
+          var ul = ctx.createLinearGradient(cx-120,0,cx+120,0);
+          ul.addColorStop(0,'rgba(58,172,223,0)'); ul.addColorStop(0.5,'#3AACDF'); ul.addColorStop(1,'rgba(58,172,223,0)');
           ctx.strokeStyle = ul; ctx.lineWidth = 1.5;
-          ctx.beginPath();
-          ctx.moveTo(cx-130, logoY+logoSize+60); ctx.lineTo(cx+130, logoY+logoSize+60);
-          ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(cx-120, logoY+logoSize+56); ctx.lineTo(cx+120, logoY+logoSize+56); ctx.stroke();
 
-          ctx.fillStyle = 'rgba(255,255,255,0.85)';
-          ctx.font = '15px Nasalization, Arial, sans-serif';
-          ctx.fillText('MAKE PEACE. MAKE CHANGE.', cx, logoY + logoSize + 86);
+          ctx.fillStyle = 'rgba(255,255,255,0.7)';
+          ctx.font = '13px Nasalization, Arial, sans-serif';
+          ctx.fillText('MAKE PEACE. MAKE CHANGE.', cx, logoY + logoSize + 80);
 
-          // ── TIER 2 — Invitation + QR ──
-          var t2y = logoY + logoSize + 124;
+          // ── TIER 2 — Sponsor ID + personal message ──
+          var t2y = logoY + logoSize + 116;
           var pseudo = (localStorage.getItem('nava_peace_pseudo') || 'A PEACE MEMBER').toUpperCase();
 
-          ctx.fillStyle = 'rgba(255,255,255,0.6)';
-          ctx.font = '13px Nasalization, Arial, sans-serif';
+          ctx.fillStyle = 'rgba(255,255,255,0.5)';
+          ctx.font = '12px Nasalization, Arial, sans-serif';
           ctx.fillText('YOU ARE INVITED BY', cx, t2y);
 
           ctx.fillStyle = '#3AACDF';
-          ctx.font = 'bold 24px Nasalization, Arial, sans-serif';
-          ctx.fillText(pseudo, cx, t2y + 36);
+          ctx.font = 'bold 22px Nasalization, Arial, sans-serif';
+          ctx.fillText(pseudo, cx, t2y + 32);
 
-          ctx.fillStyle = 'rgba(255,255,255,0.6)';
-          ctx.font = '13px Nasalization, Arial, sans-serif';
-          ctx.fillText('TO JOIN NAVA PEACE', cx, t2y + 68);
+          // Personal message
+          var customMsg = (document.getElementById('invite-custom-msg') || {}).value || '';
+          if (!customMsg) customMsg = (SHARE_TEXTS[userLang] || SHARE_TEXTS.en).split('\n')[0];
+          var msgFont = '13px Nasalization, Arial, sans-serif';
+          var msgLines = wrapText(customMsg, w - 80, msgFont);
+          ctx.fillStyle = 'rgba(255,255,255,0.85)';
+          ctx.font = msgFont;
+          msgLines.forEach(function(line, i) { ctx.fillText(line, cx, t2y + 68 + i * 22); });
 
-          var qrSize = 280, qrPad = 16;
-          var qrX = cx - qrSize/2, qrY = t2y + 88;
+          var afterMsg = t2y + 68 + msgLines.length * 22 + 10;
+
+          // Invite link (small)
+          ctx.fillStyle = 'rgba(58,172,223,0.7)';
+          ctx.font = '10px Nasalization, Arial, sans-serif';
+          ctx.fillText(url, cx, afterMsg + 10);
+
+          // ── QR code (bold border) ──
+          var qrSize = 240, qrPad = 14;
+          var qrX = cx - qrSize/2, qrY = afterMsg + 28;
           var qrCanvas = qrDiv.querySelector('canvas');
           if (qrCanvas) {
+            // Bold blue border
             ctx.fillStyle = '#FFFFFF';
-            rRect(qrX - qrPad, qrY - qrPad, qrSize + qrPad*2, qrSize + qrPad*2, 20);
+            rRect(qrX - qrPad, qrY - qrPad, qrSize + qrPad*2, qrSize + qrPad*2, 18);
             ctx.fill();
-            ctx.strokeStyle = '#3AACDF'; ctx.lineWidth = 3;
-            rRect(qrX - qrPad, qrY - qrPad, qrSize + qrPad*2, qrSize + qrPad*2, 20);
+            ctx.strokeStyle = '#3AACDF'; ctx.lineWidth = 5;
+            rRect(qrX - qrPad, qrY - qrPad, qrSize + qrPad*2, qrSize + qrPad*2, 18);
             ctx.stroke();
             ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
           }
           if (document.body.contains(qrDiv)) document.body.removeChild(qrDiv);
 
-          // ── TIER 3 — URLs ──
-          var t3y = qrY + qrSize + qrPad + 44;
-          ctx.fillStyle = 'rgba(58,172,223,0.9)';
-          ctx.font = '15px Nasalization, Arial, sans-serif';
-          ctx.fillText('www.nava-peace.world', cx, t3y);
-          ctx.fillText('www.nava-peace.app', cx, t3y + 30);
+          // ── TIER 3 — Peace Map (bottom third) ──
+          var mapY = qrY + qrSize + qrPad + 20;
+          var mapH = h - mapY;
 
+          // Dark map background
+          ctx.fillStyle = '#020C18';
+          ctx.fillRect(0, mapY, w, mapH);
+
+          // Divider
           ctx.fillStyle = barGrad;
-          ctx.fillRect(cr, h-4, w-2*cr, 4);
+          ctx.fillRect(0, mapY, w, 2);
+
+          // Grid lines
+          ctx.strokeStyle = 'rgba(58,172,223,0.07)'; ctx.lineWidth = 1;
+          for (var row = 0; row <= mapH; row += 36) {
+            ctx.beginPath(); ctx.moveTo(0, mapY+row); ctx.lineTo(w, mapY+row); ctx.stroke();
+          }
+          for (var col = 0; col <= w; col += 50) {
+            ctx.beginPath(); ctx.moveTo(col, mapY); ctx.lineTo(col, mapY+mapH); ctx.stroke();
+          }
+
+          // Peace dots — approximate world city positions on 600px
+          var dots = [
+            {x:0.46,y:0.28},{x:0.50,y:0.22},{x:0.55,y:0.25},{x:0.53,y:0.20}, // Europe
+            {x:0.32,y:0.30},{x:0.26,y:0.33},{x:0.36,y:0.26},                  // Americas
+            {x:0.62,y:0.28},{x:0.68,y:0.30},{x:0.74,y:0.32},                  // Asia
+            {x:0.55,y:0.48},{x:0.50,y:0.55},{x:0.44,y:0.60},                  // Africa/south
+            {x:0.78,y:0.38},{x:0.82,y:0.42},{x:0.70,y:0.40},                  // East Asia
+            {x:0.88,y:0.65},{x:0.83,y:0.70}                                    // Oceania
+          ];
+          dots.forEach(function(d, i) {
+            var pulse = i % 3 === 0;
+            if (pulse) {
+              ctx.fillStyle = 'rgba(58,172,223,0.12)';
+              ctx.beginPath(); ctx.arc(d.x*w, mapY+d.y*mapH, 8, 0, Math.PI*2); ctx.fill();
+            }
+            ctx.fillStyle = pulse ? '#3AACDF' : 'rgba(58,172,223,0.6)';
+            ctx.beginPath(); ctx.arc(d.x*w, mapY+d.y*mapH, pulse?4:3, 0, Math.PI*2); ctx.fill();
+          });
+
+          // "LIVE" label + timestamp
+          var now = new Date();
+          var dateStr = now.toUTCString().replace(/ GMT$/, ' UTC');
+          ctx.fillStyle = 'rgba(255,255,255,0.3)';
+          ctx.font = '9px Nasalization, Arial, sans-serif';
+          ctx.textAlign = 'left';
+          ctx.fillText('🌍 PEACE MAP  •  ' + dateStr, 20, mapY + 18);
+
+          // www.nava-peace.world centered
+          ctx.textAlign = 'center';
+          ctx.fillStyle = 'rgba(58,172,223,0.9)';
+          ctx.font = 'bold 18px Nasalization, Arial, sans-serif';
+          ctx.fillText('www.nava-peace.world', cx, mapY + mapH - 18);
+
+          // Accent bar bottom
+          ctx.fillStyle = barGrad;
+          ctx.fillRect(0, h-4, w, 4);
 
           canvas.toBlob(function(blob) {
             if (!blob) { console.error('toBlob returned null'); return; }

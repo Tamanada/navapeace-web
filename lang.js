@@ -174,6 +174,12 @@ const NAVA_TRANSLATIONS = {
     streak_unlock:       '{n} more day(s) to unlock',
     share_map_btn:       'SHARE THE MAP',
     share_peace:         'SHARE PEACE',
+    invite_msg_label:    'MY INVITATION MESSAGE',
+    btn_random_msg:      'RANDOM',
+    share_invite_btn:    'SHARE MY INVITE CARD',
+    share_your_card:     'SHARE YOUR INVITE CARD',
+    gallery_msg:         'YOUR CARD IS READY — CHOOSE WHERE TO SHARE',
+    gallery_saved:       '🖼 YOUR INVITE CARD IS IN YOUR GALLERY!',
   },
 
   fr: {
@@ -338,6 +344,12 @@ const NAVA_TRANSLATIONS = {
     streak_unlock:       'Encore {n} jour(s) pour débloquer',
     share_map_btn:       'PARTAGER LA CARTE',
     share_peace:         'PARTAGER LA PAIX',
+    invite_msg_label:    'MON MESSAGE D\'INVITATION',
+    btn_random_msg:      'ALÉATOIRE',
+    share_invite_btn:    'PARTAGER MA CARTE D\'INVITATION',
+    share_your_card:     'PARTAGER VOTRE CARTE',
+    gallery_msg:         'VOTRE CARTE EST PRÊTE — CHOISISSEZ OÙ PARTAGER',
+    gallery_saved:       '🖼 VOTRE CARTE EST DANS VOTRE GALERIE !',
   },
 
   es: {
@@ -502,6 +514,12 @@ const NAVA_TRANSLATIONS = {
     streak_unlock:       '{n} día(s) más para desbloquear',
     share_map_btn:       'COMPARTIR EL MAPA',
     share_peace:         'COMPARTIR PAZ',
+    invite_msg_label:    'MI MENSAJE DE INVITACIÓN',
+    btn_random_msg:      'ALEATORIO',
+    share_invite_btn:    'COMPARTIR MI TARJETA',
+    share_your_card:     'COMPARTIR TU TARJETA',
+    gallery_msg:         'TU TARJETA ESTÁ LISTA — ELIGE DÓNDE COMPARTIR',
+    gallery_saved:       '🖼 ¡TU TARJETA ESTÁ EN TU GALERÍA!',
   },
 
   pt: {
@@ -666,6 +684,12 @@ const NAVA_TRANSLATIONS = {
     streak_unlock:       'Mais {n} dia(s) para desbloquear',
     share_map_btn:       'COMPARTILHAR O MAPA',
     share_peace:         'COMPARTILHAR PAZ',
+    invite_msg_label:    'MEU MENSAGEM DE CONVITE',
+    btn_random_msg:      'ALEATÓRIO',
+    share_invite_btn:    'COMPARTILHAR MEU CARTÃO',
+    share_your_card:     'COMPARTILHAR SEU CARTÃO',
+    gallery_msg:         'SEU CARTÃO ESTÁ PRONTO — ESCOLHA ONDE COMPARTILHAR',
+    gallery_saved:       '🖼 SEU CARTÃO ESTÁ NA SUA GALERIA!',
   },
 
   de: {
@@ -830,6 +854,12 @@ const NAVA_TRANSLATIONS = {
     streak_unlock:       'Noch {n} Tag(e) bis zum Freischalten',
     share_map_btn:       'KARTE TEILEN',
     share_peace:         'FRIEDEN TEILEN',
+    invite_msg_label:    'MEINE EINLADUNGSNACHRICHT',
+    btn_random_msg:      'ZUFÄLLIG',
+    share_invite_btn:    'MEINE EINLADUNGSKARTE TEILEN',
+    share_your_card:     'DEINE KARTE TEILEN',
+    gallery_msg:         'DEINE KARTE IST BEREIT — WÄHLE WO TEILEN',
+    gallery_saved:       '🖼 DEINE KARTE IST IN DEINER GALERIE!',
   },
 
   ar: {
@@ -994,6 +1024,12 @@ const NAVA_TRANSLATIONS = {
     streak_unlock:       '{n} يوم/أيام أخرى للفتح',
     share_map_btn:       'مشاركة الخريطة',
     share_peace:         'مشاركة السلام',
+    invite_msg_label:    'رسالة دعوتي',
+    btn_random_msg:      'عشوائي',
+    share_invite_btn:    'شارك بطاقة دعوتي',
+    share_your_card:     'شارك بطاقتك',
+    gallery_msg:         'بطاقتك جاهزة — اختر أين تشارك',
+    gallery_saved:       '🖼 بطاقة دعوتك في معرض صورك!',
   },
 
   zh: {
@@ -1158,6 +1194,12 @@ const NAVA_TRANSLATIONS = {
     streak_unlock:       '还差{n}天解锁',
     share_map_btn:       '分享地图',
     share_peace:         '分享和平',
+    invite_msg_label:    '我的邀请留言',
+    btn_random_msg:      '随机',
+    share_invite_btn:    '分享我的邀请卡',
+    share_your_card:     '分享你的邀请卡',
+    gallery_msg:         '你的卡片已准备好 — 选择分享到哪里',
+    gallery_saved:       '🖼 你的邀请卡已保存到相册！',
   },
 
   ru: {
@@ -1322,6 +1364,12 @@ const NAVA_TRANSLATIONS = {
     streak_unlock:       'Ещё {n} день(дней) до разблокировки',
     share_map_btn:       'ПОДЕЛИТЬСЯ КАРТОЙ',
     share_peace:         'ПОДЕЛИТЬСЯ МИРОМ',
+    invite_msg_label:    'МОЁ ПРИГЛАСИТЕЛЬНОЕ СООБЩЕНИЕ',
+    btn_random_msg:      'СЛУЧАЙНОЕ',
+    share_invite_btn:    'ПОДЕЛИТЬСЯ КАРТОЧКОЙ',
+    share_your_card:     'ПОДЕЛИТЕСЬ СВОЕЙ КАРТОЧКОЙ',
+    gallery_msg:         'ВАША КАРТА ГОТОВА — ВЫБЕРИТЕ ГДЕ ПОДЕЛИТЬСЯ',
+    gallery_saved:       '🖼 ВАША КАРТОЧКА В ГАЛЕРЕЕ!',
   },
 
   th: {
@@ -1486,6 +1534,12 @@ const NAVA_TRANSLATIONS = {
     streak_unlock:       'อีก {n} วันเพื่อปลดล็อก',
     share_map_btn:       'แชร์แผนที่',
     share_peace:         'แชร์สันติภาพ',
+    invite_msg_label:    'ข้อความเชิญของฉัน',
+    btn_random_msg:      'สุ่ม',
+    share_invite_btn:    'แชร์การ์ดเชิญของฉัน',
+    share_your_card:     'แชร์การ์ดของคุณ',
+    gallery_msg:         'การ์ดของคุณพร้อมแล้ว — เลือกที่จะแชร์',
+    gallery_saved:       '🖼 การ์ดเชิญของคุณอยู่ในแกลเลอรี่แล้ว!',
   },
 
   ja: {
@@ -1650,6 +1704,12 @@ const NAVA_TRANSLATIONS = {
     streak_unlock:       'あと{n}日で解除',
     share_map_btn:       '地図を共有',
     share_peace:         '平和を共有',
+    invite_msg_label:    '招待メッセージ',
+    btn_random_msg:      'ランダム',
+    share_invite_btn:    '招待カードを共有',
+    share_your_card:     'カードを共有',
+    gallery_msg:         'カードが準備できました — 共有先を選択',
+    gallery_saved:       '🖼 招待カードがギャラリーに保存されました！',
   },
 
   my: {
@@ -1814,6 +1874,12 @@ const NAVA_TRANSLATIONS = {
     streak_unlock:       'နောက် {n} ရက်ဖွင့်ရန်',
     share_map_btn:       'မြေပုံမျှဝေရန်',
     share_peace:         'ငြိမ်းချမ်းရေးမျှဝေရန်',
+    invite_msg_label:    'ငါ့ဖိတ်ကြားချက်',
+    btn_random_msg:      'ကျပန်း',
+    share_invite_btn:    'ငါ့ဖိတ်ကြားကတ် မျှဝေ',
+    share_your_card:     'မင်းကတ် မျှဝေ',
+    gallery_msg:         'မင်းကတ် အသင့်ဖြစ်ပြီ — မျှဝေမည့်နေရာ ရွေးချယ်ပါ',
+    gallery_saved:       '🖼 ဖိတ်ကြားကတ် ဓာတ်ပုံပြခန်းတွင် ရှိသည်!',
   },
 
   hi: {
@@ -1978,6 +2044,12 @@ const NAVA_TRANSLATIONS = {
     streak_unlock:       'अनलॉक करने में {n} दिन और',
     share_map_btn:       'मानचित्र साझा करें',
     share_peace:         'शांति साझा करें',
+    invite_msg_label:    'मेरा आमंत्रण संदेश',
+    btn_random_msg:      'यादृच्छिक',
+    share_invite_btn:    'मेरा कार्ड साझा करें',
+    share_your_card:     'अपना कार्ड साझा करें',
+    gallery_msg:         'आपका कार्ड तैयार है — शेयर करने का स्थान चुनें',
+    gallery_saved:       '🖼 आपका कार्ड गैलरी में है!',
   },
 
   uk: {
@@ -2148,6 +2220,12 @@ const NAVA_TRANSLATIONS = {
     streak_unlock:       'Ще {n} день(днів) до розблокування',
     share_map_btn:       'ПОДІЛИТИСЯ КАРТОЮ',
     share_peace:         'ПОДІЛИТИСЯ МИРОМ',
+    invite_msg_label:    'МОЄ ЗАПРОШЕННЯ',
+    btn_random_msg:      'ВИПАДКОВЕ',
+    share_invite_btn:    'ПОДІЛИТИСЯ КАРТКОЮ',
+    share_your_card:     'ПОДІЛІТЬСЯ СВОЄЮ КАРТКОЮ',
+    gallery_msg:         'ВАША КАРТКА ГОТОВА — ОБЕРІТЬ ДЕ ПОДІЛИТИСЯ',
+    gallery_saved:       '🖼 ВАША КАРТКА У ГАЛЕРЕЇ!',
   },
 
 };

@@ -632,6 +632,104 @@
 
     setDailyMessage();
 
+    // ── Ref code screen — first-time visitors ───────────────────────
+    var REF_CODE_LABELS = {
+      en: { title: 'GOT A REFERRAL CODE?', placeholder: 'ENTER CODE (OPTIONAL)', enter: 'JOIN WITH CODE', skip: 'SKIP' },
+      fr: { title: 'TU AS UN CODE PARRAIN?', placeholder: 'ENTRER LE CODE (FACULTATIF)', enter: 'REJOINDRE AVEC CODE', skip: 'PASSER' },
+      es: { title: '¿TIENES UN CÓDIGO?', placeholder: 'INGRESA EL CÓDIGO (OPCIONAL)', enter: 'UNIRME CON CÓDIGO', skip: 'OMITIR' },
+      pt: { title: 'TEM UM CÓDIGO?', placeholder: 'INSERIR CÓDIGO (OPCIONAL)', enter: 'ENTRAR COM CÓDIGO', skip: 'PULAR' },
+      de: { title: 'HAST DU EINEN CODE?', placeholder: 'CODE EINGEBEN (OPTIONAL)', enter: 'MIT CODE BEITRETEN', skip: 'ÜBERSPRINGEN' },
+      ar: { title: 'هل لديك رمز إحالة؟', placeholder: 'أدخل الرمز (اختياري)', enter: 'انضم برمز', skip: 'تخطي' },
+      zh: { title: '有邀请码？', placeholder: '输入邀请码（可选）', enter: '用邀请码加入', skip: '跳过' },
+      ru: { title: 'ЕСТЬ КОД ПРИГЛАШЕНИЯ?', placeholder: 'ВВЕДИ КОД (НЕОБЯЗАТЕЛЬНО)', enter: 'ВОЙТИ С КОДОМ', skip: 'ПРОПУСТИТЬ' },
+      ja: { title: '招待コードはありますか？', placeholder: 'コードを入力（任意）', enter: 'コードで参加', skip: 'スキップ' },
+      hi: { title: 'क्या आपके पास रेफरल कोड है?', placeholder: 'कोड डालें (वैकल्पिक)', enter: 'कोड से जुड़ें', skip: 'छोड़ें' },
+      uk: { title: 'Є КОД ЗАПРОШЕННЯ?', placeholder: 'ВВЕДІТЬ КОД (НЕОБОВ\'ЯЗКОВО)', enter: 'ПРИЄДНАТИСЯ З КОДОМ', skip: 'ПРОПУСТИТИ' },
+    };
+
+    function showRefCodeScreen() {
+      var stage = document.querySelector('.stage');
+      var hero  = document.querySelector('.hero');
+      var tapEl = document.getElementById('tap-hint');
+      if (tapEl) tapEl.style.display = 'none';
+
+      var lang = (typeof detectLang === 'function') ? detectLang() : 'en';
+      var lbl  = REF_CODE_LABELS[lang] || REF_CODE_LABELS.en;
+
+      // Fade out hero text
+      if (hero) {
+        hero.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        hero.style.opacity    = '0';
+        hero.style.transform  = 'scale(0.95)';
+      }
+
+      setTimeout(function () {
+        // Build ref code UI inside stage
+        var refBox = document.createElement('div');
+        refBox.id  = 'ref-code-box';
+        refBox.style.cssText =
+          'display:flex;flex-direction:column;align-items:center;gap:16px;' +
+          'width:100%;max-width:320px;padding:0 24px;' +
+          'animation:fadeIn 0.7s ease both;';
+
+        refBox.innerHTML =
+          '<p style="font-family:Nasalization,Arial,sans-serif;font-size:10px;letter-spacing:3px;' +
+          'color:rgba(255,255,255,0.65);text-transform:uppercase;text-align:center;margin:0;">' +
+          lbl.title + '</p>' +
+
+          '<input id="ref-code-input" type="text" maxlength="16" autocomplete="off" spellcheck="false"' +
+          ' placeholder="' + lbl.placeholder + '"' +
+          ' style="width:100%;background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.3);' +
+          'border-radius:12px;color:#fff;font-family:Nasalization,Arial,sans-serif;font-size:12px;' +
+          'letter-spacing:3px;padding:13px 16px;text-align:center;outline:none;' +
+          'text-transform:uppercase;box-sizing:border-box;">' +
+
+          '<button id="ref-enter-btn" style="' +
+          'width:100%;padding:14px;border-radius:14px;border:none;cursor:pointer;' +
+          'background:linear-gradient(135deg,#3AACDF,#1E6E9A);color:#fff;' +
+          'font-family:Nasalization,Arial,sans-serif;font-size:10px;letter-spacing:3px;">' +
+          lbl.enter + '</button>' +
+
+          '<button id="ref-skip-btn" style="' +
+          'background:none;border:none;color:rgba(255,255,255,0.4);' +
+          'font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:3px;' +
+          'text-transform:uppercase;cursor:pointer;text-decoration:underline;">' +
+          lbl.skip + '</button>';
+
+        if (stage) stage.appendChild(refBox);
+
+        // Input uppercase transform
+        var inp = document.getElementById('ref-code-input');
+        if (inp) inp.addEventListener('input', function() { this.value = this.value.toUpperCase(); });
+
+        // Enter button
+        document.getElementById('ref-enter-btn').addEventListener('click', function() {
+          var code = (document.getElementById('ref-code-input').value || '').trim().toUpperCase();
+          if (code) {
+            localStorage.setItem('nava_peace_referred_by', code);
+          }
+          goToApp();
+        });
+
+        // Skip button
+        document.getElementById('ref-skip-btn').addEventListener('click', function() {
+          goToApp();
+        });
+
+        // Also allow pressing Enter key
+        if (inp) inp.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') document.getElementById('ref-enter-btn').click();
+        });
+
+      }, 500);
+    }
+
+    function goToApp() {
+      var stage  = document.querySelector('.stage');
+      if (stage) { stage.style.transition = 'opacity 0.6s ease'; stage.style.opacity = '0'; }
+      setTimeout(function() { window.location.href = 'index.html'; }, 650);
+    }
+
     // ── Navigation tap/click → page suivante ────────────────────────
     function enableTap(dest) {
       var tapEl  = document.getElementById('tap-hint');
@@ -722,8 +820,8 @@
               idx++;
               if (idx >= WELCOME_WORDS.length) {
                 clearInterval(cycleTimer);
-                // After all words shown, enable tap
-                setTimeout(function () { enableTap('index.html'); }, 800);
+                // After all words shown, show ref code input
+                setTimeout(function () { showRefCodeScreen(); }, 800);
                 return;
               }
               // Fade out current
