@@ -536,11 +536,20 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
+      position: relative;
+      box-shadow: 0 0 18px 4px rgba(58,172,223,0.45), 0 0 40px 10px rgba(58,172,223,0.18);
+      animation: halo-pulse 2.4s ease-in-out infinite;
       transition: opacity 0.2s;
     }
 
+    @keyframes halo-pulse {
+      0%   { box-shadow: 0 0 14px 3px rgba(58,172,223,0.40), 0 0 32px 8px rgba(58,172,223,0.14); }
+      50%  { box-shadow: 0 0 26px 8px rgba(58,172,223,0.70), 0 0 55px 18px rgba(58,172,223,0.28); }
+      100% { box-shadow: 0 0 14px 3px rgba(58,172,223,0.40), 0 0 32px 8px rgba(58,172,223,0.14); }
+    }
+
     .share-card-btn:hover { opacity: 0.88; }
-    .share-card-btn:disabled { opacity: 0.5; cursor: default; }
+    .share-card-btn:disabled { opacity: 0.5; cursor: default; animation: none; box-shadow: none; }
 
     .points-box {
       display: flex;
@@ -2429,6 +2438,8 @@
 
       var galleryMsg  = GALLERY_MSGS[userLang]  || GALLERY_MSGS.en;
       var gallerySaved = GALLERY_SAVED[userLang] || GALLERY_SAVED.en;
+      var _HOLD_LABELS = {en:'HOLD IMAGE TO SAVE TO GALLERY',fr:'APPUI LONG POUR SAUVEGARDER',es:'MANTÉN PARA GUARDAR',pt:'SEGURE PARA SALVAR',de:'BILD HALTEN ZUM SPEICHERN',ar:'اضغط مطولاً للحفظ',zh:'长按图片保存',ru:'УДЕРЖИ ДЛЯ СОХРАНЕНИЯ',ja:'長押しで保存',hi:'सेव करने के लिए दबाएं',uk:'УТРИМУЙ ДЛЯ ЗБЕРЕЖЕННЯ'};
+      var holdLabel = _HOLD_LABELS[userLang] || _HOLD_LABELS.en;
 
       var sheet = document.createElement('div');
       sheet.id  = 'card-share-sheet';
@@ -2467,28 +2478,23 @@
           '<button id="css-close" style="background:rgba(255,255,255,0.08);border:none;border-radius:50%;width:30px;height:30px;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>' +
         '</div>' +
 
-        // Card preview
-        '<div style="display:flex;justify-content:center;margin-bottom:16px;">' +
-          '<img src="' + imgURL + '" style="width:140px;border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,0.5);" />' +
+        // Card preview — large, hold to save
+        '<div style="display:flex;flex-direction:column;align-items:center;margin-bottom:6px;">' +
+          '<img id="css-card-preview" src="' + imgURL + '" style="width:100%;max-width:320px;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.6);" />' +
+          '<p style="margin:8px 0 4px;font-family:Nasalization,Arial;font-size:7.5px;letter-spacing:2px;color:rgba(58,172,223,0.85);text-align:center;">👆 ' + holdLabel + '</p>' +
         '</div>' +
 
         // Message
-        '<p id="css-gallery-msg" style="text-align:center;font-size:8px;letter-spacing:1.5px;color:rgba(58,172,223,0.9);margin-bottom:20px;">' + galleryMsg + '</p>' +
+        '<p id="css-gallery-msg" style="text-align:center;font-size:8px;letter-spacing:1.5px;color:rgba(255,255,255,0.35);margin-bottom:18px;">' + galleryMsg + '</p>' +
 
         // App buttons (5 platforms — no Messenger, replaced with Telegram)
-        '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;">' +
+        '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:8px;">' +
           _appBtn('whatsapp',  'WHATSAPP') +
           _appBtn('instagram', 'INSTAGRAM') +
           _appBtn('x',         'X') +
           _appBtn('facebook',  'FACEBOOK') +
           _appBtn('telegram',  'TELEGRAM') +
         '</div>' +
-
-        // Save to gallery button
-        '<button id="css-save-btn" style="width:100%;padding:14px;border-radius:12px;border:1.5px solid rgba(58,172,223,0.4);' +
-        'background:rgba(58,172,223,0.12);color:#6DD5F5;' +
-        'font-family:Nasalization,Arial;font-size:9px;letter-spacing:2px;cursor:pointer;">' +
-        '💾 SAVE TO GALLERY</button>' +
         '</div>';
 
       // Platform URL builder
@@ -2550,23 +2556,9 @@
       sheet.querySelector('#css-close').onclick = closeSheet;
       sheet.onclick = function(e) { if (e.target === sheet) closeSheet(); };
 
-      sheet.querySelector('#css-save-btn').onclick = function() {
-        // Try native share with file → user can "Save Image" from native sheet
-        if (navigator.canShare && navigator.canShare({ files: [imgFile] })) {
-          navigator.share({ files: [imgFile], title: 'NAVA PEACE 🕊' })
-            .then(function() {
-              document.getElementById('css-gallery-msg').textContent = gallerySaved;
-            })
-            .catch(function(e) { if (e.name !== 'AbortError') _downloadFallback(); });
-        } else {
-          _downloadFallback();
-        }
-      };
-
       function _downloadFallback() {
         var a = document.createElement('a');
         a.href = imgURL; a.download = 'nava-peace-invite.png'; a.click();
-        document.getElementById('css-gallery-msg').textContent = gallerySaved;
       }
 
       sheet.querySelectorAll('[data-css-app]').forEach(function(el) {
