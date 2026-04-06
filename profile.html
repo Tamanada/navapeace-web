@@ -2497,51 +2497,82 @@
         '</div>' +
         '</div>';
 
+      // Clipboard copy helper
+      function _copyToClipboard(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          return navigator.clipboard.writeText(text);
+        }
+        var ta = document.createElement('textarea');
+        ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+        return Promise.resolve();
+      }
+
+      // Platform labels for clipboard hint
+      var _COPY_HINTS = {
+        en: '📋 MESSAGE COPIED — paste it in Facebook + attach the card from your gallery',
+        fr: '📋 MESSAGE COPIÉ — colle-le dans Facebook + ajoute la carte depuis ta galerie',
+        es: '📋 MENSAJE COPIADO — pégalo en Facebook + adjunta la tarjeta de tu galería',
+        pt: '📋 MENSAGEM COPIADA — cole no Facebook + anexe o cartão da sua galeria',
+        de: '📋 NACHRICHT KOPIERT — in Facebook einfügen + Karte aus der Galerie hinzufügen',
+        ar: '📋 تم نسخ الرسالة — الصقها في فيسبوك + أضف البطاقة من معرضك',
+        zh: '📋 已复制消息 — 粘贴到Facebook + 从相册添加卡片',
+        ru: '📋 СООБЩЕНИЕ СКОПИРОВАНО — вставьте в Facebook + добавьте карточку из галереи',
+        ja: '📋 メッセージをコピーしました — Facebookに貼り付け + ギャラリーからカードを添付',
+        hi: '📋 संदेश कॉपी किया — Facebook में पेस्ट करें + गैलरी से कार्ड जोड़ें',
+        uk: '📋 ПОВІДОМЛЕННЯ СКОПІЙОВАНО — вставте у Facebook + додайте картку з галереї'
+      };
+
       // Platform URL builder
       function _openApp(appName) {
         var customMsg = (document.getElementById('invite-custom-msg') || {}).value || '';
         var shareText = (customMsg || (SHARE_TEXTS[userLang] || SHARE_TEXTS.en).split('\n')[0]) + '\n' + inviteURL;
         var enc = encodeURIComponent(shareText);
         var encURL = encodeURIComponent(inviteURL);
-        var urls = {
-          whatsapp:  'https://wa.me/?text=' + enc,
-          instagram: null, // image-based only → native share
-          x:         'https://x.com/intent/tweet?text=' + enc,
-          facebook:  'https://www.facebook.com/sharer/sharer.php?u=' + encURL,
-          telegram:  'https://t.me/share/url?url=' + encURL + '&text=' + encodeURIComponent(shareText.split('\n')[0])
-        };
 
-        // Always try native share with image file first
-        if (navigator.canShare && navigator.canShare({ files: [imgFile] })) {
-          navigator.share({ files: [imgFile], title: 'NAVA PEACE 🕊', text: shareText })
-            .then(function() {
-              document.getElementById('css-gallery-msg').textContent = gallerySaved;
-            })
-            .catch(function(err) {
-              if (err.name !== 'AbortError') { fallbackShare(appName, urls); }
-            });
-        } else {
-          fallbackShare(appName, urls);
-        }
-      }
-
-      function fallbackShare(appName, urls) {
-        var url = urls[appName];
-        if (!url) {
-          // Instagram / no URL: download image and show hint
-          _downloadFallback();
+        // Facebook: copy message to clipboard + open Facebook — image must be attached manually
+        if (appName === 'facebook') {
+          _copyToClipboard(shareText).catch(function(){});
+          var hint = _COPY_HINTS[userLang] || _COPY_HINTS.en;
+          var msgEl = document.getElementById('css-gallery-msg');
+          if (msgEl) msgEl.textContent = hint;
+          setTimeout(function() {
+            var fbUrl = 'https://www.facebook.com/';
+            if (typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram) {
+              Telegram.WebApp.openLink(fbUrl);
+            } else {
+              window.open(fbUrl, '_blank');
+            }
+          }, 800);
           return;
         }
-        // Download card then open app
-        _downloadFallback();
-        setTimeout(function() {
-          if (typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram) {
-            if (appName === 'telegram') { Telegram.WebApp.openTelegramLink(url); }
-            else { Telegram.WebApp.openLink(url); }
+
+        // Instagram: native share with image file (no URL scheme)
+        if (appName === 'instagram') {
+          if (navigator.canShare && navigator.canShare({ files: [imgFile] })) {
+            navigator.share({ files: [imgFile], title: 'NAVA PEACE 🕊', text: shareText })
+              .catch(function(err) { if (err.name !== 'AbortError') _downloadFallback(); });
           } else {
-            window.open(url, '_blank');
+            _downloadFallback();
           }
-        }, 600);
+          return;
+        }
+
+        var urls = {
+          whatsapp: 'https://wa.me/?text=' + enc,
+          x:        'https://x.com/intent/tweet?text=' + enc,
+          telegram: 'https://t.me/share/url?url=' + encURL + '&text=' + encodeURIComponent(shareText.split('\n')[0])
+        };
+
+        var url = urls[appName];
+        if (!url) return;
+        if (typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram) {
+          if (appName === 'telegram') { Telegram.WebApp.openTelegramLink(url); }
+          else { Telegram.WebApp.openLink(url); }
+        } else {
+          window.open(url, '_blank');
+        }
       }
 
       function closeSheet() {
