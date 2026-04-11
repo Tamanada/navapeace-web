@@ -2536,16 +2536,20 @@
           '<button id="css-close" style="background:rgba(255,255,255,0.08);border:none;border-radius:50%;width:30px;height:30px;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>' +
         '</div>' +
 
-        // Card preview — large, hold to save
-        '<div style="display:flex;flex-direction:column;align-items:center;margin-bottom:6px;">' +
-          '<img id="css-card-preview" src="' + imgURL + '" style="width:100%;max-width:320px;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.6);" />' +
-          '<p style="margin:8px 0 4px;font-family:Nasalization,Arial;font-size:7.5px;letter-spacing:2px;color:rgba(58,172,223,0.85);text-align:center;">👆 ' + holdLabel + '</p>' +
+        // Card preview
+        '<div style="display:flex;flex-direction:column;align-items:center;margin-bottom:12px;">' +
+          '<img id="css-card-preview" src="' + imgURL + '" style="width:100%;max-width:300px;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.6);" />' +
         '</div>' +
 
-        // Message
-        '<p id="css-gallery-msg" style="text-align:center;font-size:8px;letter-spacing:1.5px;color:rgba(255,255,255,0.35);margin-bottom:18px;">' + galleryMsg + '</p>' +
+        // SAVE button (primary action)
+        '<button id="css-save-btn" style="width:100%;padding:14px;border-radius:14px;border:none;margin-bottom:14px;' +
+        'background:linear-gradient(135deg,#3AACDF,#1E6E9A);color:#fff;' +
+        'font-family:Nasalization,Arial;font-size:10px;letter-spacing:2.5px;cursor:pointer;">💾 SAVE TO GALLERY</button>' +
 
-        // App buttons (5 platforms — no Messenger, replaced with Telegram)
+        // Status message
+        '<p id="css-gallery-msg" style="text-align:center;font-size:8px;letter-spacing:1.5px;color:rgba(255,255,255,0.45);margin-bottom:16px;">' + galleryMsg + '</p>' +
+
+        // App buttons (5 platforms)
         '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:8px;">' +
           _appBtn('whatsapp',  'WHATSAPP') +
           _appBtn('instagram', 'INSTAGRAM') +
@@ -2645,9 +2649,58 @@
       sheet.querySelector('#css-close').onclick = closeSheet;
       sheet.onclick = function(e) { if (e.target === sheet) closeSheet(); };
 
+      function _setMsg(text) {
+        var el = document.getElementById('css-gallery-msg');
+        if (el) el.textContent = text;
+      }
+
       function _downloadFallback() {
         var a = document.createElement('a');
         a.href = imgURL; a.download = 'nava-peace-invite.png'; a.click();
+      }
+
+      // SAVE TO GALLERY button — multi-strategy
+      sheet.querySelector('#css-save-btn').onclick = function() {
+        var btn = this; btn.disabled = true; btn.textContent = '···';
+
+        // Strategy 1: native share with file (Android → "Save Image" in share sheet)
+        if (navigator.canShare && imgFile && navigator.canShare({ files: [imgFile] })) {
+          navigator.share({ files: [imgFile], title: 'NAVA PEACE 🕊' })
+            .then(function() {
+              _setMsg(gallerySaved);
+              btn.textContent = '✓ SAVED';
+            })
+            .catch(function(err) {
+              if (err.name === 'AbortError') {
+                btn.disabled = false; btn.textContent = '💾 SAVE TO GALLERY';
+              } else {
+                _tryCopyThenDownload(btn);
+              }
+            });
+          return;
+        }
+
+        // Strategy 2: clipboard image write (works on iOS Safari, desktop Chrome)
+        _tryCopyThenDownload(btn);
+      };
+
+      function _tryCopyThenDownload(btn) {
+        if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write && imgFile) {
+          navigator.clipboard.write([new ClipboardItem({ 'image/png': imgFile })])
+            .then(function() {
+              _setMsg('📋 IMAGE COPIED TO CLIPBOARD — PASTE ANYWHERE');
+              btn.textContent = '✓ COPIED';
+            })
+            .catch(function() { _finalFallback(btn); });
+        } else {
+          _finalFallback(btn);
+        }
+      }
+
+      function _finalFallback(btn) {
+        _downloadFallback();
+        _setMsg('📥 IMAGE DOWNLOADED — CHECK YOUR DOWNLOADS FOLDER');
+        btn.textContent = '✓ DOWNLOADED';
       }
 
       sheet.querySelectorAll('[data-css-app]').forEach(function(el) {
@@ -2903,14 +2956,14 @@
           ctx.font = 'bold 22px Nasalization, Arial, sans-serif';
           ctx.fillText(pseudo, cx, t2y + 32);
 
-          // Personal message
+          // Personal message — large font, super readable
           var customMsg = (document.getElementById('invite-custom-msg') || {}).value || '';
           if (!customMsg) customMsg = (SHARE_TEXTS[userLang] || SHARE_TEXTS.en).split('\n')[0];
-          var msgFont = '13px Nasalization, Arial, sans-serif';
+          var msgFont = 'bold 21px Nasalization, Arial, sans-serif';
           var msgLines = wrapText(customMsg, w - 80, msgFont);
-          ctx.fillStyle = 'rgba(255,255,255,0.85)';
+          ctx.fillStyle = '#FFFFFF';
           ctx.font = msgFont;
-          msgLines.forEach(function(line, i) { ctx.fillText(line, cx, t2y + 68 + i * 22); });
+          msgLines.forEach(function(line, i) { ctx.fillText(line, cx, t2y + 72 + i * 32); });
 
           var afterMsg = t2y + 68 + msgLines.length * 22 + 10;
 
@@ -2935,59 +2988,93 @@
           }
           if (document.body.contains(qrDiv)) document.body.removeChild(qrDiv);
 
-          // ── TIER 3 — Peace Map (bottom third) ──
+          // ── TIER 3 — Peace Map (bottom third, MAP page style) ──
           var mapY = qrY + qrSize + qrPad + 20;
           var mapH = h - mapY;
 
-          // Dark map background
-          ctx.fillStyle = '#020C18';
+          // Blue gradient background — same palette as MAP page
+          var mapBg = ctx.createLinearGradient(0, mapY, 0, mapY + mapH);
+          mapBg.addColorStop(0,   '#1a6fb5');
+          mapBg.addColorStop(0.5, '#0d3f7a');
+          mapBg.addColorStop(1,   '#061830');
+          ctx.fillStyle = mapBg;
           ctx.fillRect(0, mapY, w, mapH);
 
-          // Divider
+          // Divider line
           ctx.fillStyle = barGrad;
           ctx.fillRect(0, mapY, w, 2);
 
-          // Grid lines
-          ctx.strokeStyle = 'rgba(58,172,223,0.07)'; ctx.lineWidth = 1;
-          for (var row = 0; row <= mapH; row += 36) {
-            ctx.beginPath(); ctx.moveTo(0, mapY+row); ctx.lineTo(w, mapY+row); ctx.stroke();
-          }
-          for (var col = 0; col <= w; col += 50) {
-            ctx.beginPath(); ctx.moveTo(col, mapY); ctx.lineTo(col, mapY+mapH); ctx.stroke();
-          }
-
-          // Peace dots — approximate world city positions on 600px
-          var dots = [
-            {x:0.46,y:0.28},{x:0.50,y:0.22},{x:0.55,y:0.25},{x:0.53,y:0.20}, // Europe
-            {x:0.32,y:0.30},{x:0.26,y:0.33},{x:0.36,y:0.26},                  // Americas
-            {x:0.62,y:0.28},{x:0.68,y:0.30},{x:0.74,y:0.32},                  // Asia
-            {x:0.55,y:0.48},{x:0.50,y:0.55},{x:0.44,y:0.60},                  // Africa/south
-            {x:0.78,y:0.38},{x:0.82,y:0.42},{x:0.70,y:0.40},                  // East Asia
-            {x:0.88,y:0.65},{x:0.83,y:0.70}                                    // Oceania
-          ];
-          dots.forEach(function(d, i) {
-            var pulse = i % 3 === 0;
-            if (pulse) {
-              ctx.fillStyle = 'rgba(58,172,223,0.12)';
-              ctx.beginPath(); ctx.arc(d.x*w, mapY+d.y*mapH, 8, 0, Math.PI*2); ctx.fill();
-            }
-            ctx.fillStyle = pulse ? '#3AACDF' : 'rgba(58,172,223,0.6)';
-            ctx.beginPath(); ctx.arc(d.x*w, mapY+d.y*mapH, pulse?4:3, 0, Math.PI*2); ctx.fill();
+          // Soft glow orbs (like MAP page)
+          ctx.save();
+          [[w*0.85, mapY+mapH*0.18, 180],[w*0.12, mapY+mapH*0.65, 130],[w*0.5, mapY+mapH*0.45, 220]].forEach(function(g) {
+            var gr = ctx.createRadialGradient(g[0],g[1],0,g[0],g[1],g[2]);
+            gr.addColorStop(0,'rgba(109,213,245,0.14)'); gr.addColorStop(1,'rgba(109,213,245,0)');
+            ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(g[0],g[1],g[2],0,Math.PI*2); ctx.fill();
           });
+          ctx.restore();
 
-          // "LIVE" label + timestamp
+          // Lat/Lon grid lines — white, visible
+          ctx.strokeStyle = 'rgba(255,255,255,0.10)'; ctx.lineWidth = 1;
+          for (var lRow = 0; lRow <= mapH; lRow += Math.round(mapH/7)) {
+            ctx.beginPath(); ctx.moveTo(0, mapY+lRow); ctx.lineTo(w, mapY+lRow); ctx.stroke();
+          }
+          for (var lCol = 0; lCol <= w; lCol += Math.round(w/11)) {
+            ctx.beginPath(); ctx.moveTo(lCol, mapY); ctx.lineTo(lCol, mapY+mapH); ctx.stroke();
+          }
+
+          // Peace dots grid — 9×22 layout like MAP page, geographically weighted
+          var DCOLS = 22, DROWS = 9;
+          // Active positions (col, row) — approximate world geography
+          var activeDots = [
+            // Europe
+            [10,2],[11,2],[10,3],[11,3],[12,2],[9,3],
+            // N America
+            [3,2],[4,2],[5,3],[3,3],[4,3],
+            // S America
+            [5,5],[6,5],[5,6],[4,6],
+            // Africa
+            [11,4],[11,5],[12,4],[10,5],
+            // Middle East / India
+            [13,3],[14,3],[14,4],[15,3],
+            // East Asia
+            [16,2],[17,2],[17,3],[16,3],[18,3],
+            // SE Asia / Oceania
+            [17,5],[18,5],[19,6],[20,6]
+          ];
+          var activeSet = {};
+          activeDots.forEach(function(d){ activeSet[d[0]+','+d[1]] = true; });
+          for (var dr = 0; dr < DROWS; dr++) {
+            for (var dc = 0; dc < DCOLS; dc++) {
+              var dx = (dc + 0.5) / DCOLS * w;
+              var dy = mapY + (dr + 0.5) / DROWS * mapH;
+              var isActive = !!activeSet[dc+','+dr];
+              if (isActive) {
+                // Glow ring
+                ctx.fillStyle = 'rgba(58,172,223,0.20)';
+                ctx.beginPath(); ctx.arc(dx, dy, 9, 0, Math.PI*2); ctx.fill();
+                // Bright dot
+                ctx.fillStyle = '#6DD5F5';
+                ctx.beginPath(); ctx.arc(dx, dy, 4.5, 0, Math.PI*2); ctx.fill();
+              } else {
+                ctx.fillStyle = 'rgba(255,255,255,0.12)';
+                ctx.beginPath(); ctx.arc(dx, dy, 2.5, 0, Math.PI*2); ctx.fill();
+              }
+            }
+          }
+
+          // "PEACE MAP" label + timestamp
           var now = new Date();
           var dateStr = now.toUTCString().replace(/ GMT$/, ' UTC');
-          ctx.fillStyle = 'rgba(255,255,255,0.3)';
-          ctx.font = '9px Nasalization, Arial, sans-serif';
+          ctx.fillStyle = 'rgba(255,255,255,0.45)';
+          ctx.font = '10px Nasalization, Arial, sans-serif';
           ctx.textAlign = 'left';
-          ctx.fillText('🌍 PEACE MAP  •  ' + dateStr, 20, mapY + 18);
+          ctx.fillText('🌍 PEACE MAP  •  ' + dateStr, 20, mapY + 20);
 
           // www.nava-peace.world centered
           ctx.textAlign = 'center';
-          ctx.fillStyle = 'rgba(58,172,223,0.9)';
-          ctx.font = 'bold 18px Nasalization, Arial, sans-serif';
-          ctx.fillText('www.nava-peace.world', cx, mapY + mapH - 18);
+          ctx.fillStyle = '#6DD5F5';
+          ctx.font = 'bold 20px Nasalization, Arial, sans-serif';
+          ctx.fillText('www.nava-peace.world', cx, mapY + mapH - 16);
 
           // Accent bar bottom
           ctx.fillStyle = barGrad;
