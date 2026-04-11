@@ -1310,6 +1310,11 @@
         </div>
         <div class="dove-divider"></div>
         <div class="dove-part">
+          <span class="num" id="dove-streak-display">—</span>
+          <span class="lbl">🔥 STREAK<br>DOVES</span>
+        </div>
+        <div class="dove-divider"></div>
+        <div class="dove-part">
           <span class="num" id="dove-ref">—</span>
           <span class="lbl" data-i18n-html="dove_ref_lbl">REFERRAL<br>DOVES</span>
         </div>
@@ -2098,6 +2103,8 @@
     document.getElementById('dove-total').textContent = total;
     document.getElementById('dove-own').textContent   = ownActions;
     document.getElementById('dove-ref').textContent   = referralDoves;
+    const _streakEl = document.getElementById('dove-streak-display');
+    if (_streakEl) _streakEl.textContent = streakDoves;
 
     // Mettre à jour les 4 catégories
     const _setEl = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
