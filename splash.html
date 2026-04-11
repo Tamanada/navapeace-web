@@ -414,14 +414,48 @@
       _startSplashAnimation();
     }
 
+    // ── GLOBAL SAFETY TIMEOUT ─────────────────────────────────────────────────
+    // Fires unconditionally after 6s — handles mobile Telegram race condition
+    // where initData is empty at script parse time but WebApp IS available.
+    setTimeout(function() {
+      // Re-detect Telegram in case it wasn't ready at parse time
+      if (!NAVA_TG.isTelegram && window.Telegram && window.Telegram.WebApp) {
+        try {
+          var tgU = window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user;
+          if (tgU && tgU.id) {
+            NAVA_TG.isTelegram = true;
+            NAVA_TG.uid = 'tg_' + tgU.id;
+            localStorage.setItem('nava_peace_uid', NAVA_TG.uid);
+            var sp = window.Telegram.WebApp.initDataUnsafe.start_param;
+            if (sp) localStorage.setItem('nava_peace_referred_by', sp.toUpperCase());
+            window._NAVA_IN_TG = true;
+          }
+        } catch(e) {}
+      }
+      _runSplashLogic();
+    }, 6000);
+
     (function restoreSession() {
       // Re-check with SDK (handles edge cases where hash was empty on mobile)
       if (!window._NAVA_IN_TG) {
         var tgSDK = window.Telegram && window.Telegram.WebApp;
-        if (tgSDK && tgSDK.initData) {
+        if (tgSDK && (tgSDK.initData || tgSDK.initDataUnsafe)) {
           window._NAVA_IN_TG = true;
           document.documentElement.classList.add('in-tg');
           document.body.style.background = '';
+          // Re-detect user if NAVA_TG missed the race
+          if (!NAVA_TG.isTelegram) {
+            try {
+              var _u = tgSDK.initDataUnsafe && tgSDK.initDataUnsafe.user;
+              if (_u && _u.id) {
+                NAVA_TG.isTelegram = true;
+                NAVA_TG.uid = 'tg_' + _u.id;
+                localStorage.setItem('nava_peace_uid', NAVA_TG.uid);
+                var _sp = tgSDK.initDataUnsafe.start_param;
+                if (_sp) localStorage.setItem('nava_peace_referred_by', _sp.toUpperCase());
+              }
+            } catch(e) {}
+          }
         } else {
           return; // Confirmed not Telegram
         }
@@ -773,8 +807,8 @@
 
     // ── SPLASH LOGIC ──────────────────────────────────────────────────
     function _startSplashAnimation() {
-      // Not in Telegram → block page shown via CSS, don't start splash (avoids click capture)
-      if (!NAVA_TG.isTelegram && !window._NAVA_IN_TG) return;
+      // Not in Telegram at all (browser without WebApp) → block page shown via CSS
+      if (!NAVA_TG.isTelegram && !window._NAVA_IN_TG && !(window.Telegram && window.Telegram.WebApp)) return;
       var uid = localStorage.getItem('nava_peace_uid');
       var isRegistered = uid && localStorage.getItem('nava_peace_country');
 
