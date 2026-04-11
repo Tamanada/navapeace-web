@@ -2852,11 +2852,12 @@
         var cx = w / 2;
         var cr = 36;
 
-        // ── BACKGROUND ──
-        var grad = ctx.createRadialGradient(cx, h*0.3, 0, cx, h*0.5, h);
-        grad.addColorStop(0, '#1E6E9A');
-        grad.addColorStop(0.45, '#0F4060');
-        grad.addColorStop(1, '#050F1A');
+        // ── BACKGROUND — bright blue like MAP page ──
+        var grad = ctx.createRadialGradient(cx, h*0.25, 0, cx, h*0.45, h*0.9);
+        grad.addColorStop(0,    '#6DD5F5');
+        grad.addColorStop(0.35, '#3AACDF');
+        grad.addColorStop(0.72, '#1E8EC4');
+        grad.addColorStop(1,    '#0a3060');
         ctx.fillStyle = grad;
         ctx.beginPath();
         ctx.moveTo(cr,0); ctx.lineTo(w-cr,0); ctx.quadraticCurveTo(w,0,w,cr);
@@ -2960,10 +2961,19 @@
           var customMsg = (document.getElementById('invite-custom-msg') || {}).value || '';
           if (!customMsg) customMsg = (SHARE_TEXTS[userLang] || SHARE_TEXTS.en).split('\n')[0];
           var msgFont = 'bold 21px Nasalization, Arial, sans-serif';
-          var msgLines = wrapText(customMsg, w - 80, msgFont);
+          // Force 2-line break at sentence boundary (period)
+          var msgLines;
+          var dotIdx = customMsg.search(/[.!?]/);
+          if (dotIdx > 0 && dotIdx < customMsg.length - 1) {
+            var line1 = customMsg.slice(0, dotIdx + 1).trim();
+            var line2 = customMsg.slice(dotIdx + 1).trim();
+            msgLines = line2 ? [line1, line2] : [line1];
+          } else {
+            msgLines = wrapText(customMsg, w - 100, msgFont);
+          }
           ctx.fillStyle = '#FFFFFF';
           ctx.font = msgFont;
-          msgLines.forEach(function(line, i) { ctx.fillText(line, cx, t2y + 72 + i * 32); });
+          msgLines.forEach(function(line, i) { ctx.fillText(line, cx, t2y + 72 + i * 34); });
 
           var afterMsg = t2y + 68 + msgLines.length * 22 + 10;
 
@@ -2973,7 +2983,7 @@
           ctx.fillText(url, cx, afterMsg + 10);
 
           // ── QR code (bold border) ──
-          var qrSize = 240, qrPad = 14;
+          var qrSize = 180, qrPad = 12;
           var qrX = cx - qrSize/2, qrY = afterMsg + 28;
           var qrCanvas = qrDiv.querySelector('canvas');
           if (qrCanvas) {
