@@ -2035,13 +2035,15 @@
         ]);
         streakDoves = (sr || []).reduce((s, r) => s + (r.doves_awarded || 0), 0);
 
-        // Recalculate current streak
+        // Calculate current active streak AND max-ever streak
         let currentStreak = 0;
+        let maxStreak = 0;
         if (voteHistory && voteHistory.length > 0) {
           const dayNums = [...new Set(voteHistory.map(v =>
             Math.floor(new Date(v.created_at).getTime() / 86400000)
           ))].sort((a, b) => b - a);
           const today = Math.floor(Date.now() / 86400000);
+          // Current active streak (must include today or yesterday)
           if (dayNums[0] >= today - 1) {
             currentStreak = 1;
             for (let i = 1; i < dayNums.length; i++) {
@@ -2049,13 +2051,20 @@
               else break;
             }
           }
+          // Max-ever streak (scan full history)
+          let run = 1;
+          for (let i = 1; i < dayNums.length; i++) {
+            if (dayNums[i - 1] - dayNums[i] === 1) { run++; maxStreak = Math.max(maxStreak, run); }
+            else run = 1;
+          }
+          maxStreak = Math.max(maxStreak, currentStreak, run);
           localStorage.setItem('nava_peace_streak', currentStreak);
         }
 
-        // Claim any unclaimed milestones
+        // Claim unclaimed milestones based on MAX streak ever achieved
         const alreadyClaimed = new Set((sr || []).map(r => r.streak_days));
         for (const m of PROFILE_STREAK_MILESTONES) {
-          if (currentStreak >= m.days && !alreadyClaimed.has(m.days)) {
+          if (maxStreak >= m.days && !alreadyClaimed.has(m.days)) {
             try {
               const { error } = await sbS.from('nava_streak_rewards').insert({
                 user_uid: uid2, streak_days: m.days, doves_awarded: m.doves
