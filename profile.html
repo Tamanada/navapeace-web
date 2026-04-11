@@ -2017,14 +2017,56 @@
       }
     } catch(e) {}
 
-    // Streak doves
+    // Streak doves — read existing + claim any unclaimed milestones
+    const PROFILE_STREAK_MILESTONES = [
+      { days: 7,  doves: 2  },
+      { days: 14, doves: 5  },
+      { days: 21, doves: 8  },
+      { days: 28, doves: 10 }
+    ];
     let streakDoves = 0;
     try {
       if (uid2) {
         const sbS = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const { data: sr } = await sbS.from('nava_streak_rewards')
-          .select('doves_awarded').eq('user_uid', uid2);
+        // Read existing rewards + vote history in parallel
+        const [{ data: sr }, { data: voteHistory }] = await Promise.all([
+          sbS.from('nava_streak_rewards').select('streak_days, doves_awarded').eq('user_uid', uid2),
+          sbS.from('peace_votes').select('created_at').eq('user_uid', uid2).order('created_at', { ascending: false })
+        ]);
         streakDoves = (sr || []).reduce((s, r) => s + (r.doves_awarded || 0), 0);
+
+        // Recalculate current streak
+        let currentStreak = 0;
+        if (voteHistory && voteHistory.length > 0) {
+          const dayNums = [...new Set(voteHistory.map(v =>
+            Math.floor(new Date(v.created_at).getTime() / 86400000)
+          ))].sort((a, b) => b - a);
+          const today = Math.floor(Date.now() / 86400000);
+          if (dayNums[0] >= today - 1) {
+            currentStreak = 1;
+            for (let i = 1; i < dayNums.length; i++) {
+              if (dayNums[i - 1] - dayNums[i] === 1) currentStreak++;
+              else break;
+            }
+          }
+          localStorage.setItem('nava_peace_streak', currentStreak);
+        }
+
+        // Claim any unclaimed milestones
+        const alreadyClaimed = new Set((sr || []).map(r => r.streak_days));
+        for (const m of PROFILE_STREAK_MILESTONES) {
+          if (currentStreak >= m.days && !alreadyClaimed.has(m.days)) {
+            try {
+              const { error } = await sbS.from('nava_streak_rewards').insert({
+                user_uid: uid2, streak_days: m.days, doves_awarded: m.doves
+              });
+              if (!error) {
+                streakDoves += m.doves;
+                alreadyClaimed.add(m.days);
+              }
+            } catch(e) {}
+          }
+        }
       }
     } catch(e) {}
 
