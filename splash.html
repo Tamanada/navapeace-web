@@ -434,14 +434,14 @@
       _forceStartAnimation();
     }
 
-    // ── HARD SAFETY TIMEOUT — fires no matter what after 4s ─────────────────
+    // ── HARD SAFETY TIMEOUT — fires no matter what after 1.5s ───────────────
     // New visitor stuck? Force animation unconditionally.
     setTimeout(function() {
       if (!_sessionCheckDone && !_animationStarted) {
         _sessionCheckDone = true;
         _forceStartAnimation();
       }
-    }, 4000);
+    }, 1500);
 
     (function restoreSession() {
       // Re-check with SDK (handles edge cases where hash was empty on mobile)
@@ -580,8 +580,8 @@
         setTimeout(_doRestore, 350); // Telegram mobile: wait for WebApp to be ready
       }
 
-      // Safety timeout: if nothing happened in 5s → show splash normally
-      setTimeout(function() { _runSplashLogic(); }, 5000);
+      // Safety timeout: if nothing happened in 2s → show splash normally
+      setTimeout(function() { _runSplashLogic(); }, 2000);
     })();
     // ──────────────────────────────────────────────────────────────────────
     // 12 languages — flag · translation
@@ -838,7 +838,7 @@
           var divEl  = document.querySelector('.divider');
 
           [hero, dateEl, textEl, divEl].forEach(function (el) {
-            if (el) { el.style.transition = 'opacity 1.2s ease'; el.style.opacity = '0'; }
+            if (el) { el.style.transition = 'opacity 0.6s ease'; el.style.opacity = '0'; }
           });
 
           setTimeout(function () {
@@ -866,11 +866,11 @@
               if (idx >= WELCOME_WORDS.length) {
                 clearInterval(cycleTimer);
                 // After all words shown, show ref code input
-                setTimeout(function () { showRefCodeScreen(); }, 800);
+                setTimeout(function () { showRefCodeScreen(); }, 500);
                 return;
               }
               // Fade out current
-              hero.style.transition = 'opacity 0.4s ease, filter 0.4s ease, transform 0.4s ease';
+              hero.style.transition = 'opacity 0.25s ease, filter 0.25s ease, transform 0.25s ease';
               hero.style.opacity    = '0';
               hero.style.filter     = 'blur(8px)';
               hero.style.transform  = 'scale(0.95)';
@@ -882,15 +882,15 @@
                 hero.style.filter     = 'blur(12px)';
                 hero.style.transform  = 'scale(0.9)';
                 void hero.offsetWidth;
-                hero.style.transition = 'opacity 0.6s ease, filter 0.6s ease, transform 0.6s ease';
+                hero.style.transition = 'opacity 0.35s ease, filter 0.35s ease, transform 0.35s ease';
                 hero.style.opacity    = '1';
                 hero.style.filter     = 'blur(0)';
                 hero.style.transform  = 'scale(1)';
-              }, 400);
-            }, 1200); // 1.2s per word
+              }, 250);
+            }, 600); // 0.6s per word
 
-          }, 1200); // after fade-out
-        }, 4000);   // after logo visible
+          }, 700); // after fade-out
+        }, 1500);   // after logo visible
 
         return;
       }
@@ -979,7 +979,7 @@
           }, 2500);
 
         }, 1400); // fade-out terminé
-      }, 4000);   // logo + hero pleinement visibles
+      }, 1500);   // logo + hero pleinement visibles
 
     } // end _startSplashAnimation
   </script>
