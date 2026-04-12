@@ -809,13 +809,69 @@
 
       if (!isRegistered) {
         // ═══════════════════════════════════════════════
-        // NOUVEAU VISITEUR — logo 1.5s puis inscription
+        // NOUVEAU VISITEUR — logo 1.5s puis bienvenue en 13 langues
         // ═══════════════════════════════════════════════
         var enterEl = document.querySelector('.enter-link');
         if (enterEl) enterEl.setAttribute('href', 'index.html');
 
-        // Logo visible 1.5s, puis formulaire d'inscription directement
-        setTimeout(function () { showRefCodeScreen(); }, 1500);
+        // Après 1.5s (logo visible), fade out BORN TO GROW + daily msg
+        setTimeout(function () {
+          var hero   = document.querySelector('.hero');
+          var dateEl = document.getElementById('daily-date');
+          var textEl = document.getElementById('daily-text');
+          var divEl  = document.querySelector('.divider');
+
+          [hero, dateEl, textEl, divEl].forEach(function (el) {
+            if (el) { el.style.transition = 'opacity 0.5s ease'; el.style.opacity = '0'; }
+          });
+
+          setTimeout(function () {
+            if (!hero) return;
+            if (dateEl) dateEl.style.display = 'none';
+            if (textEl) textEl.style.display = 'none';
+            if (divEl)  divEl.style.display  = 'none';
+
+            // Cycle bienvenue en 13 langues
+            var idx = 0;
+            hero.textContent      = WELCOME_WORDS[0];
+            hero.style.transition = 'none';
+            hero.style.opacity    = '0';
+            hero.style.filter     = 'blur(10px)';
+            hero.style.transform  = 'scale(0.9)';
+            void hero.offsetWidth;
+            hero.style.transition = 'opacity 0.5s ease, filter 0.5s ease, transform 0.5s ease';
+            hero.style.opacity    = '1';
+            hero.style.filter     = 'blur(0)';
+            hero.style.transform  = 'scale(1)';
+
+            var cycleTimer = setInterval(function () {
+              idx++;
+              if (idx >= WELCOME_WORDS.length) {
+                clearInterval(cycleTimer);
+                setTimeout(function () { showRefCodeScreen(); }, 400);
+                return;
+              }
+              hero.style.transition = 'opacity 0.2s ease, filter 0.2s ease, transform 0.2s ease';
+              hero.style.opacity    = '0';
+              hero.style.filter     = 'blur(8px)';
+              hero.style.transform  = 'scale(0.95)';
+
+              setTimeout(function () {
+                hero.textContent      = WELCOME_WORDS[idx];
+                hero.style.transition = 'none';
+                hero.style.opacity    = '0';
+                hero.style.filter     = 'blur(10px)';
+                hero.style.transform  = 'scale(0.9)';
+                void hero.offsetWidth;
+                hero.style.transition = 'opacity 0.3s ease, filter 0.3s ease, transform 0.3s ease';
+                hero.style.opacity    = '1';
+                hero.style.filter     = 'blur(0)';
+                hero.style.transform  = 'scale(1)';
+              }, 200);
+            }, 600); // 0.6s par mot × 13 = 7.8s
+
+          }, 500); // après fade-out
+        }, 1500);  // après logo visible
 
         return;
       }
