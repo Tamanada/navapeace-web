@@ -394,46 +394,54 @@
     localStorage.removeItem('nava_modules');
     localStorage.removeItem('nava_modules_ts');
 
-    // ── AUTO-RESTORE SESSION (domain change / cleared localStorage) ────────
-    // Bloque toute navigation jusqu'à ce que le check Supabase soit terminé
+    // ── SESSION STATE ──────────────────────────────────────────────────────────
     var _sessionCheckDone = false;
+    var _animationStarted = false;
+
+    function _forceStartAnimation() {
+      // Always start animation — bypass all guards
+      if (_animationStarted) return;
+      _animationStarted = true;
+      // Force isTelegram flag so animation guard passes
+      if (window.Telegram && window.Telegram.WebApp) {
+        window._NAVA_IN_TG = true;
+        NAVA_TG.isTelegram = true;
+        try {
+          var _u = window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user;
+          if (_u && _u.id) {
+            NAVA_TG.uid = 'tg_' + _u.id;
+            localStorage.setItem('nava_peace_uid', NAVA_TG.uid);
+            var _sp = window.Telegram.WebApp.initDataUnsafe.start_param;
+            if (_sp) localStorage.setItem('nava_peace_referred_by', _sp.toUpperCase());
+          }
+        } catch(e) {}
+      }
+      _startSplashAnimation();
+    }
 
     function _runSplashLogic() {
-      if (_sessionCheckDone) return; // déjà lancé
+      if (_sessionCheckDone) return;
       _sessionCheckDone = true;
 
       // Returning user already in localStorage
-      if (NAVA_TG.isTelegram && localStorage.getItem('nava_peace_country')) {
+      if (localStorage.getItem('nava_peace_country')) {
         var _today = new Date().toISOString().split('T')[0];
         var _dest = (localStorage.getItem('nava_peace_voted') === _today) ? 'map.html' : 'peace.html';
         window.location.replace(_dest);
         return;
       }
 
-      // Lance l'animation splash (nouveau visiteur ou session à restaurer)
-      _startSplashAnimation();
+      _forceStartAnimation();
     }
 
-    // ── GLOBAL SAFETY TIMEOUT ─────────────────────────────────────────────────
-    // Fires unconditionally after 6s — handles mobile Telegram race condition
-    // where initData is empty at script parse time but WebApp IS available.
+    // ── HARD SAFETY TIMEOUT — fires no matter what after 4s ─────────────────
+    // New visitor stuck? Force animation unconditionally.
     setTimeout(function() {
-      // Re-detect Telegram in case it wasn't ready at parse time
-      if (!NAVA_TG.isTelegram && window.Telegram && window.Telegram.WebApp) {
-        try {
-          var tgU = window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user;
-          if (tgU && tgU.id) {
-            NAVA_TG.isTelegram = true;
-            NAVA_TG.uid = 'tg_' + tgU.id;
-            localStorage.setItem('nava_peace_uid', NAVA_TG.uid);
-            var sp = window.Telegram.WebApp.initDataUnsafe.start_param;
-            if (sp) localStorage.setItem('nava_peace_referred_by', sp.toUpperCase());
-            window._NAVA_IN_TG = true;
-          }
-        } catch(e) {}
+      if (!_sessionCheckDone && !_animationStarted) {
+        _sessionCheckDone = true;
+        _forceStartAnimation();
       }
-      _runSplashLogic();
-    }, 6000);
+    }, 4000);
 
     (function restoreSession() {
       // Re-check with SDK (handles edge cases where hash was empty on mobile)
@@ -488,16 +496,19 @@
       }
 
       // New user in Telegram — restore session from DB
+      var _doRestoreAttempts = 0;
       function _doRestore() {
-        // Re-check initData (might now be available after ready())
-        var initData = window.Telegram.WebApp.initData || '';
-        var tgUser   = initData &&
-                       window.Telegram.WebApp.initDataUnsafe &&
-                       window.Telegram.WebApp.initDataUnsafe.user;
+        _doRestoreAttempts++;
+        var tgUser = window.Telegram.WebApp.initDataUnsafe &&
+                     window.Telegram.WebApp.initDataUnsafe.user;
 
-        // In Telegram but user not yet available (mobile slow init) → retry
+        // Retry up to 8 times (2.4s total), then give up and show splash
         if (!tgUser || !tgUser.id) {
-          setTimeout(_doRestore, 300);
+          if (_doRestoreAttempts < 8) {
+            setTimeout(_doRestore, 300);
+          } else {
+            _runSplashLogic(); // give up, show animation for new visitor
+          }
           return;
         }
 
@@ -807,8 +818,8 @@
 
     // ── SPLASH LOGIC ──────────────────────────────────────────────────
     function _startSplashAnimation() {
-      // Not in Telegram at all (browser without WebApp) → block page shown via CSS
-      if (!NAVA_TG.isTelegram && !window._NAVA_IN_TG && !(window.Telegram && window.Telegram.WebApp)) return;
+      // Only block if truly not in Telegram at all (pure browser with no WebApp SDK)
+      if (!NAVA_TG.isTelegram && !window._NAVA_IN_TG && !_animationStarted) return;
       var uid = localStorage.getItem('nava_peace_uid');
       var isRegistered = uid && localStorage.getItem('nava_peace_country');
 
