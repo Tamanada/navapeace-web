@@ -13,6 +13,7 @@
     var isTg = h.indexOf('tgWebAppData') !== -1 ||
                h.indexOf('tgWebAppVersion') !== -1 ||
                !!window.TelegramWebviewProxy ||
+               !!(window.Telegram && window.Telegram.WebApp) ||
                !!localStorage.getItem('nava_peace_country') ||
                (localStorage.getItem('nava_peace_uid') || '').indexOf('tg_') === 0;
     window._NAVA_IN_TG = isTg;
@@ -23,7 +24,7 @@
     }
   })();
   </script>
-  <script src="https://telegram.org/js/telegram-web-app.js" async></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="supabase_config.js"></script>
   <script src="telegram.js"></script>
   <script src="module_gate.js?v=6"></script>
@@ -727,8 +728,10 @@
 
         if (stage) stage.appendChild(refBox);
 
-        // Input uppercase transform
+        // Auto-fill ref code if referred by someone
         var inp = document.getElementById('ref-code-input');
+        var autoRef = (NAVA_TG && NAVA_TG.startParam) || localStorage.getItem('nava_peace_referred_by') || '';
+        if (inp && autoRef) { inp.value = autoRef.toUpperCase(); }
         if (inp) inp.addEventListener('input', function() { this.value = this.value.toUpperCase(); });
 
         // Enter button
@@ -754,9 +757,38 @@
     }
 
     function goToApp() {
-      var stage  = document.querySelector('.stage');
-      if (stage) { stage.style.transition = 'opacity 0.6s ease'; stage.style.opacity = '0'; }
-      setTimeout(function() { window.location.href = 'index.html'; }, 650);
+      // 1. Fade out form
+      var refBox = document.getElementById('ref-code-box');
+      if (refBox) { refBox.style.transition = 'opacity 0.3s ease'; refBox.style.opacity = '0'; }
+
+      setTimeout(function() {
+        if (refBox) refBox.remove();
+
+        // 2. Play BIENVENUE in 13 languages
+        var hero = document.querySelector('.hero');
+        if (hero) {
+          hero.style.animation = 'none';
+          hero.style.transition = 'none';
+          hero.style.opacity   = '1';
+          hero.style.filter    = 'blur(0)';
+          hero.style.transform = 'scale(1)';
+          hero.textContent     = WELCOME_WORDS[0];
+        }
+
+        var idx = 0;
+        var timer = setInterval(function() {
+          idx++;
+          if (idx >= WELCOME_WORDS.length) {
+            clearInterval(timer);
+            // 3. Fade out and go to app
+            var stage = document.querySelector('.stage');
+            if (stage) { stage.style.transition = 'opacity 0.6s ease'; stage.style.opacity = '0'; }
+            setTimeout(function() { window.location.href = 'index.html'; }, 650);
+            return;
+          }
+          if (hero) hero.textContent = WELCOME_WORDS[idx];
+        }, 600);
+      }, 300);
     }
 
     // ── Navigation tap/click → page suivante ────────────────────────
@@ -809,70 +841,11 @@
 
       if (!isRegistered) {
         // ═══════════════════════════════════════════════
-        // NOUVEAU VISITEUR — logo 1.5s puis bienvenue en 13 langues
+        // NOUVEAU VISITEUR — inscription directement
         // ═══════════════════════════════════════════════
         var enterEl = document.querySelector('.enter-link');
         if (enterEl) enterEl.setAttribute('href', 'index.html');
-
-        // Après 1.5s (logo visible), fade out BORN TO GROW + daily msg
-        setTimeout(function () {
-          var hero   = document.querySelector('.hero');
-          var dateEl = document.getElementById('daily-date');
-          var textEl = document.getElementById('daily-text');
-          var divEl  = document.querySelector('.divider');
-
-          [hero, dateEl, textEl, divEl].forEach(function (el) {
-            if (el) { el.style.transition = 'opacity 0.5s ease'; el.style.opacity = '0'; }
-          });
-
-          setTimeout(function () {
-            if (!hero) return;
-            if (dateEl) dateEl.style.display = 'none';
-            if (textEl) textEl.style.display = 'none';
-            if (divEl)  divEl.style.display  = 'none';
-
-            // Cycle bienvenue en 13 langues
-            var idx = 0;
-            hero.textContent      = WELCOME_WORDS[0];
-            hero.style.transition = 'none';
-            hero.style.opacity    = '0';
-            hero.style.filter     = 'blur(10px)';
-            hero.style.transform  = 'scale(0.9)';
-            void hero.offsetWidth;
-            hero.style.transition = 'opacity 0.5s ease, filter 0.5s ease, transform 0.5s ease';
-            hero.style.opacity    = '1';
-            hero.style.filter     = 'blur(0)';
-            hero.style.transform  = 'scale(1)';
-
-            var cycleTimer = setInterval(function () {
-              idx++;
-              if (idx >= WELCOME_WORDS.length) {
-                clearInterval(cycleTimer);
-                setTimeout(function () { showRefCodeScreen(); }, 400);
-                return;
-              }
-              hero.style.transition = 'opacity 0.2s ease, filter 0.2s ease, transform 0.2s ease';
-              hero.style.opacity    = '0';
-              hero.style.filter     = 'blur(8px)';
-              hero.style.transform  = 'scale(0.95)';
-
-              setTimeout(function () {
-                hero.textContent      = WELCOME_WORDS[idx];
-                hero.style.transition = 'none';
-                hero.style.opacity    = '0';
-                hero.style.filter     = 'blur(10px)';
-                hero.style.transform  = 'scale(0.9)';
-                void hero.offsetWidth;
-                hero.style.transition = 'opacity 0.3s ease, filter 0.3s ease, transform 0.3s ease';
-                hero.style.opacity    = '1';
-                hero.style.filter     = 'blur(0)';
-                hero.style.transform  = 'scale(1)';
-              }, 200);
-            }, 600); // 0.6s par mot × 13 = 7.8s
-
-          }, 500); // après fade-out
-        }, 1500);  // après logo visible
-
+        showRefCodeScreen();
         return;
       }
 
