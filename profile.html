@@ -3426,5 +3426,20 @@
     try { NAVA_DISCOVERY.check('profile', window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)); } catch(e) {}
   }
   </script>
+
+  <!-- ── TEMP DEV RESET BUTTON ── remove after testing ── -->
+  <div style="text-align:center;padding:40px 0 60px;">
+    <button onclick="
+      if(confirm('⚠️ Simuler un nouveau visiteur ?\nTes données Supabase restent intactes.')) {
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = 'splash.html';
+      }
+    " style="background:none;border:1px solid rgba(255,255,255,0.15);border-radius:20px;
+      color:rgba(255,255,255,0.25);font-family:Nasalization,Arial,sans-serif;
+      font-size:8px;letter-spacing:2px;padding:8px 20px;cursor:pointer;">
+      🔄 RESET SESSION (TEST)
+    </button>
+  </div>
 </body>
 </html>
