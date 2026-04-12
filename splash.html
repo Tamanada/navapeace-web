@@ -24,7 +24,6 @@
   })();
   </script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase_config.js"></script>
   <script src="telegram.js"></script>
   <script src="module_gate.js?v=6"></script>
@@ -513,62 +512,47 @@
         }
 
         var expectedUID = 'tg_' + tgUser.id;
-      try {
-        var sbr = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        // Cherche d'abord dans peace_votes (utilisateurs ayant voté)
-        sbr.from('peace_votes')
-          .select('referral_code, referred_by, country, age, gender, created_at')
-          .eq('user_uid', expectedUID)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .then(function(res) {
-            if (res.data && res.data.length > 0) {
-              var row = res.data[0];
+        var _h = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY };
+        var _base = SUPABASE_URL + '/rest/v1/';
+
+        // 1. Cherche dans peace_votes
+        fetch(_base + 'peace_votes?select=referral_code,referred_by,country,age,gender,created_at&user_uid=eq.' + encodeURIComponent(expectedUID) + '&order=created_at.desc&limit=1', { headers: _h })
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            if (data && data.length > 0) {
+              var row = data[0];
               localStorage.setItem('nava_peace_uid', expectedUID);
-              // country peut être null en DB → on met 'XX' pour signaler "inscrit"
               localStorage.setItem('nava_peace_country', row.country || 'XX');
               if (row.referral_code) localStorage.setItem('nava_peace_ref_code',    row.referral_code);
               if (row.age)           localStorage.setItem('nava_peace_age',         row.age);
               if (row.gender)        localStorage.setItem('nava_peace_gender',      row.gender);
               if (row.referred_by)   localStorage.setItem('nava_peace_referred_by', row.referred_by);
-              // Restaurer la date du dernier vote pour éviter la boucle peace.html→index.html
-              if (row.created_at) {
-                var lastVoteDate = row.created_at.split('T')[0];
-                localStorage.setItem('nava_peace_voted', lastVoteDate);
-              }
-              // Restaurer le peace message depuis peace_messages
-              sbr.from('peace_messages').select('pseudo, message')
-                .eq('user_uid', expectedUID).limit(1)
+              if (row.created_at)    localStorage.setItem('nava_peace_voted',       row.created_at.split('T')[0]);
+              // 2. Restaurer pseudo/message depuis peace_messages
+              return fetch(_base + 'peace_messages?select=pseudo,message&user_uid=eq.' + encodeURIComponent(expectedUID) + '&limit=1', { headers: _h })
+                .then(function(r2) { return r2.json(); })
                 .then(function(pm) {
-                  if (pm.data && pm.data[0]) {
-                    if (pm.data[0].pseudo)  localStorage.setItem('nava_peace_pseudo',  pm.data[0].pseudo);
-                    if (pm.data[0].message) localStorage.setItem('nava_peace_message', pm.data[0].message);
+                  if (pm && pm[0]) {
+                    if (pm[0].pseudo)  localStorage.setItem('nava_peace_pseudo',  pm[0].pseudo);
+                    if (pm[0].message) localStorage.setItem('nava_peace_message', pm[0].message);
                   }
                   window.location.replace('peace.html');
                 })
                 .catch(function() { window.location.replace('peace.html'); });
-              return;
-              return;
             }
-            // Aucun vote trouvé — peut-être inscrit mais pas encore voté
-            // Cherche dans nava_discoveries pour confirmer l'inscription
-            return sbr.from('nava_discoveries')
-              .select('user_uid')
-              .eq('user_uid', expectedUID)
-              .limit(1)
-              .then(function(res2) {
-                if (res2.data && res2.data.length > 0) {
-                  // Inscrit mais pas voté → va directement à peace.html
+            // 3. Pas de vote — vérifier nava_discoveries
+            return fetch(_base + 'nava_discoveries?select=user_uid&user_uid=eq.' + encodeURIComponent(expectedUID) + '&limit=1', { headers: _h })
+              .then(function(r3) { return r3.json(); })
+              .then(function(disc) {
+                if (disc && disc.length > 0) {
                   localStorage.setItem('nava_peace_uid', expectedUID);
                   window.location.replace('peace.html');
                   return;
                 }
-                // Vraiment nouveau → animation normale
-                _runSplashLogic();
+                _runSplashLogic(); // Vraiment nouveau visiteur
               });
           })
-          .catch(function() { _runSplashLogic(); }); // erreur réseau → animation normale
-      } catch(e) { _runSplashLogic(); }
+          .catch(function() { _runSplashLogic(); });
       } // end _doRestore
 
       // We are in Telegram — start session restore
