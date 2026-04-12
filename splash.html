@@ -809,72 +809,13 @@
 
       if (!isRegistered) {
         // ═══════════════════════════════════════════════
-        // NOUVEAU VISITEUR — "Bienvenue" cycling en 13 langues
+        // NOUVEAU VISITEUR — logo 1.5s puis inscription
         // ═══════════════════════════════════════════════
         var enterEl = document.querySelector('.enter-link');
         if (enterEl) enterEl.setAttribute('href', 'index.html');
 
-        // Après 3s (logo visible), fade out BORN TO GROW + daily msg
-        setTimeout(function () {
-          var hero   = document.querySelector('.hero');
-          var dateEl = document.getElementById('daily-date');
-          var textEl = document.getElementById('daily-text');
-          var divEl  = document.querySelector('.divider');
-
-          [hero, dateEl, textEl, divEl].forEach(function (el) {
-            if (el) { el.style.transition = 'opacity 0.6s ease'; el.style.opacity = '0'; }
-          });
-
-          setTimeout(function () {
-            if (!hero) return;
-            // Hide daily msg area
-            if (dateEl) dateEl.style.display = 'none';
-            if (textEl) textEl.style.display = 'none';
-            if (divEl)  divEl.style.display  = 'none';
-
-            // Start cycling welcome words
-            var idx = 0;
-            hero.textContent      = WELCOME_WORDS[0];
-            hero.style.transition = 'none';
-            hero.style.opacity    = '0';
-            hero.style.filter     = 'blur(12px)';
-            hero.style.transform  = 'scale(0.9)';
-            void hero.offsetWidth;
-            hero.style.transition = 'opacity 0.8s ease, filter 0.8s ease, transform 0.8s ease';
-            hero.style.opacity    = '1';
-            hero.style.filter     = 'blur(0)';
-            hero.style.transform  = 'scale(1)';
-
-            var cycleTimer = setInterval(function () {
-              idx++;
-              if (idx >= WELCOME_WORDS.length) {
-                clearInterval(cycleTimer);
-                // After all words shown, show ref code input
-                setTimeout(function () { showRefCodeScreen(); }, 500);
-                return;
-              }
-              // Fade out current
-              hero.style.transition = 'opacity 0.25s ease, filter 0.25s ease, transform 0.25s ease';
-              hero.style.opacity    = '0';
-              hero.style.filter     = 'blur(8px)';
-              hero.style.transform  = 'scale(0.95)';
-
-              setTimeout(function () {
-                hero.textContent      = WELCOME_WORDS[idx];
-                hero.style.transition = 'none';
-                hero.style.opacity    = '0';
-                hero.style.filter     = 'blur(12px)';
-                hero.style.transform  = 'scale(0.9)';
-                void hero.offsetWidth;
-                hero.style.transition = 'opacity 0.35s ease, filter 0.35s ease, transform 0.35s ease';
-                hero.style.opacity    = '1';
-                hero.style.filter     = 'blur(0)';
-                hero.style.transform  = 'scale(1)';
-              }, 250);
-            }, 600); // 0.6s per word
-
-          }, 700); // after fade-out
-        }, 1500);   // after logo visible
+        // Logo visible 1.5s, puis formulaire d'inscription directement
+        setTimeout(function () { showRefCodeScreen(); }, 1500);
 
         return;
       }
