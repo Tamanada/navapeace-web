@@ -14,8 +14,8 @@
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     sb.from('blocked_users').select('user_uid,reason').eq('user_uid', uid).then(function(res){
-      if(res.error) return;
-      if(res.data && res.data.length > 0){
+      if(res.error || !res.data) return;
+      if(res.data.length > 0){
         showBlockScreen();
       }
     });

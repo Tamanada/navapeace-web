@@ -885,6 +885,11 @@
     }
     let _countdownInterval = null;
 
+    // ── Clear countdown on page unload to prevent orphaned intervals ──
+    window.addEventListener('pagehide', function() {
+      if (_countdownInterval) { clearInterval(_countdownInterval); _countdownInterval = null; }
+    });
+
     // ── Détection nouveau jour quand l'app est rouverte (mobile sleep) ──
     document.addEventListener('visibilitychange', function() {
       if (document.visibilityState === 'visible') {

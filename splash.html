@@ -756,7 +756,16 @@
       }, 500);
     }
 
+    var _goToAppTimer = null;
+    var _goToAppCalled = false;
     function goToApp() {
+      // Guard against double-call (e.g. double-tap)
+      if (_goToAppCalled) return;
+      _goToAppCalled = true;
+
+      // Clear any previously running BIENVENUE interval
+      if (_goToAppTimer) { clearInterval(_goToAppTimer); _goToAppTimer = null; }
+
       // 1. Fade out form
       var refBox = document.getElementById('ref-code-box');
       if (refBox) { refBox.style.transition = 'opacity 0.3s ease'; refBox.style.opacity = '0'; }
@@ -776,10 +785,11 @@
         }
 
         var idx = 0;
-        var timer = setInterval(function() {
+        _goToAppTimer = setInterval(function() {
           idx++;
           if (idx >= WELCOME_WORDS.length) {
-            clearInterval(timer);
+            clearInterval(_goToAppTimer);
+            _goToAppTimer = null;
             // 3. Fade out and go to app
             var stage = document.querySelector('.stage');
             if (stage) { stage.style.transition = 'opacity 0.6s ease'; stage.style.opacity = '0'; }

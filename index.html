@@ -693,11 +693,29 @@
     document.getElementById('peaceForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = e.target.querySelector('button[type="submit"]');
+
+      // ── Age validation ─────────────────────────────────────────────
+      const ageRaw = parseInt(document.getElementById('age').value, 10);
+      const ageInput = document.getElementById('age');
+      let ageErr = document.getElementById('age-error');
+      if (!ageErr) {
+        ageErr = document.createElement('div');
+        ageErr.id = 'age-error';
+        ageErr.style.cssText = 'color:#ff6b6b;font-size:10px;letter-spacing:2px;margin-top:4px;';
+        ageInput.parentNode.appendChild(ageErr);
+      }
+      if (!ageRaw || ageRaw < 1 || ageRaw > 120) {
+        ageErr.textContent = 'Please enter a valid age (1–120)';
+        ageInput.focus();
+        return;
+      }
+      ageErr.textContent = '';
+
       btn.textContent = '...';
       btn.disabled = true;
 
       const country      = document.getElementById('country').value;
-      const age          = parseInt(document.getElementById('age').value, 10) || null;
+      const age          = ageRaw;
       const gender       = document.getElementById('gender').value || null;
       const referralCode = localStorage.getItem('nava_peace_ref_code') || genRefCode();
       // Bloquer l'auto-référencement (son propre code de parrainage)

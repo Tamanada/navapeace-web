@@ -883,7 +883,8 @@
       document.getElementById('cnt-timer').textContent = `${h}:${m}:${s}`;
     }
     tick();
-    setInterval(tick, 1000);
+    if (window._mapTickInterval) clearInterval(window._mapTickInterval);
+    window._mapTickInterval = setInterval(tick, 1000);
   }
 
   // ── Rafraîchissement du compteur "Actions today" toutes les 60 s ──
@@ -903,7 +904,8 @@
       document.getElementById('cnt-today').textContent = '+' + count.toLocaleString('fr-FR');
     } catch(e) { /* silencieux */ }
   }
-  setInterval(refreshTodayCount, 60_000);
+  if (window._mapRefreshInterval) clearInterval(window._mapRefreshInterval);
+  window._mapRefreshInterval = setInterval(refreshTodayCount, 60_000);
 
   // ── Initialisation Supabase & chargement des données ────────────
   async function loadPeaceData() {
