@@ -15,19 +15,34 @@
   <script>
   (function () {
     var h = window.location.hash || '';
-    var isTg =
-      h.indexOf('tgWebAppData')    !== -1 ||
-      h.indexOf('tgWebAppVersion') !== -1 ||
-      !!window.TelegramWebviewProxy ||
-      !!(window.Telegram && window.Telegram.WebApp) ||
-      !!localStorage.getItem('nava_peace_country') ||
-      (localStorage.getItem('nava_peace_uid') || '').indexOf('tg_') === 0;
+    var checks = {
+      hash_data:    h.indexOf('tgWebAppData')    !== -1,
+      hash_version: h.indexOf('tgWebAppVersion') !== -1,
+      proxy:        !!window.TelegramWebviewProxy,
+      tg_webapi:    !!(window.Telegram && window.Telegram.WebApp),
+      ls_country:   !!localStorage.getItem('nava_peace_country'),
+      ls_uid:       (localStorage.getItem('nava_peace_uid') || '').indexOf('tg_') === 0,
+    };
+    var isTg = checks.hash_data || checks.hash_version || checks.proxy ||
+               checks.tg_webapi || checks.ls_country || checks.ls_uid;
+    window._NAVA_DEBUG = checks;
+    window._NAVA_IS_TG = isTg;
 
     if (isTg) {
       document.documentElement.classList.add('in-tg');
     } else {
-      // Not Telegram — redirect to bot (handled before body renders)
-      window.location.replace('https://t.me/NavaPeaceBot/app');
+      // Might not be Telegram — show block page, redirect after short delay
+      // (delay allows async telegram-web-app.js to load and re-confirm)
+      document.documentElement.classList.add('not-tg');
+      setTimeout(function() {
+        // Re-check after CDN script may have loaded
+        if (window.Telegram && window.Telegram.WebApp) {
+          document.documentElement.classList.remove('not-tg');
+          document.documentElement.classList.add('in-tg');
+        } else {
+          window.location.replace('https://t.me/NavaPeaceBot/app');
+        }
+      }, 800);
     }
   })();
   </script>
@@ -54,12 +69,16 @@
     }
 
     /* ── TELEGRAM GATE ── */
-    #tg-block { display: flex !important; }
-    .stage, .enter-link, .ticker-wrap { display: none !important; }
-    html.in-tg #tg-block    { display: none !important; }
-    html.in-tg .stage       { display: flex !important; }
-    html.in-tg .ticker-wrap { display: flex !important; }
-    html.in-tg .enter-link  { display: block; }
+    /* Stage visible by default — hidden only if JS confirms non-Telegram */
+    #tg-block { display: none !important; }
+    .stage       { display: flex !important; }
+    .ticker-wrap { display: flex !important; }
+    .enter-link  { display: block; }
+    /* Non-Telegram confirmed (added by JS): show block, hide splash */
+    html.not-tg #tg-block    { display: flex !important; }
+    html.not-tg .stage       { display: none !important; }
+    html.not-tg .ticker-wrap { display: none !important; }
+    html.not-tg .enter-link  { display: none !important; }
 
     /* ── STAGE ── */
     .stage {
