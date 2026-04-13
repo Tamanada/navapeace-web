@@ -14,40 +14,7 @@
   <meta property="og:image"       content="https://nava-peace.app/og-image.png" />
   <meta name="twitter:card"       content="summary_large_image" />
 
-  <!-- ① Telegram detection — runs synchronously, zero network, no blocking -->
-  <script>
-  (function () {
-    var h = window.location.hash || '';
-    var isTg =
-      h.indexOf('tgWebAppData')    !== -1 ||
-      h.indexOf('tgWebAppVersion') !== -1 ||
-      !!window.TelegramWebviewProxy ||
-      !!(window.Telegram && window.Telegram.WebApp) ||
-      !!localStorage.getItem('nava_peace_country') ||
-      (localStorage.getItem('nava_peace_uid') || '').indexOf('tg_') === 0;
-    window._NAVA_IS_TG = isTg;
-
-    if (isTg) {
-      document.documentElement.classList.add('in-tg');
-    } else {
-      // Might not be Telegram — show block page, redirect after short delay
-      // (delay allows async telegram-web-app.js to load and re-confirm)
-      document.documentElement.classList.add('not-tg');
-      setTimeout(function() {
-        // Re-check after CDN script may have loaded
-        if (window.Telegram && window.Telegram.WebApp) {
-          document.documentElement.classList.remove('not-tg');
-          document.documentElement.classList.add('in-tg');
-        } else {
-          window.location.replace('https://t.me/NavaPeaceBot/app');
-        }
-      }, 800);
-    }
-  })();
-  </script>
-
-  <!-- ② Telegram SDK — async. Telegram injects window.Telegram.WebApp natively
-       before any scripts; this CDN script is only a fallback for web browsers. -->
+  <!-- Telegram SDK — async, non-blocking -->
   <script src="https://telegram.org/js/telegram-web-app.js" async></script>
 
   <style>
@@ -67,17 +34,8 @@
       background: radial-gradient(ellipse at 50% 20%, #6DD5F5 0%, #3AACDF 45%, #1E8EC4 100%);
     }
 
-    /* ── TELEGRAM GATE ── */
-    /* Stage visible by default — hidden only if JS confirms non-Telegram */
+    /* No CSS gate — stage always visible. JS handles non-Telegram redirect. */
     #tg-block { display: none !important; }
-    .stage       { display: flex !important; }
-    .ticker-wrap { display: flex !important; }
-    .enter-link  { display: block; }
-    /* Non-Telegram confirmed (added by JS): show block, hide splash */
-    html.not-tg #tg-block    { display: flex !important; }
-    html.not-tg .stage       { display: none !important; }
-    html.not-tg .ticker-wrap { display: none !important; }
-    html.not-tg .enter-link  { display: none !important; }
 
     /* ── STAGE ── */
     .stage {
@@ -226,16 +184,6 @@
 
 <body>
 
-  <!-- Non-Telegram fallback block -->
-  <div id="tg-block" style="position:fixed;inset:0;z-index:9999;flex-direction:column;align-items:center;justify-content:center;background:#050F1A;color:#fff;font-family:Arial,sans-serif;text-align:center;padding:30px;">
-    <img src="logo.png" style="width:72px;height:72px;object-fit:contain;margin-bottom:18px;opacity:.9;" onerror="this.style.display='none'">
-    <div style="font-size:20px;letter-spacing:4px;color:#64D2FF;margin-bottom:8px;">NAVA PEACE</div>
-    <div style="font-size:11px;letter-spacing:3px;color:rgba(255,255,255,.45);margin-bottom:28px;">MAKE PEACE. MAKE CHANGE.</div>
-    <div style="font-size:13px;letter-spacing:2px;color:rgba(255,255,255,.8);margin-bottom:28px;line-height:2.2;">THIS APP IS ONLY AVAILABLE<br>INSIDE TELEGRAM</div>
-    <a href="https://t.me/NavaPeaceBot/app" target="_blank" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#3AACDF,#1E8EC4);color:#fff;border-radius:12px;text-decoration:none;font-size:12px;letter-spacing:3px;">🕊 OPEN IN TELEGRAM</a>
-  </div>
-
-  <a class="enter-link" href="peace.html">ENTER →</a>
 
   <!-- ── MAIN STAGE — renders immediately, CSS animations auto-start ── -->
   <div class="stage" id="main-stage">
@@ -458,6 +406,14 @@
       try { sessionStorage.setItem('nava_splash_shown', '1'); } catch(e) {}
       // Clear stale module cache
       try { localStorage.removeItem('nava_modules'); localStorage.removeItem('nava_modules_ts'); } catch(e) {}
+
+      // Non-Telegram redirect — only after 1.5s delay (time for async CDN script + native injection)
+      setTimeout(function() {
+        var hasTg = !!(window.Telegram && window.Telegram.WebApp) ||
+                    !!localStorage.getItem('nava_peace_country') ||
+                    (localStorage.getItem('nava_peace_uid') || '').indexOf('tg_') === 0;
+        if (!hasTg) window.location.replace('https://t.me/NavaPeaceBot/app');
+      }, 1500);
 
       // Call Telegram.WebApp.ready() if available
       try {
