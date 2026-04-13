@@ -2,75 +2,73 @@
 <html lang="en" data-module="module_splash">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://telegram.org https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; frame-ancestors 'none';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://telegram.org; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co; frame-ancestors 'none';" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NAVA PEACE — Born To Grow</title>
   <link rel="icon" type="image/png" href="favicon.png" />
-  <!-- FIRST script — runs before body renders, zero network dependency -->
+  <meta property="og:title"       content="NAVA PEACE — Born To Grow" />
+  <meta property="og:description" content="The world talks about peace. Let's practice it." />
+  <meta property="og:image"       content="https://nava-peace.app/og-image.png" />
+  <meta name="twitter:card"       content="summary_large_image" />
+
+  <!-- ① Telegram detection — runs synchronously, zero network, no blocking -->
   <script>
-  (function(){
+  (function () {
     var h = window.location.hash || '';
-    var isTg = h.indexOf('tgWebAppData') !== -1 ||
-               h.indexOf('tgWebAppVersion') !== -1 ||
-               !!window.TelegramWebviewProxy ||
-               !!(window.Telegram && window.Telegram.WebApp) ||
-               !!localStorage.getItem('nava_peace_country') ||
-               (localStorage.getItem('nava_peace_uid') || '').indexOf('tg_') === 0;
-    window._NAVA_IN_TG = isTg;
+    var isTg =
+      h.indexOf('tgWebAppData')    !== -1 ||
+      h.indexOf('tgWebAppVersion') !== -1 ||
+      !!window.TelegramWebviewProxy ||
+      !!(window.Telegram && window.Telegram.WebApp) ||
+      !!localStorage.getItem('nava_peace_country') ||
+      (localStorage.getItem('nava_peace_uid') || '').indexOf('tg_') === 0;
+
     if (isTg) {
       document.documentElement.classList.add('in-tg');
     } else {
+      // Not Telegram — redirect to bot (handled before body renders)
       window.location.replace('https://t.me/NavaPeaceBot/app');
     }
   })();
   </script>
+
+  <!-- ② Telegram SDK — async. Telegram injects window.Telegram.WebApp natively
+       before any scripts; this CDN script is only a fallback for web browsers. -->
   <script src="https://telegram.org/js/telegram-web-app.js" async></script>
-  <script src="supabase_config.js"></script>
-  <script src="telegram.js"></script>
-  <script src="module_gate.js?v=6"></script>
-  <!-- Open Graph -->
-  <meta property="og:type"        content="website" />
-  <meta property="og:url"         content="https://nava-peace.app/splash.html" />
-  <meta property="og:title"       content="NAVA PEACE — Born To Grow" />
-  <meta property="og:description" content="The world talks about peace. Let's practice it. Join NAVA PEACE today and vote for peace every day." />
-  <meta property="og:image"       content="https://nava-peace.app/og-image.png" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:image" content="https://nava-peace.app/og-image.png" />
+
   <style>
     @font-face {
       font-family: 'Nasalization';
       font-style: normal; font-weight: 400; font-display: swap;
       src: url('nasalization.woff') format('woff');
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --font: 'Nasalization', Arial, sans-serif; }
 
-    :root {
-      --font: 'Nasalization', Arial, sans-serif;
-    }
-
-    html {
-      height: 100%; width: 100%;
-      /* pas d'overflow:hidden — iOS Safari clippe les position:fixed quand html OU body ont overflow:hidden */
-    }
+    html { height: 100%; width: 100%; }
     body {
       height: 100%; width: 100%;
-      overscroll-behavior: none; /* empêche le pull-to-refresh sans bloquer le ticker */
+      overscroll-behavior: none;
       font-family: var(--font);
       background: radial-gradient(ellipse at 50% 20%, #6DD5F5 0%, #3AACDF 45%, #1E8EC4 100%);
     }
 
-    /* ── MAIN LAYOUT ───────────────────────────── */
+    /* ── TELEGRAM GATE ── */
+    #tg-block { display: flex !important; }
+    .stage, .enter-link, .ticker-wrap { display: none !important; }
+    html.in-tg #tg-block    { display: none !important; }
+    html.in-tg .stage       { display: flex !important; }
+    html.in-tg .ticker-wrap { display: flex !important; }
+    html.in-tg .enter-link  { display: block; }
+
+    /* ── STAGE ── */
     .stage {
       position: fixed; inset: 0;
-      display: flex; flex-direction: column;
+      flex-direction: column;
       align-items: center; justify-content: center;
-      padding-bottom: 90px; /* room for ticker */
+      padding-bottom: 90px;
+      transition: opacity 0.6s ease;
     }
-
-    /* ── BACKGROUND BREATH ─────────────────────── */
     .stage::before {
       content: '';
       position: fixed; top: -5%; left: 50%;
@@ -81,871 +79,481 @@
       animation: bgBreath 14s ease-in-out infinite;
     }
 
-    /* ── LOGO ──────────────────────────────────── */
+    /* ── LOGO ── */
     .logo-wrap {
       margin-bottom: min(36px, 3.5vh);
-      animation: logoFadeIn 1.5s ease-out both,
-                 logoFloat 10s 1.7s ease-in-out infinite;
+      animation: logoFadeIn 1.2s ease-out both,
+                 logoFloat 10s 1.3s ease-in-out infinite;
     }
     .logo-img {
-      /* min(286px, 28vh) : sur PC 800px de haut → 224px ; mobile portrait inchangé */
-      width: min(286px, 28vh); height: min(286px, 28vh); object-fit: contain;
-      animation: logoBlur 1.5s ease-out both,
-                 logoGlow 7s 1.7s ease-in-out infinite;
+      width: min(220px, 26vh); height: min(220px, 26vh); object-fit: contain;
+      animation: logoBlur 1.2s ease-out both,
+                 logoGlow 7s 1.3s ease-in-out infinite;
     }
-    .logo-fallback {
-      font-size: min(170px, 20vh);
-      line-height: 1;
-      animation: logoBlur 1.5s ease-out both,
-                 logoGlow 7s 1.7s ease-in-out infinite;
-    }
+    .logo-fallback { font-size: min(140px, 18vh); line-height: 1; }
 
-    /* ── BRAND NAME ────────────────────────────── */
+    /* ── BRAND ── */
     .brand {
-      font-size: clamp(18px, 3vw, 30px);
-      letter-spacing: clamp(10px, 2vw, 22px);
+      font-size: clamp(16px, 3vw, 28px);
+      letter-spacing: clamp(8px, 2vw, 20px);
       color: rgba(255,255,255,0.72);
       text-transform: uppercase;
-      margin-bottom: 20px;
-      animation: brandReveal 2.2s 1.8s ease-out both;
+      margin-bottom: 18px;
+      animation: brandReveal 1.8s 1.2s ease-out both;
     }
 
-    /* ── HERO TEXT ─────────────────────────────── */
+    /* ── HERO ── */
     .hero {
-      /* min(11vw, 9vh) : sur PC 1280×800 → min(140px, 72px) = 72px ; mobile portrait inchangé */
-      font-size: clamp(48px, min(11vw, 9vh), 160px);
-      letter-spacing: clamp(4px, min(1.2vw, 0.8vh), 18px);
-      color: #ffffff;
+      font-size: clamp(44px, min(11vw, 9vh), 140px);
+      letter-spacing: clamp(4px, min(1.2vw, 0.8vh), 16px);
+      color: #fff;
       text-transform: uppercase;
       text-align: center;
       line-height: 1;
-      text-shadow:
-        0 0 60px rgba(255,255,255,0.35),
-        0 0 120px rgba(255,255,255,0.15),
-        0 4px 30px rgba(30,100,170,0.4);
-      animation: heroReveal 2.8s 2.6s ease-out both;
+      text-shadow: 0 0 60px rgba(255,255,255,0.35), 0 4px 30px rgba(30,100,170,0.4);
+      animation: heroReveal 2s 1.8s ease-out both;
       user-select: none;
+      transition: opacity 0.4s ease;
     }
 
-    /* ── DIVIDER ───────────────────────────────── */
+    /* ── DIVIDER ── */
     .divider {
-      width: clamp(60px, 10vw, 140px);
-      height: 1px;
+      width: clamp(60px, 10vw, 140px); height: 1px;
       background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
-      margin: 28px auto 16px;
-      animation: fadeIn 2s 4s ease both;
+      margin: 24px auto 14px;
+      animation: fadeIn 2s 3s ease both;
     }
 
-    /* ── DAILY MESSAGE ──────────────────────────── */
+    /* ── DAILY MSG ── */
     .daily-msg {
-      font-size: clamp(14px, 1.9vw, 22px);
+      font-size: clamp(13px, 1.8vw, 20px);
       letter-spacing: clamp(2px, 0.5vw, 5px);
-      color: rgba(255,255,255,0.58);
+      color: rgba(255,255,255,0.55);
       text-transform: uppercase;
       text-align: center;
-      max-width: 560px;
+      max-width: 520px;
       padding: 0 24px;
       line-height: 1.65;
-      animation: msgReveal 2.5s 4.6s ease both;
+      animation: msgReveal 2s 3.4s ease both;
     }
     .daily-msg-date {
       display: block;
-      font-size: clamp(10px, 1.1vw, 13px);
+      font-size: clamp(9px, 1vw, 12px);
       letter-spacing: 4px;
-      color: rgba(255,255,255,0.3);
+      color: rgba(255,255,255,0.28);
       margin-bottom: 8px;
     }
 
-    /* ── BOTTOM TICKER ─────────────────────────── */
+    /* ── TICKER ── */
     .ticker-wrap {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      z-index: 200;
-      height: 72px;
-      background: rgba(10, 40, 80, 0.72);
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+      height: 68px;
+      background: rgba(10,40,80,0.72);
       backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
       border-top: 1px solid rgba(255,255,255,0.18);
-      display: flex; align-items: center;
-      overflow: hidden;
-      animation: fadeIn 1s 0.8s ease both;
+      align-items: center; overflow: hidden;
+      animation: fadeIn 0.8s 0.4s ease both;
     }
-
     .ticker-track {
-      display: flex;
-      align-items: center;
+      display: flex; align-items: center;
       white-space: nowrap;
-      animation: ticker 42s linear infinite;
+      animation: ticker 40s linear infinite;
       will-change: transform;
     }
-
     .ticker-item {
-      display: inline-flex;
-      align-items: center;
-      padding: 0 36px;
-      font-size: clamp(14px, 1.9vw, 24px);
-      letter-spacing: clamp(3px, 0.6vw, 8px);
+      display: inline-flex; align-items: center;
+      padding: 0 30px;
+      font-size: clamp(13px, 1.8vw, 22px);
+      letter-spacing: clamp(2px, 0.5vw, 6px);
       color: rgba(255,255,255,0.88);
-      text-transform: uppercase;
-      white-space: nowrap;
-      flex-shrink: 0;
+      text-transform: uppercase; white-space: nowrap; flex-shrink: 0;
     }
-    .ticker-sep {
-      width: 1px; height: 26px;
-      background: rgba(255,255,255,0.22);
-      flex-shrink: 0;
-    }
+    .ticker-sep { width: 1px; height: 24px; background: rgba(255,255,255,0.22); flex-shrink: 0; }
 
-    /* ── TAP TO CONTINUE ───────────────────────── */
-    .tap-hint {
-      margin-top: clamp(18px, 3vh, 28px);
-      font-size: clamp(9px, 1.1vw, 12px);
-      letter-spacing: clamp(5px, 1vw, 10px);
-      color: rgba(255,255,255,0.5);
-      text-transform: uppercase;
-      opacity: 0;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-    }
-    @keyframes tapPulse {
-      0%, 100% { opacity: 0.3; }
-      50%       { opacity: 0.75; }
-    }
-
-    /* ── LINK (nouveau visiteur) ────────────────── */
+    /* ── ENTER LINK ── */
     .enter-link {
-      position: fixed;
-      bottom: 90px; right: 32px;
-      font-size: 13px; letter-spacing: 4px;
-      color: rgba(255,255,255,0.6);
-      text-transform: uppercase;
-      text-decoration: none;
-      border-bottom: 1px solid rgba(255,255,255,0.25);
-      padding-bottom: 2px;
-      transition: color 0.2s, border-color 0.2s;
-      animation: fadeIn 1.2s 1.4s ease both;
-      z-index: 10;
-    }
-    .enter-link:hover { color: #fff; border-color: rgba(255,255,255,0.7); }
-
-    /* ── ANIMATIONS ────────────────────────────── */
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
-    @keyframes ticker {
-      0%   { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
+      position: fixed; bottom: 86px; right: 28px;
+      font-size: 12px; letter-spacing: 4px;
+      color: rgba(255,255,255,0.55);
+      text-transform: uppercase; text-decoration: none;
+      border-bottom: 1px solid rgba(255,255,255,0.22); padding-bottom: 2px;
+      animation: fadeIn 1s 1.2s ease both; z-index: 10;
     }
 
-    /* Background glow pulse — very subtle */
-    @keyframes bgBreath {
-      0%, 100% { opacity: 0.55; transform: translateX(-50%) scale(1);    }
-      50%       { opacity: 1;    transform: translateX(-50%) scale(1.18); }
-    }
+    /* ── ANIMATIONS ── */
+    @keyframes fadeIn    { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes ticker    { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    @keyframes bgBreath  { 0%,100% { opacity:.55; transform:translateX(-50%) scale(1); } 50% { opacity:1; transform:translateX(-50%) scale(1.18); } }
+    @keyframes logoFadeIn { 0% { opacity:0; transform:scale(0.84); } 60% { opacity:.9; } 100% { opacity:1; transform:scale(1); } }
+    @keyframes logoBlur  { 0% { filter:blur(8px) brightness(1.6); } 50% { filter:blur(2px) brightness(1.1); } 100% { filter:blur(0) brightness(1) drop-shadow(0 12px 50px rgba(255,255,255,.5)) drop-shadow(0 0 70px rgba(109,213,245,.35)); } }
+    @keyframes logoGlow  { 0%,100% { filter:drop-shadow(0 12px 50px rgba(255,255,255,.48)) drop-shadow(0 0 70px rgba(109,213,245,.28)); } 50% { filter:drop-shadow(0 18px 80px rgba(255,255,255,.78)) drop-shadow(0 0 120px rgba(109,213,245,.55)); } }
+    @keyframes logoFloat { 0%,100% { transform:translateY(0) rotate(0deg); } 35% { transform:translateY(-12px) rotate(0.5deg); } 70% { transform:translateY(-6px) rotate(-0.3deg); } }
+    @keyframes brandReveal { 0% { opacity:0; letter-spacing:4px; } 100% { opacity:1; } }
+    @keyframes heroReveal  { 0% { opacity:0; filter:blur(10px); } 50% { opacity:.7; filter:blur(2px); } 100% { opacity:1; filter:blur(0); } }
+    @keyframes msgReveal   { 0% { opacity:0; transform:translateY(10px); } 100% { opacity:1; transform:translateY(0); } }
+    @keyframes tapPulse    { 0%,100% { opacity:.3; } 50% { opacity:.75; } }
 
-    /* Logo — slow materialise from light */
-    @keyframes logoFadeIn {
-      0%   { opacity: 0; transform: scale(0.82); }
-      60%  { opacity: 0.88; }
-      100% { opacity: 1;  transform: scale(1); }
-    }
-
-    /* Logo blur clearing — filter only */
-    @keyframes logoBlur {
-      0%   { filter: blur(8px)  brightness(1.6)
-                     drop-shadow(0 0 0px rgba(255,255,255,0)); }
-      50%  { filter: blur(2px)  brightness(1.15)
-                     drop-shadow(0 8px 30px rgba(255,255,255,0.3)); }
-      100% { filter: blur(0px)  brightness(1)
-                     drop-shadow(0 12px 50px rgba(255,255,255,0.50))
-                     drop-shadow(0 0 80px rgba(109,213,245,0.35)); }
-    }
-
-    /* Logo glow breathing — continuous */
-    @keyframes logoGlow {
-      0%, 100% { filter: drop-shadow(0 12px 50px rgba(255,255,255,0.48))
-                         drop-shadow(0 0 70px rgba(109,213,245,0.28)); }
-      50%       { filter: drop-shadow(0 18px 80px rgba(255,255,255,0.78))
-                         drop-shadow(0 0 120px rgba(109,213,245,0.55)); }
-    }
-
-    /* Logo float — slow, like breathing */
-    @keyframes logoFloat {
-      0%,  100% { transform: translateY(0px)   rotate(0deg);    }
-      35%        { transform: translateY(-14px) rotate(0.6deg);  }
-      70%        { transform: translateY(-8px)  rotate(-0.4deg); }
-    }
-
-    /* Brand name — letter-spacing expansion */
-    @keyframes brandReveal {
-      0%   { opacity: 0; letter-spacing: 5px; }
-      100% { opacity: 1; letter-spacing: clamp(10px, 2vw, 22px); }
-    }
-
-    /* Hero text — blur to sharp */
-    @keyframes heroReveal {
-      0%   { opacity: 0; filter: blur(10px); }
-      45%  { opacity: 0.7; filter: blur(2px); }
-      100% { opacity: 1; filter: blur(0); }
-    }
-
-    /* Daily message — soft rise */
-    @keyframes msgReveal {
-      0%   { opacity: 0; transform: translateY(12px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ── RESPONSIVE ────────────────────────────── */
+    /* ── MOBILE ── */
     @media (max-width: 600px) {
-      .brand { letter-spacing: 8px; font-size: 16px; }
-      .logo-img { width: 195px; height: 195px; }
-      .logo-fallback { font-size: 120px; }
-
-      /* Ticker mobile */
-      .ticker-wrap {
-        height: 56px;
-      }
-      .ticker-item {
-        padding: 0 18px;
-        font-size: clamp(13px, 4.2vw, 18px);
-        letter-spacing: clamp(2px, 0.8vw, 5px);
-      }
-      .ticker-track {
-        animation-duration: 32s; /* plus rapide car écran plus petit */
-      }
-
-      /* Ajustement stage pour ticker plus court */
+      .brand { letter-spacing: 7px; font-size: 15px; }
       .stage { padding-bottom: 72px; }
-
-      .enter-link { bottom: 68px; right: 18px; font-size: 11px; }
-      .daily-msg { font-size: 13px; padding: 0 18px; }
-      .daily-msg-date { font-size: 9px; }
+      .ticker-wrap { height: 54px; }
+      .ticker-item { padding: 0 16px; font-size: clamp(12px,4vw,16px); }
+      .ticker-track { animation-duration: 30s; }
+      .enter-link { bottom: 66px; right: 16px; font-size: 10px; }
     }
-
-    /* ── TELEGRAM GATE — static CSS, zero injection, zero flash ── */
-    /* Default (browser): block page visible, splash hidden        */
-    #tg-block { display: flex !important; }
-    .stage, .enter-link, .ticker-wrap { display: none !important; }
-    /* Telegram confirmed (html.in-tg): block hidden, splash shown */
-    html.in-tg #tg-block         { display: none !important; }
-    html.in-tg .stage            { display: flex !important; }
-    html.in-tg .enter-link       { display: block; }
-    html.in-tg .ticker-wrap      { display: flex !important; }
-
   </style>
 </head>
-<body style="background:#050F1A;">
 
-  <!-- Telegram-only block page — hidden by default, shown via CSS injected in <head> when not in Telegram -->
+<body>
+
+  <!-- Non-Telegram fallback block -->
   <div id="tg-block" style="position:fixed;inset:0;z-index:9999;flex-direction:column;align-items:center;justify-content:center;background:#050F1A;color:#fff;font-family:Arial,sans-serif;text-align:center;padding:30px;">
-    <img src="logo.png" style="width:80px;height:80px;object-fit:contain;margin-bottom:20px;opacity:0.9;" onerror="this.style.display='none'">
-    <div style="font-size:22px;letter-spacing:4px;color:#64D2FF;margin-bottom:8px;">NAVA PEACE</div>
-    <div style="font-size:11px;letter-spacing:3px;color:rgba(255,255,255,0.5);margin-bottom:32px;">MAKE PEACE. MAKE CHANGE.</div>
-    <div style="font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.8);margin-bottom:32px;line-height:2;">THIS APP IS ONLY AVAILABLE<br>INSIDE TELEGRAM</div>
-    <a href="https://t.me/NavaPeaceBot/app" target="_blank" style="display:inline-block;padding:14px 32px;cursor:pointer;background:linear-gradient(135deg,#3AACDF,#1E8EC4);color:#fff;border-radius:12px;text-decoration:none;font-size:13px;letter-spacing:3px;">🕊 OPEN IN TELEGRAM</a>
+    <img src="logo.png" style="width:72px;height:72px;object-fit:contain;margin-bottom:18px;opacity:.9;" onerror="this.style.display='none'">
+    <div style="font-size:20px;letter-spacing:4px;color:#64D2FF;margin-bottom:8px;">NAVA PEACE</div>
+    <div style="font-size:11px;letter-spacing:3px;color:rgba(255,255,255,.45);margin-bottom:28px;">MAKE PEACE. MAKE CHANGE.</div>
+    <div style="font-size:13px;letter-spacing:2px;color:rgba(255,255,255,.8);margin-bottom:28px;line-height:2.2;">THIS APP IS ONLY AVAILABLE<br>INSIDE TELEGRAM</div>
+    <a href="https://t.me/NavaPeaceBot/app" target="_blank" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#3AACDF,#1E8EC4);color:#fff;border-radius:12px;text-decoration:none;font-size:12px;letter-spacing:3px;">🕊 OPEN IN TELEGRAM</a>
   </div>
 
-  <!-- Optional: enter app link -->
   <a class="enter-link" href="peace.html">ENTER →</a>
 
-  <!-- ── MAIN STAGE ─────────────────────────── -->
-  <div class="stage">
-
-    <!-- Logo -->
+  <!-- ── MAIN STAGE — renders immediately, CSS animations auto-start ── -->
+  <div class="stage" id="main-stage">
     <div class="logo-wrap">
       <img class="logo-img" src="logo.png" alt="NAVA PEACE"
-           onerror="this.style.display='none';document.getElementById('logo-fallback').style.display='block'" />
-      <span class="logo-fallback" id="logo-fallback" style="display:none;">🕊</span>
+           onerror="this.style.display='none';document.getElementById('logo-fb').style.display='block'" />
+      <span id="logo-fb" style="display:none;font-size:min(140px,18vh);">🕊</span>
     </div>
-
-    <!-- Brand -->
     <p class="brand">NAVA PEACE</p>
-
-    <!-- Hero -->
-    <h1 class="hero">BORN TO GROW</h1>
-
-    <!-- Divider line -->
+    <h1 class="hero" id="hero">BORN TO GROW</h1>
     <div class="divider"></div>
-
-    <!-- Daily message -->
-    <div class="daily-msg" id="daily-msg">
+    <div class="daily-msg">
       <span class="daily-msg-date" id="daily-date"></span>
       <span id="daily-text"></span>
     </div>
-
-    <!-- Tap / click to continue -->
-    <p class="tap-hint" id="tap-hint">TAP TO CONTINUE</p>
-
   </div>
 
-  <!-- ── TICKER ─────────────────────────────── -->
-  <div class="ticker-wrap" aria-label="Born to grow in 12 languages">
-    <div class="ticker-track" id="ticker-track">
-      <!-- filled by JS; duplicated for seamless loop -->
-    </div>
+  <!-- ── TICKER ── -->
+  <div class="ticker-wrap" aria-label="Born to grow in 13 languages">
+    <div class="ticker-track" id="ticker-track"></div>
   </div>
 
+  <!-- ══════════════════════════════════════════════════════════════
+       ③ ALL LOGIC — runs after body is fully parsed & visible
+       No external dependencies — SUPABASE credentials are inlined
+       ══════════════════════════════════════════════════════════════ -->
   <script>
-    // Marquer la session : la splash a été vue — empêche les boucles de redirect
-    sessionStorage.setItem('nava_splash_shown', '1');
+  (function () {
+    'use strict';
 
-    // Toujours vider le cache des modules au démarrage — l'état sera refetché depuis Supabase
-    localStorage.removeItem('nava_modules');
-    localStorage.removeItem('nava_modules_ts');
+    // ── SUPABASE CREDENTIALS (inlined — no supabase.js needed) ──
+    var SB_URL = 'https://qvbxcxehhenpifhclhvs.supabase.co';
+    var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2YnhjeGVoaGVucGlmaGNsaHZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1ODcxNzgsImV4cCI6MjA4MzE2MzE3OH0.emnoT_8qFJzDHHgHa9e6CIAwJvCW6t-NC1CDKGU_pew';
+    var SB_H   = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
 
-    // ── SESSION STATE ──────────────────────────────────────────────────────────
-    var _sessionCheckDone = false;
-    var _animationStarted = false;
-
-    function _forceStartAnimation() {
-      // Always start animation — bypass all guards
-      if (_animationStarted) return;
-      _animationStarted = true;
-      // Force isTelegram flag so animation guard passes
-      if (window.Telegram && window.Telegram.WebApp) {
-        window._NAVA_IN_TG = true;
-        NAVA_TG.isTelegram = true;
-        try {
-          var _u = window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user;
-          if (_u && _u.id) {
-            NAVA_TG.uid = 'tg_' + _u.id;
-            localStorage.setItem('nava_peace_uid', NAVA_TG.uid);
-            var _sp = window.Telegram.WebApp.initDataUnsafe.start_param;
-            if (_sp) localStorage.setItem('nava_peace_referred_by', _sp.toUpperCase());
-          }
-        } catch(e) {}
-      }
-      _startSplashAnimation();
+    // ── HELPERS ──
+    function sbGet(path) {
+      return fetch(SB_URL + '/rest/v1/' + path, { headers: SB_H }).then(function (r) { return r.json(); });
     }
-
-    function _runSplashLogic() {
-      if (_sessionCheckDone) return;
-      _sessionCheckDone = true;
-
-      // Returning user already in localStorage
-      if (localStorage.getItem('nava_peace_country')) {
-        var _today = new Date().toISOString().split('T')[0];
-        var _dest = (localStorage.getItem('nava_peace_voted') === _today) ? 'map.html' : 'peace.html';
-        window.location.replace(_dest);
-        return;
-      }
-
-      _forceStartAnimation();
+    function ls(k, v) {
+      if (v !== undefined) { try { localStorage.setItem(k, v); } catch(e){} }
+      else { try { return localStorage.getItem(k); } catch(e){ return null; } }
     }
+    function stage()  { return document.getElementById('main-stage'); }
+    function hero()   { return document.getElementById('hero'); }
 
-    // ── HARD SAFETY TIMEOUT — fires no matter what after 1.5s ───────────────
-    // New visitor stuck? Force animation unconditionally.
-    setTimeout(function() {
-      if (!_sessionCheckDone && !_animationStarted) {
-        _sessionCheckDone = true;
-        _forceStartAnimation();
-      }
-    }, 1500);
-
-    (function restoreSession() {
-      // Re-check with SDK (handles edge cases where hash was empty on mobile)
-      if (!window._NAVA_IN_TG) {
-        var tgSDK = window.Telegram && window.Telegram.WebApp;
-        if (tgSDK && (tgSDK.initData || tgSDK.initDataUnsafe)) {
-          window._NAVA_IN_TG = true;
-          document.documentElement.classList.add('in-tg');
-          document.body.style.background = '';
-          // Re-detect user if NAVA_TG missed the race
-          if (!NAVA_TG.isTelegram) {
-            try {
-              var _u = tgSDK.initDataUnsafe && tgSDK.initDataUnsafe.user;
-              if (_u && _u.id) {
-                NAVA_TG.isTelegram = true;
-                NAVA_TG.uid = 'tg_' + _u.id;
-                localStorage.setItem('nava_peace_uid', NAVA_TG.uid);
-                var _sp = tgSDK.initDataUnsafe.start_param;
-                if (_sp) localStorage.setItem('nava_peace_referred_by', _sp.toUpperCase());
-              }
-            } catch(e) {}
-          }
-        } else {
-          return; // Confirmed not Telegram
-        }
-      }
-
-      // ── IN TELEGRAM — restore blue splash background ───────────────────────
-      document.body.style.background = '';
-      if (window.Telegram && window.Telegram.WebApp) {
-        try { window.Telegram.WebApp.ready(); } catch(e) {}
-      }
-
-      if (localStorage.getItem('nava_peace_country')) {
-        // Returning user already in localStorage — sync pseudo in background
-        var _uid = localStorage.getItem('nava_peace_uid');
-        if (_uid && typeof SUPABASE_URL !== 'undefined' && window.supabase) {
-          try {
-            var _sbg = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            _sbg.from('peace_messages').select('pseudo, message')
-              .eq('user_uid', _uid).limit(1)
-              .then(function(r) {
-                if (r.data && r.data[0]) {
-                  if (r.data[0].pseudo)  localStorage.setItem('nava_peace_pseudo',  r.data[0].pseudo);
-                  if (r.data[0].message) localStorage.setItem('nava_peace_message', r.data[0].message);
-                }
-              }).catch(function(){});
-          } catch(e) {}
-        }
-        setTimeout(_runSplashLogic, 0);
-        return;
-      }
-
-      // New user in Telegram — restore session from DB
-      var _doRestoreAttempts = 0;
-      function _doRestore() {
-        _doRestoreAttempts++;
-        var tgUser = window.Telegram.WebApp.initDataUnsafe &&
-                     window.Telegram.WebApp.initDataUnsafe.user;
-
-        // Retry up to 8 times (2.4s total), then give up and show splash
-        if (!tgUser || !tgUser.id) {
-          if (_doRestoreAttempts < 8) {
-            setTimeout(_doRestore, 300);
-          } else {
-            _runSplashLogic(); // give up, show animation for new visitor
-          }
-          return;
-        }
-
-        var expectedUID = 'tg_' + tgUser.id;
-        var _h = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY };
-        var _base = SUPABASE_URL + '/rest/v1/';
-
-        // 1. Cherche dans peace_votes
-        fetch(_base + 'peace_votes?select=referral_code,referred_by,country,age,gender,created_at&user_uid=eq.' + encodeURIComponent(expectedUID) + '&order=created_at.desc&limit=1', { headers: _h })
-          .then(function(r) { return r.json(); })
-          .then(function(data) {
-            if (data && data.length > 0) {
-              var row = data[0];
-              localStorage.setItem('nava_peace_uid', expectedUID);
-              localStorage.setItem('nava_peace_country', row.country || 'XX');
-              if (row.referral_code) localStorage.setItem('nava_peace_ref_code',    row.referral_code);
-              if (row.age)           localStorage.setItem('nava_peace_age',         row.age);
-              if (row.gender)        localStorage.setItem('nava_peace_gender',      row.gender);
-              if (row.referred_by)   localStorage.setItem('nava_peace_referred_by', row.referred_by);
-              if (row.created_at)    localStorage.setItem('nava_peace_voted',       row.created_at.split('T')[0]);
-              // 2. Restaurer pseudo/message depuis peace_messages
-              return fetch(_base + 'peace_messages?select=pseudo,message&user_uid=eq.' + encodeURIComponent(expectedUID) + '&limit=1', { headers: _h })
-                .then(function(r2) { return r2.json(); })
-                .then(function(pm) {
-                  if (pm && pm[0]) {
-                    if (pm[0].pseudo)  localStorage.setItem('nava_peace_pseudo',  pm[0].pseudo);
-                    if (pm[0].message) localStorage.setItem('nava_peace_message', pm[0].message);
-                  }
-                  window.location.replace('peace.html');
-                })
-                .catch(function() { window.location.replace('peace.html'); });
-            }
-            // 3. Pas de vote — vérifier nava_discoveries
-            return fetch(_base + 'nava_discoveries?select=user_uid&user_uid=eq.' + encodeURIComponent(expectedUID) + '&limit=1', { headers: _h })
-              .then(function(r3) { return r3.json(); })
-              .then(function(disc) {
-                if (disc && disc.length > 0) {
-                  localStorage.setItem('nava_peace_uid', expectedUID);
-                  window.location.replace('peace.html');
-                  return;
-                }
-                _runSplashLogic(); // Vraiment nouveau visiteur
-              });
-          })
-          .catch(function() { _runSplashLogic(); });
-      } // end _doRestore
-
-      // We are in Telegram — start session restore
-      var tgUserImmediate = window.Telegram.WebApp.initDataUnsafe &&
-                            window.Telegram.WebApp.initDataUnsafe.user;
-      if (tgUserImmediate && tgUserImmediate.id) {
-        _doRestore(); // Telegram PC / user already available
-      } else {
-        setTimeout(_doRestore, 350); // Telegram mobile: wait for WebApp to be ready
-      }
-
-      // Safety timeout: if nothing happened in 2s → show splash normally
-      setTimeout(function() { _runSplashLogic(); }, 2000);
+    // ── TICKER ──
+    var TICKER_ITEMS = [
+      { text: 'BORN TO GROW' }, { text: 'NÉ POUR GRANDIR' }, { text: 'NACIDO PARA CRECER' },
+      { text: 'NASCIDO PARA CRESCER' }, { text: 'ZUM WACHSEN GEBOREN' }, { text: 'РОЖДЁН РАСТИ' },
+      { text: 'وُلِدَ لِيَنمُو' }, { text: '生而成长' }, { text: '成長のために生まれた' },
+      { text: 'बढ़ने के लिए जन्मा' }, { text: 'AMEZALIWA KUKUA' }, { text: 'НАРОДЖЕНИЙ ЗРОСТАТИ' },
+    ];
+    (function buildTicker() {
+      var html = TICKER_ITEMS.map(function (t) {
+        return '<span class="ticker-item">' + t.text + '</span><span class="ticker-sep"></span>';
+      }).join('');
+      var el = document.getElementById('ticker-track');
+      if (el) el.innerHTML = html + html;
     })();
-    // ──────────────────────────────────────────────────────────────────────
-    // 12 languages — flag · translation
-    const translations = [
-      { flag: '🇬🇧', lang: 'EN', text: 'BORN TO GROW'          },
-      { flag: '🇫🇷', lang: 'FR', text: 'NÉ POUR GRANDIR'       },
-      { flag: '🇪🇸', lang: 'ES', text: 'NACIDO PARA CRECER'    },
-      { flag: '🇵🇹', lang: 'PT', text: 'NASCIDO PARA CRESCER'  },
-      { flag: '🇩🇪', lang: 'DE', text: 'ZUM WACHSEN GEBOREN'   },
-      { flag: '🇮🇹', lang: 'IT', text: 'NATO PER CRESCERE'     },
-      { flag: '🇷🇺', lang: 'RU', text: 'РОЖДЁН РАСТИ'          },
-      { flag: '🇸🇦', lang: 'AR', text: 'وُلِدَ لِيَنمُو'            },
-      { flag: '🇨🇳', lang: 'ZH', text: '生而成长'               },
-      { flag: '🇯🇵', lang: 'JA', text: '成長のために生まれた'   },
-      { flag: '🇮🇳', lang: 'HI', text: 'बढ़ने के लिए जन्मा'     },
-      { flag: '🌍',  lang: 'SW', text: 'AMEZALIWA KUKUA'        },
-      { flag: '🇺🇦', lang: 'UK', text: 'НАРОДЖЕНИЙ ЗРОСТАТИ'    },
+
+    // ── DAILY MESSAGE ──
+    (function setDaily() {
+      var msgs = [
+        'Peace begins within.','Every choice for peace matters.','We grow together.',
+        'Be the peace you wish to see.','One heart at a time, we change the world.',
+        'Your peace is your power.','Peace is not a destination. It is the path.',
+        'Silence is the language of peace.','We are all seeds of the same tree.',
+        'Love is the root of all growth.','Hope is the dove we send ahead.',
+        'You were born to bloom.','Small acts of kindness move mountains.',
+        'Peace is possible. You are the proof.','Together we rise.',
+        'The universe leans toward peace.','In stillness, we hear the voice of peace.',
+        'Grow where you are planted.','One world, one heart.','Peace is a daily practice.',
+        'You are part of something beautiful.','Act for peace. Live in peace.',
+        'Choose peace. Choose love. Choose growth.','Every sunrise is a new chance for peace.',
+        'What you give to the world, the world gives back.','Peace is a seed — plant it today.',
+        'Compassion is the highest courage.','Your presence is a gift to the world.',
+        'In every moment, choose light.','The world needs your peace.',
+        'Peace flows where intention goes.','We are more alike than we are different.',
+        'A peaceful heart changes everything.','Your kindness is contagious.',
+        'Today, be the reason someone smiles.',
+      ];
+      var now   = new Date();
+      var day   = Math.floor((now - new Date(now.getFullYear(),0,0)) / 86400000);
+      var msg   = msgs[day % msgs.length];
+      var words = msg.split(' ');
+      var mid   = Math.round(words.length / 2);
+      var display = words.length >= 4
+        ? words.slice(0,mid).join(' ') + '<br>' + words.slice(mid).join(' ')
+        : msg;
+      var dateStr = now.toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'}).toUpperCase();
+      var d = document.getElementById('daily-date');
+      var t = document.getElementById('daily-text');
+      if (d) d.textContent  = dateStr;
+      if (t) t.innerHTML    = display;
+    })();
+
+    // ── WELCOME WORDS (13 languages) ──
+    var WELCOME_WORDS = [
+      'WELCOME','BIENVENUE','BIENVENIDO','BEM-VINDO','WILLKOMMEN',
+      'مرحباً','欢迎','ДОБРО ПОЖАЛОВАТЬ','ยินดีต้อนรับ','ようこそ',
+      'ကြိုဆိုပါသည်','स्वागत है','ЛАСКАВО ПРОСИМО',
     ];
 
-    function buildTicker() {
-      const track = document.getElementById('ticker-track');
-      // Build one full set, then duplicate it for seamless loop
-      const html = translations.map((t, i) => `
-        <span class="ticker-item">${t.text}</span>
-        <span class="ticker-sep"></span>
-      `).join('');
-      // Double it so the loop is invisible
-      track.innerHTML = html + html;
-    }
-
-    buildTicker();
-
-    // ── DAILY MESSAGE ──────────────────────────────────
-    const DAILY_MESSAGES = [
-      "Peace begins within.",
-      "Every choice for peace matters.",
-      "We grow together.",
-      "Be the peace you wish to see.",
-      "One heart at a time, we change the world.",
-      "Your peace is your power.",
-      "Peace is not a destination. It is the path.",
-      "Silence is the language of peace.",
-      "We are all seeds of the same tree.",
-      "Love is the root of all growth.",
-      "Hope is the dove we send ahead.",
-      "You were born to bloom.",
-      "Small acts of kindness move mountains.",
-      "Peace is possible. You are the proof.",
-      "Together we rise.",
-      "The universe leans toward peace.",
-      "In stillness, we hear the voice of peace.",
-      "Grow where you are planted.",
-      "One world, one heart.",
-      "Peace is a daily practice.",
-      "You are part of something beautiful.",
-      "Act for peace. Live in peace.",
-      "Choose peace. Choose love. Choose growth.",
-      "Every sunrise is a new chance for peace.",
-      "What you give to the world, the world gives back.",
-      "Peace is a seed — plant it today.",
-      "Compassion is the highest courage.",
-      "Your presence is a gift to the world.",
-      "In every moment, choose light.",
-      "The world needs your peace.",
-      "Peace flows where intention goes.",
-      "We are more alike than we are different.",
-      "A peaceful heart changes everything.",
-      "Your kindness is contagious.",
-      "Today, be the reason someone smiles.",
-    ];
-
-    function setDailyMessage() {
-      const now = new Date();
-      const start = new Date(now.getFullYear(), 0, 0);
-      const dayOfYear = Math.floor((now - start) / 86400000);
-      const msg = DAILY_MESSAGES[dayOfYear % DAILY_MESSAGES.length];
-
-      const dateStr = now.toLocaleDateString('en-GB', {
-        day: '2-digit', month: 'long', year: 'numeric'
-      }).toUpperCase();
-
-      document.getElementById('daily-date').textContent = dateStr;
-
-      // Split message into two balanced lines
-      const words = msg.split(' ');
-      let display = msg;
-      if (words.length >= 4) {
-        const mid = Math.round(words.length / 2);
-        display = words.slice(0, mid).join(' ') + '<br>' + words.slice(mid).join(' ');
-      }
-      document.getElementById('daily-text').innerHTML = display;
-    }
-
-    setDailyMessage();
-
-    // ── Ref code screen — first-time visitors ───────────────────────
-    var REF_CODE_LABELS = {
-      en: { title: 'GOT A REFERRAL CODE?', placeholder: 'ENTER CODE (OPTIONAL)', enter: 'JOIN WITH CODE', skip: 'SKIP' },
-      fr: { title: 'TU AS UN CODE PARRAIN?', placeholder: 'ENTRER LE CODE (FACULTATIF)', enter: 'REJOINDRE AVEC CODE', skip: 'PASSER' },
-      es: { title: '¿TIENES UN CÓDIGO?', placeholder: 'INGRESA EL CÓDIGO (OPCIONAL)', enter: 'UNIRME CON CÓDIGO', skip: 'OMITIR' },
-      pt: { title: 'TEM UM CÓDIGO?', placeholder: 'INSERIR CÓDIGO (OPCIONAL)', enter: 'ENTRAR COM CÓDIGO', skip: 'PULAR' },
-      de: { title: 'HAST DU EINEN CODE?', placeholder: 'CODE EINGEBEN (OPTIONAL)', enter: 'MIT CODE BEITRETEN', skip: 'ÜBERSPRINGEN' },
-      ar: { title: 'هل لديك رمز إحالة؟', placeholder: 'أدخل الرمز (اختياري)', enter: 'انضم برمز', skip: 'تخطي' },
-      zh: { title: '有邀请码？', placeholder: '输入邀请码（可选）', enter: '用邀请码加入', skip: '跳过' },
-      ru: { title: 'ЕСТЬ КОД ПРИГЛАШЕНИЯ?', placeholder: 'ВВЕДИ КОД (НЕОБЯЗАТЕЛЬНО)', enter: 'ВОЙТИ С КОДОМ', skip: 'ПРОПУСТИТЬ' },
-      ja: { title: '招待コードはありますか？', placeholder: 'コードを入力（任意）', enter: 'コードで参加', skip: 'スキップ' },
-      hi: { title: 'क्या आपके पास रेफरल कोड है?', placeholder: 'कोड डालें (वैकल्पिक)', enter: 'कोड से जुड़ें', skip: 'छोड़ें' },
-      uk: { title: 'Є КОД ЗАПРОШЕННЯ?', placeholder: 'ВВЕДІТЬ КОД (НЕОБОВ\'ЯЗКОВО)', enter: 'ПРИЄДНАТИСЯ З КОДОМ', skip: 'ПРОПУСТИТИ' },
+    // ── REF CODE LABELS ──
+    var REF_LABELS = {
+      en: { title:'GOT A REFERRAL CODE?', ph:'ENTER CODE (OPTIONAL)', btn:'JOIN WITH CODE', skip:'SKIP' },
+      fr: { title:'TU AS UN CODE PARRAIN?', ph:'ENTRER LE CODE (FACULTATIF)', btn:'REJOINDRE AVEC CODE', skip:'PASSER' },
+      es: { title:'¿TIENES UN CÓDIGO?', ph:'INGRESA EL CÓDIGO (OPCIONAL)', btn:'UNIRME CON CÓDIGO', skip:'OMITIR' },
+      pt: { title:'TEM UM CÓDIGO?', ph:'INSERIR CÓDIGO (OPCIONAL)', btn:'ENTRAR COM CÓDIGO', skip:'PULAR' },
+      de: { title:'HAST DU EINEN CODE?', ph:'CODE EINGEBEN (OPTIONAL)', btn:'MIT CODE BEITRETEN', skip:'ÜBERSPRINGEN' },
+      ar: { title:'هل لديك رمز إحالة؟', ph:'أدخل الرمز (اختياري)', btn:'انضم برمز', skip:'تخطي' },
+      zh: { title:'有邀请码？', ph:'输入邀请码（可选）', btn:'用邀请码加入', skip:'跳过' },
+      ru: { title:'ЕСТЬ КОД ПРИГЛАШЕНИЯ?', ph:'ВВЕДИ КОД (НЕОБЯЗАТЕЛЬНО)', btn:'ВОЙТИ С КОДОМ', skip:'ПРОПУСТИТЬ' },
     };
 
-    function showRefCodeScreen() {
-      var stage = document.querySelector('.stage');
-      var hero  = document.querySelector('.hero');
-      var tapEl = document.getElementById('tap-hint');
-      if (tapEl) tapEl.style.display = 'none';
+    // ── REDIRECT HELPERS ──
+    function fadeAndGo(url) {
+      var s = stage();
+      if (s) { s.style.opacity = '0'; }
+      setTimeout(function () { window.location.replace(url); }, 600);
+    }
 
-      var lang = (typeof detectLang === 'function') ? detectLang() : 'en';
-      var lbl  = REF_CODE_LABELS[lang] || REF_CODE_LABELS.en;
-
-      // Fade out hero text
-      if (hero) {
-        hero.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-        hero.style.opacity    = '0';
-        hero.style.transform  = 'scale(0.95)';
+    // ── BIENVENUE → then go to url ──
+    var _bTimer = null;
+    function playBienvenue(onDone) {
+      if (_bTimer) { clearInterval(_bTimer); _bTimer = null; }
+      var h = hero();
+      if (h) {
+        h.style.cssText = 'opacity:1;filter:blur(0);transform:scale(1);animation:none;transition:none;font-size:clamp(44px,min(11vw,9vh),140px);letter-spacing:clamp(4px,min(1.2vw,0.8vh),16px);color:#fff;text-transform:uppercase;text-align:center;line-height:1;text-shadow:0 0 60px rgba(255,255,255,.35),0 4px 30px rgba(30,100,170,.4);user-select:none;';
+        h.textContent = WELCOME_WORDS[0];
       }
+      var idx = 0;
+      _bTimer = setInterval(function () {
+        idx++;
+        if (idx >= WELCOME_WORDS.length) {
+          clearInterval(_bTimer); _bTimer = null;
+          onDone();
+          return;
+        }
+        if (h) h.textContent = WELCOME_WORDS[idx];
+      }, 600);
+    }
+
+    // ── SHOW REGISTRATION FORM ──
+    var _formShown = false;
+    function showForm() {
+      if (_formShown) return;
+      _formShown = true;
+
+      var h = hero();
+      if (h) { h.style.transition = 'opacity 0.4s'; h.style.opacity = '0'; }
+
+      var lang = (localStorage.getItem('nava_peace_lang') || navigator.language || 'en').substring(0,2).toLowerCase();
+      var lbl  = REF_LABELS[lang] || REF_LABELS.en;
+
+      // Auto-ref from Telegram startParam or localStorage
+      var autoRef = '';
+      try {
+        autoRef = (window.Telegram && window.Telegram.WebApp &&
+                   window.Telegram.WebApp.initDataUnsafe &&
+                   window.Telegram.WebApp.initDataUnsafe.start_param) ||
+                  ls('nava_peace_referred_by') || '';
+      } catch(e) {}
 
       setTimeout(function () {
-        // Build ref code UI inside stage
-        var refBox = document.createElement('div');
-        refBox.id  = 'ref-code-box';
-        refBox.style.cssText =
-          'display:flex;flex-direction:column;align-items:center;gap:16px;' +
-          'width:100%;max-width:320px;padding:0 24px;' +
-          'animation:fadeIn 0.7s ease both;';
-
-        refBox.innerHTML =
+        var box = document.createElement('div');
+        box.id  = 'ref-box';
+        box.style.cssText =
+          'display:flex;flex-direction:column;align-items:center;gap:14px;' +
+          'width:100%;max-width:300px;padding:0 20px;animation:fadeIn 0.5s ease both;';
+        box.innerHTML =
           '<p style="font-family:Nasalization,Arial,sans-serif;font-size:10px;letter-spacing:3px;' +
-          'color:rgba(255,255,255,0.65);text-transform:uppercase;text-align:center;margin:0;">' +
-          lbl.title + '</p>' +
-
-          '<input id="ref-code-input" type="text" maxlength="16" autocomplete="off" spellcheck="false"' +
-          ' placeholder="' + lbl.placeholder + '"' +
-          ' style="width:100%;background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.3);' +
+          'color:rgba(255,255,255,.65);text-transform:uppercase;text-align:center;margin:0">' + lbl.title + '</p>' +
+          '<input id="ref-inp" type="text" maxlength="16" autocomplete="off" spellcheck="false"' +
+          ' placeholder="' + lbl.ph + '"' +
+          ' value="' + autoRef.toUpperCase() + '"' +
+          ' style="width:100%;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.3);' +
           'border-radius:12px;color:#fff;font-family:Nasalization,Arial,sans-serif;font-size:12px;' +
-          'letter-spacing:3px;padding:13px 16px;text-align:center;outline:none;' +
-          'text-transform:uppercase;box-sizing:border-box;">' +
-
-          '<button id="ref-enter-btn" style="' +
-          'width:100%;padding:14px;border-radius:14px;border:none;cursor:pointer;' +
+          'letter-spacing:3px;padding:13px 16px;text-align:center;outline:none;text-transform:uppercase;box-sizing:border-box">' +
+          '<button id="ref-btn" style="width:100%;padding:14px;border-radius:14px;border:none;cursor:pointer;' +
           'background:linear-gradient(135deg,#3AACDF,#1E6E9A);color:#fff;' +
-          'font-family:Nasalization,Arial,sans-serif;font-size:10px;letter-spacing:3px;">' +
-          lbl.enter + '</button>' +
-
-          '<button id="ref-skip-btn" style="' +
-          'background:none;border:none;color:rgba(255,255,255,0.4);' +
+          'font-family:Nasalization,Arial,sans-serif;font-size:10px;letter-spacing:3px">' + lbl.btn + '</button>' +
+          '<button id="skip-btn" style="background:none;border:none;color:rgba(255,255,255,.4);' +
           'font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:3px;' +
-          'text-transform:uppercase;cursor:pointer;text-decoration:underline;">' +
-          lbl.skip + '</button>';
+          'text-transform:uppercase;cursor:pointer;text-decoration:underline">' + lbl.skip + '</button>';
 
-        if (stage) stage.appendChild(refBox);
+        var s = stage();
+        if (s) s.appendChild(box);
 
-        // Auto-fill ref code if referred by someone
-        var inp = document.getElementById('ref-code-input');
-        var autoRef = (NAVA_TG && NAVA_TG.startParam) || localStorage.getItem('nava_peace_referred_by') || '';
-        if (inp && autoRef) { inp.value = autoRef.toUpperCase(); }
-        if (inp) inp.addEventListener('input', function() { this.value = this.value.toUpperCase(); });
+        var inp = document.getElementById('ref-inp');
+        if (inp) inp.addEventListener('input', function () { this.value = this.value.toUpperCase(); });
 
-        // Enter button
-        document.getElementById('ref-enter-btn').addEventListener('click', function() {
-          var code = (document.getElementById('ref-code-input').value || '').trim().toUpperCase();
-          if (code) {
-            localStorage.setItem('nava_peace_referred_by', code);
-          }
-          goToApp();
-        });
-
-        // Skip button
-        document.getElementById('ref-skip-btn').addEventListener('click', function() {
-          goToApp();
-        });
-
-        // Also allow pressing Enter key
-        if (inp) inp.addEventListener('keydown', function(e) {
-          if (e.key === 'Enter') document.getElementById('ref-enter-btn').click();
-        });
-
-      }, 500);
-    }
-
-    var _goToAppTimer = null;
-    var _goToAppCalled = false;
-    function goToApp() {
-      // Guard against double-call (e.g. double-tap)
-      if (_goToAppCalled) return;
-      _goToAppCalled = true;
-
-      // Clear any previously running BIENVENUE interval
-      if (_goToAppTimer) { clearInterval(_goToAppTimer); _goToAppTimer = null; }
-
-      // 1. Fade out form
-      var refBox = document.getElementById('ref-code-box');
-      if (refBox) { refBox.style.transition = 'opacity 0.3s ease'; refBox.style.opacity = '0'; }
-
-      setTimeout(function() {
-        if (refBox) refBox.remove();
-
-        // 2. Play BIENVENUE in 13 languages
-        var hero = document.querySelector('.hero');
-        if (hero) {
-          hero.style.animation = 'none';
-          hero.style.transition = 'none';
-          hero.style.opacity   = '1';
-          hero.style.filter    = 'blur(0)';
-          hero.style.transform = 'scale(1)';
-          hero.textContent     = WELCOME_WORDS[0];
+        var _goLock = false;
+        function go() {
+          if (_goLock) return; _goLock = true;
+          var code = (document.getElementById('ref-inp').value || '').trim().toUpperCase();
+          if (code) ls('nava_peace_referred_by', code);
+          // Remove form, play BIENVENUE, then go to registration
+          var b = document.getElementById('ref-box');
+          if (b) { b.style.transition = 'opacity 0.3s'; b.style.opacity = '0'; }
+          setTimeout(function () {
+            if (b) b.remove();
+            playBienvenue(function () { fadeAndGo('index.html'); });
+          }, 300);
         }
 
-        var idx = 0;
-        _goToAppTimer = setInterval(function() {
-          idx++;
-          if (idx >= WELCOME_WORDS.length) {
-            clearInterval(_goToAppTimer);
-            _goToAppTimer = null;
-            // 3. Fade out and go to app
-            var stage = document.querySelector('.stage');
-            if (stage) { stage.style.transition = 'opacity 0.6s ease'; stage.style.opacity = '0'; }
-            setTimeout(function() { window.location.href = 'index.html'; }, 650);
-            return;
-          }
-          if (hero) hero.textContent = WELCOME_WORDS[idx];
-        }, 600);
-      }, 300);
+        var eb = document.getElementById('ref-btn');
+        var sb = document.getElementById('skip-btn');
+        if (eb) eb.addEventListener('click', go);
+        if (sb) sb.addEventListener('click', go);
+        if (inp) inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
+
+      }, 400);
     }
 
-    // ── Navigation tap/click → page suivante ────────────────────────
-    function enableTap(dest) {
-      var tapEl  = document.getElementById('tap-hint');
-      var stage  = document.querySelector('.stage');
+    // ── MAIN SESSION LOGIC ──
+    (function init() {
+      // Mark splash shown
+      try { sessionStorage.setItem('nava_splash_shown', '1'); } catch(e) {}
+      // Clear stale module cache
+      try { localStorage.removeItem('nava_modules'); localStorage.removeItem('nava_modules_ts'); } catch(e) {}
 
-      // Afficher le hint avec pulsation
-      if (tapEl) {
-        tapEl.style.animation = 'tapPulse 2.2s ease-in-out infinite';
-        tapEl.style.opacity   = '1';
-      }
-
-      // Toute la page répond au clic ET au touch (mobile)
-      function goNext(e) {
-        e.preventDefault();
-        document.removeEventListener('click',    goNext);
-        document.removeEventListener('touchend', goNext);
-        if (tapEl) tapEl.style.animation = 'none';
-        if (stage) { stage.style.transition = 'opacity 0.7s ease'; stage.style.opacity = '0'; }
-        setTimeout(function () { window.location.href = dest; }, 720);
-      }
-      document.addEventListener('click',    goNext);
-      document.addEventListener('touchend', goNext, { passive: false });
-    }
-
-    // ── 13 traductions de "BIENVENUE" ──────────────────────────────────
-    var WELCOME_WORDS = [
-      'WELCOME',           // EN
-      'BIENVENUE',         // FR
-      'BIENVENIDO',        // ES
-      'BEM-VINDO',         // PT
-      'WILLKOMMEN',        // DE
-      'مرحباً',              // AR
-      '欢迎',               // ZH
-      'ДОБРО ПОЖАЛОВАТЬ',  // RU
-      'ยินดีต้อนรับ',         // TH
-      'ようこそ',            // JA
-      'ကြိုဆိုပါသည်',        // MY
-      'स्वागत है',           // HI
-      'ЛАСКАВО ПРОСИМО',   // UK
-    ];
-
-    // ── SPLASH LOGIC ──────────────────────────────────────────────────
-    function _startSplashAnimation() {
-      // Only block if truly not in Telegram at all (pure browser with no WebApp SDK)
-      if (!NAVA_TG.isTelegram && !window._NAVA_IN_TG && !_animationStarted) return;
-      var uid = localStorage.getItem('nava_peace_uid');
-      var isRegistered = uid && localStorage.getItem('nava_peace_country');
-
-      if (!isRegistered) {
-        // ═══════════════════════════════════════════════
-        // NOUVEAU VISITEUR — inscription directement
-        // ═══════════════════════════════════════════════
-        var enterEl = document.querySelector('.enter-link');
-        if (enterEl) enterEl.setAttribute('href', 'index.html');
-        showRefCodeScreen();
-        return;
-      }
-
-      // ═══════════════════════════════════════════════
-      // UTILISATEUR ENREGISTRÉ — WELCOME BACK
-      // ═══════════════════════════════════════════════
-      var enterEl = document.querySelector('.enter-link');
-      if (enterEl) enterEl.style.display = 'none';
-
-      var pseudo = localStorage.getItem('nava_peace_pseudo') || '';
-
-      // Total doves — vérifie le statut du compte
-      var doveCount = 0;
+      // Call Telegram.WebApp.ready() if available
       try {
-        var adminFlags = JSON.parse(localStorage.getItem('nava_user_flags') || '{}');
-        var isDisabled = adminFlags[uid] && adminFlags[uid].status === 'disabled';
-        if (!isDisabled) {
-          doveCount = parseInt(localStorage.getItem('nava_peace_days') || '0', 10);
+        if (window.Telegram && window.Telegram.WebApp) {
+          window.Telegram.WebApp.ready();
+          window.Telegram.WebApp.expand();
+          try {
+            window.Telegram.WebApp.setHeaderColor('#43b4e4');
+            window.Telegram.WebApp.setBackgroundColor('#43b4e4');
+          } catch(e) {}
         }
       } catch(e) {}
 
-      // ① Logo + hero pleinement visibles (3 s)
-      setTimeout(function () {
-        var hero   = document.querySelector('.hero');
-        var dateEl = document.getElementById('daily-date');
-        var textEl = document.getElementById('daily-text');
-        var divEl  = document.querySelector('.divider');
+      // Check for returning user in localStorage
+      var country = ls('nava_peace_country');
+      var uid     = ls('nava_peace_uid');
 
-        // Fade-out lent (1.4 s)
-        [hero, dateEl, textEl, divEl].forEach(function (el) {
-          if (el) { el.style.transition = 'opacity 1.4s ease'; el.style.opacity = '0'; }
-        });
-
-        setTimeout(function () {
-
-          // ② WELCOME BACK : blur → net (2.5 s)
-          if (hero) {
-            hero.textContent      = 'WELCOME BACK';
-            hero.style.transition = 'none';
-            hero.style.opacity    = '0';
-            hero.style.filter     = 'blur(20px)';
-            void hero.offsetWidth;
-            hero.style.transition = 'opacity 2.5s ease, filter 2.5s ease';
-            hero.style.opacity    = '1';
-            hero.style.filter     = 'blur(0px)';
-          }
-
-          // ③ Pseudo — 2 s après WB, letter-spacing expand (2 s)
-          setTimeout(function () {
-            if (textEl) {
-              textEl.textContent         = pseudo ? pseudo.toUpperCase() : 'PEACE LOVER';
-              textEl.style.transition    = 'none';
-              textEl.style.opacity       = '0';
-              textEl.style.letterSpacing = '1px';
-              void textEl.offsetWidth;
-              textEl.style.transition    = 'opacity 2s ease, letter-spacing 2s ease';
-              textEl.style.opacity       = '1';
-              textEl.style.letterSpacing = 'clamp(5px, 1.1vw, 12px)';
+      if (uid && country) {
+        // Returning user — refresh pseudo/message from DB in background
+        sbGet('peace_messages?select=pseudo,message&user_uid=eq.' + encodeURIComponent(uid) + '&limit=1')
+          .then(function (d) {
+            if (d && d[0]) {
+              if (d[0].pseudo)  ls('nava_peace_pseudo',  d[0].pseudo);
+              if (d[0].message) ls('nava_peace_message', d[0].message);
             }
-          }, 2000);
+          }).catch(function(){});
 
-          // ④ Divider + total DOVES — 2.5 s après WB
-          setTimeout(function () {
-            if (divEl) { divEl.style.transition = 'opacity 1.5s ease'; divEl.style.opacity = '0.4'; }
-            if (dateEl) {
-              dateEl.style.transition    = 'opacity 1.5s ease';
-              dateEl.style.fontSize      = 'clamp(22px, 4vw, 52px)';
-              dateEl.style.letterSpacing = '3px';
-              dateEl.style.color         = 'rgba(255,255,255,0.85)';
-              dateEl.style.marginBottom  = '0';
-              dateEl.innerHTML =
-                '🕊&ensp;' + doveCount +
-                '<span style="display:block;font-size:clamp(8px,0.9vw,11px);' +
-                             'letter-spacing:6px;color:rgba(255,255,255,0.38);' +
-                             'margin-top:6px;">DOVES OFFERED</span>';
-              void dateEl.offsetWidth;
-              dateEl.style.opacity = '1';
+        // Redirect after logo is visible (~1s)
+        var today = new Date().toISOString().split('T')[0];
+        var dest  = (ls('nava_peace_voted') === today) ? 'map.html' : 'peace.html';
+        setTimeout(function () { fadeAndGo(dest); }, 1000);
+        return;
+      }
+
+      // New visitor — read Telegram user to check DB
+      var _attempts = 0;
+      function tryRestore() {
+        _attempts++;
+        var tg = null;
+        try { tg = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user; } catch(e) {}
+
+        if (tg && tg.id) {
+          // Store uid & startParam
+          var myUID = 'tg_' + tg.id;
+          ls('nava_peace_uid', myUID);
+          try {
+            var sp = window.Telegram.WebApp.initDataUnsafe.start_param;
+            if (sp) ls('nava_peace_referred_by', sp.toUpperCase());
+            // Store language from Telegram
+            if (tg.language_code) {
+              var supported = ['en','fr','es','pt','ar','zh','hi','ja','ru','de','ko','uk'];
+              var lc = tg.language_code.substring(0,2).toLowerCase();
+              if (supported.indexOf(lc) !== -1 && !ls('nava_peace_lang')) ls('nava_peace_lang', lc);
             }
+          } catch(e) {}
 
-            // ⑤ TAP TO CONTINUE — 1.5 s après DOVES (laisse le temps de les lire)
-            setTimeout(function () {
-              enableTap('peace.html');
-            }, 1500);
+          // Check DB: has this user registered?
+          sbGet('peace_votes?select=referral_code,referred_by,country,age,gender,created_at&user_uid=eq.' + encodeURIComponent(myUID) + '&order=created_at.desc&limit=1')
+            .then(function (data) {
+              if (data && data.length > 0) {
+                var row = data[0];
+                ls('nava_peace_country', row.country || 'XX');
+                if (row.referral_code) ls('nava_peace_ref_code',    row.referral_code);
+                if (row.age)           ls('nava_peace_age',         row.age);
+                if (row.gender)        ls('nava_peace_gender',      row.gender);
+                if (row.referred_by)   ls('nava_peace_referred_by', row.referred_by);
+                if (row.created_at)    ls('nava_peace_voted',       row.created_at.split('T')[0]);
+                // Also fetch pseudo/message
+                return sbGet('peace_messages?select=pseudo,message&user_uid=eq.' + encodeURIComponent(myUID) + '&limit=1')
+                  .then(function (pm) {
+                    if (pm && pm[0]) {
+                      if (pm[0].pseudo)  ls('nava_peace_pseudo',  pm[0].pseudo);
+                      if (pm[0].message) ls('nava_peace_message', pm[0].message);
+                    }
+                    fadeAndGo('peace.html');
+                  }).catch(function () { fadeAndGo('peace.html'); });
+              }
+              // Check nava_discoveries
+              return sbGet('nava_discoveries?select=user_uid&user_uid=eq.' + encodeURIComponent(myUID) + '&limit=1')
+                .then(function (disc) {
+                  if (disc && disc.length > 0) {
+                    ls('nava_peace_uid', myUID);
+                    fadeAndGo('peace.html');
+                  } else {
+                    showForm(); // Truly new visitor
+                  }
+                });
+            }).catch(function () { showForm(); });
 
-          }, 2500);
+        } else if (_attempts < 6) {
+          // WebApp not ready yet — retry
+          setTimeout(tryRestore, 300);
+        } else {
+          // Give up — show form
+          showForm();
+        }
+      }
 
-        }, 1400); // fade-out terminé
-      }, 1500);   // logo + hero pleinement visibles
+      // Hard fallback: show form after 2s no matter what
+      setTimeout(function () { showForm(); }, 2000);
 
-    } // end _startSplashAnimation
+      // Start restore after short delay (let WebApp initialize on mobile)
+      setTimeout(tryRestore, 250);
+    })();
+
+  })();
   </script>
+
+  <!-- ④ Support scripts — loaded last, non-blocking.
+       supabase_config.js sets SUPABASE_URL/KEY globals for module_gate.js.
+       telegram.js sets NAVA_TG global used by other pages.
+       module_gate.js hides disabled nav items. -->
+  <script src="supabase_config.js"></script>
+  <script src="telegram.js"></script>
+  <script src="module_gate.js?v=6"></script>
+
 </body>
 </html>
