@@ -98,13 +98,6 @@
                  }
                }
                if (target) window.location.replace(target);
-             } else {
-               // Modules changed → reload to re-run gate check with fresh values
-               window.location.reload();
-             }
-           } else {
-             // Not on a module page — reload to refresh nav
-             window.location.reload();
            }
          }).catch(function () {});
       }

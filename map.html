@@ -8,6 +8,7 @@
     var isTg = h.indexOf('tgWebAppData') !== -1 ||
                h.indexOf('tgWebAppVersion') !== -1 ||
                !!window.TelegramWebviewProxy ||
+               !!(window.Telegram && window.Telegram.WebApp) ||
                !!localStorage.getItem('nava_peace_country') ||
                (localStorage.getItem('nava_peace_uid') || '').indexOf('tg_') === 0;
     if (!isTg) window.location.replace('https://t.me/NavaPeaceBot/app');
@@ -49,7 +50,7 @@
   <script src="supabase_config.js"></script>
   <script src="discovery.js"></script>
   <script src="block_check.js"></script>
-  <script src="lang.js"></script>
+  <script src="lang.js?v=3"></script>
 
   <!-- amCharts 5 -->
   <script src="https://cdn.amcharts.com/lib/5/index.js"></script>

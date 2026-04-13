@@ -8,6 +8,7 @@
     var isTg = h.indexOf('tgWebAppData') !== -1 ||
                h.indexOf('tgWebAppVersion') !== -1 ||
                !!window.TelegramWebviewProxy ||
+               !!(window.Telegram && window.Telegram.WebApp) ||
                !!localStorage.getItem('nava_peace_country') ||
                (localStorage.getItem('nava_peace_uid') || '').indexOf('tg_') === 0;
     if (!isTg) window.location.replace('https://t.me/NavaPeaceBot/app');

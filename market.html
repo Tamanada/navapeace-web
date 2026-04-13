@@ -8,6 +8,7 @@
     var isTg = h.indexOf('tgWebAppData') !== -1 ||
                h.indexOf('tgWebAppVersion') !== -1 ||
                !!window.TelegramWebviewProxy ||
+               !!(window.Telegram && window.Telegram.WebApp) ||
                !!localStorage.getItem('nava_peace_country') ||
                (localStorage.getItem('nava_peace_uid') || '').indexOf('tg_') === 0;
     if (!isTg) window.location.replace('https://t.me/NavaPeaceBot/app');
@@ -25,7 +26,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="supabase_config.js"></script>
   <script src="block_check.js"></script>
-  <script src="lang.js"></script>
+  <script src="lang.js?v=3"></script>
   <style>
     @font-face {
       font-family: 'Nasalization';
@@ -549,10 +550,29 @@
       } catch(e) { console.warn('Claim error', e); }
     }
 
-    async function buyCard(code, isBundle) {
-      // TODO: Call Supabase Edge Function → Stripe Checkout
-      // For now: show coming soon
-      alert('Stripe checkout coming soon!\n\nCard: ' + code + (isBundle ? '\nBundle' : ''));
+    function buyCard(code, isBundle) {
+      var old = document.getElementById('buy-toast');
+      if (old) old.remove();
+      var el = document.createElement('div');
+      el.id = 'buy-toast';
+      el.style.cssText =
+        'position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:99999;' +
+        'background:linear-gradient(135deg,rgba(58,172,223,0.97),rgba(30,142,196,0.97));' +
+        'border:1px solid rgba(255,255,255,0.3);border-radius:50px;' +
+        'padding:10px 26px;font-family:Nasalization,Arial,sans-serif;' +
+        'font-size:9px;letter-spacing:3px;color:#fff;white-space:nowrap;' +
+        'box-shadow:0 4px 24px rgba(58,172,223,0.4);' +
+        'opacity:0;transition:opacity 0.4s ease,top 0.4s ease;pointer-events:none;';
+      el.textContent = '🕊  COMING SOON — STAY TUNED!';
+      document.body.appendChild(el);
+      requestAnimationFrame(function () {
+        el.style.opacity = '1';
+        setTimeout(function () {
+          el.style.opacity = '0';
+          el.style.top = '8px';
+          setTimeout(function () { el.remove(); }, 450);
+        }, 2800);
+      });
     }
 
     // ── Lang button ──────────────────────────────────────────────────────

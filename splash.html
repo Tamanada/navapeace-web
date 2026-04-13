@@ -15,17 +15,13 @@
   <script>
   (function () {
     var h = window.location.hash || '';
-    var checks = {
-      hash_data:    h.indexOf('tgWebAppData')    !== -1,
-      hash_version: h.indexOf('tgWebAppVersion') !== -1,
-      proxy:        !!window.TelegramWebviewProxy,
-      tg_webapi:    !!(window.Telegram && window.Telegram.WebApp),
-      ls_country:   !!localStorage.getItem('nava_peace_country'),
-      ls_uid:       (localStorage.getItem('nava_peace_uid') || '').indexOf('tg_') === 0,
-    };
-    var isTg = checks.hash_data || checks.hash_version || checks.proxy ||
-               checks.tg_webapi || checks.ls_country || checks.ls_uid;
-    window._NAVA_DEBUG = checks;
+    var isTg =
+      h.indexOf('tgWebAppData')    !== -1 ||
+      h.indexOf('tgWebAppVersion') !== -1 ||
+      !!window.TelegramWebviewProxy ||
+      !!(window.Telegram && window.Telegram.WebApp) ||
+      !!localStorage.getItem('nava_peace_country') ||
+      (localStorage.getItem('nava_peace_uid') || '').indexOf('tg_') === 0;
     window._NAVA_IS_TG = isTg;
 
     if (isTg) {
