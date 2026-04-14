@@ -1409,6 +1409,26 @@
     </div>
   </div>
 
+  <!-- RESTORE ACCOUNT LINK -->
+  <div style="text-align:center;padding:0 24px 24px;">
+    <button onclick="openRestore()" style="background:none;border:none;color:rgba(255,255,255,0.25);font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;padding:4px 8px;">⟳ Restore account</button>
+  </div>
+
+  <!-- RESTORE ACCOUNT MODAL -->
+  <div id="restoreOverlay" onclick="closeRestore(event)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center;">
+    <div onclick="event.stopPropagation()" style="background:linear-gradient(160deg,#0a1628,#0d2240);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:28px 24px;width:88%;max-width:340px;text-align:center;">
+      <p style="font-family:Nasalization,Arial,sans-serif;font-size:11px;letter-spacing:3px;color:#fff;margin:0 0 6px;">RESTORE ACCOUNT</p>
+      <p style="font-size:11px;color:rgba(255,255,255,0.45);margin:0 0 20px;font-family:Arial,sans-serif;line-height:1.5;">Enter your personal invite code to reconnect your account on this device.</p>
+      <input id="restoreInput" type="text" placeholder="Your invite code (e.g. MOON-RZ)" maxlength="30"
+        style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.2);border-radius:12px;color:#fff;font-size:13px;padding:12px 16px;box-sizing:border-box;font-family:Arial,sans-serif;outline:none;text-transform:uppercase;text-align:center;letter-spacing:2px;"/>
+      <p id="restoreStatus" style="font-size:10px;color:rgba(255,255,255,0.4);margin:10px 0 16px;font-family:Arial,sans-serif;min-height:16px;"></p>
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button onclick="submitRestore()" style="background:rgba(100,160,255,0.2);border:1px solid rgba(100,160,255,0.5);border-radius:12px;color:#7ab4ff;font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:1.5px;padding:12px 24px;cursor:pointer;">RESTORE</button>
+        <button onclick="closeRestore()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:rgba(255,255,255,0.5);font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:1.5px;padding:12px 24px;cursor:pointer;">CANCEL</button>
+      </div>
+    </div>
+  </div>
+
   <!-- FEEDBACK MODAL -->
   <div id="feedbackOverlay" onclick="closeFeedback(event)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;align-items:center;justify-content:center;">
     <div onclick="event.stopPropagation()" style="background:linear-gradient(160deg,#0a1628,#0d2240);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:28px 24px;width:88%;max-width:360px;text-align:center;max-height:85vh;overflow-y:auto;">
@@ -3438,6 +3458,50 @@
   // ── Discovery dove — première visite PROFILE ──────────────────
   if (window.NAVA_DISCOVERY) {
     try { NAVA_DISCOVERY.check('profile', window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)); } catch(e) {}
+  }
+
+  // ── RESTORE ACCOUNT ──────────────────────────────────────────
+  function openRestore() {
+    document.getElementById('restoreOverlay').style.display = 'flex';
+    document.getElementById('restoreInput').value = '';
+    document.getElementById('restoreStatus').textContent = '';
+    setTimeout(function() { document.getElementById('restoreInput').focus(); }, 100);
+  }
+
+  function closeRestore(e) {
+    if (!e || e.target === document.getElementById('restoreOverlay')) {
+      document.getElementById('restoreOverlay').style.display = 'none';
+    }
+  }
+
+  async function submitRestore() {
+    var code = (document.getElementById('restoreInput').value || '').trim().toUpperCase();
+    if (!code) { document.getElementById('restoreStatus').textContent = 'Please enter your invite code.'; return; }
+    document.getElementById('restoreStatus').textContent = 'Looking up account···';
+    try {
+      var sbR = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      var { data, error } = await sbR
+        .from('peace_votes')
+        .select('user_uid, referral_code')
+        .eq('referral_code', code)
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data || !data.user_uid) {
+        document.getElementById('restoreStatus').textContent = 'Code not found. Check and try again.';
+        document.getElementById('restoreStatus').style.color = '#ff7a7a';
+        return;
+      }
+      // Restore session
+      localStorage.setItem('nava_peace_uid', data.user_uid);
+      localStorage.setItem('nava_peace_ref_code', data.referral_code || code);
+      document.getElementById('restoreStatus').textContent = '✓ Account restored! Reloading···';
+      document.getElementById('restoreStatus').style.color = '#7ab4ff';
+      setTimeout(function() { window.location.reload(); }, 1200);
+    } catch(e) {
+      document.getElementById('restoreStatus').textContent = 'Error. Please try again.';
+      document.getElementById('restoreStatus').style.color = '#ff7a7a';
+    }
   }
   </script>
 
