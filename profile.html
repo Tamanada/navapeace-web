@@ -74,6 +74,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      width: 100%;
+      text-align: center;
       margin-bottom: 16px;
     }
 
@@ -88,6 +90,8 @@
       font-size: 28px;
       font-weight: 400;
       letter-spacing: 7px;
+      padding-left: 7px; /* compensate trailing letter-spacing for visual centering */
+      text-align: center;
       text-shadow: 0 1px 16px rgba(255,255,255,0.4);
     }
 
@@ -249,14 +253,14 @@
     }
 
     .dove-part .num {
-      font-size: 22px;
+      font-size: 18px;
       letter-spacing: 1px;
       color: rgba(255,255,255,0.9);
     }
 
     .dove-part .lbl {
-      font-size: 11px;
-      letter-spacing: 1.5px;
+      font-size: 9px;
+      letter-spacing: 1px;
       text-transform: uppercase;
       color: rgba(255,255,255,0.7);
       text-align: center;
@@ -1311,6 +1315,11 @@
         </div>
         <div class="dove-divider"></div>
         <div class="dove-part">
+          <span class="num" id="dove-discovery">—</span>
+          <span class="lbl">🌍 DISCOVERY<br>DOVES</span>
+        </div>
+        <div class="dove-divider"></div>
+        <div class="dove-part">
           <span class="num" id="dove-streak-display">—</span>
           <span class="lbl">🔥 STREAK<br>DOVES</span>
         </div>
@@ -1960,6 +1969,8 @@
         document.getElementById('dove-total').textContent = '0';
         document.getElementById('dove-own').textContent   = '0';
         document.getElementById('dove-ref').textContent   = '0';
+        const _dEl = document.getElementById('dove-discovery');
+        if (_dEl) _dEl.textContent = '0';
         // Ajouter une bannière sous le compteur
         const card = document.querySelector('.dove-card-inner');
         if (card && !document.getElementById('disabled-banner')) {
@@ -2104,6 +2115,8 @@
     document.getElementById('dove-total').textContent = total;
     document.getElementById('dove-own').textContent   = ownActions;
     document.getElementById('dove-ref').textContent   = referralDoves;
+    const _discEl = document.getElementById('dove-discovery');
+    if (_discEl) _discEl.textContent = discoveryDoves;
     const _streakEl = document.getElementById('dove-streak-display');
     if (_streakEl) _streakEl.textContent = streakDoves;
 
@@ -3428,19 +3441,5 @@
   }
   </script>
 
-  <!-- ── TEMP DEV RESET BUTTON ── remove after testing ── -->
-  <div style="text-align:center;padding:40px 0 60px;">
-    <button onclick="
-      if(confirm('⚠️ Simuler un nouveau visiteur ?\nTes données Supabase restent intactes.')) {
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href = 'splash.html';
-      }
-    " style="background:none;border:1px solid rgba(255,255,255,0.15);border-radius:20px;
-      color:rgba(255,255,255,0.25);font-family:Nasalization,Arial,sans-serif;
-      font-size:8px;letter-spacing:2px;padding:8px 20px;cursor:pointer;">
-      🔄 RESET SESSION (TEST)
-    </button>
-  </div>
 </body>
 </html>

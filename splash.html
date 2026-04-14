@@ -40,6 +40,7 @@
     /* ── STAGE ── */
     .stage {
       position: fixed; inset: 0;
+      display: flex;
       flex-direction: column;
       align-items: center; justify-content: center;
       padding-bottom: 90px;
@@ -229,6 +230,27 @@
     }
     function stage()  { return document.getElementById('main-stage'); }
     function hero()   { return document.getElementById('hero'); }
+
+    // ── READ startParam FROM URL HASH IMMEDIATELY ──
+    // Telegram passes the referral code as tgWebAppStartParam in the URL hash.
+    // We capture it here at page-load time before any timeout fires, so showForm()
+    // always finds it in localStorage regardless of timing.
+    (function captureStartParam() {
+      try {
+        var hash = window.location.hash || '';
+        // Try URL hash first (format: #tgWebAppStartParam=CODE&...)
+        var m = hash.match(/[?&#]?tgWebAppStartParam=([^&]+)/i);
+        if (m && m[1]) {
+          ls('nava_peace_referred_by', decodeURIComponent(m[1]).toUpperCase());
+          return;
+        }
+        // Also try window.Telegram.WebApp if already injected
+        var sp = window.Telegram && window.Telegram.WebApp &&
+                 window.Telegram.WebApp.initDataUnsafe &&
+                 window.Telegram.WebApp.initDataUnsafe.start_param;
+        if (sp) ls('nava_peace_referred_by', sp.toUpperCase());
+      } catch(e) {}
+    })();
 
     // ── TICKER ──
     var TICKER_ITEMS = [
