@@ -60,6 +60,7 @@
       padding: 20px 20px 12px;
       gap: 4px;
       position: relative;
+      z-index: 1;
     }
     .header img { width: 48px; height: 48px; object-fit: contain; filter: drop-shadow(0 3px 14px rgba(255,255,255,0.3)); }
     .header h1 { font-size: 20px; letter-spacing: 6px; padding-left: 6px; text-align: center; color: #fff; }
@@ -68,7 +69,8 @@
     /* ── TONCONNECT BUTTON (official UI) ── */
     #ton-connect-btn {
       position: absolute;
-      top: 14px; right: 14px;
+      top: 16px; right: 14px;
+      z-index: 10;
     }
     /* Override TonConnect button styles to fit the dark theme */
     #ton-connect-btn button,
@@ -422,21 +424,17 @@
     .nav-item.active { color: #64D2FF; }
     .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
 
-    /* lang */
-    #lang-btn { position: fixed; top: 16px; left: 14px; z-index: 200; background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 5px 10px; color: rgba(255,255,255,0.6); font-family: 'Nasalization', Arial, sans-serif; font-size: 8px; letter-spacing: 2px; cursor: pointer; }
   </style>
 </head>
 <body>
-
-  <button id="lang-btn" onclick="cycleLang()">🇬🇧 EN</button>
-  <!-- TonConnect renders its button here -->
-  <div id="ton-connect-btn"></div>
 
   <!-- HEADER -->
   <div class="header">
     <img src="logo.png" alt="NAVA PEACE" />
     <h1>NAVA PEACE</h1>
     <p class="tagline">PEACE CARDS</p>
+    <!-- TonConnect renders its button here -->
+    <div id="ton-connect-btn"></div>
   </div>
 
   <!-- STATUS CARD -->
@@ -1113,24 +1111,8 @@
     el._t = setTimeout(function() { el.className = 'toast'; }, 3000);
   }
 
-  // ── LANG ─────────────────────────────────────────────────────────────────
-  var LANGS = ['en','fr','es','ar','zh','hi','pt','ru','ja','ko','th','de','it'];
-  function cycleLang() {
-    if (typeof window.NAVA_LANG === 'undefined') return;
-    var idx  = LANGS.indexOf(window.NAVA_LANG);
-    var next = LANGS[(idx + 1) % LANGS.length];
-    if (typeof setLang === 'function') { setLang(next); updateLangBtn(); }
-  }
-  function updateLangBtn() {
-    var FLAGS = {en:'🇬🇧',fr:'🇫🇷',es:'🇪🇸',ar:'🇸🇦',zh:'🇨🇳',hi:'🇮🇳',pt:'🇧🇷',ru:'🇷🇺',ja:'🇯🇵',ko:'🇰🇷',th:'🇹🇭',de:'🇩🇪',it:'🇮🇹'};
-    var l = window.NAVA_LANG || 'en';
-    var btn = document.getElementById('lang-btn');
-    if (btn) btn.textContent = (FLAGS[l]||'🌐') + ' ' + l.toUpperCase();
-  }
-
   // ── INIT ─────────────────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', function() {
-    updateLangBtn();
     initTonConnect();
     loadMarket();
     try { NAVA_DISCOVERY.check('market', sb); } catch(e) {}
