@@ -833,9 +833,11 @@
           + '</div>';
       }
 
+      // Hide owned cards — they are shown in the HIGHEST CARD status card
+      if (isOwned) return '';
+
       // Card classes
       var cls = 'peace-card';
-      if (isOwned)   cls += ' owned';
       if (isNextBuy) cls += ' next-buy';
       if (isLocked)  cls += ' locked-card';
 
