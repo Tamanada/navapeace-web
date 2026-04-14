@@ -96,9 +96,9 @@
       align-items: center;
       gap: 14px;
     }
-    #status-card .s-icon { flex-shrink: 0; width: 64px; height: 64px; border-radius: 12px; overflow: hidden; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; }
+    #status-card .s-icon { flex-shrink: 0; width: 90px; height: 90px; border-radius: 14px; overflow: hidden; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; }
     #status-card .s-icon img { width: 100%; height: 100%; object-fit: contain; }
-    #status-card .s-icon .s-icon-fb { font-size: 28px; }
+    #status-card .s-icon .s-icon-fb { font-size: 36px; }
     #status-card .s-info { flex: 1; min-width: 0; }
     #status-card .s-label { font-size: 8px; letter-spacing: 2px; color: rgba(255,255,255,0.4); margin-bottom: 2px; }
     #status-card .s-name { font-size: 12px; letter-spacing: 2px; color: #64D2FF; margin-bottom: 2px; }
@@ -641,12 +641,13 @@
     document.getElementById('status-card').style.display = 'flex';
     document.getElementById('list-hdr').style.display = 'block';
 
-    // Card image
+    // Card image — always hide fallback first, show img
     var img = document.getElementById('s-icon-img');
     var fb  = document.getElementById('s-icon-fb');
-    img.src = 'cards/' + tier.code + '.png';
-    img.style.display = 'block';
+    fb.style.display = 'none';
     fb.textContent = tier.icon;
+    img.style.display = 'block';
+    img.src = 'cards/' + tier.code + '.png';
 
     document.getElementById('s-name').textContent  = tier.name;
     document.getElementById('s-name').style.color  = tier.color;
