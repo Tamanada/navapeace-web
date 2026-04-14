@@ -527,6 +527,11 @@
   </nav>
 
   <script>
+  // ── TREASURY — SET BEFORE LAUNCH ─────────────────────────────────────────
+  // Your NAVA PEACE treasury TON wallet address (Tonkeeper / MyTonWallet)
+  // Set this to your actual address when you create the wallet.
+  var TREASURY_ADDR = 'YOUR_TREASURY_TON_ADDRESS';
+
   // ── STARS PRICES ⭐ — UPDATE BEFORE LAUNCH ────────────────────────────────
   // Formula: Stars = (net_price_usd / 0.013) × 1.43  (covers iOS 30% + Telegram fee)
   // At launch, replace 0 values with confirmed amounts.
@@ -1049,74 +1054,138 @@
     _currentPurchase = null;
   }
 
-  // ── CONFIRM PURCHASE ─────────────────────────────────────────────────────
+  // ── CONFIRM PURCHASE (TON / USDT) ────────────────────────────────────────
   async function confirmPurchase() {
     if (!_currentPurchase) return;
     var p = _currentPurchase;
 
     var btn = document.getElementById('btn-pay');
     btn.disabled = true;
-    btn.textContent = '⏳ PROCESSING...';
+    btn.textContent = '⏳ CONNECTING...';
 
     try {
       // Step 1: Connect wallet if needed
-      var connected = tonConnect && tonConnect.wallet;
-      if (!connected) {
-        try {
-          if (tonConnect) {
-            await tonConnect.openModal();
-            // Wait up to 30s for user to connect
-            await new Promise(function(resolve, reject) {
-              var tries = 0;
-              var check = setInterval(function() {
-                tries++;
-                if (tonConnect.wallet) { clearInterval(check); resolve(); }
-                if (tries > 60)        { clearInterval(check); reject(new Error('Wallet not connected')); }
-              }, 500);
-            });
-            walletAddress = tonConnect.wallet.account.address;
-          } else {
-            throw new Error('TonConnect not available');
-          }
-        } catch(e) {
-          showToast('Please connect your TON wallet first', 'error');
-          btn.disabled = false; btn.textContent = '💎 PAY WITH TON WALLET';
-          return;
-        }
-      } else {
-        walletAddress = tonConnect.wallet.account.address;
-      }
-
-      // Step 2: Record intent in Supabase (pending payment)
-      if (uid && sb) {
-        try {
-          await sb.from('nft_pending_purchases').insert({
-            user_uid:    uid,
-            tier_code:   p.tier.code,
-            is_bundle:   p.isBundle,
-            price_usdt:  p.price,
-            wallet_addr: walletAddress || 'unknown',
-            status:      'pending',
-            created_at:  new Date().toISOString()
+      if (!tonConnect || !tonConnect.wallet) {
+        if (tonConnect) {
+          await tonConnect.openModal();
+          await new Promise(function(resolve, reject) {
+            var tries = 0;
+            var check = setInterval(function() {
+              tries++;
+              if (tonConnect.wallet) { clearInterval(check); resolve(); }
+              if (tries > 60)        { clearInterval(check); reject(new Error('timeout')); }
+            }, 500);
           });
-        } catch(e) { /* table might not exist yet */ }
+        } else {
+          throw new Error('TonConnect not available');
+        }
       }
 
-      // Step 3: TON transaction (when smart contract is ready)
-      // TODO: Replace with actual USDT jetton transfer to smart contract
-      // const tx = await tonConnect.sendTransaction({...});
+      var walletAddr = tonConnect.wallet.account.address;
+      btn.textContent = '⏳ SENDING...';
 
-      // Step 4: Close modal & show success
+      // Step 2: Create purchase record, get its ID
+      var purchaseId = null;
+      if (uid && sb) {
+        var { data: rec } = await sb.from('nft_pending_purchases').insert({
+          user_uid:    uid,
+          tier_code:   p.tier.code,
+          is_bundle:   p.isBundle,
+          price_usdt:  p.price,
+          wallet_addr: walletAddr,
+          status:      'pending',
+          payment_method: 'ton_usdt',
+          created_at:  new Date().toISOString()
+        }).select('id').maybeSingle().catch(function(){ return { data: null }; });
+        purchaseId = rec && rec.id;
+      }
+
+      // Step 3: Send USDT via TonConnect
+      // Treasury address must be set before launch.
+      // Amount in nano-USDT (6 decimals), e.g. $5 = 5_000_000
+      if (TREASURY_ADDR === 'YOUR_TREASURY_TON_ADDRESS') {
+        // Pre-launch: register order without actual tx
+        document.getElementById('modal').classList.remove('open');
+        showToast('🕊 Order registered — payment gateway launching soon!', 'success');
+        _currentPurchase = null;
+        return;
+      }
+
+      var nanoUsdt = p.price * 1_000_000;
+      await tonConnect.sendTransaction({
+        validUntil: Math.floor(Date.now() / 1000) + 600,
+        messages: [{
+          address: TREASURY_ADDR,
+          amount:  '50000000', // 0.05 TON for gas
+          // USDT jetton transfer will be added when smart contract deploys
+          // For now, records intent and treasury receives TON as placeholder
+        }]
+      });
+
+      // Step 4: Auto-verify on blockchain
+      btn.textContent = '⏳ CONFIRMING...';
       document.getElementById('modal').classList.remove('open');
-      showToast('🕊 ORDER REGISTERED — LAUNCHING SOON!', 'success');
+      showToast('🔍 Verifying on blockchain...', 'info');
+
+      if (purchaseId) {
+        pollTonConfirmation(purchaseId, walletAddr, p.tier.code, p.isBundle, p.price);
+      }
       _currentPurchase = null;
 
     } catch(e) {
-      showToast('Transaction failed', 'error');
+      if (e && e.message && e.message.includes('timeout')) {
+        showToast('Wallet not connected', 'error');
+      } else if (e && String(e).includes('cancel')) {
+        showToast('Transaction cancelled', 'info');
+      } else {
+        showToast('Transaction failed', 'error');
+      }
     } finally {
       btn.disabled = false;
       btn.textContent = '💎 PAY WITH TON WALLET';
     }
+  }
+
+  // ── POLL BLOCKCHAIN CONFIRMATION ─────────────────────────────────────────
+  function pollTonConfirmation(purchaseId, walletAddr, tierCode, isBundle, priceUsdt) {
+    var attempts = 0;
+    var maxAttempts = 36; // 3 minutes (every 5s)
+
+    var interval = setInterval(async function() {
+      attempts++;
+      try {
+        var res = await fetch(SUPABASE_URL + '/functions/v1/verify-ton-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type':  'application/json',
+            'apikey':        SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+          },
+          body: JSON.stringify({
+            purchase_id:   purchaseId,
+            user_uid:      uid,
+            tier_code:     tierCode,
+            is_bundle:     isBundle,
+            wallet_addr:   walletAddr,
+            expected_usdt: priceUsdt,
+            treasury_addr: TREASURY_ADDR
+          })
+        });
+        var data = await res.json();
+
+        if (data.confirmed) {
+          clearInterval(interval);
+          showToast('✅ Payment confirmed! NFT added to your collection.', 'success');
+          setTimeout(loadMarket, 1200);
+          return;
+        }
+      } catch(e) { /* retry */ }
+
+      if (attempts >= maxAttempts) {
+        clearInterval(interval);
+        showToast('⚠ Verification timeout — check back in a few minutes.', 'error');
+      }
+    }, 5000);
   }
 
   // ── TOAST ────────────────────────────────────────────────────────────────
