@@ -267,6 +267,7 @@
     .btn-pay:active { transform: scale(0.98); opacity: 0.9; }
     .btn-pay:disabled { opacity: 0.5; cursor: default; }
     .btn-pay.gold { background: linear-gradient(135deg, #C4920A, #8B6508); }
+    .btn-pay.stars { background: linear-gradient(135deg, #7B5EA7, #4A3580); margin-top: 8px; }
     .btn-cancel { width: 100%; padding: 11px; border: none; background: none; color: rgba(255,255,255,0.35); font-family: 'Nasalization', Arial, sans-serif; font-size: 9px; letter-spacing: 2px; cursor: pointer; margin-top: 10px; }
     .modal-wallet-note { font-size: 8px; letter-spacing: 1.5px; color: rgba(255,255,255,0.3); text-align: center; margin-top: 10px; line-height: 1.7; }
     .modal-coming-soon {
@@ -506,8 +507,9 @@
         <span style="color:rgba(255,255,255,0.4);">Place your order now to be first in queue.</span>
       </div>
       <button class="btn-pay" id="btn-pay" onclick="confirmPurchase()">💎 PAY WITH TON WALLET</button>
+      <button class="btn-pay stars" id="btn-pay-stars" onclick="payWithStars()">⭐ PAY WITH STARS</button>
       <button class="btn-cancel" onclick="closeModal()">CANCEL</button>
-      <p class="modal-wallet-note">Powered by TonConnect · USDT on TON blockchain<br>Transaction processed on TON mainnet</p>
+      <p class="modal-wallet-note">TON Wallet · USDT on TON blockchain &nbsp;|&nbsp; Telegram ⭐ Stars<br>Smart contract deploying — orders registered now</p>
     </div>
   </div>
 
@@ -525,6 +527,19 @@
   </nav>
 
   <script>
+  // ── STARS PRICES ⭐ — UPDATE BEFORE LAUNCH ────────────────────────────────
+  // Formula: Stars = (net_price_usd / 0.013) × 1.43  (covers iOS 30% + Telegram fee)
+  // At launch, replace 0 values with confirmed amounts.
+  var STARS_PRICES = {
+    PEACE_GARDENER:    { single: 550,   bundle: 550   },
+    PEACE_GUARDIAN:    { single: 1650,  bundle: 2450  },
+    PEACE_GUIDE:       { single: 3300,  bundle: 6200  },
+    PEACE_ILLUMINATOR: { single: 5500,  bundle: 11700 },
+    PEACE_LEGEND:      { single: 8800,  bundle: 20700 },
+    ANGEL_OF_PEACE:    { single: 13200, bundle: 34500 },
+    PEACE_POWER:       { single: 22000, bundle: 58000 },
+  };
+
   // ── CONSTANTS ────────────────────────────────────────────────────────────
   var TIERS = [
     { code:'PEACE_LOVER',       tier:1, name:'PEACE LOVER',       icon:'🕊',  color:'#64D2FF', price:0,   bundle:null, multiplier:1,  supplyType:'unlimited', maxSupply:0        },
@@ -1111,6 +1126,91 @@
     el.className   = 'toast show' + (type ? ' ' + type : '');
     clearTimeout(el._t);
     el._t = setTimeout(function() { el.className = 'toast'; }, 3000);
+  }
+
+  // ── PAY WITH STARS ───────────────────────────────────────────────────────
+  async function payWithStars() {
+    if (!_currentPurchase) return;
+    var p = _currentPurchase;
+
+    var sp = STARS_PRICES[p.tier.code];
+    var starsAmt = sp ? (p.isBundle ? sp.bundle : sp.single) : 0;
+    if (!starsAmt) {
+      showToast('⭐ Stars price TBD — coming soon', 'info');
+      return;
+    }
+
+    var tgWebApp = window.Telegram && window.Telegram.WebApp;
+    if (!tgWebApp || typeof tgWebApp.openInvoice !== 'function') {
+      showToast('Stars payment requires Telegram app', 'error');
+      return;
+    }
+
+    var btn = document.getElementById('btn-pay-stars');
+    btn.disabled = true; btn.textContent = '⏳ OPENING...';
+
+    try {
+      // Get invoice link from edge function
+      var res = await fetch(SUPABASE_URL + '/functions/v1/create-stars-invoice', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+        },
+        body: JSON.stringify({
+          tier_code:   p.tier.code,
+          is_bundle:   p.isBundle,
+          user_uid:    uid,
+          tg_user_id:  tgWebApp.initDataUnsafe && tgWebApp.initDataUnsafe.user
+                         ? tgWebApp.initDataUnsafe.user.id : null,
+          stars_price: starsAmt,
+          tier_name:   p.tier.name,
+          multiplier:  p.tier.multiplier,
+          items_count: p.items.length
+        })
+      });
+      var data = await res.json();
+      if (!data.invoice_link) throw new Error(data.error || 'No invoice link');
+
+      // Open Telegram Stars payment
+      tgWebApp.openInvoice(data.invoice_link, async function(status) {
+        if (status === 'paid') {
+          // Record badge
+          if (uid && sb) {
+            var codes = p.isBundle
+              ? p.items.map(function(t){ return t.code; })
+              : [p.tier.code];
+            for (var i = 0; i < codes.length; i++) {
+              await sb.from('user_badges').upsert(
+                { user_uid: uid, badge_code: codes[i], payment_method: 'stars' },
+                { onConflict: 'user_uid,badge_code' }
+              ).catch(function(){});
+            }
+            // Record purchase log
+            await sb.from('nft_pending_purchases').insert({
+              user_uid: uid, tier_code: p.tier.code,
+              is_bundle: p.isBundle, price_stars: starsAmt,
+              wallet_addr: 'pending_claim', status: 'paid_stars',
+              payment_method: 'stars', created_at: new Date().toISOString()
+            }).catch(function(){});
+          }
+          document.getElementById('modal').classList.remove('open');
+          showToast('⭐ Payment confirmed! NFT added.', 'success');
+          setTimeout(loadMarket, 1200);
+        } else if (status === 'cancelled') {
+          showToast('Payment cancelled', 'info');
+        } else {
+          showToast('Payment failed — try again', 'error');
+        }
+        btn.disabled = false; btn.textContent = '⭐ PAY WITH STARS';
+      });
+
+    } catch(e) {
+      console.error('Stars payment error:', e);
+      showToast('Stars payment unavailable', 'error');
+      btn.disabled = false; btn.textContent = '⭐ PAY WITH STARS';
+    }
   }
 
   // ── INIT ─────────────────────────────────────────────────────────────────
