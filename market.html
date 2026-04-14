@@ -824,13 +824,13 @@
         btnsHtml = '<button class="btn-claim" onclick="claimFree(\'' + t.code + '\')">CLAIM FREE</button>';
       } else if (isNextBuy) {
         btnsHtml = '<div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;">'
-          + '<button class="btn-buy" onclick="openBuy(\'' + t.code + '\',false)">BUY $' + t.price + '</button>'
-          + (t.bundle ? '<button class="btn-bundle" onclick="openBuy(\'' + t.code + '\',true)">BUNDLE $' + t.bundle + '</button>' : '')
+          + '<button class="btn-buy" onclick="openBuy(\'' + t.code + '\',false)">BUY — TBD</button>'
+          + (t.bundle ? '<button class="btn-bundle" onclick="openBuy(\'' + t.code + '\',true)">BUNDLE — TBD</button>' : '')
           + '</div>';
       } else if (isLocked) {
         btnsHtml = '<div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;">'
           + '<div class="btn-locked">🔒 LOCKED</div>'
-          + (t.bundle ? '<button class="btn-bundle" onclick="openBuy(\'' + t.code + '\',true)">BUNDLE $' + t.bundle + '</button>' : '')
+          + (t.bundle ? '<button class="btn-bundle" onclick="openBuy(\'' + t.code + '\',true)">BUNDLE — TBD</button>' : '')
           + '</div>';
       }
 
@@ -853,7 +853,7 @@
         +     '<div class="card-name">' + t.name + '</div>'
         +     '<div class="card-meta">'
         +       '<span class="card-mult" style="color:' + color + ';border-color:' + color + '44;background:' + color + '18;">×' + t.multiplier + '</span>'
-        +       (isFree ? '<span class="card-free-badge">FREE</span>' : '<span class="card-price">$' + t.price + '</span>')
+        +       (isFree ? '<span class="card-free-badge">FREE</span>' : '<span class="card-price" style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:1px;color:rgba(255,255,255,0.5);">TBD</span>')
         +     '</div>'
         +     supplyHtml
         +     lockedMsg
@@ -903,7 +903,7 @@
     // Key stats: multiplier + price
     var priceDisplay = t.price === 0
       ? '<span style="color:#64FFAA;font-size:22px;">FREE</span>'
-      : '<span style="color:#fff;">$' + t.price + '</span><span style="font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);margin-left:4px;">USDT</span>';
+      : '<span style="color:rgba(255,255,255,0.6);font-size:16px;letter-spacing:2px;">TBD</span>';
     document.getElementById('cp-stats').innerHTML =
       '<div class="cp-stat">'
       +   '<div class="cp-stat-val" style="color:' + color + '">×' + t.multiplier + '</div>'
@@ -954,12 +954,12 @@
       actHtml = '<button class="btn-claim" style="width:100%;padding:15px;font-size:13px;letter-spacing:2px;" onclick="closeCardPopup();claimFree(\'' + code + '\')">Claim for Free</button>';
     } else {
       if (isNext) {
-        actHtml += '<button class="btn-buy" style="width:100%;padding:15px;font-size:13px;letter-spacing:1px;" onclick="closeCardPopup();openBuy(\'' + code + '\',false)">Buy for $' + t.price + ' USDT</button>';
+        actHtml += '<button class="btn-buy" style="width:100%;padding:15px;font-size:13px;letter-spacing:1px;" onclick="closeCardPopup();openBuy(\'' + code + '\',false)">Buy — TBD</button>';
       }
       if (t.bundle) {
         var bundleItems = getBundleTiers(t.tier);
         actHtml += '<button class="btn-bundle" style="width:100%;padding:14px;font-size:12px;letter-spacing:1px;" onclick="closeCardPopup();openBuy(\'' + code + '\',true)">'
-          + 'Bundle $' + t.bundle + ' — Get all ' + bundleItems.length + ' cards up to this tier</button>';
+          + 'Bundle — TBD — Get all ' + bundleItems.length + ' cards up to this tier</button>';
       }
       if (!isNext) {
         var prev = TIERS[t.tier - 2];
@@ -999,7 +999,7 @@
     // Populate modal
     document.getElementById('modal-title').textContent   = tier.name;
     document.getElementById('modal-subtitle').textContent = subtitle;
-    document.getElementById('modal-price').textContent   = price;
+    document.getElementById('modal-price').textContent   = 'TBD';
     document.getElementById('modal-img').src  = 'cards/' + code + '.png';
     document.getElementById('modal-img').alt  = tier.name;
 
@@ -1018,8 +1018,7 @@
       var savings    = indivTotal - price;
       if (savings > 0) {
         document.getElementById('modal-note').innerHTML =
-          '💰 SAVE $' + savings + ' vs buying individually<br>'
-          + '<span style="color:rgba(255,255,255,0.4);">🚀 SMART CONTRACT DEPLOYING — LAUNCHING SOON</span>';
+          '<span style="color:rgba(255,255,255,0.4);">🚀 SMART CONTRACT DEPLOYING — LAUNCHING SOON</span>';
       }
     }
 
