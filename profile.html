@@ -2473,19 +2473,74 @@
     // ── New card-first share flow ─────────────────────────────────
     window.NAVA_SHARE = { open: openInviteCardFlow };
 
-    // ── Load static world map SVG (same-origin, no CORS, no library) ──────────
+    // ── Draw world map directly on canvas — no fetch, no CORS, works in Telegram ──
+    // Path format: "M258 30 L308 18 ... Z" (cmd letter is prefix of first coord token)
+    function _drawSVGPath(ctx, d) {
+      var t = d.trim().split(/\s+/), i = 0;
+      ctx.beginPath();
+      while (i < t.length) {
+        var tok = t[i], cmd = tok[0];
+        if (cmd === 'M' || cmd === 'L') {
+          var x = +(tok.slice(1)), y = +(t[i+1] || 0);
+          if (cmd === 'M') ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          i += 2;
+        } else if (cmd === 'Z' || tok === 'Z') {
+          ctx.closePath(); i++;
+        } else { i++; }
+      }
+    }
+
     function captureWorldMap() {
       return new Promise(function(resolve) {
-        fetch('world-map.svg')
-          .then(function(r) { return r.blob(); })
-          .then(function(blob) {
-            var url = URL.createObjectURL(blob);
-            var img = new Image();
-            img.onload = function() { URL.revokeObjectURL(url); resolve(img); };
-            img.onerror = function() { URL.revokeObjectURL(url); resolve(null); };
-            img.src = url;
-          })
-          .catch(function() { resolve(null); });
+        try {
+          var mc = document.createElement('canvas');
+          mc.width = 1000; mc.height = 500;
+          var mctx = mc.getContext('2d');
+
+          // Ocean
+          mctx.fillStyle = '#1E8EC4'; mctx.fillRect(0,0,1000,500);
+
+          // Grid lines
+          [[0,167,1000,167,0.07],[0,250,1000,250,0.12],[0,333,1000,333,0.07],
+           [250,0,250,500,0.06],[500,0,500,500,0.09],[750,0,750,500,0.06]].forEach(function(l){
+            mctx.strokeStyle='rgba(255,255,255,'+l[4]+')'; mctx.lineWidth=1;
+            mctx.beginPath(); mctx.moveTo(l[0],l[1]); mctx.lineTo(l[2],l[3]); mctx.stroke();
+          });
+
+          // Continents
+          var paths = [
+            'M258 30 L308 18 L352 22 L358 52 L335 72 L288 80 L255 65 Z',
+            'M22 88 L68 52 L128 28 L172 32 L208 52 L248 88 L272 132 L278 178 L262 228 L232 258 L198 274 L162 284 L128 278 L98 262 L72 240 L50 208 L32 168 L18 128 Z',
+            'M198 274 L210 282 L218 300 L205 308 L195 295 L192 278 Z',
+            'M220 248 L240 244 L248 252 L232 258 L220 254 Z',
+            'M195 308 L240 278 L285 282 L318 308 L338 352 L342 402 L328 448 L298 478 L262 488 L232 472 L212 438 L202 392 L192 348 Z',
+            'M428 75 L448 68 L458 78 L448 88 L430 86 Z',
+            'M450 108 L464 98 L476 104 L472 122 L456 128 Z',
+            'M438 82 L475 62 L518 55 L562 58 L598 72 L618 98 L612 128 L590 152 L558 162 L522 158 L494 148 L462 138 L442 118 Z',
+            'M498 42 L522 28 L545 32 L558 55 L540 72 L518 75 L500 65 Z',
+            'M508 152 L528 162 L522 185 L510 195 L498 182 L498 162 Z',
+            'M438 162 L492 148 L558 152 L602 168 L622 208 L628 258 L608 318 L572 362 L528 388 L482 382 L445 355 L422 308 L418 255 L428 205 Z',
+            'M618 328 L628 318 L635 338 L628 360 L618 352 Z',
+            'M558 55 L638 38 L718 32 L798 42 L868 58 L918 78 L938 112 L928 152 L898 182 L862 205 L818 222 L775 232 L732 238 L692 242 L648 238 L608 218 L572 192 L558 162 L548 128 L548 88 Z',
+            'M575 192 L618 175 L648 185 L658 215 L642 248 L618 258 L595 242 L578 218 Z',
+            'M658 215 L702 228 L738 238 L728 278 L702 312 L678 295 L660 262 Z',
+            'M718 318 L726 312 L730 322 L722 328 Z',
+            'M775 232 L818 245 L845 258 L840 278 L818 282 L792 268 L775 252 Z',
+            'M788 295 L815 285 L838 290 L842 305 L820 312 L795 308 Z',
+            'M848 298 L868 290 L880 298 L878 312 L858 315 Z',
+            'M878 138 L895 128 L905 142 L898 162 L882 158 Z',
+            'M858 155 L872 148 L878 158 L868 172 L855 168 Z',
+            'M858 238 L868 228 L878 238 L872 255 L860 252 Z',
+            'M798 352 L848 338 L898 342 L928 358 L938 388 L922 418 L892 432 L848 428 L812 412 L798 385 Z',
+            'M950 432 L962 420 L968 438 L958 452 L948 445 Z',
+            'M22 88 L8 112 L18 128 Z',
+            'M918 78 L955 88 L962 115 L948 132 L930 125 L918 105 Z'
+          ];
+          mctx.fillStyle = '#3AACDF'; mctx.strokeStyle = '#5DC8F0'; mctx.lineWidth = 0.8; mctx.globalAlpha = 0.9;
+          paths.forEach(function(d){ _drawSVGPath(mctx, d); mctx.fill(); mctx.stroke(); });
+          mctx.globalAlpha = 1;
+          resolve(mc);
+        } catch(e) { resolve(null); }
       });
     }
     // ─────────────────────────────────────────────────────────────────────────
@@ -3161,7 +3216,9 @@
             // Clip to map area
             ctx.beginPath(); ctx.rect(0, mapY+2, w, mapH-2); ctx.clip();
             // Scale to fill width, center vertically
-            var mAR = mapImg.naturalWidth / mapImg.naturalHeight;
+            var mSrcW = mapImg.naturalWidth || mapImg.width || 1000;
+            var mSrcH = mapImg.naturalHeight || mapImg.height || 500;
+            var mAR = mSrcW / mSrcH;
             var mW = w, mH = mW / mAR;
             if (mH < mapH) { mH = mapH; mW = mH * mAR; }
             ctx.drawImage(mapImg, (w - mW) / 2, mapY + 2 + (mapH - mH) / 2, mW, mH);
