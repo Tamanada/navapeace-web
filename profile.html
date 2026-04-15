@@ -2634,13 +2634,19 @@
         '<p id="css-gallery-msg" style="text-align:center;font-size:8px;letter-spacing:1.5px;color:rgba(255,255,255,0.45);margin-bottom:16px;">' + galleryMsg + '</p>' +
 
         // App buttons (5 platforms)
-        '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:8px;">' +
+        '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px;">' +
           _appBtn('whatsapp',  'WHATSAPP') +
           _appBtn('instagram', 'INSTAGRAM') +
           _appBtn('x',         'X') +
           _appBtn('facebook',  'FACEBOOK') +
           _appBtn('telegram',  'TELEGRAM') +
         '</div>' +
+
+        // Close button (bottom, full-width, mobile-friendly)
+        '<button id="css-close-bottom" style="width:100%;padding:13px;border-radius:12px;border:1px solid rgba(255,255,255,0.13);' +
+        'background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);' +
+        'font-family:Nasalization,Arial;font-size:9px;letter-spacing:2.5px;cursor:pointer;">✕ FERMER</button>' +
+
         '</div>';
 
       // Clipboard copy helper
@@ -2777,6 +2783,7 @@
       requestAnimationFrame(function() { sheet.style.opacity = '1'; });
 
       sheet.querySelector('#css-close').onclick = closeSheet;
+      sheet.querySelector('#css-close-bottom').onclick = closeSheet;
       sheet.onclick = function(e) { if (e.target === sheet) closeSheet(); };
 
       function _setMsg(text) {
