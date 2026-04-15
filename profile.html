@@ -2533,7 +2533,7 @@
         if (btn) { var _sp2 = btn.querySelector('span'); if (_sp2) _sp2.textContent = '⏳ CARD…'; }
         var mapImg = await captureWorldMap();
         var result = await generateShareCard(inviteURL, refCode, cardStats, mapImg);
-        showCardShareSheet(result.blobURL, result.file);
+        showCardShareSheet(result.dataURL, result.file);
       } catch(e) {
         console.error('Card generation error:', e);
       } finally {
@@ -2769,11 +2769,7 @@
 
       function closeSheet() {
         sheet.style.opacity = '0';
-        setTimeout(function() {
-          sheet.remove();
-          // Free blob URL memory
-          if (imgURL && imgURL.startsWith('blob:')) { URL.revokeObjectURL(imgURL); }
-        }, 300);
+        setTimeout(function() { sheet.remove(); }, 300);
       }
 
       // Bind events after DOM inserted
@@ -2789,11 +2785,24 @@
       }
 
       function _downloadFallback() {
+        // Create blob URL on demand (never store blob: URL as <img> src — Telegram blocks it)
         var a = document.createElement('a');
-        a.href = imgURL; a.download = 'nava-peace-invite.jpg';
-        a.style.display = 'none';
-        document.body.appendChild(a); a.click();
-        setTimeout(function() { if (a.parentNode) a.parentNode.removeChild(a); }, 200);
+        if (imgFile) {
+          var blobURL = URL.createObjectURL(imgFile);
+          a.href = blobURL; a.download = 'nava-peace-invite.jpg';
+          a.style.display = 'none';
+          document.body.appendChild(a); a.click();
+          setTimeout(function() {
+            URL.revokeObjectURL(blobURL);
+            if (a.parentNode) a.parentNode.removeChild(a);
+          }, 1000);
+        } else {
+          // Last resort: data URL anchor (may not work in all browsers)
+          a.href = imgURL; a.download = 'nava-peace-invite.jpg';
+          a.style.display = 'none';
+          document.body.appendChild(a); a.click();
+          setTimeout(function() { if (a.parentNode) a.parentNode.removeChild(a); }, 200);
+        }
       }
 
       // SAVE TO GALLERY button — multi-strategy
@@ -3247,18 +3256,18 @@
           ctx.fillStyle = barGrad;
           ctx.fillRect(0, h-4, w, 4);
 
-          // Generate as JPEG (~150-250 KB vs 2-4 MB PNG) and expose as blob URL
-          // blob: URLs are downloadable by Telegram/Android natively
+          // JPEG 88% quality: ~150-250 KB (vs 2-4 MB PNG)
+          // Use data: URL for display (works everywhere inc. Telegram WebView)
+          // Blob is kept for File sharing only — blob URLs are NOT used as <img> src
+          var dataURL = canvas.toDataURL('image/jpeg', 0.88);
           canvas.toBlob(function(blob) {
             if (!blob) {
-              var fbDataURL = canvas.toDataURL('image/jpeg', 0.88);
-              var byteStr = atob(fbDataURL.split(',')[1]);
+              var byteStr = atob(dataURL.split(',')[1]);
               var arr = new Uint8Array(byteStr.length);
               for (var i = 0; i < byteStr.length; i++) arr[i] = byteStr.charCodeAt(i);
               blob = new Blob([arr], { type: 'image/jpeg' });
             }
-            var blobURL = URL.createObjectURL(blob);
-            resolve({ file: new File([blob], 'nava-peace-invite.jpg', { type:'image/jpeg' }), blobURL: blobURL });
+            resolve({ file: new File([blob], 'nava-peace-invite.jpg', { type:'image/jpeg' }), dataURL: dataURL });
           }, 'image/jpeg', 0.88);
         }
       });
