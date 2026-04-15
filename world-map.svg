@@ -1,0 +1,61 @@
+<svg viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1000" height="500" fill="#1E8EC4"/>
+  <!-- Greenland -->
+  <path d="M258 30 L308 18 L352 22 L358 52 L335 72 L288 80 L255 65 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="1.2" stroke-linejoin="round" opacity="0.9"/>
+  <!-- North America -->
+  <path d="M22 88 L68 52 L128 28 L172 32 L208 52 L248 88 L272 132 L278 178 L262 228 L232 258 L198 274 L162 284 L128 278 L98 262 L72 240 L50 208 L32 168 L18 128 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="1.2" stroke-linejoin="round" opacity="0.9"/>
+  <!-- Central America -->
+  <path d="M198 274 L210 282 L218 300 L205 308 L195 295 L192 278 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="1" opacity="0.9"/>
+  <!-- Caribbean (Cuba) -->
+  <path d="M220 248 L240 244 L248 252 L232 258 L220 254 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="0.8" opacity="0.85"/>
+  <!-- South America -->
+  <path d="M195 308 L240 278 L285 282 L318 308 L338 352 L342 402 L328 448 L298 478 L262 488 L232 472 L212 438 L202 392 L192 348 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="1.2" stroke-linejoin="round" opacity="0.9"/>
+  <!-- Iceland -->
+  <path d="M428 75 L448 68 L458 78 L448 88 L430 86 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="1" opacity="0.85"/>
+  <!-- UK / Ireland -->
+  <path d="M450 108 L464 98 L476 104 L472 122 L456 128 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="0.8" opacity="0.85"/>
+  <!-- Europe -->
+  <path d="M438 82 L475 62 L518 55 L562 58 L598 72 L618 98 L612 128 L590 152 L558 162 L522 158 L494 148 L462 138 L442 118 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="1.2" stroke-linejoin="round" opacity="0.9"/>
+  <!-- Scandinavia -->
+  <path d="M498 42 L522 28 L545 32 L558 55 L540 72 L518 75 L500 65 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="1" opacity="0.9"/>
+  <!-- Italy / Balkans -->
+  <path d="M508 152 L528 162 L522 185 L510 195 L498 182 L498 162 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="0.8" opacity="0.85"/>
+  <!-- Africa -->
+  <path d="M438 162 L492 148 L558 152 L602 168 L622 208 L628 258 L608 318 L572 362 L528 388 L482 382 L445 355 L422 308 L418 255 L428 205 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="1.2" stroke-linejoin="round" opacity="0.9"/>
+  <!-- Madagascar -->
+  <path d="M618 328 L628 318 L635 338 L628 360 L618 352 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="0.8" opacity="0.85"/>
+  <!-- Asia (main body) -->
+  <path d="M558 55 L638 38 L718 32 L798 42 L868 58 L918 78 L938 112 L928 152 L898 182 L862 205 L818 222 L775 232 L732 238 L692 242 L648 238 L608 218 L572 192 L558 162 L548 128 L548 88 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="1.2" stroke-linejoin="round" opacity="0.9"/>
+  <!-- Arabia -->
+  <path d="M575 192 L618 175 L648 185 L658 215 L642 248 L618 258 L595 242 L578 218 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="1" opacity="0.9"/>
+  <!-- India -->
+  <path d="M658 215 L702 228 L738 238 L728 278 L702 312 L678 295 L660 262 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="1" stroke-linejoin="round" opacity="0.9"/>
+  <!-- Sri Lanka -->
+  <path d="M718 318 L726 312 L730 322 L722 328 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="0.7" opacity="0.85"/>
+  <!-- SE Asia -->
+  <path d="M775 232 L818 245 L845 258 L840 278 L818 282 L792 268 L775 252 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="1" opacity="0.9"/>
+  <!-- Indonesia (simplified) -->
+  <path d="M788 295 L815 285 L838 290 L842 305 L820 312 L795 308 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="0.8" opacity="0.85"/>
+  <path d="M848 298 L868 290 L880 298 L878 312 L858 315 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="0.8" opacity="0.85"/>
+  <!-- Japan -->
+  <path d="M878 138 L895 128 L905 142 L898 162 L882 158 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="0.8" opacity="0.85"/>
+  <!-- Korea -->
+  <path d="M858 155 L872 148 L878 158 L868 172 L855 168 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="0.8" opacity="0.85"/>
+  <!-- Philippines -->
+  <path d="M858 238 L868 228 L878 238 L872 255 L860 252 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="0.8" opacity="0.85"/>
+  <!-- Australia -->
+  <path d="M798 352 L848 338 L898 342 L928 358 L938 388 L922 418 L892 432 L848 428 L812 412 L798 385 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="1.2" stroke-linejoin="round" opacity="0.9"/>
+  <!-- New Zealand -->
+  <path d="M950 432 L962 420 L968 438 L958 452 L948 445 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="0.8" opacity="0.85"/>
+  <!-- Alaska -->
+  <path d="M22 88 L8 112 L18 128 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="0.8" opacity="0.9"/>
+  <!-- Siberia / Kamchatka extension -->
+  <path d="M918 78 L955 88 L962 115 L948 132 L930 125 L918 105 Z" fill="#3AACDF" stroke="#5DC8F0" stroke-width="1" opacity="0.9"/>
+  <!-- Lat/Lon grid lines -->
+  <line x1="0" y1="167" x2="1000" y2="167" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <line x1="0" y1="250" x2="1000" y2="250" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <line x1="0" y1="333" x2="1000" y2="333" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <line x1="250" y1="0" x2="250" y2="500" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+  <line x1="500" y1="0" x2="500" y2="500" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <line x1="750" y1="0" x2="750" y2="500" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+</svg>

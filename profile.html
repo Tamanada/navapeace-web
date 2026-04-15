@@ -2473,81 +2473,26 @@
     // ── New card-first share flow ─────────────────────────────────
     window.NAVA_SHARE = { open: openInviteCardFlow };
 
-    // ── Lazy-load amCharts + capture world map SVG ──────────────────────────
-    function _loadScript(src, cb) {
-      if (document.querySelector('script[src="' + src + '"]')) { cb(); return; }
-      var s = document.createElement('script');
-      s.src = src; s.onload = cb;
-      s.onerror = function() { cb(new Error('fail')); };
-      document.head.appendChild(s);
-    }
-
+    // ── Load static world map SVG (same-origin, no CORS, no library) ──────────
     function captureWorldMap() {
       return new Promise(function(resolve) {
-        var srcs = [
-          'https://cdn.amcharts.com/lib/5/index.js',
-          'https://cdn.amcharts.com/lib/5/map.js',
-          'https://cdn.amcharts.com/lib/5/geodata/worldLow.js',
-        ];
-        var i = 0;
-        function next(err) {
-          if (err) { resolve(null); return; }
-          if (i >= srcs.length) { _doMapCapture(resolve); return; }
-          _loadScript(srcs[i++], next);
-        }
-        next();
+        fetch('world-map.svg')
+          .then(function(r) { return r.blob(); })
+          .then(function(blob) {
+            var url = URL.createObjectURL(blob);
+            var img = new Image();
+            img.onload = function() { URL.revokeObjectURL(url); resolve(img); };
+            img.onerror = function() { URL.revokeObjectURL(url); resolve(null); };
+            img.src = url;
+          })
+          .catch(function() { resolve(null); });
       });
-    }
-
-    function _doMapCapture(resolve) {
-      try {
-        var W = 600, H = 280;
-        var mc = document.createElement('div');
-        mc.style.cssText = 'position:fixed;left:-6000px;top:0;width:' + W + 'px;height:' + H + 'px;';
-        document.body.appendChild(mc);
-
-        var root = am5.Root.new(mc);
-        var chart = root.container.children.push(am5map.MapChart.new(root, {
-          panX: 'none', panY: 'none', wheelY: 'none',
-          projection: am5map.geoMercator(),
-          background: am5.Rectangle.new(root, { fill: am5.color('#1E8EC4'), fillOpacity: 1 })
-        }));
-        chart.series.push(am5map.MapPolygonSeries.new(root, {
-          geoJSON: am5geodata_worldLow,
-          fill: am5.color('#3AACDF'),
-          stroke: am5.color('#5DC8F0'),
-          strokeWidth: 0.7,
-        }));
-
-        var done = false;
-        function _capture() {
-          if (done) return; done = true;
-          setTimeout(function() {
-            try {
-              var svg = mc.querySelector('svg');
-              if (!svg) { _cleanup(); resolve(null); return; }
-              var svgStr = new XMLSerializer().serializeToString(svg);
-              var blob = new Blob([svgStr], { type: 'image/svg+xml' });
-              var url = URL.createObjectURL(blob);
-              var img = new Image();
-              img.onload = function() { _cleanup(); URL.revokeObjectURL(url); resolve(img); };
-              img.onerror = function() { _cleanup(); URL.revokeObjectURL(url); resolve(null); };
-              img.src = url;
-            } catch(e) { _cleanup(); resolve(null); }
-          }, 400);
-        }
-        root.events.on('frameended', _capture);
-        setTimeout(function() { if (!done) _capture(); }, 4000);
-        function _cleanup() {
-          try { root.dispose(); document.body.removeChild(mc); } catch(e) {}
-        }
-      } catch(e) { resolve(null); }
     }
     // ─────────────────────────────────────────────────────────────────────────
 
     async function openInviteCardFlow() {
       var btn = document.getElementById('share-card-main-btn');
-      if (btn) { btn.disabled = true; var _sp = btn.querySelector('span'); if (_sp) _sp.textContent = '⏳ MAP…'; }
+      if (btn) { btn.disabled = true; var _sp = btn.querySelector('span'); if (_sp) _sp.textContent = '⏳ LOADING…'; }
       try {
         // Fetch live stats for the share card
         var cardStats = { lovers: 0, countries: 0, doves: 0, today: 0, days: 0 };
@@ -2739,20 +2684,66 @@
           return;
         }
 
-        // Instagram: native share with image file (no URL scheme)
+        // Instagram: copy text + open app (native file share rarely works in Telegram)
         if (appName === 'instagram') {
+          var _doIG = function() {
+            var _igHints = {
+              en:'📋 TEXT COPIED — open Instagram and paste in your story or post',
+              fr:'📋 TEXTE COPIÉ — ouvre Instagram et colle dans ta story ou publication',
+              es:'📋 TEXTO COPIADO — abre Instagram y pega en tu historia o publicación',
+              pt:'📋 TEXTO COPIADO — abre o Instagram e cole na história ou publicação',
+              de:'📋 TEXT KOPIERT — öffne Instagram und füge in Story oder Post ein',
+              ru:'📋 ТЕКСТ СКОПИРОВАН — открой Instagram и вставь в историю или пост',
+              zh:'📋 已复制 — 打开Instagram粘贴到你的故事或帖子',
+              ar:'📋 تم النسخ — افتح Instagram والصق في قصتك أو منشورك',
+              ja:'📋 テキストコピー — Instagramを開いてストーリーまたは投稿に貼り付け',
+              hi:'📋 कॉपी — Instagram खोलें और स्टोरी या पोस्ट में पेस्ट करें',
+              uk:'📋 СКОПІЙОВАНО — відкрий Instagram і встав у свою публікацію'
+            };
+            _copyToClipboard(shareText).catch(function(){});
+            _setMsg(_igHints[userLang] || _igHints.en);
+            setTimeout(function() {
+              var igUrl = 'https://www.instagram.com/';
+              if (typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram) {
+                Telegram.WebApp.openLink(igUrl);
+              } else { window.open(igUrl, '_blank'); }
+            }, 700);
+          };
           if (navigator.canShare && navigator.canShare({ files: [imgFile] })) {
             navigator.share({ files: [imgFile], title: 'NAVA PEACE 🕊', text: shareText })
-              .catch(function(err) { if (err.name !== 'AbortError') _downloadFallback(); });
-          } else {
-            _downloadFallback();
-          }
+              .catch(function(err) { if (err.name !== 'AbortError') _doIG(); });
+          } else { _doIG(); }
+          return;
+        }
+
+        // X: copy text to clipboard + open compose URL
+        if (appName === 'x') {
+          var _xHints = {
+            en:'📋 TEXT COPIED — paste it in your X post',
+            fr:'📋 TEXTE COPIÉ — colle-le dans ton post X',
+            es:'📋 TEXTO COPIADO — pégalo en tu post de X',
+            pt:'📋 TEXTO COPIADO — cole no seu post do X',
+            de:'📋 TEXT KOPIERT — füge ihn in deinen X-Post ein',
+            ru:'📋 ТЕКСТ СКОПИРОВАН — вставь в свой пост X',
+            zh:'📋 已复制 — 粘贴到你的X帖子',
+            ar:'📋 تم النسخ — الصقه في منشور X',
+            ja:'📋 テキストコピー — Xの投稿に貼り付け',
+            hi:'📋 कॉपी — X पोस्ट में पेस्ट करें',
+            uk:'📋 СКОПІЙОВАНО — встав у свій пост X'
+          };
+          _copyToClipboard(shareText).catch(function(){});
+          _setMsg(_xHints[userLang] || _xHints.en);
+          setTimeout(function() {
+            var xUrl = 'https://x.com/intent/tweet?text=' + enc;
+            if (typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram) {
+              Telegram.WebApp.openLink(xUrl);
+            } else { window.open(xUrl, '_blank'); }
+          }, 600);
           return;
         }
 
         var urls = {
           whatsapp: 'https://wa.me/?text=' + enc,
-          x:        'https://x.com/intent/tweet?text=' + enc,
           telegram: 'https://t.me/share/url?url=' + encURL + '&text=' + encodeURIComponent(shareText.split('\n')[0])
         };
 
@@ -2806,6 +2797,21 @@
                 _tryCopyThenDownload(btn);
               }
             });
+          return;
+        }
+
+        // Telegram WebApp: navigator.share not available → highlight card for long-press
+        var isTG = typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram;
+        if (isTG) {
+          var prev = document.getElementById('css-card-preview');
+          if (prev) {
+            prev.style.outline = '3px solid #3AACDF';
+            prev.style.outlineOffset = '4px';
+            prev.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+          _setMsg('☝️ ' + holdLabel);
+          btn.disabled = false;
+          btn.textContent = '☝️ HOLD IMAGE TO SAVE';
           return;
         }
 
