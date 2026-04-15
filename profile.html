@@ -2473,9 +2473,81 @@
     // ── New card-first share flow ─────────────────────────────────
     window.NAVA_SHARE = { open: openInviteCardFlow };
 
+    // ── Lazy-load amCharts + capture world map SVG ──────────────────────────
+    function _loadScript(src, cb) {
+      if (document.querySelector('script[src="' + src + '"]')) { cb(); return; }
+      var s = document.createElement('script');
+      s.src = src; s.onload = cb;
+      s.onerror = function() { cb(new Error('fail')); };
+      document.head.appendChild(s);
+    }
+
+    function captureWorldMap() {
+      return new Promise(function(resolve) {
+        var srcs = [
+          'https://cdn.amcharts.com/lib/5/index.js',
+          'https://cdn.amcharts.com/lib/5/map.js',
+          'https://cdn.amcharts.com/lib/5/geodata/worldLow.js',
+        ];
+        var i = 0;
+        function next(err) {
+          if (err) { resolve(null); return; }
+          if (i >= srcs.length) { _doMapCapture(resolve); return; }
+          _loadScript(srcs[i++], next);
+        }
+        next();
+      });
+    }
+
+    function _doMapCapture(resolve) {
+      try {
+        var W = 600, H = 280;
+        var mc = document.createElement('div');
+        mc.style.cssText = 'position:fixed;left:-6000px;top:0;width:' + W + 'px;height:' + H + 'px;';
+        document.body.appendChild(mc);
+
+        var root = am5.Root.new(mc);
+        var chart = root.container.children.push(am5map.MapChart.new(root, {
+          panX: 'none', panY: 'none', wheelY: 'none',
+          projection: am5map.geoMercator(),
+          background: am5.Rectangle.new(root, { fill: am5.color('#1E8EC4'), fillOpacity: 1 })
+        }));
+        chart.series.push(am5map.MapPolygonSeries.new(root, {
+          geoJSON: am5geodata_worldLow,
+          fill: am5.color('#3AACDF'),
+          stroke: am5.color('#5DC8F0'),
+          strokeWidth: 0.7,
+        }));
+
+        var done = false;
+        function _capture() {
+          if (done) return; done = true;
+          setTimeout(function() {
+            try {
+              var svg = mc.querySelector('svg');
+              if (!svg) { _cleanup(); resolve(null); return; }
+              var svgStr = new XMLSerializer().serializeToString(svg);
+              var blob = new Blob([svgStr], { type: 'image/svg+xml' });
+              var url = URL.createObjectURL(blob);
+              var img = new Image();
+              img.onload = function() { _cleanup(); URL.revokeObjectURL(url); resolve(img); };
+              img.onerror = function() { _cleanup(); URL.revokeObjectURL(url); resolve(null); };
+              img.src = url;
+            } catch(e) { _cleanup(); resolve(null); }
+          }, 400);
+        }
+        root.events.on('frameended', _capture);
+        setTimeout(function() { if (!done) _capture(); }, 4000);
+        function _cleanup() {
+          try { root.dispose(); document.body.removeChild(mc); } catch(e) {}
+        }
+      } catch(e) { resolve(null); }
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     async function openInviteCardFlow() {
       var btn = document.getElementById('share-card-main-btn');
-      if (btn) { btn.disabled = true; var _sp = btn.querySelector('span'); if (_sp) _sp.textContent = '⏳'; }
+      if (btn) { btn.disabled = true; var _sp = btn.querySelector('span'); if (_sp) _sp.textContent = '⏳ MAP…'; }
       try {
         // Fetch live stats for the share card
         var cardStats = { lovers: 0, countries: 0, doves: 0, today: 0, days: 0 };
@@ -2503,7 +2575,9 @@
           }
         } catch(se) { console.warn('cardStats fetch', se); }
 
-        var result = await generateShareCard(inviteURL, refCode, cardStats);
+        if (btn) { var _sp2 = btn.querySelector('span'); if (_sp2) _sp2.textContent = '⏳ CARD…'; }
+        var mapImg = await captureWorldMap();
+        var result = await generateShareCard(inviteURL, refCode, cardStats, mapImg);
         showCardShareSheet(result.dataURL, result.file);
       } catch(e) {
         console.error('Card generation error:', e);
@@ -2897,7 +2971,7 @@
     // (share buttons removed — card-first flow via window.NAVA_SHARE.open)
 
     // Generate share card — Logo/Title | Personal msg + QR | Live peace map
-    function generateShareCard(url, code, stats) {
+    function generateShareCard(url, code, stats, mapImg) {
       stats = stats || { lovers: 0, countries: 0, doves: 0, today: 0, days: 0 };
       return new Promise(function(resolve) {
 
@@ -3019,9 +3093,9 @@
           ctx.beginPath(); ctx.moveTo(cx-160, y+10); ctx.lineTo(cx+160, y+10); ctx.stroke();
           y += 26;
 
-          ctx.fillStyle = 'rgba(255,255,255,0.8)';
-          ctx.font = '13px Nasalization, Arial, sans-serif';
-          ctx.fillText('TODAY HUMANITY CHOOSES PEACE', cx, y); y += 32;
+          ctx.fillStyle = 'rgba(255,255,255,0.92)';
+          ctx.font = 'bold 22px Nasalization, Arial, sans-serif';
+          ctx.fillText('TODAY HUMANITY CHOOSES PEACE', cx, y); y += 40;
 
           // ── STATS GRID 2×2 (like MAP page) ──
           var cellW = (w - pad*2 - 10) / 2, cellH = 86;
@@ -3034,13 +3108,13 @@
 
           // ── YOU ARE INVITED BY ──
           var pseudo = (localStorage.getItem('nava_peace_pseudo') || 'A PEACE MEMBER').toUpperCase();
-          ctx.fillStyle = 'rgba(255,255,255,0.55)';
-          ctx.font = '12px Nasalization, Arial, sans-serif';
-          ctx.fillText('YOU ARE INVITED BY', cx, y); y += 30;
+          ctx.fillStyle = 'rgba(255,255,255,0.85)';
+          ctx.font = 'bold 18px Nasalization, Arial, sans-serif';
+          ctx.fillText('YOU ARE INVITED BY', cx, y); y += 34;
 
           ctx.fillStyle = '#FFFFFF';
-          ctx.font = 'bold 24px Nasalization, Arial, sans-serif';
-          ctx.fillText(pseudo, cx, y); y += 28;
+          ctx.font = 'bold 32px Nasalization, Arial, sans-serif';
+          ctx.fillText(pseudo, cx, y); y += 36;
 
           // ── Personal message ──
           var customMsg = (document.getElementById('invite-custom-msg') || {}).value || '';
@@ -3067,89 +3141,85 @@
           if (document.body.contains(qrDiv)) document.body.removeChild(qrDiv);
           y += qrSize + qrPad + 20;
 
-          // ── MAP SECTION — bright blue like MAP page, NOT dark ──
+          // ── MAP SECTION ──
           var mapY = y;
           var mapH = h - mapY;
-
-          // Same bright overlay (slightly more saturated than body)
-          ctx.save();
-          ctx.globalAlpha = 0.12; ctx.fillStyle = '#000';
-          ctx.fillRect(0, mapY, w, mapH);
-          ctx.restore();
 
           // Divider
           ctx.fillStyle = barGrad;
           ctx.fillRect(0, mapY, w, 2);
 
-          // Grid lines
-          ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1;
-          for (var lRow = 0; lRow <= mapH; lRow += Math.round(mapH/6)) {
-            ctx.beginPath(); ctx.moveTo(0, mapY+lRow); ctx.lineTo(w, mapY+lRow); ctx.stroke();
-          }
-          for (var lCol = 0; lCol <= w; lCol += Math.round(w/10)) {
-            ctx.beginPath(); ctx.moveTo(lCol, mapY); ctx.lineTo(lCol, mapY+mapH); ctx.stroke();
-          }
+          if (mapImg) {
+            // ── Real amCharts map ──
+            ctx.save();
+            // Clip to map area
+            ctx.beginPath(); ctx.rect(0, mapY+2, w, mapH-2); ctx.clip();
+            // Scale to fill width, center vertically
+            var mAR = mapImg.naturalWidth / mapImg.naturalHeight;
+            var mW = w, mH = mW / mAR;
+            if (mH < mapH) { mH = mapH; mW = mH * mAR; }
+            ctx.drawImage(mapImg, (w - mW) / 2, mapY + 2 + (mapH - mH) / 2, mW, mH);
+            ctx.restore();
 
-          // Peace dots
-          var activeDots = [
-            [10,2],[11,2],[10,3],[11,3],[12,2],[9,3],
-            [3,2],[4,2],[5,3],[3,3],[4,3],
-            [5,5],[6,5],[5,6],[4,6],
-            [11,4],[11,5],[12,4],[10,5],
-            [13,3],[14,3],[14,4],[15,3],
-            [16,2],[17,2],[17,3],[16,3],[18,3],
-            [17,5],[18,5],[19,6],[20,6]
-          ];
-          var DCOLS = 22, DROWS = 8;
-          var activeSet = {};
-          activeDots.forEach(function(d){ activeSet[d[0]+','+d[1]] = true; });
-          for (var dr = 0; dr < DROWS; dr++) {
-            for (var dc = 0; dc < DCOLS; dc++) {
-              var dx = (dc + 0.5) / DCOLS * w;
-              var dy = mapY + (dr + 0.5) / DROWS * mapH;
-              if (!!activeSet[dc+','+dr]) {
-                ctx.fillStyle = 'rgba(255,255,255,0.28)';
-                ctx.beginPath(); ctx.arc(dx, dy, 10, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = '#FFFFFF';
-                ctx.beginPath(); ctx.arc(dx, dy, 4.5, 0, Math.PI*2); ctx.fill();
-              } else {
-                ctx.fillStyle = 'rgba(255,255,255,0.15)';
-                ctx.beginPath(); ctx.arc(dx, dy, 2.5, 0, Math.PI*2); ctx.fill();
+            // Peace words overlay
+            var peaceWords = [
+              {t:'PEACE',  px:0.06, py:0.38, s:14},
+              {t:'PAIX',   px:0.34, py:0.22, s:12},
+              {t:'PAZ',    px:0.18, py:0.62, s:13},
+              {t:'AMANI',  px:0.50, py:0.74, s:12},
+              {t:'SHALOM', px:0.53, py:0.28, s:11},
+              {t:'平和',    px:0.74, py:0.20, s:15},
+              {t:'МИР',    px:0.50, py:0.12, s:11},
+              {t:'和平',    px:0.80, py:0.52, s:13},
+              {t:'DAMAI',  px:0.82, py:0.68, s:11},
+            ];
+            peaceWords.forEach(function(pw) {
+              ctx.fillStyle = 'rgba(255,255,255,0.55)';
+              ctx.font = 'bold ' + pw.s + 'px Nasalization, Arial, sans-serif';
+              ctx.textAlign = 'left';
+              ctx.fillText(pw.t, pw.px * w, mapY + pw.py * mapH);
+            });
+          } else {
+            // ── Fallback: bright dot grid ──
+            ctx.save(); ctx.globalAlpha = 0.12; ctx.fillStyle = '#000';
+            ctx.fillRect(0, mapY+2, w, mapH-2); ctx.restore();
+            var activeDots = [
+              [10,2],[11,2],[10,3],[11,3],[12,2],[9,3],[3,2],[4,2],[5,3],[3,3],[4,3],
+              [5,5],[6,5],[5,6],[4,6],[11,4],[11,5],[12,4],[10,5],[13,3],[14,3],[14,4],[15,3],
+              [16,2],[17,2],[17,3],[16,3],[18,3],[17,5],[18,5],[19,6],[20,6]
+            ];
+            var DCOLS = 22, DROWS = 8;
+            var aSet = {};
+            activeDots.forEach(function(d){ aSet[d[0]+','+d[1]] = true; });
+            for (var dr = 0; dr < DROWS; dr++) {
+              for (var dc = 0; dc < DCOLS; dc++) {
+                var ddx = (dc+0.5)/DCOLS*w, ddy = mapY+2+(dr+0.5)/DROWS*(mapH-4);
+                if (aSet[dc+','+dr]) {
+                  ctx.fillStyle='rgba(255,255,255,0.28)'; ctx.beginPath(); ctx.arc(ddx,ddy,10,0,Math.PI*2); ctx.fill();
+                  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(ddx,ddy,4.5,0,Math.PI*2); ctx.fill();
+                } else {
+                  ctx.fillStyle='rgba(255,255,255,0.15)'; ctx.beginPath(); ctx.arc(ddx,ddy,2.5,0,Math.PI*2); ctx.fill();
+                }
               }
             }
+            var fallbackWords = [{t:'PEACE',px:0.08,py:0.38,s:13},{t:'PAIX',px:0.35,py:0.18,s:12},{t:'PAZ',px:0.20,py:0.60,s:13},{t:'AMANI',px:0.52,py:0.72,s:11},{t:'平和',px:0.76,py:0.22,s:14}];
+            fallbackWords.forEach(function(pw) {
+              ctx.fillStyle='rgba(255,255,255,0.32)'; ctx.font=pw.s+'px Nasalization,Arial,sans-serif'; ctx.textAlign='left';
+              ctx.fillText(pw.t, pw.px*w, mapY+pw.py*mapH);
+            });
           }
-
-          // Peace words (like MAP page)
-          var peaceWords = [
-            {t:'PEACE',  px:0.08, py:0.38, s:13},
-            {t:'PAIX',   px:0.35, py:0.18, s:12},
-            {t:'PAZ',    px:0.20, py:0.60, s:13},
-            {t:'AMANI',  px:0.52, py:0.72, s:11},
-            {t:'SHALOM', px:0.55, py:0.30, s:11},
-            {t:'平和',    px:0.76, py:0.22, s:14},
-            {t:'MND',    px:0.52, py:0.10, s:10},
-            {t:'和平',    px:0.80, py:0.50, s:12},
-            {t:'शांति',  px:0.64, py:0.42, s:11},
-            {t:'PAZ',    px:0.30, py:0.78, s:10},
-          ];
-          peaceWords.forEach(function(pw) {
-            ctx.fillStyle = 'rgba(255,255,255,0.32)';
-            ctx.font = pw.s + 'px Nasalization, Arial, sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText(pw.t, pw.px * w, mapY + pw.py * mapH);
-          });
 
           // Timestamp
           var now = new Date();
           var dateStr = now.toUTCString().replace(/ GMT$/, ' UTC');
-          ctx.fillStyle = 'rgba(255,255,255,0.4)';
+          ctx.fillStyle = 'rgba(255,255,255,0.5)';
           ctx.font = '9px Nasalization, Arial, sans-serif';
           ctx.textAlign = 'left';
           ctx.fillText('🌍 PEACE MAP  •  ' + dateStr, 16, mapY + 18);
 
           // www.nava-peace.world
           ctx.textAlign = 'center';
-          ctx.fillStyle = 'rgba(255,255,255,0.7)';
+          ctx.fillStyle = 'rgba(255,255,255,0.8)';
           ctx.font = 'bold 18px Nasalization, Arial, sans-serif';
           ctx.fillText('WWW.NAVA-PEACE.WORLD', cx, mapY + mapH - 12);
 
