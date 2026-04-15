@@ -2805,6 +2805,76 @@
         }
       }
 
+      // ── Telegram SAVE: upload JPEG → Supabase Storage → native TG download ──
+      // Requires bucket 'card-shares' (public) in Supabase Storage.
+      // Setup once in Supabase Dashboard → Storage → New bucket → card-shares (public)
+      // RLS: allow anon INSERT on storage.objects where bucket_id = 'card-shares'
+      async function _telegramSave(btn) {
+        try {
+          var sb2 = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          var uid3 = localStorage.getItem('nava_peace_uid') || 'anon';
+          var fname = 'share_' + uid3 + '_' + Date.now() + '.jpg';
+
+          // Resolve blob from File or data URL
+          var fblob = imgFile;
+          if (!fblob && imgURL) {
+            var b64p = imgURL.split(',')[1];
+            var byteS = atob(b64p);
+            var u8 = new Uint8Array(byteS.length);
+            for (var bi = 0; bi < byteS.length; bi++) u8[bi] = byteS.charCodeAt(bi);
+            fblob = new Blob([u8], { type: 'image/jpeg' });
+          }
+          if (!fblob) throw new Error('no-image');
+
+          // Upload
+          var upRes = await sb2.storage.from('card-shares').upload(fname, fblob, { contentType: 'image/jpeg' });
+          if (upRes.error) throw upRes.error;
+
+          // Public URL
+          var pubURL = sb2.storage.from('card-shares').getPublicUrl(fname).data.publicUrl;
+
+          // Auto-delete after 3 minutes
+          setTimeout(function() {
+            try { sb2.storage.from('card-shares').remove([fname]); } catch(e2) {}
+          }, 180000);
+
+          // Trigger native download (Bot API 7.8+) or open in system browser
+          if (typeof Telegram !== 'undefined' && Telegram.WebApp && typeof Telegram.WebApp.downloadFile === 'function') {
+            Telegram.WebApp.downloadFile({ url: pubURL, file_name: 'nava-peace-invite.jpg' });
+            _setMsg('📥 REGARDE TES TÉLÉCHARGEMENTS TELEGRAM');
+            btn.textContent = '✓ TÉLÉCHARGÉ';
+          } else {
+            // Opens in system browser — user long-presses → Save Image
+            Telegram.WebApp.openLink(pubURL);
+            _setMsg('📱 APPUI LONG SUR L\'IMAGE → ENREGISTRER');
+            btn.textContent = '✓ OUVERT';
+          }
+          btn.disabled = false;
+
+        } catch(tgErr) {
+          // Bucket not ready or upload failed → fullscreen long-press fallback
+          console.warn('TG save fallback:', tgErr);
+          _showFullscreenForSave();
+          btn.disabled = false;
+          btn.textContent = '💾 SAVE TO GALLERY';
+          _setMsg('📱 APPUI LONG SUR L\'IMAGE → ENREGISTRER');
+        }
+      }
+
+      // Fullscreen image overlay so user can long-press → Save Image (Android)
+      function _showFullscreenForSave() {
+        if (!imgURL) return;
+        var ov = document.createElement('div');
+        ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.94);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px;box-sizing:border-box;';
+        ov.innerHTML =
+          '<p style="color:#fff;font:600 14px/1.6 sans-serif;text-align:center;margin:0">' +
+          '📱 Appuie <b style="color:#5DC8F0">longuement</b> sur l\'image<br>puis <b style="color:#5DC8F0">Enregistrer l\'image</b></p>' +
+          '<img src="' + imgURL + '" style="max-width:100%;max-height:70vh;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.6);display:block;">' +
+          '<button style="color:#fff;background:rgba(255,255,255,0.18);border:none;border-radius:24px;padding:11px 40px;font-size:15px;cursor:pointer;font-family:inherit;margin-top:4px">✕ Fermer</button>';
+        ov.querySelector('button').onclick = function() { ov.remove(); };
+        document.body.appendChild(ov);
+      }
+
       // SAVE TO GALLERY button — multi-strategy
       sheet.querySelector('#css-save-btn').onclick = function() {
         var btn = this; btn.disabled = true; btn.textContent = '···';
@@ -2826,13 +2896,12 @@
           return;
         }
 
-        // Telegram WebApp: use _downloadFallback (blob URL triggers download on Android)
+        // Telegram WebApp: upload to Supabase Storage → native TG download
         var isTG = typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram;
         if (isTG) {
-          _downloadFallback();
-          _setMsg('📥 IMAGE EN TÉLÉCHARGEMENT — VÉRIFIE TES TÉLÉCHARGEMENTS');
-          btn.disabled = false;
-          btn.textContent = '✓ TÉLÉCHARGÉ';
+          btn.disabled = true;
+          _setMsg('⏳ PRÉPARATION...');
+          _telegramSave(btn);
           return;
         }
 
