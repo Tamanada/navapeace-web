@@ -10,20 +10,21 @@ CREATE TABLE IF NOT EXISTS public.blocked_users (
   blocked_by TEXT DEFAULT 'admin'
 );
 
--- Accès anonyme en lecture (pour que l'app puisse vérifier)
+-- Lecture anonyme (block_check.js en a besoin) — écriture via RPC admin uniquement
 ALTER TABLE public.blocked_users ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Allow anon read blocked_users"
+CREATE POLICY "blocked_users_select_public"
   ON public.blocked_users FOR SELECT
   USING (true);
 
-CREATE POLICY "Allow anon insert blocked_users"
+-- INSERT / UPDATE / DELETE : bloqués côté anon — utiliser nava_block_user() / nava_unblock_user()
+CREATE POLICY "blocked_users_insert_block"
   ON public.blocked_users FOR INSERT
-  WITH CHECK (true);
+  WITH CHECK (false);
 
-CREATE POLICY "Allow anon delete blocked_users"
+CREATE POLICY "blocked_users_delete_block"
   ON public.blocked_users FOR DELETE
-  USING (true);
+  USING (false);
 
 -- ═══════════════════════════════════════════════════════════════
 --  Vérification : SELECT * FROM blocked_users;
