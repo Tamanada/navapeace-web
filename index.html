@@ -215,7 +215,7 @@
     .footer-note {
       text-align: center;
       font-family: 'Nasalization', Arial, sans-serif;
-      font-size: 12px;
+      font-size: 14px;
       letter-spacing: 1.5px;
       color: #F7F7F1;
       opacity: 0.45;
@@ -347,13 +347,13 @@
       margin-bottom: 10px;
     }
     #fd-msg {
-      font-size: 11px; letter-spacing: 2.5px; color: rgba(255,255,255,0.9);
+      font-size: 14px; letter-spacing: 2.5px; color: rgba(255,255,255,0.9);
       text-transform: uppercase; text-align: center; max-width: 260px; line-height: 1.7;
       opacity: 0;
       animation: fdMsgIn 0.5s ease 1.75s forwards;
     }
     #fd-sub {
-      font-size: 9px; letter-spacing: 2px; color: rgba(255,255,255,0.55);
+      font-size: 13px; letter-spacing: 2px; color: rgba(255,255,255,0.55);
       text-transform: uppercase; text-align: center; max-width: 240px;
       opacity: 0;
       animation: fdMsgIn 0.5s ease 2.1s forwards;
@@ -702,7 +702,7 @@
       if (!ageErr) {
         ageErr = document.createElement('div');
         ageErr.id = 'age-error';
-        ageErr.style.cssText = 'color:#ff6b6b;font-size:10px;letter-spacing:2px;margin-top:4px;';
+        ageErr.style.cssText = 'color:#ff6b6b;font-size:13px;letter-spacing:2px;margin-top:4px;';
         ageInput.parentNode.appendChild(ageErr);
       }
       if (!ageRaw || ageRaw < 1 || ageRaw > 120) {
