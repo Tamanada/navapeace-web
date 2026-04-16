@@ -237,34 +237,16 @@
 
     .peace-btn:hover:not(:disabled) {
       transform: scale(1.04);
-      box-shadow:
-        0 0 0 14px rgba(255,255,255,0.2),
-        0 0 0 28px rgba(255,255,255,0.08),
-        0 12px 50px rgba(255,255,255,0.4);
     }
 
     .peace-btn:active:not(:disabled) {
       transform: scale(0.97);
     }
 
-    /* Pulse ring animation — démarre du centre */
+    /* Pulse ring — disabled */
     .peace-btn::before,
     .peace-btn::after {
-      content: '';
-      position: absolute;
-      inset: 50%;
-      border-radius: 50%;
-      border: 2px solid rgba(255,255,255,0.6);
-      animation: ring-pulse 2.5s ease-out infinite;
-    }
-
-    .peace-btn::after {
-      animation-delay: 1.25s;
-    }
-
-    @keyframes ring-pulse {
-      0%   { inset: 50%;  opacity: 0.85; }
-      100% { inset: -47px; opacity: 0; }
+      display: none;
     }
 
     /* ── NOTIFICATION BANNER ── */
@@ -306,12 +288,9 @@
 
     /* DONE state */
     .peace-btn:disabled {
-      background: rgba(255,255,255,0.25);
+      background: transparent;
       color: rgba(255,255,255,0.7);
       cursor: default;
-      box-shadow:
-        0 0 0 12px rgba(255,255,255,0.07),
-        0 4px 20px rgba(255,255,255,0.1);
     }
 
     .peace-btn:disabled .btn-logo {
