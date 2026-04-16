@@ -2354,13 +2354,12 @@ document.addEventListener('click', (e) => {
       right: 14px;
       z-index: 500;
     }
-    /* When placed inside the page header — absolute, top-right of header */
+    /* When placed inside the page header — fixed top-right (header area) */
     #lang-switcher.in-header {
-      position: absolute;
-      top: 50%;
-      right: 0;
-      transform: translateY(-50%);
-      z-index: 10;
+      position: fixed;
+      top: 8px;
+      right: 10px;
+      z-index: 500;
     }
     .lang-toggle-btn {
       background: rgba(255,255,255,0.18);
