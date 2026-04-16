@@ -617,12 +617,13 @@
 <body>
 
   <!-- HEADER -->
-  <div class="header">
+  <div class="header" style="position:relative;">
     <a href="https://www.nava-peace.world" target="_blank" style="text-decoration:none;color:inherit;display:contents;" onclick="if(typeof NAVA_TG!=='undefined'&&NAVA_TG.isTelegram){event.preventDefault();Telegram.WebApp.openLink('https://www.nava-peace.world');}">
     <img src="logo.png" alt="NAVA PEACE" />
     <h1>NAVA PEACE</h1>
     </a>
     <p class="tagline" data-i18n="tagline">TODAY HUMANITY CHOOSE PEACE</p>
+    <div id="lang-switcher" class="in-header"></div>
     <!-- DAYS inline under tagline -->
     <p class="launch-inline">
       <span id="cnt-days">0</span> DAYS &nbsp;·&nbsp; <span id="cnt-timer">00:00:00</span> SINCE LAUNCH

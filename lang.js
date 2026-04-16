@@ -2347,11 +2347,20 @@ document.addEventListener('click', (e) => {
   const style = document.createElement('style');
   style.id = 'lang-style';
   style.textContent = `
-    #lang-switcher {
+    /* When injected into body (fallback) — fixed position */
+    #lang-switcher:not(.in-header) {
       position: fixed;
       top: 56px;
       right: 14px;
       z-index: 500;
+    }
+    /* When placed inside the page header — absolute, top-right of header */
+    #lang-switcher.in-header {
+      position: absolute;
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
+      z-index: 10;
     }
     .lang-toggle-btn {
       background: rgba(255,255,255,0.18);
@@ -2450,9 +2459,13 @@ document.addEventListener('click', (e) => {
 
 // ── Inject picker HTML & auto-apply language ──────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  // Inject the picker widget
-  const switcher = document.createElement('div');
-  switcher.id = 'lang-switcher';
+  // Reuse existing placeholder if page placed #lang-switcher in header
+  let switcher = document.getElementById('lang-switcher');
+  const isInHeader = switcher && switcher.classList.contains('in-header');
+  if (!switcher) {
+    switcher = document.createElement('div');
+    switcher.id = 'lang-switcher';
+  }
   const currentLang = detectLang();
   const currentMeta = LANG_META[currentLang];
 
@@ -2467,7 +2480,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </button>`).join('')}
     </div>
   `;
-  document.body.appendChild(switcher);
+  if (!isInHeader) document.body.appendChild(switcher);
 
   // ── Scroll-to-top button (appears after 300px scroll) ────────────
   const scrollBtn = document.createElement('button');

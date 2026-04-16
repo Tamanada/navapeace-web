@@ -358,12 +358,13 @@
 </head>
 
 <body>
-  <div class="header">
+  <div class="header" style="position:relative;">
     <a href="https://www.nava-peace.world" target="_blank" style="text-decoration:none;color:inherit;display:contents;" onclick="if(typeof NAVA_TG!=='undefined'&&NAVA_TG.isTelegram){event.preventDefault();Telegram.WebApp.openLink('https://www.nava-peace.world');}">
     <img src="logo.png" alt="NAVA PEACE" />
     <h1>NAVA PEACE</h1>
     </a>
     <p class="tagline" data-i18n="stats_tagline">GLOBAL STATS</p>
+    <div id="lang-switcher" class="in-header"></div>
   </div>
 
   <!-- COUNTERS -->

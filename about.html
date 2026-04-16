@@ -423,12 +423,13 @@
   <button id="skip-about" onclick="skipAbout()">×</button>
 
   <!-- HEADER -->
-  <div class="header">
+  <div class="header" style="position:relative;">
     <a href="https://www.nava-peace.world" target="_blank" style="text-decoration:none;color:inherit;display:contents;" onclick="if(typeof NAVA_TG!=='undefined'&&NAVA_TG.isTelegram){event.preventDefault();Telegram.WebApp.openLink('https://www.nava-peace.world');}">
     <img src="logo.png" alt="NAVA PEACE" />
     <h1>NAVA PEACE</h1>
     </a>
     <p class="tagline" data-i18n="about_tagline">ABOUT THE MOVEMENT</p>
+    <div id="lang-switcher" class="in-header"></div>
   </div>
 
   <!-- MISSION -->
@@ -574,7 +575,19 @@
   </div>
 
   <!-- Website link -->
-  <a href="https://www.nava-peace.world" target="_blank" class="cta-btn" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.3);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);margin-bottom:12px;" onclick="if(typeof NAVA_TG!=='undefined'&&NAVA_TG.isTelegram){event.preventDefault();Telegram.WebApp.openLink('https://www.nava-peace.world');}"><img src="logo.png" style="width:22px;height:22px;vertical-align:middle;filter:brightness(0) invert(1);"> &nbsp; WWW.NAVA-PEACE.WORLD &nbsp; <img src="logo.png" style="width:22px;height:22px;vertical-align:middle;filter:brightness(0) invert(1);"></a>
+  <a href="https://www.nava-peace.world" target="_blank"
+     style="display:flex;align-items:center;justify-content:center;gap:10px;
+            background:rgba(255,255,255,0.18);border:2px solid rgba(255,255,255,0.6);
+            border-radius:16px;padding:16px;margin:0 16px 16px;
+            text-decoration:none;color:#fff;
+            font-family:'Nasalization',Arial,sans-serif;font-size:11px;letter-spacing:2.5px;
+            box-shadow:0 4px 20px rgba(0,0,0,0.2);
+            backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);"
+     onclick="if(typeof NAVA_TG!=='undefined'&&NAVA_TG.isTelegram){event.preventDefault();Telegram.WebApp.openLink('https://www.nava-peace.world');}">
+    <img src="logo.png" style="width:24px;height:24px;filter:brightness(0) invert(1);flex-shrink:0;">
+    <span>WWW.NAVA-PEACE.WORLD</span>
+    <svg viewBox="0 0 24 24" width="15" height="15" fill="rgba(255,255,255,0.8)"><path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+  </a>
 
   <!-- PEACE CARDS -->
   <div class="card">

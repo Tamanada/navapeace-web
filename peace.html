@@ -483,11 +483,12 @@
   </div>
 
   <!-- HEADER -->
-  <div class="header">
+  <div class="header" style="position:relative;">
     <a href="https://www.nava-peace.world" target="_blank" style="text-decoration:none;color:inherit;display:flex;flex-direction:column;align-items:center;width:100%;" onclick="if(typeof NAVA_TG!=='undefined'&&NAVA_TG.isTelegram){event.preventDefault();Telegram.WebApp.openLink('https://www.nava-peace.world');}">
     <img src="logo.png" alt="NAVA PEACE" />
     <h1>NAVA PEACE</h1>
     </a>
+    <div id="lang-switcher" class="in-header"></div>
   </div>
 
   <!-- BOOM SLOGAN -->
@@ -607,6 +608,58 @@
       <p id="info-pop-desc"></p>
       <button class="info-pop-close" onclick="closeInfoPop()">OK</button>
     </div>
+  </div>
+
+  <!-- WEBSITE LINK + WHY NAVA PEACE -->
+  <div style="padding:0 16px 16px;">
+
+    <!-- Lien site -->
+    <a href="https://www.nava-peace.world" target="_blank"
+       style="display:flex;align-items:center;justify-content:center;gap:10px;
+              background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.5);
+              border-radius:14px;padding:13px 16px;margin-bottom:16px;
+              text-decoration:none;color:#fff;
+              font-family:'Nasalization',Arial,sans-serif;font-size:10px;letter-spacing:2.5px;
+              backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);"
+       onclick="if(typeof NAVA_TG!=='undefined'&&NAVA_TG.isTelegram){event.preventDefault();Telegram.WebApp.openLink('https://www.nava-peace.world');}">
+      <img src="logo.png" style="width:20px;height:20px;filter:brightness(0) invert(1);flex-shrink:0;">
+      <span>WWW.NAVA-PEACE.WORLD</span>
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="rgba(255,255,255,0.7)"><path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+    </a>
+
+    <!-- Pourquoi NAVA PEACE -->
+    <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);
+                border-radius:18px;padding:20px 18px;">
+      <p style="font-family:'Nasalization',Arial,sans-serif;font-size:8px;letter-spacing:3px;
+                color:rgba(255,255,255,0.45);margin:0 0 10px;text-align:center;">
+        BEHIND THE TAP GAME
+      </p>
+      <p style="font-family:'Nasalization',Arial,sans-serif;font-size:16px;letter-spacing:2px;
+                color:#fff;margin:0 0 14px;text-align:center;line-height:1.4;">
+        WHY DOES<br>NAVA PEACE EXIST?
+      </p>
+      <p style="font-size:12px;letter-spacing:0.8px;color:rgba(255,255,255,0.75);
+                line-height:1.7;margin:0 0 12px;text-align:center;">
+        Every tap is a real vote.<br>
+        Millions of people choosing peace, every day.<br>
+        That's not just a game — it's a <strong style="color:#6DD5F5;">global movement</strong>.
+      </p>
+      <p style="font-size:11px;letter-spacing:0.6px;color:rgba(255,255,255,0.55);
+                line-height:1.7;margin:0 0 16px;text-align:center;">
+        Behind NAVA PEACE is a foundation project built to prove,
+        with real data, that humanity overwhelmingly chooses peace.
+        The map, the numbers, the voices — all public, all transparent.
+      </p>
+      <a href="about.html"
+         style="display:block;text-align:center;background:rgba(109,213,245,0.15);
+                border:1px solid rgba(109,213,245,0.4);border-radius:12px;
+                padding:12px;text-decoration:none;
+                font-family:'Nasalization',Arial,sans-serif;font-size:9px;
+                letter-spacing:2px;color:#6DD5F5;">
+        DISCOVER THE PROJECT →
+      </a>
+    </div>
+
   </div>
 
   <!-- BOTTOM NAV -->
