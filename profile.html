@@ -2963,8 +2963,10 @@
         'opacity:0;transition:opacity 0.3s;';
 
       function renderPanel() {
-        var text = (SHARE_TEXTS[activeLang] || SHARE_TEXTS.en) + inviteURL;
-        var textShort = (SHARE_TEXTS[activeLang] || SHARE_TEXTS.en).split('\n')[0];
+        var _customMsg = ((document.getElementById('invite-custom-msg') || {}).value || '').trim();
+        var _defaultText = (SHARE_TEXTS[activeLang] || SHARE_TEXTS.en);
+        var text = (_customMsg ? _customMsg + '\n' : _defaultText) + inviteURL;
+        var textShort = _customMsg || _defaultText.split('\n')[0];
         var encodedText = encodeURIComponent(text);
         var encodedURL  = encodeURIComponent(inviteURL);
 
