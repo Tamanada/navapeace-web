@@ -1784,14 +1784,16 @@
       return;
     }
 
-    if (country) container.innerHTML += `
-      <div class="my-badge"><div class="val">${country.toUpperCase()}</div><div class="key">${t('lbl_country_badge')}</div></div>`;
+    // XSS guard: escape all user-controlled values before innerHTML injection
+    function _esc(s){const d=document.createElement('div');d.textContent=String(s||'');return d.innerHTML;}
+    if (country && country !== 'null') container.innerHTML += `
+      <div class="my-badge"><div class="val">${_esc(country.toUpperCase())}</div><div class="key">${t('lbl_country_badge')}</div></div>`;
     if (age && age !== 'null') container.innerHTML += `
-      <div class="my-badge"><div class="val">${age}</div><div class="key">${t('lbl_age_badge')}</div></div>`;
+      <div class="my-badge"><div class="val">${_esc(age)}</div><div class="key">${t('lbl_age_badge')}</div></div>`;
     if (gender && gender !== 'null') container.innerHTML += `
-      <div class="my-badge"><div class="val">${gender.toUpperCase()}</div><div class="key">${t('lbl_gender_badge')}</div></div>`;
+      <div class="my-badge"><div class="val">${_esc(gender.toUpperCase())}</div><div class="key">${t('lbl_gender_badge')}</div></div>`;
     if (days) container.innerHTML += `
-      <div class="my-badge"><div class="val">${days}</div><div class="key">${t('lbl_days_badge')}</div></div>`;
+      <div class="my-badge"><div class="val">${_esc(days)}</div><div class="key">${t('lbl_days_badge')}</div></div>`;
   }
 
   function toggleEdit() {
@@ -1983,16 +1985,19 @@
   async function loadMyDoves() {
     const uid = localStorage.getItem('nava_peace_uid');
 
-    // ── Vérifier si ce compte est désactivé par l'admin ──
+    // ── Vérifier si ce compte est bloqué (source de vérité = DB, non localStorage) ──
     try {
-      const adminFlags = JSON.parse(localStorage.getItem('nava_user_flags') || '{}');
-      if (uid && adminFlags[uid] && adminFlags[uid].status === 'disabled') {
+      const sbBlock = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const { count: blockCount } = await sbBlock
+        .from('blocked_users')
+        .select('user_uid', { count: 'exact', head: true })
+        .eq('user_uid', uid);
+      if (blockCount && blockCount > 0) {
         document.getElementById('dove-total').textContent = '0';
         document.getElementById('dove-own').textContent   = '0';
         document.getElementById('dove-ref').textContent   = '0';
         const _dEl = document.getElementById('dove-discovery');
         if (_dEl) _dEl.textContent = '0';
-        // Ajouter une bannière sous le compteur
         const card = document.querySelector('.dove-card-inner');
         if (card && !document.getElementById('disabled-banner')) {
           const banner = document.createElement('div');
@@ -2005,7 +2010,7 @@
           banner.textContent = '⊘ Account disabled by administrator';
           card.parentNode.insertBefore(banner, card.nextSibling);
         }
-        return; // Données réelles préservées, juste masquées
+        return;
       }
     } catch(e) {}
 
@@ -2025,17 +2030,18 @@
           .order('created_at', { ascending: false });
         if (voteData && voteData.length > 0) {
           ownActions = voteData.length;
-          // Stocker le nombre de votes réels séparément (utilisé par initVotesLog dans peace.html)
           localStorage.setItem('nava_peace_vote_count', ownActions);
-          // Calcul du streak consécutif (jours UTC sans interruption)
-          const dayNums = [...new Set(voteData.map(v =>
-            Math.floor(new Date(v.created_at).getTime() / 86400000)
-          ))].sort((a, b) => b - a);
-          const today = Math.floor(Date.now() / 86400000);
-          if (dayNums[0] >= today - 1) { // streak actif si voté aujourd'hui ou hier
+          // P1 fix: local date strings (not UTC epoch) to avoid timezone drift
+          const _toLD=(iso)=>{const _d=new Date(iso);return _d.getFullYear()+'-'+String(_d.getMonth()+1).padStart(2,'0')+'-'+String(_d.getDate()).padStart(2,'0');};
+          const _td2=new Date(),_yd2=new Date(_td2);_yd2.setDate(_yd2.getDate()-1);
+          const _todStr=_td2.getFullYear()+'-'+String(_td2.getMonth()+1).padStart(2,'0')+'-'+String(_td2.getDate()).padStart(2,'0');
+          const _ytStr=_yd2.getFullYear()+'-'+String(_yd2.getMonth()+1).padStart(2,'0')+'-'+String(_yd2.getDate()).padStart(2,'0');
+          const localDays=[...new Set(voteData.map(v=>_toLD(v.created_at)))].sort().reverse();
+          if (localDays.length && (localDays[0] === _todStr || localDays[0] === _ytStr)) {
             streak = 1;
-            for (let i = 1; i < dayNums.length; i++) {
-              if (dayNums[i - 1] - dayNums[i] === 1) streak++;
+            for (let i = 1; i < localDays.length; i++) {
+              const _a=new Date(localDays[i-1]+'T12:00:00'),_b=new Date(localDays[i]+'T12:00:00');
+              if (Math.round((_a-_b)/86400000) === 1) streak++;
               else break;
             }
           }
@@ -2077,32 +2083,36 @@
         let currentStreak = 0;
         let maxStreak = 0;
         if (voteHistory && voteHistory.length > 0) {
-          const dayNums = [...new Set(voteHistory.map(v =>
-            Math.floor(new Date(v.created_at).getTime() / 86400000)
-          ))].sort((a, b) => b - a);
-          const today = Math.floor(Date.now() / 86400000);
+          // P1 fix: local date strings (not UTC epoch) to avoid timezone drift
+          const _toLD2=(iso)=>{const _d=new Date(iso);return _d.getFullYear()+'-'+String(_d.getMonth()+1).padStart(2,'0')+'-'+String(_d.getDate()).padStart(2,'0');};
+          const _td3=new Date(),_yd3=new Date(_td3);_yd3.setDate(_yd3.getDate()-1);
+          const _todStr3=_td3.getFullYear()+'-'+String(_td3.getMonth()+1).padStart(2,'0')+'-'+String(_td3.getDate()).padStart(2,'0');
+          const _ytStr3=_yd3.getFullYear()+'-'+String(_yd3.getMonth()+1).padStart(2,'0')+'-'+String(_yd3.getDate()).padStart(2,'0');
+          const localDays2=[...new Set(voteHistory.map(v=>_toLD2(v.created_at)))].sort().reverse();
           // Current active streak (must include today or yesterday)
-          if (dayNums[0] >= today - 1) {
+          if (localDays2.length && (localDays2[0] === _todStr3 || localDays2[0] === _ytStr3)) {
             currentStreak = 1;
-            for (let i = 1; i < dayNums.length; i++) {
-              if (dayNums[i - 1] - dayNums[i] === 1) currentStreak++;
+            for (let i = 1; i < localDays2.length; i++) {
+              const _a=new Date(localDays2[i-1]+'T12:00:00'),_b=new Date(localDays2[i]+'T12:00:00');
+              if (Math.round((_a-_b)/86400000) === 1) currentStreak++;
               else break;
             }
           }
-          // Max-ever streak (scan full history)
+          // Max-ever streak (informational only — milestones use currentStreak)
           let run = 1;
-          for (let i = 1; i < dayNums.length; i++) {
-            if (dayNums[i - 1] - dayNums[i] === 1) { run++; maxStreak = Math.max(maxStreak, run); }
+          for (let i = 1; i < localDays2.length; i++) {
+            const _a=new Date(localDays2[i-1]+'T12:00:00'),_b=new Date(localDays2[i]+'T12:00:00');
+            if (Math.round((_a-_b)/86400000) === 1) { run++; maxStreak = Math.max(maxStreak, run); }
             else run = 1;
           }
           maxStreak = Math.max(maxStreak, currentStreak, run);
           localStorage.setItem('nava_peace_streak', currentStreak);
         }
 
-        // Claim unclaimed milestones based on MAX streak ever achieved
+        // P2 fix: claim milestones on currentStreak (active), not maxStreak (all-time)
         const alreadyClaimed = new Set((sr || []).map(r => r.streak_days));
         for (const m of PROFILE_STREAK_MILESTONES) {
-          if (maxStreak >= m.days && !alreadyClaimed.has(m.days)) {
+          if (currentStreak >= m.days && !alreadyClaimed.has(m.days)) {
             try {
               const { error } = await sbS.from('nava_streak_rewards').insert({
                 user_uid: uid2, streak_days: m.days, doves_awarded: m.doves
@@ -2322,7 +2332,14 @@
 
     // ── Last resort: generate a new code (user who never voted yet) ──
     if (!refCode) {
-      refCode = Math.random().toString(36).slice(2, 10).toUpperCase();
+      // P2 fix: use crypto.getRandomValues (cryptographically secure) over Math.random()
+      if (window.crypto && window.crypto.getRandomValues) {
+        const arr = new Uint32Array(2);
+        window.crypto.getRandomValues(arr);
+        refCode = (arr[0].toString(36) + arr[1].toString(36)).slice(0, 8).toUpperCase();
+      } else {
+        refCode = Math.random().toString(36).slice(2, 10).toUpperCase();
+      }
       localStorage.setItem('nava_peace_ref_code', refCode);
     }
 
@@ -2330,8 +2347,9 @@
 
     // Use Telegram-aware share link (t.me/NavaPeaceBot/app?startapp=CODE in TG, nava-peace.app/?ref=CODE on web)
     const inviteURL   = getShareLink(refCode);
-    const inviteText  = 'The world talks about peace. Let\'s practice it.\nJoin NAVA PEACE today. 🕊\n' + inviteURL;
-    const msg         = encodeURIComponent(inviteText);
+    // P3 fix: inviteText will be set below after SHARE_TEXTS is defined (multilingual)
+    let inviteText = '';
+    let msg        = '';
 
     // Show link
     document.getElementById('ref-link-display').textContent = inviteURL;
@@ -2470,6 +2488,10 @@
       hi: "दुनिया शांति की बात करती है। इसे अभ्यास करें। 🕊\nआज ही NAVA PEACE से जुड़ें।\n",
       uk: "Світ говорить про мир. Давайте його практикувати. 🕊\nДолучайся до NAVA PEACE сьогодні.\n"
     };
+
+    // P3 fix: inviteText now uses SHARE_TEXTS (multilingual)
+    inviteText = (SHARE_TEXTS[userLang] || SHARE_TEXTS.en) + inviteURL;
+    msg        = encodeURIComponent(inviteText);
 
     // ── Init custom message textarea now that SHARE_TEXTS is defined ──
     var _defMsg = (SHARE_TEXTS[userLang] || SHARE_TEXTS.en).split('\n')[0];
@@ -3495,23 +3517,42 @@
       const pseudoMap = {};
       (msgData || []).forEach(m => { if (m.pseudo) pseudoMap[m.user_uid] = m.pseudo; });
 
-      list.innerHTML = friends.map(f => {
-        const doves  = dovesPerUser[f.user_uid] || 0;
-        const pseudo = pseudoMap[f.user_uid]
+      // XSS fix: build rows via DOM (textContent escapes user-supplied pseudo + uid)
+      list.innerHTML = '';
+      friends.forEach(f => {
+        const doves     = dovesPerUser[f.user_uid] || 0;
+        const rawPseudo = pseudoMap[f.user_uid]
           ? '🕊 ' + pseudoMap[f.user_uid]
           : '🕊 ' + (f.user_uid || '').replace(/[^a-z0-9]/gi, '').slice(-6).toUpperCase();
         const cooldownKey = 'nava_remind_' + f.user_uid;
-        const lastSent = parseInt(localStorage.getItem(cooldownKey) || '0', 10);
-        const canRemind = Date.now() - lastSent > 86400000; // 24h cooldown
-        const btnLabel = canRemind ? t('remind_btn') : t('remind_sent');
-        return `
-          <div class="ref-row">
-            <span class="ref-row-country">${pseudo}</span>
-            <span class="ref-row-doves">${doves} 🕊</span>
-            <button class="ref-remind-btn" ${canRemind ? '' : 'disabled'}
-              onclick="sendReminder('${f.user_uid}', this)">${btnLabel}</button>
-          </div>`;
-      }).join('');
+        const lastSent  = parseInt(localStorage.getItem(cooldownKey) || '0', 10);
+        const canRemind = Date.now() - lastSent > 86400000;
+        const btnLabel  = canRemind ? t('remind_btn') : t('remind_sent');
+
+        const row = document.createElement('div');
+        row.className = 'ref-row';
+
+        const pseudoSpan = document.createElement('span');
+        pseudoSpan.className = 'ref-row-country';
+        pseudoSpan.textContent = rawPseudo; // textContent prevents XSS
+
+        const dovesSpan = document.createElement('span');
+        dovesSpan.className = 'ref-row-doves';
+        dovesSpan.textContent = doves + ' 🕊';
+
+        const btn = document.createElement('button');
+        btn.className = 'ref-remind-btn';
+        btn.disabled  = !canRemind;
+        btn.textContent = btnLabel;
+        // Use closure + dataset instead of inline onclick to prevent uid injection
+        btn.dataset.uid = f.user_uid;
+        btn.addEventListener('click', function() { sendReminder(f.user_uid, btn); });
+
+        row.appendChild(pseudoSpan);
+        row.appendChild(dovesSpan);
+        row.appendChild(btn);
+        list.appendChild(row);
+      });
 
     } catch(e) {
       list.innerHTML = `<p class="ref-empty">${t('referrals_empty').replace(/\n/g,'<br>')}</p>`;

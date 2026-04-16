@@ -830,8 +830,6 @@
       const gender       = localStorage.getItem('nava_peace_gender') || null;
 
       let alreadyVotedToday = false;
-      // Détecter premier clic (inscription fraîche : welcome dove = 1, pas encore de vote réel)
-      const isFirstEver = !localStorage.getItem('nava_peace_vote_count') || localStorage.getItem('nava_peace_vote_count') === '0';
 
       if (sb) {
         // Enregistrer l'action du jour dans peace_votes (avec profil complet)
@@ -849,8 +847,8 @@
           if (error) {
             // Code 23505 = unique constraint violation (déjà voté aujourd'hui)
             if (error.code === '23505' || error.message?.includes('unique')) {
-              // Si c'est le tout premier clic (juste après inscription), traiter comme un vote frais
-              alreadyVotedToday = !isFirstEver;
+              // 23505 = déjà voté aujourd'hui (multi-tab, localStorage effacé, etc.)
+              alreadyVotedToday = true;
               markVoteSynced(TODAY); // déjà en DB → synced
             } else {
               console.warn('Vote insert error', error);
@@ -941,9 +939,10 @@
     // ── Détection nouveau jour quand l'app est rouverte (mobile sleep) ──
     document.addEventListener('visibilitychange', function() {
       if (document.visibilityState === 'visible') {
-        const nowDay = new Date().toISOString().split('T')[0];
+        const _nd = new Date();
+        const nowDay = _nd.getFullYear()+'-'+String(_nd.getMonth()+1).padStart(2,'0')+'-'+String(_nd.getDate()).padStart(2,'0');
         if (nowDay !== TODAY) {
-          // Nouveau jour UTC → rechargement propre
+          // Nouveau jour local → rechargement propre
           localStorage.removeItem(PEACE_KEY);
           window.location.reload();
         }
@@ -1089,9 +1088,12 @@
           const {data:votes} = await sb2.from('peace_votes').select('created_at')
             .eq('user_uid',uid).order('created_at',{ascending:false});
           if (votes && votes.length) {
-            const dayNums=[...new Set(votes.map(v=>Math.floor(new Date(v.created_at).getTime()/86400000)))].sort((a,b)=>b-a);
-            const today=Math.floor(Date.now()/86400000);
-            if(dayNums[0]>=today-1){d.streak=1;for(let i=1;i<dayNums.length;i++){if(dayNums[i-1]-dayNums[i]===1)d.streak++;else break;}}
+            // P1 fix: local date strings (not UTC epoch) to avoid timezone drift
+            const _toLDs=(iso)=>{const _d=new Date(iso);return _d.getFullYear()+'-'+String(_d.getMonth()+1).padStart(2,'0')+'-'+String(_d.getDate()).padStart(2,'0');};
+            const _yd3=new Date();_yd3.setDate(_yd3.getDate()-1);
+            const _yest3=_yd3.getFullYear()+'-'+String(_yd3.getMonth()+1).padStart(2,'0')+'-'+String(_yd3.getDate()).padStart(2,'0');
+            const localDs=[...new Set(votes.map(v=>_toLDs(v.created_at)))].sort().reverse();
+            if(localDs.length&&(localDs[0]===TODAY||localDs[0]===_yest3)){d.streak=1;for(let i=1;i<localDs.length;i++){const _a=new Date(localDs[i-1]+'T12:00:00'),_b=new Date(localDs[i]+'T12:00:00');if(Math.round((_a-_b)/86400000)===1)d.streak++;else break;}}
             // Inclure les discovery doves dans le total
             const {count:_dc} = await sb2.from('nava_discoveries').select('id',{count:'exact',head:true}).eq('user_uid',uid);
             localStorage.setItem('nava_peace_vote_count', votes.length);
@@ -1319,7 +1321,9 @@
           .order('created_at', { ascending: true });
         if (!votes) return;
         // Construire un log propre basé uniquement sur les vrais votes DB
-        const dbDates = new Set(votes.map(v => v.created_at.split('T')[0]));
+        // P3 fix: use local date (not UTC split) to avoid timezone drift
+        const _toLDr=(iso)=>{const _d=new Date(iso);return _d.getFullYear()+'-'+String(_d.getMonth()+1).padStart(2,'0')+'-'+String(_d.getDate()).padStart(2,'0');};
+        const dbDates = new Set(votes.map(v => _toLDr(v.created_at)));
         const log = Array.from(dbDates).map(date => ({ date, synced: true }));
         // Conserver le vote du jour s'il a été fait localement mais pas encore en DB
         if (localStorage.getItem(PEACE_KEY) === TODAY && !dbDates.has(TODAY)) {
@@ -1517,8 +1521,10 @@
       var title = document.getElementById('info-pop-title');
       var formula = document.getElementById('info-pop-formula');
       var desc = document.getElementById('info-pop-desc');
-      var todayVal = document.getElementById('cnt-today').textContent;
-      var totalVal = document.getElementById('cnt-total').textContent;
+      var _todayEl = document.getElementById('cnt-today');
+      var _totalEl = document.getElementById('cnt-total');
+      var todayVal = _todayEl ? _todayEl.textContent : '—';
+      var totalVal = _totalEl ? _totalEl.textContent : '—';
 
       if (type === 'today') {
         title.textContent = '🕊 TODAY';

@@ -1,43 +1,97 @@
 -- ══════════════════════════════════════════════════════════════
---  NAVA PEACE — Security & Integrity Patch v2
+--  NAVA PEACE — Security & Integrity Patch v2  (FINAL)
 --  Run in Supabase SQL Editor (project dashboard → SQL Editor)
 -- ══════════════════════════════════════════════════════════════
 
--- ── P0 · Referral points deduplication ─────────────────────────
--- Prevents a referrer from earning 2+ points for the same user
--- (race condition: user clicks vote twice, or joins on 2 devices)
+-- ── STEP 1 · Inspect duplicates (optional, for info) ──────────
+-- Run this block alone first if you want to see what will be deleted.
+/*
+SELECT referral_code, user_uid, COUNT(*) AS cnt
+FROM public.referral_points
+GROUP BY referral_code, user_uid
+HAVING COUNT(*) > 1;
 
-ALTER TABLE public.referral_points
-  ADD CONSTRAINT IF NOT EXISTS unique_referral_per_user
-  UNIQUE (referral_code, user_uid);
+SELECT user_uid, streak_days, COUNT(*) AS cnt
+FROM public.nava_streak_rewards
+GROUP BY user_uid, streak_days
+HAVING COUNT(*) > 1;
 
--- ── P0 · Streak reward deduplication ──────────────────────────
--- Prevents the same milestone from being awarded twice if two
--- concurrent requests race to insert the same (user, days) pair.
+SELECT user_uid, section, COUNT(*) AS cnt
+FROM public.nava_discoveries
+GROUP BY user_uid, section
+HAVING COUNT(*) > 1;
+*/
 
-ALTER TABLE public.nava_streak_rewards
-  ADD CONSTRAINT IF NOT EXISTS unique_streak_milestone
-  UNIQUE (user_uid, streak_days);
+-- ── STEP 2 · Deduplicate referral_points ──────────────────────
+-- Keeps the row with the smallest id (oldest insert); deletes the rest.
+DELETE FROM public.referral_points
+WHERE id NOT IN (
+  SELECT MIN(id)
+  FROM public.referral_points
+  GROUP BY referral_code, user_uid
+);
 
--- ── P1 · Welcome dove deduplication ───────────────────────────
--- nava_discoveries already stores discovery doves.
--- section='welcome' marks the first-open bonus.
--- A unique constraint prevents it from being awarded twice.
+-- ── STEP 3 · Deduplicate nava_streak_rewards ──────────────────
+DELETE FROM public.nava_streak_rewards
+WHERE id NOT IN (
+  SELECT MIN(id)
+  FROM public.nava_streak_rewards
+  GROUP BY user_uid, streak_days
+);
 
-ALTER TABLE public.nava_discoveries
-  ADD CONSTRAINT IF NOT EXISTS unique_discovery_per_section
-  UNIQUE (user_uid, section);
+-- ── STEP 4 · Deduplicate nava_discoveries ─────────────────────
+DELETE FROM public.nava_discoveries
+WHERE id NOT IN (
+  SELECT MIN(id)
+  FROM public.nava_discoveries
+  GROUP BY user_uid, section
+);
 
--- ── P1 · Welcome dove RLS ──────────────────────────────────────
--- Allow anon users to insert their own welcome dove row only.
--- (existing RLS on nava_discoveries should already allow this,
---  but run anyway to be explicit)
+-- ── STEP 5 · Add UNIQUE constraints (safe, no duplicates left) ─
+
+-- P0 · Referral points
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'unique_referral_per_user'
+  ) THEN
+    ALTER TABLE public.referral_points
+      ADD CONSTRAINT unique_referral_per_user
+      UNIQUE (referral_code, user_uid);
+  END IF;
+END $$;
+
+-- P0 · Streak reward milestones
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'unique_streak_milestone'
+  ) THEN
+    ALTER TABLE public.nava_streak_rewards
+      ADD CONSTRAINT unique_streak_milestone
+      UNIQUE (user_uid, streak_days);
+  END IF;
+END $$;
+
+-- P1 · Welcome dove (and other section discoveries)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'unique_discovery_per_section'
+  ) THEN
+    ALTER TABLE public.nava_discoveries
+      ADD CONSTRAINT unique_discovery_per_section
+      UNIQUE (user_uid, section);
+  END IF;
+END $$;
+
+-- ── STEP 6 · RLS — anon can insert their own discovery ─────────
 DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM pg_policies
     WHERE tablename = 'nava_discoveries'
-    AND policyname = 'anon_insert_own_discovery'
+    AND policyname  = 'anon_insert_own_discovery'
   ) THEN
     EXECUTE $policy$
       CREATE POLICY anon_insert_own_discovery
@@ -49,7 +103,7 @@ BEGIN
   END IF;
 END $$;
 
--- ── Verification ──────────────────────────────────────────────
+-- ── STEP 7 · Verification ──────────────────────────────────────
 SELECT
   conname   AS constraint_name,
   contype   AS type,
