@@ -861,9 +861,17 @@
         } catch(e) { console.warn('Vote insert error', e); }
 
         // Récompenser le parrain si applicable (seulement si vote réel)
+        // P0 fix: check existence first to prevent duplicate inserts
         if (referredBy && !alreadyVotedToday) {
           try {
-            await sb.from('referral_points').insert({ referral_code: referredBy, user_uid: uid });
+            const { data: _existRef } = await sb.from('referral_points')
+              .select('id').eq('referral_code', referredBy).eq('user_uid', uid).maybeSingle();
+            if (!_existRef) {
+              const { error: _refErr } = await sb.from('referral_points')
+                .insert({ referral_code: referredBy, user_uid: uid });
+              // 23505 = unique violation (race condition) → already rewarded, safe to ignore
+              if (_refErr && _refErr.code !== '23505') console.warn('Referral point error', _refErr);
+            }
           } catch(e) { console.warn('Referral point error', e); }
         }
       }
@@ -1327,7 +1335,8 @@
       let log = [];
       try { log = JSON.parse(localStorage.getItem(VOTES_LOG_KEY) || '[]'); } catch(e) {}
       if (!log.find(e => e.date === TODAY)) {
-        log.push({ date: TODAY, synced: false });
+        // P2 fix: store actual ISO timestamp so offline sync uses real vote time
+        log.push({ date: TODAY, synced: false, ts: new Date().toISOString() });
         localStorage.setItem(VOTES_LOG_KEY, JSON.stringify(log));
       }
     }
@@ -1356,7 +1365,8 @@
 
       for (const entry of unsynced) {
         try {
-          const created_at = entry.date + 'T12:00:00.000Z';
+          // P2 fix: use real timestamp if available, fallback to noon UTC
+          const created_at = entry.ts || (entry.date + 'T12:00:00.000Z');
           const { error } = await sb.from('peace_votes').insert({
             user_uid:      uid,
             country:       ctry,
@@ -1376,6 +1386,39 @@
     async function initAndSync() {
       await rebuildVotesLogFromDB(); // ← reconstruit proprement depuis DB
       await syncVotesToSupabase();   // ← sync uniquement le vote offline si besoin
+    }
+
+    /* ── P1 · Welcome Dove — awarded once on first app open ─────────
+       Uses nava_discoveries with section='welcome'.
+       localStorage flag prevents re-trigger; UNIQUE DB constraint
+       (unique_discovery_per_section) is the server-side safety net. */
+    async function awardWelcomeDove() {
+      const _wKey = 'nava_welcome_done';
+      if (localStorage.getItem(_wKey)) return; // already done this device
+      const _uid = localStorage.getItem('nava_peace_uid');
+      if (!_uid || !sb) return;
+      localStorage.setItem(_wKey, '1'); // set immediately — prevents double-trigger
+      try {
+        const { error: _wErr } = await sb.from('nava_discoveries')
+          .insert({ user_uid: _uid, section: 'welcome' });
+        if (_wErr && _wErr.code !== '23505') {
+          // Failed for real reason (not duplicate) — let next session retry
+          localStorage.removeItem(_wKey);
+          return;
+        }
+        // Show welcome toast (reuse discovery style)
+        const _t = document.createElement('div');
+        _t.style.cssText = 'position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:99999;'+
+          'background:linear-gradient(135deg,rgba(58,172,223,0.97),rgba(30,142,196,0.97));'+
+          'border:1px solid rgba(255,255,255,0.3);border-radius:50px;'+
+          'padding:10px 26px;font-family:Nasalization,Arial,sans-serif;'+
+          'font-size:9px;letter-spacing:3px;color:#fff;box-shadow:0 4px 24px rgba(58,172,223,0.4);pointer-events:none;';
+        _t.textContent = '🕊  +1 WELCOME DOVE';
+        document.body.appendChild(_t);
+        setTimeout(() => { _t.style.opacity='0'; setTimeout(() => _t.remove(), 400); }, 3000);
+      } catch(e) {
+        localStorage.removeItem(_wKey); // network error — retry next session
+      }
     }
 
     // Streak milestones → streak doves awarded
@@ -1408,16 +1451,22 @@
         ]);
         if (!votes || !votes.length) return;
 
-        // Streak = jours consécutifs
-        const dayNums = [...new Set(votes.map(v =>
-          Math.floor(new Date(v.created_at).getTime()/86400000)
-        ))].sort((a,b) => b - a);
-        const today = Math.floor(Date.now()/86400000);
+        // P1 fix: use LOCAL date strings (not UTC epoch days) to avoid timezone drift
+        // e.g. user in GMT+5 voting at 01:00 local = previous UTC day → streak wrongly broken
+        const _toLocalDate = (iso) => {
+          const d = new Date(iso);
+          return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+        };
+        const _yd = new Date(); _yd.setDate(_yd.getDate()-1);
+        const _yesterday = _yd.getFullYear()+'-'+String(_yd.getMonth()+1).padStart(2,'0')+'-'+String(_yd.getDate()).padStart(2,'0');
+        const _localDates = [...new Set(votes.map(v => _toLocalDate(v.created_at)))].sort().reverse();
         let streak = 0;
-        if (dayNums[0] >= today - 1) {
+        if (_localDates.length && (_localDates[0] === TODAY || _localDates[0] === _yesterday)) {
           streak = 1;
-          for (let i = 1; i < dayNums.length; i++) {
-            if (dayNums[i-1] - dayNums[i] === 1) streak++;
+          for (let i = 1; i < _localDates.length; i++) {
+            const _d1 = new Date(_localDates[i-1]+'T12:00:00');
+            const _d2 = new Date(_localDates[i]+'T12:00:00');
+            if (Math.round((_d1 - _d2) / 86400000) === 1) streak++;
             else break;
           }
         }
@@ -1496,6 +1545,7 @@
     checkNotifications();
     initPush();
     initAndSync(); // ← sync offline votes au démarrage
+    awardWelcomeDove(); // P1 · welcome dove — first open only
 
     // ── Appliquer les traductions ──────────────────────────────────────
     if (typeof applyLang === 'function') applyLang(detectLang());
