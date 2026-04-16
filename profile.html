@@ -1124,6 +1124,62 @@
     }
     #streakCelebCard { animation: celebPop 0.4s cubic-bezier(.22,1,.36,1) both; }
     #celebIcon       { animation: iconBounce 0.8s ease 0.4s both; display:inline-block; }
+
+    /* ── STARS DONATION ──────────────────────────────────────── */
+    .donation-tier {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 16px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .donation-tier:active { background: rgba(255,255,255,0.12); }
+    .donation-tier.done {
+      border-color: rgba(255,215,0,0.45);
+      background: rgba(255,215,0,0.07);
+      cursor: default;
+    }
+    .donation-tier-icon {
+      font-size: 28px;
+      flex-shrink: 0;
+      width: 44px;
+      text-align: center;
+    }
+    .donation-tier-info { flex: 1; }
+    .donation-tier-title {
+      font-family: Nasalization, Arial, sans-serif;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .donation-tier-desc {
+      font-size: 11px;
+      color: rgba(255,255,255,0.5);
+      font-family: Arial, sans-serif;
+      line-height: 1.4;
+    }
+    .donation-tier-price {
+      font-family: Nasalization, Arial, sans-serif;
+      font-size: 13px;
+      color: #FFD700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .donation-tier-done-badge {
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .donation-tier-loading {
+      opacity: 0.5;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -1396,6 +1452,30 @@
     </div><!-- end card-body -->
   </div>
 
+
+  <!-- SUPPORT THE MISSION (Telegram Stars) -->
+  <div class="card card-collapse" id="support-card" onclick="toggleCard('support-card')">
+    <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('support-card',true)">
+      <p class="section-title">
+        <svg class="title-icon" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+        <span>SUPPORT THE MISSION</span>
+      </p>
+      <span class="card-chevron">▾</span>
+    </div>
+    <div class="card-body">
+      <p style="font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.6);text-align:center;line-height:1.6;margin:0 0 18px;">
+        NAVA PEACE is 100% independent.<br>
+        If you believe in this mission, a coffee helps us keep building. ☕
+      </p>
+      <div id="support-tiers" style="display:flex;flex-direction:column;gap:10px;">
+        <!-- rendered by initDonation() -->
+        <div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:2px;">LOADING…</div>
+      </div>
+      <p id="support-notg" style="display:none;text-align:center;font-family:Arial,sans-serif;font-size:11px;color:rgba(255,255,255,0.35);margin-top:16px;line-height:1.5;">
+        ⭐ Telegram Stars are only available inside the Telegram app.
+      </p>
+    </div>
+  </div>
 
   <!-- FEEDBACK BUTTON -->
   <div style="text-align:center;padding:18px 24px 28px;position:relative;">
@@ -3565,6 +3645,189 @@
       document.getElementById('refOverlay').classList.remove('open');
     }
   }
+
+  // ── TELEGRAM STARS DONATION ──────────────────────────────────────────
+  const DONATION_TIERS = [
+    {
+      key:   'cafe',
+      icon:  '☕',
+      title: 'BUY US A COFFEE',
+      desc:  'A small gesture that makes a big difference.',
+      stars: 50,
+      doves: 0,
+      section: 'donor_cafe',
+    },
+    {
+      key:   'dove',
+      icon:  '🕊',
+      title: 'PEACE BUILDER',
+      desc:  'Support the mission + receive a Peace Builder badge.',
+      stars: 200,
+      doves: 10,
+      section: 'donor_dove',
+    },
+    {
+      key:   'arch',
+      icon:  '🚢',
+      title: 'ARCH FOUNDER',
+      desc:  'Your name in the credits + Arch Founder badge + max bonus.',
+      stars: 500,
+      doves: 25,
+      section: 'donor_arch',
+    },
+  ];
+
+  async function initDonation() {
+    const container = document.getElementById('support-tiers');
+    if (!container) return;
+
+    // Non-Telegram: show fallback
+    const isTG = typeof Telegram !== 'undefined' && Telegram.WebApp && Telegram.WebApp.version;
+    if (!isTG) {
+      container.innerHTML = '';
+      const notg = document.getElementById('support-notg');
+      if (notg) notg.style.display = 'block';
+      return;
+    }
+
+    const uid = localStorage.getItem('nava_peace_uid');
+
+    // Fetch already-donated tiers from nava_discoveries
+    let donatedSections = new Set();
+    if (uid) {
+      try {
+        const sbD = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { data: disco } = await sbD
+          .from('nava_discoveries')
+          .select('section')
+          .eq('user_uid', uid)
+          .in('section', ['donor_cafe', 'donor_dove', 'donor_arch']);
+        (disco || []).forEach(d => donatedSections.add(d.section));
+      } catch(e) {}
+    }
+
+    // Render tiers
+    container.innerHTML = '';
+    for (const tier of DONATION_TIERS) {
+      const done = donatedSections.has(tier.section);
+      const div  = document.createElement('div');
+      div.className = 'donation-tier' + (done ? ' done' : '');
+
+      const iconEl = document.createElement('div');
+      iconEl.className = 'donation-tier-icon';
+      iconEl.textContent = tier.icon;
+
+      const infoEl = document.createElement('div');
+      infoEl.className = 'donation-tier-info';
+
+      const titleEl = document.createElement('div');
+      titleEl.className = 'donation-tier-title';
+      titleEl.textContent = tier.title;
+
+      const descEl = document.createElement('div');
+      descEl.className = 'donation-tier-desc';
+      descEl.textContent = tier.desc + (tier.doves > 0 ? ' +' + tier.doves + ' 🕊' : '');
+
+      infoEl.appendChild(titleEl);
+      infoEl.appendChild(descEl);
+
+      const priceEl = document.createElement('div');
+      if (done) {
+        priceEl.className = 'donation-tier-done-badge';
+        priceEl.textContent = '✅';
+      } else {
+        priceEl.className = 'donation-tier-price';
+        priceEl.textContent = '⭐ ' + tier.stars;
+      }
+
+      div.appendChild(iconEl);
+      div.appendChild(infoEl);
+      div.appendChild(priceEl);
+
+      if (!done) {
+        div.addEventListener('click', () => startDonation(tier, div));
+      }
+
+      container.appendChild(div);
+    }
+  }
+
+  async function startDonation(tier, divEl) {
+    divEl.classList.add('donation-tier-loading');
+
+    try {
+      // 1. Get invoice link from Supabase Edge Function
+      const fnUrl = SUPABASE_URL.replace('/rest/v1', '').replace(/\/$/, '')
+                   + '/functions/v1/create-stars-invoice';
+
+      const res = await fetch(fnUrl, {
+        method:  'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'apikey': SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({ tier: tier.key }),
+      });
+
+      const data = await res.json();
+
+      if (!data.link) {
+        console.warn('Invoice creation failed:', data.error);
+        divEl.classList.remove('donation-tier-loading');
+        return;
+      }
+
+      // 2. Open Telegram Stars payment
+      Telegram.WebApp.openInvoice(data.link, async (status) => {
+        divEl.classList.remove('donation-tier-loading');
+
+        if (status !== 'paid') return; // cancelled or failed
+
+        const uid = localStorage.getItem('nava_peace_uid');
+        if (!uid) return;
+
+        // 3. Record donation in DB
+        try {
+          const sbP = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+          // Insert into nava_donations (history)
+          await sbP.from('nava_donations').insert({
+            user_uid: uid,
+            tier:     tier.key,
+            stars:    tier.stars,
+          });
+
+          // Insert badge in nava_discoveries (idempotent via unique constraint)
+          await sbP.from('nava_discoveries').insert({
+            user_uid: uid,
+            section:  tier.section,
+          });
+
+        } catch(e) { console.warn('Donation record error', e); }
+
+        // 4. Update UI — mark as done
+        divEl.classList.add('done');
+        divEl.removeEventListener('click', () => startDonation(tier, divEl));
+        const priceEl = divEl.querySelector('.donation-tier-price');
+        if (priceEl) { priceEl.className = 'donation-tier-done-badge'; priceEl.textContent = '✅'; }
+        divEl.style.cursor = 'default';
+
+        // 5. Toast
+        showToastMsg('🕊 THANK YOU — ' + tier.title + '!');
+
+        // 6. Refresh dove count
+        loadMyDoves();
+      });
+
+    } catch(e) {
+      console.warn('Donation error:', e);
+      divEl.classList.remove('donation-tier-loading');
+    }
+  }
+
+  // Init on load
+  initDonation();
 
   // ── SEND REMINDER NOTIFICATION ─────────────────────────────────────
   async function sendReminder(toUid, btn) {
