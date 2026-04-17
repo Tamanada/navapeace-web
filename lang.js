@@ -180,6 +180,29 @@ const NAVA_TRANSLATIONS = {
     share_your_card:     'SHARE YOUR INVITE CARD',
     gallery_msg:         'YOUR CARD IS READY — CHOOSE WHERE TO SHARE',
     gallery_saved:       '🖼 YOUR INVITE CARD IS IN YOUR GALLERY!',
+    // About — Foundation section
+    about_goal_label:    'NAVA PEACE GOAL',
+    about_create_label:  'CREATE',
+    about_foundation_heading: 'THE NAVA PEACE\nFOUNDATION',
+    about_foundation_sub:'THE FIRST FOUNDATION BUILT BY\nTHE WORLD POPULATION — IN SOLIDARITY',
+    about_every_tap:     'EVERY TAP FUNDS SOMETHING REAL.',
+    // Peace — Behind the tap
+    peace_behind_tap:    'BEHIND THE TAP GAME',
+    peace_every_tap_builds: 'EVERY TAP<br>BUILDS THIS',
+    peace_taps_funding:  'Your taps are funding the <strong style="color:#6DD5F5;">NAVA PEACE Foundation</strong> — the first foundation created by the world population, in solidarity.',
+    peace_arch_desc:     'We are building <strong style="color:#fff;">NAVA PEACE ARCH</strong> — a ship transformed into a floating city of life. Hospital. 3D prosthetics lab. Reconstruction team. Floating farm. Kitchen. Volunteer quarters. Powered by hydrogen.',
+    peace_sail_in:       'SAIL IN. REBUILD. MOVE ON. REPEAT.',
+    peace_discover_project: 'DISCOVER THE FULL PROJECT →',
+    // Profile — Support the mission
+    support_mission_title: 'SUPPORT THE MISSION',
+    support_mission_desc:  'NAVA PEACE is 100% independent.<br>If you believe in this mission, a coffee helps us keep building. ☕',
+    donation_cafe_title:   'BUY US A COFFEE',
+    donation_cafe_desc:    'A small gesture that makes a big difference.',
+    donation_dove_title:   'PEACE BUILDER',
+    donation_dove_desc:    'Support the mission and receive a Peace Builder badge.',
+    donation_arch_title:   'ARCH FOUNDER',
+    donation_arch_desc:    'Your name in the credits + Arch Founder badge + max bonus doves.',
+    support_stars_note:    '⭐ Telegram Stars are only available inside the Telegram app.',
   },
 
   fr: {
@@ -350,6 +373,29 @@ const NAVA_TRANSLATIONS = {
     share_your_card:     'PARTAGER VOTRE CARTE',
     gallery_msg:         'VOTRE CARTE EST PRÊTE — CHOISISSEZ OÙ PARTAGER',
     gallery_saved:       '🖼 VOTRE CARTE EST DANS VOTRE GALERIE !',
+    // About — Foundation section
+    about_goal_label:    'OBJECTIF NAVA PEACE',
+    about_create_label:  'CRÉER',
+    about_foundation_heading: 'LA FONDATION\nNAVA PEACE',
+    about_foundation_sub:'LA PREMIÈRE FONDATION BÂTIE PAR\nLA POPULATION MONDIALE — EN SOLIDARITÉ',
+    about_every_tap:     'CHAQUE TAP FINANCE QUELQUE CHOSE DE RÉEL.',
+    // Peace — Behind the tap
+    peace_behind_tap:    'DERRIÈRE LE JEU DE TAPS',
+    peace_every_tap_builds: 'CHAQUE TAP<br>CONSTRUIT CECI',
+    peace_taps_funding:  'Vos taps financent la <strong style="color:#6DD5F5;">Fondation NAVA PEACE</strong> — la première fondation créée par la population mondiale, en solidarité.',
+    peace_arch_desc:     'Nous construisons <strong style="color:#fff;">NAVA PEACE ARCH</strong> — un navire transformé en ville flottante de vie. Hôpital. Laboratoire de prothèses 3D. Équipe de reconstruction. Ferme flottante. Cuisine. Quartiers des bénévoles. Propulsé à l\'hydrogène.',
+    peace_sail_in:       'ARRIVER. RECONSTRUIRE. PARTIR. RECOMMENCER.',
+    peace_discover_project: 'DÉCOUVRIR LE PROJET COMPLET →',
+    // Profile — Support the mission
+    support_mission_title: 'SOUTENIR LA MISSION',
+    support_mission_desc:  'NAVA PEACE est 100 % indépendant.<br>Si vous croyez en cette mission, un café nous aide à continuer à construire. ☕',
+    donation_cafe_title:   'OFFREZ-NOUS UN CAFÉ',
+    donation_cafe_desc:    'Un petit geste qui fait une grande différence.',
+    donation_dove_title:   'ARTISAN DE PAIX',
+    donation_dove_desc:    'Soutenez la mission et recevez le badge Artisan de Paix.',
+    donation_arch_title:   'FONDATEUR DE L\'ARCHE',
+    donation_arch_desc:    'Votre nom au générique + badge Fondateur de l\'Arche + bonus de colombes maximum.',
+    support_stars_note:    '⭐ Les Telegram Stars ne sont disponibles qu\'à l\'intérieur de l\'application Telegram.',
   },
 
   es: {
@@ -520,6 +566,29 @@ const NAVA_TRANSLATIONS = {
     share_your_card:     'COMPARTIR TU TARJETA',
     gallery_msg:         'TU TARJETA ESTÁ LISTA — ELIGE DÓNDE COMPARTIR',
     gallery_saved:       '🖼 ¡TU TARJETA ESTÁ EN TU GALERÍA!',
+    // About — Foundation section
+    about_goal_label:    'OBJETIVO NAVA PEACE',
+    about_create_label:  'CREAR',
+    about_foundation_heading: 'LA FUNDACIÓN\nNAVA PEACE',
+    about_foundation_sub:'LA PRIMERA FUNDACIÓN CONSTRUIDA POR\nLA POBLACIÓN MUNDIAL — EN SOLIDARIDAD',
+    about_every_tap:     'CADA TAP FINANCIA ALGO REAL.',
+    // Peace — Behind the tap
+    peace_behind_tap:    'DETRÁS DEL JUEGO DE TAPS',
+    peace_every_tap_builds: 'CADA TAP<br>CONSTRUYE ESTO',
+    peace_taps_funding:  'Tus taps financian la <strong style="color:#6DD5F5;">Fundación NAVA PEACE</strong> — la primera fundación creada por la población mundial, en solidaridad.',
+    peace_arch_desc:     'Estamos construyendo <strong style="color:#fff;">NAVA PEACE ARCH</strong> — un barco transformado en una ciudad flotante de vida. Hospital. Laboratorio de prótesis 3D. Equipo de reconstrucción. Granja flotante. Cocina. Alojamiento para voluntarios. Propulsado por hidrógeno.',
+    peace_sail_in:       'LLEGAR. RECONSTRUIR. PARTIR. REPETIR.',
+    peace_discover_project: 'DESCUBRIR EL PROYECTO COMPLETO →',
+    // Profile — Support the mission
+    support_mission_title: 'APOYAR LA MISIÓN',
+    support_mission_desc:  'NAVA PEACE es 100 % independiente.<br>Si crees en esta misión, un café nos ayuda a seguir construyendo. ☕',
+    donation_cafe_title:   'INVÍTANOS A UN CAFÉ',
+    donation_cafe_desc:    'Un pequeño gesto que marca una gran diferencia.',
+    donation_dove_title:   'CONSTRUCTOR DE PAZ',
+    donation_dove_desc:    'Apoya la misión y recibe el badge de Constructor de Paz.',
+    donation_arch_title:   'FUNDADOR DEL ARCO',
+    donation_arch_desc:    'Tu nombre en los créditos + badge Fundador del Arco + máximo bonus de palomas.',
+    support_stars_note:    '⭐ Las Telegram Stars solo están disponibles dentro de la aplicación Telegram.',
   },
 
   pt: {
@@ -690,6 +759,29 @@ const NAVA_TRANSLATIONS = {
     share_your_card:     'COMPARTILHAR SEU CARTÃO',
     gallery_msg:         'SEU CARTÃO ESTÁ PRONTO — ESCOLHA ONDE COMPARTILHAR',
     gallery_saved:       '🖼 SEU CARTÃO ESTÁ NA SUA GALERIA!',
+    // About — Foundation section
+    about_goal_label:    'OBJETIVO NAVA PEACE',
+    about_create_label:  'CRIAR',
+    about_foundation_heading: 'A FUNDAÇÃO\nNAVA PEACE',
+    about_foundation_sub:'A PRIMEIRA FUNDAÇÃO CONSTRUÍDA PELA\nPOPULAÇÃO MUNDIAL — EM SOLIDARIEDADE',
+    about_every_tap:     'CADA TAP FINANCIA ALGO REAL.',
+    // Peace — Behind the tap
+    peace_behind_tap:    'POR TRÁS DO JOGO DE TAPS',
+    peace_every_tap_builds: 'CADA TAP<br>CONSTRÓI ISSO',
+    peace_taps_funding:  'Seus taps financiam a <strong style="color:#6DD5F5;">Fundação NAVA PEACE</strong> — a primeira fundação criada pela população mundial, em solidariedade.',
+    peace_arch_desc:     'Estamos construindo <strong style="color:#fff;">NAVA PEACE ARCH</strong> — um navio transformado em uma cidade flutuante de vida. Hospital. Laboratório de próteses 3D. Equipe de reconstrução. Fazenda flutuante. Cozinha. Alojamento para voluntários. Movido a hidrogênio.',
+    peace_sail_in:       'CHEGAR. RECONSTRUIR. PARTIR. REPETIR.',
+    peace_discover_project: 'DESCOBRIR O PROJETO COMPLETO →',
+    // Profile — Support the mission
+    support_mission_title: 'APOIAR A MISSÃO',
+    support_mission_desc:  'NAVA PEACE é 100% independente.<br>Se você acredita nesta missão, um café nos ajuda a continuar construindo. ☕',
+    donation_cafe_title:   'NOS PAGUE UM CAFÉ',
+    donation_cafe_desc:    'Um pequeno gesto que faz uma grande diferença.',
+    donation_dove_title:   'CONSTRUTOR DE PAZ',
+    donation_dove_desc:    'Apoie a missão e receba o badge de Construtor de Paz.',
+    donation_arch_title:   'FUNDADOR DO ARCO',
+    donation_arch_desc:    'Seu nome nos créditos + badge Fundador do Arco + bônus máximo de pombas.',
+    support_stars_note:    '⭐ O Telegram Stars só está disponível dentro do aplicativo Telegram.',
   },
 
   de: {
@@ -860,6 +952,29 @@ const NAVA_TRANSLATIONS = {
     share_your_card:     'DEINE KARTE TEILEN',
     gallery_msg:         'DEINE KARTE IST BEREIT — WÄHLE WO TEILEN',
     gallery_saved:       '🖼 DEINE KARTE IST IN DEINER GALERIE!',
+    // About — Foundation section
+    about_goal_label:    'ZIEL VON NAVA PEACE',
+    about_create_label:  'GRÜNDEN',
+    about_foundation_heading: 'DIE NAVA PEACE\nSTIFTUNG',
+    about_foundation_sub:'DIE ERSTE STIFTUNG GEGRÜNDET VON DER\nWELTBEVÖLKERUNG — IN SOLIDARITÄT',
+    about_every_tap:     'JEDER TAP FINANZIERT ETWAS REALES.',
+    // Peace — Behind the tap
+    peace_behind_tap:    'HINTER DEM TAP-SPIEL',
+    peace_every_tap_builds: 'JEDER TAP<br>BAUT DAS HIER',
+    peace_taps_funding:  'Deine Taps finanzieren die <strong style="color:#6DD5F5;">NAVA PEACE Stiftung</strong> — die erste Stiftung, gegründet von der Weltbevölkerung, in Solidarität.',
+    peace_arch_desc:     'Wir bauen <strong style="color:#fff;">NAVA PEACE ARCH</strong> — ein Schiff, das in eine schwimmende Lebensstadt verwandelt wird. Krankenhaus. 3D-Prothesenlabor. Wiederaufbauteam. Schwimmende Farm. Küche. Freiwilligenquartiere. Betrieben mit Wasserstoff.',
+    peace_sail_in:       'ANLEGEN. WIEDERAUFBAUEN. WEITERZIEHEN. WIEDERHOLEN.',
+    peace_discover_project: 'GESAMTES PROJEKT ENTDECKEN →',
+    // Profile — Support the mission
+    support_mission_title: 'MISSION UNTERSTÜTZEN',
+    support_mission_desc:  'NAVA PEACE ist 100 % unabhängig.<br>Wenn du an diese Mission glaubst, hilft uns ein Kaffee beim Weitermachen. ☕',
+    donation_cafe_title:   'KAUF UNS EINEN KAFFEE',
+    donation_cafe_desc:    'Eine kleine Geste, die einen großen Unterschied macht.',
+    donation_dove_title:   'FRIEDENSERBAUER',
+    donation_dove_desc:    'Unterstütze die Mission und erhalte das Friedenserbauer-Abzeichen.',
+    donation_arch_title:   'ARCHE-GRÜNDER',
+    donation_arch_desc:    'Dein Name in den Credits + Arche-Gründer-Abzeichen + maximale Bonus-Tauben.',
+    support_stars_note:    '⭐ Telegram Stars sind nur innerhalb der Telegram-App verfügbar.',
   },
 
   ar: {
@@ -1030,6 +1145,29 @@ const NAVA_TRANSLATIONS = {
     share_your_card:     'شارك بطاقتك',
     gallery_msg:         'بطاقتك جاهزة — اختر أين تشارك',
     gallery_saved:       '🖼 بطاقة دعوتك في معرض صورك!',
+    // About — Foundation section
+    about_goal_label:    'هدف نافا بيس',
+    about_create_label:  'إنشاء',
+    about_foundation_heading: 'مؤسسة\nنافا بيس',
+    about_foundation_sub:'أول مؤسسة بُنيت من قِبَل\nسكان العالم — بروح التضامن',
+    about_every_tap:     'كل نقرة تموّل شيئًا حقيقيًا.',
+    // Peace — Behind the tap
+    peace_behind_tap:    'خلف لعبة النقرات',
+    peace_every_tap_builds: 'كل نقرة<br>تبني هذا',
+    peace_taps_funding:  'نقراتك تموّل <strong style="color:#6DD5F5;">مؤسسة نافا بيس</strong> — أول مؤسسة أسسها سكان العالم، بروح التضامن.',
+    peace_arch_desc:     'نحن نبني <strong style="color:#fff;">نافا بيس آرش</strong> — سفينة تتحول إلى مدينة عائمة للحياة. مستشفى. مختبر أطراف اصطناعية ثلاثية الأبعاد. فريق إعادة الإعمار. مزرعة عائمة. مطبخ. أماكن للمتطوعين. يعمل بالهيدروجين.',
+    peace_sail_in:       'أبحر. أعِد البناء. انطلق. كرّر.',
+    peace_discover_project: 'اكتشف المشروع الكامل ←',
+    // Profile — Support the mission
+    support_mission_title: 'ادعم المهمة',
+    support_mission_desc:  'نافا بيس مستقل بنسبة 100٪.<br>إذا كنت تؤمن بهذه المهمة، فقهوة واحدة تساعدنا على الاستمرار. ☕',
+    donation_cafe_title:   'اشترِ لنا قهوة',
+    donation_cafe_desc:    'إيماءة صغيرة تصنع فارقًا كبيرًا.',
+    donation_dove_title:   'بانٍ للسلام',
+    donation_dove_desc:    'ادعم المهمة واحصل على شارة بانٍ للسلام.',
+    donation_arch_title:   'مؤسس الآرش',
+    donation_arch_desc:    'اسمك في القائمة + شارة مؤسس الآرش + أقصى مكافأة من الحمائم.',
+    support_stars_note:    '⭐ نجوم تيليغرام متاحة فقط داخل تطبيق تيليغرام.',
   },
 
   zh: {
@@ -1200,6 +1338,29 @@ const NAVA_TRANSLATIONS = {
     share_your_card:     '分享你的邀请卡',
     gallery_msg:         '你的卡片已准备好 — 选择分享到哪里',
     gallery_saved:       '🖼 你的邀请卡已保存到相册！',
+    // About — Foundation section
+    about_goal_label:    'NAVA PEACE 目标',
+    about_create_label:  '创建',
+    about_foundation_heading: 'NAVA PEACE\n基金会',
+    about_foundation_sub:'全球人口共同创建的\n第一个基金会 — 团结一心',
+    about_every_tap:     '每一次点击都在资助真实的事业。',
+    // Peace — Behind the tap
+    peace_behind_tap:    '点击游戏背后的故事',
+    peace_every_tap_builds: '每次点击<br>都在建造这个',
+    peace_taps_funding:  '你的点击正在资助 <strong style="color:#6DD5F5;">NAVA PEACE 基金会</strong> — 这是由全球人口共同创建的第一个基金会，团结一心。',
+    peace_arch_desc:     '我们正在建造 <strong style="color:#fff;">NAVA PEACE ARCH</strong> — 一艘改造成浮动生命城市的船。医院。3D义肢实验室。重建队。浮动农场。厨房。志愿者宿舍。以氢气为动力。',
+    peace_sail_in:       '驶入。重建。离开。重复。',
+    peace_discover_project: '探索完整项目 →',
+    // Profile — Support the mission
+    support_mission_title: '支持这一使命',
+    support_mission_desc:  'NAVA PEACE 完全独立。<br>如果你相信这一使命，一杯咖啡帮助我们继续前行。 ☕',
+    donation_cafe_title:   '请我们喝杯咖啡',
+    donation_cafe_desc:    '一个小小的举动，带来巨大的改变。',
+    donation_dove_title:   '和平建设者',
+    donation_dove_desc:    '支持使命并获得和平建设者徽章。',
+    donation_arch_title:   'ARCH 创始人',
+    donation_arch_desc:    '你的名字出现在致谢中 + ARCH 创始人徽章 + 最多奖励鸽子。',
+    support_stars_note:    '⭐ Telegram Stars 仅在 Telegram 应用内可用。',
   },
 
   ru: {
@@ -1370,6 +1531,29 @@ const NAVA_TRANSLATIONS = {
     share_your_card:     'ПОДЕЛИТЕСЬ СВОЕЙ КАРТОЧКОЙ',
     gallery_msg:         'ВАША КАРТА ГОТОВА — ВЫБЕРИТЕ ГДЕ ПОДЕЛИТЬСЯ',
     gallery_saved:       '🖼 ВАША КАРТОЧКА В ГАЛЕРЕЕ!',
+    // About — Foundation section
+    about_goal_label:    'ЦЕЛЬ NAVA PEACE',
+    about_create_label:  'СОЗДАТЬ',
+    about_foundation_heading: 'ФОНД\nNAVA PEACE',
+    about_foundation_sub:'ПЕРВЫЙ ФОНД, СОЗДАННЫЙ\nМИРОВЫМ НАСЕЛЕНИЕМ — В СОЛИДАРНОСТИ',
+    about_every_tap:     'КАЖДЫЙ ТАП ФИНАНСИРУЕТ ЧТО-ТО РЕАЛЬНОЕ.',
+    // Peace — Behind the tap
+    peace_behind_tap:    'ЗА ИГРОЙ В ТАПЫ',
+    peace_every_tap_builds: 'КАЖДЫЙ ТАП<br>СТРОИТ ЭТО',
+    peace_taps_funding:  'Ваши тапы финансируют <strong style="color:#6DD5F5;">Фонд NAVA PEACE</strong> — первый фонд, созданный населением мира, в солидарности.',
+    peace_arch_desc:     'Мы строим <strong style="color:#fff;">NAVA PEACE ARCH</strong> — корабль, превращённый в плавучий город жизни. Больница. Лаборатория 3D-протезирования. Команда по восстановлению. Плавучая ферма. Кухня. Жилые помещения для волонтёров. Работает на водороде.',
+    peace_sail_in:       'ПРИБЫТЬ. ВОССТАНОВИТЬ. УЙТИ. ПОВТОРИТЬ.',
+    peace_discover_project: 'УЗНАТЬ О ПОЛНОМ ПРОЕКТЕ →',
+    // Profile — Support the mission
+    support_mission_title: 'ПОДДЕРЖАТЬ МИССИЮ',
+    support_mission_desc:  'NAVA PEACE полностью независим.<br>Если вы верите в эту миссию, чашка кофе помогает нам продолжать строить. ☕',
+    donation_cafe_title:   'УГОСТИТЕ НАС КОФЕ',
+    donation_cafe_desc:    'Маленький жест, который имеет большое значение.',
+    donation_dove_title:   'СТРОИТЕЛЬ МИРА',
+    donation_dove_desc:    'Поддержите миссию и получите значок Строителя Мира.',
+    donation_arch_title:   'ОСНОВАТЕЛЬ АРКИ',
+    donation_arch_desc:    'Ваше имя в титрах + значок Основателя Арки + максимальный бонус голубей.',
+    support_stars_note:    '⭐ Telegram Stars доступны только внутри приложения Telegram.',
   },
 
   th: {
@@ -1540,6 +1724,29 @@ const NAVA_TRANSLATIONS = {
     share_your_card:     'แชร์การ์ดของคุณ',
     gallery_msg:         'การ์ดของคุณพร้อมแล้ว — เลือกที่จะแชร์',
     gallery_saved:       '🖼 การ์ดเชิญของคุณอยู่ในแกลเลอรี่แล้ว!',
+    // About — Foundation section
+    about_goal_label:    'เป้าหมายของ NAVA PEACE',
+    about_create_label:  'สร้าง',
+    about_foundation_heading: 'มูลนิธิ\nNAVA PEACE',
+    about_foundation_sub:'มูลนิธิแรกที่สร้างโดย\nประชากรโลก — ด้วยความสามัคคี',
+    about_every_tap:     'ทุกการแตะมีส่วนร่วมในสิ่งที่เป็นจริง',
+    // Peace — Behind the tap
+    peace_behind_tap:    'เบื้องหลังเกมการแตะ',
+    peace_every_tap_builds: 'ทุกการแตะ<br>สร้างสิ่งนี้',
+    peace_taps_funding:  'การแตะของคุณสนับสนุน <strong style="color:#6DD5F5;">มูลนิธิ NAVA PEACE</strong> — มูลนิธิแรกที่สร้างโดยประชากรโลก ด้วยความสามัคคี',
+    peace_arch_desc:     'เรากำลังสร้าง <strong style="color:#fff;">NAVA PEACE ARCH</strong> — เรือที่แปลงเป็นเมืองลอยน้ำแห่งชีวิต โรงพยาบาล ห้องปฏิบัติการขาเทียม 3D ทีมฟื้นฟู ฟาร์มลอยน้ำ ห้องครัว ที่พักอาสาสมัคร ขับเคลื่อนด้วยไฮโดรเจน',
+    peace_sail_in:       'แล่นเข้า. ฟื้นฟู. เดินหน้า. ทำซ้ำ.',
+    peace_discover_project: 'ค้นพบโครงการทั้งหมด →',
+    // Profile — Support the mission
+    support_mission_title: 'สนับสนุนภารกิจ',
+    support_mission_desc:  'NAVA PEACE เป็นอิสระ 100%<br>หากคุณเชื่อในภารกิจนี้ กาแฟหนึ่งแก้วช่วยให้เราสร้างต่อไปได้ ☕',
+    donation_cafe_title:   'ซื้อกาแฟให้เรา',
+    donation_cafe_desc:    'ท่าทางเล็กน้อยที่สร้างความแตกต่างอย่างยิ่งใหญ่',
+    donation_dove_title:   'ผู้สร้างสันติภาพ',
+    donation_dove_desc:    'สนับสนุนภารกิจและรับตราสัญลักษณ์ผู้สร้างสันติภาพ',
+    donation_arch_title:   'ผู้ก่อตั้ง ARCH',
+    donation_arch_desc:    'ชื่อของคุณในเครดิต + ตราสัญลักษณ์ผู้ก่อตั้ง ARCH + โบนัสนกพิราบสูงสุด',
+    support_stars_note:    '⭐ Telegram Stars ใช้ได้เฉพาะในแอป Telegram เท่านั้น',
   },
 
   ja: {
@@ -1710,6 +1917,29 @@ const NAVA_TRANSLATIONS = {
     share_your_card:     'カードを共有',
     gallery_msg:         'カードが準備できました — 共有先を選択',
     gallery_saved:       '🖼 招待カードがギャラリーに保存されました！',
+    // About — Foundation section
+    about_goal_label:    'NAVA PEACE の目標',
+    about_create_label:  '設立する',
+    about_foundation_heading: 'NAVA PEACE\n財団',
+    about_foundation_sub:'世界の人々によって築かれた\n最初の財団 — 連帯して',
+    about_every_tap:     'すべてのタップが現実の何かを資金援助する。',
+    // Peace — Behind the tap
+    peace_behind_tap:    'タップゲームの裏側',
+    peace_every_tap_builds: 'タップのたびに<br>これが建てられる',
+    peace_taps_funding:  'あなたのタップが <strong style="color:#6DD5F5;">NAVA PEACE 財団</strong> を支援しています — 世界の人々によって連帯のもとに作られた初めての財団です。',
+    peace_arch_desc:     '私たちは <strong style="color:#fff;">NAVA PEACE ARCH</strong> を建設しています — 命の浮かぶ都市に変貌した船。病院。3Dプロテーゼ研究室。復興チーム。浮かぶ農場。厨房。ボランティアの宿舎。水素で動く。',
+    peace_sail_in:       '入港。再建。出発。繰り返す。',
+    peace_discover_project: 'プロジェクト全体を見る →',
+    // Profile — Support the mission
+    support_mission_title: 'ミッションを支援する',
+    support_mission_desc:  'NAVA PEACE は完全に独立しています。<br>このミッションを信じるなら、コーヒー一杯が私たちの活動を支えます。 ☕',
+    donation_cafe_title:   'コーヒーをおごってください',
+    donation_cafe_desc:    '小さな行動が大きな違いを生む。',
+    donation_dove_title:   '平和の建設者',
+    donation_dove_desc:    'ミッションを支援して平和の建設者バッジを受け取りましょう。',
+    donation_arch_title:   'ARCH 創設者',
+    donation_arch_desc:    'クレジットにあなたの名前 + ARCH 創設者バッジ + 最大ボーナスの鳩。',
+    support_stars_note:    '⭐ Telegram Stars は Telegram アプリ内でのみ利用可能です。',
   },
 
   my: {
@@ -1880,6 +2110,29 @@ const NAVA_TRANSLATIONS = {
     share_your_card:     'မင်းကတ် မျှဝေ',
     gallery_msg:         'မင်းကတ် အသင့်ဖြစ်ပြီ — မျှဝေမည့်နေရာ ရွေးချယ်ပါ',
     gallery_saved:       '🖼 ဖိတ်ကြားကတ် ဓာတ်ပုံပြခန်းတွင် ရှိသည်!',
+    // About — Foundation section
+    about_goal_label:    'NAVA PEACE ၏ ရည်မှန်းချက်',
+    about_create_label:  'တည်ထောင်ရန်',
+    about_foundation_heading: 'NAVA PEACE\nဖောင်ဒေးရှင်း',
+    about_foundation_sub:'ကမ္ဘာ့လူဦးရေမှ တည်ဆောက်သော\nပထမဆုံးသော ဖောင်ဒေးရှင်း — ညီညွတ်မှုဖြင့်',
+    about_every_tap:     'တစ်ချက်စီ နှိပ်တိုင်း အစစ်အမှန်ကို ထောက်ပံ့သည်။',
+    // Peace — Behind the tap
+    peace_behind_tap:    'ထိချိန် ဂိမ်း၏ နောက်ကွယ်',
+    peace_every_tap_builds: 'တစ်ချက်စီ<br>ဒါကို တည်ဆောက်သည်',
+    peace_taps_funding:  'သင်၏ ထိချိန်များသည် <strong style="color:#6DD5F5;">NAVA PEACE ဖောင်ဒေးရှင်း</strong> ကို ထောက်ပံ့သည် — ကမ္ဘာ့လူဦးရေမှ ညီညွတ်စွာ ဖန်တီးသော ပထမဆုံးသော ဖောင်ဒေးရှင်း',
+    peace_arch_desc:     'ကျွန်ုပ်တို့သည် <strong style="color:#fff;">NAVA PEACE ARCH</strong> ကို တည်ဆောက်နေသည် — သင်္ဘောတစ်စီး ကို ရေပေါ်မြို့တော်အဖြစ် ပြောင်းလဲသည်။ ဆေးရုံ။ 3D ဆင်ဖားပြုလုပ်ရာ ဓာတ်ခွဲခန်း။ ပြန်လည်တည်ဆောက်ရေး အဖွဲ့။ ရေပေါ် စိုက်ပျိုးရေး။ မီးဖိုချောင်။ စေတနာ့ဝန်ထမ်း တည်းခိုရာ။ ဟိုက်ဒရိုဂျင်ဖြင့် မောင်းနှင်သည်',
+    peace_sail_in:       'ရောက်ရှိ။ ပြန်တည်ဆောက်။ ထွက်ခွာ။ ထပ်လုပ်ဆောင်။',
+    peace_discover_project: 'ပရောဂျက် အပြည့်အစုံကို ကြည့်ရှုပါ →',
+    // Profile — Support the mission
+    support_mission_title: 'မစ်ရှင်ကို ထောက်ပံ့ပါ',
+    support_mission_desc:  'NAVA PEACE သည် ၁၀၀% လွတ်လပ်သည်။<br>ဤ မစ်ရှင်ကို ယုံကြည်ပါက ကော်ဖီတစ်ခွက်သည် ကျွန်ုပ်တို့ကို ဆက်လက်တည်ဆောက်ရန် ကူညီသည်။ ☕',
+    donation_cafe_title:   'ကော်ဖီတစ်ခွက် ဝယ်ပေးပါ',
+    donation_cafe_desc:    'အသေးစားသော အမူအရာ ကြီးမားသော ကွာခြားမှုကို ဖြစ်ပေါ်စေသည်',
+    donation_dove_title:   'ငြိမ်းချမ်းရေး တည်ဆောက်သူ',
+    donation_dove_desc:    'မစ်ရှင်ကို ထောက်ပံ့ပြီး ငြိမ်းချမ်းရေး တည်ဆောက်သူ ဆုဘောင်ကို ရရှိပါ',
+    donation_arch_title:   'ARCH တည်ထောင်သူ',
+    donation_arch_desc:    'ကြော်ငြာပါ သင်၏နာမည် + ARCH တည်ထောင်သူ ဆုဘောင် + အများဆုံး ချိုးများ ဆုကြေး',
+    support_stars_note:    '⭐ Telegram Stars သည် Telegram အပ်ပ်ထဲတွင်သာ ရနိုင်သည်',
   },
 
   hi: {
@@ -2050,6 +2303,29 @@ const NAVA_TRANSLATIONS = {
     share_your_card:     'अपना कार्ड साझा करें',
     gallery_msg:         'आपका कार्ड तैयार है — शेयर करने का स्थान चुनें',
     gallery_saved:       '🖼 आपका कार्ड गैलरी में है!',
+    // About — Foundation section
+    about_goal_label:    'NAVA PEACE का लक्ष्य',
+    about_create_label:  'निर्माण करें',
+    about_foundation_heading: 'NAVA PEACE\nफाउंडेशन',
+    about_foundation_sub:'विश्व की जनसंख्या द्वारा निर्मित\nपहला फाउंडेशन — एकजुटता में',
+    about_every_tap:     'हर टैप किसी वास्तविक चीज़ को वित्त पोषित करता है।',
+    // Peace — Behind the tap
+    peace_behind_tap:    'टैप गेम के पीछे',
+    peace_every_tap_builds: 'हर टैप<br>यह बनाता है',
+    peace_taps_funding:  'आपके टैप <strong style="color:#6DD5F5;">NAVA PEACE फाउंडेशन</strong> को वित्त पोषित कर रहे हैं — विश्व की जनसंख्या द्वारा एकजुटता में बनाया गया पहला फाउंडेशन।',
+    peace_arch_desc:     'हम <strong style="color:#fff;">NAVA PEACE ARCH</strong> बना रहे हैं — एक जहाज जो जीवन के एक तैरते शहर में परिवर्तित हो रहा है। अस्पताल। 3D कृत्रिम अंग प्रयोगशाला। पुनर्निर्माण दल। तैरती खेती। रसोई। स्वयंसेवक आवास। हाइड्रोजन से संचालित।',
+    peace_sail_in:       'आओ। पुनर्निर्माण करो। आगे बढ़ो। दोहराओ।',
+    peace_discover_project: 'पूरा प्रोजेक्ट देखें →',
+    // Profile — Support the mission
+    support_mission_title: 'मिशन को समर्थन दें',
+    support_mission_desc:  'NAVA PEACE 100% स्वतंत्र है।<br>यदि आप इस मिशन में विश्वास रखते हैं, एक कॉफी हमें निर्माण जारी रखने में मदद करती है। ☕',
+    donation_cafe_title:   'हमें एक कॉफी खिलाएं',
+    donation_cafe_desc:    'एक छोटा सा इशारा जो बड़ा फर्क डालता है।',
+    donation_dove_title:   'शांति निर्माता',
+    donation_dove_desc:    'मिशन को समर्थन दें और शांति निर्माता बैज प्राप्त करें।',
+    donation_arch_title:   'ARCH संस्थापक',
+    donation_arch_desc:    'क्रेडिट में आपका नाम + ARCH संस्थापक बैज + अधिकतम बोनस कबूतर।',
+    support_stars_note:    '⭐ Telegram Stars केवल Telegram ऐप के अंदर उपलब्ध हैं।',
   },
 
   uk: {
@@ -2226,6 +2502,29 @@ const NAVA_TRANSLATIONS = {
     share_your_card:     'ПОДІЛІТЬСЯ СВОЄЮ КАРТКОЮ',
     gallery_msg:         'ВАША КАРТКА ГОТОВА — ОБЕРІТЬ ДЕ ПОДІЛИТИСЯ',
     gallery_saved:       '🖼 ВАША КАРТКА У ГАЛЕРЕЇ!',
+    // About — Foundation section
+    about_goal_label:    'МЕТА NAVA PEACE',
+    about_create_label:  'СТВОРИТИ',
+    about_foundation_heading: 'ФОНД\nNAVA PEACE',
+    about_foundation_sub:'ПЕРШИЙ ФОНД, СТВОРЕНИЙ\nНАСЕЛЕННЯМ СВІТУ — В СОЛІДАРНОСТІ',
+    about_every_tap:     'КОЖЕН ТАП ФІНАНСУЄ ЩОСЬ РЕАЛЬНЕ.',
+    // Peace — Behind the tap
+    peace_behind_tap:    'ЗА ГРЮ У ТАП',
+    peace_every_tap_builds: 'КОЖЕН ТАП<br>БУДУЄ ЦЕ',
+    peace_taps_funding:  'Ваші тапи фінансують <strong style="color:#6DD5F5;">Фонд NAVA PEACE</strong> — перший фонд, створений населенням світу, в солідарності.',
+    peace_arch_desc:     'Ми будуємо <strong style="color:#fff;">NAVA PEACE ARCH</strong> — корабель, перетворений на плавуче місто життя. Лікарня. Лабораторія 3D-протезування. Команда з відновлення. Плавуча ферма. Кухня. Житло для волонтерів. Працює на водні.',
+    peace_sail_in:       'ПРИБУТИ. ВІДНОВИТИ. РУШИТИ. ПОВТОРИТИ.',
+    peace_discover_project: 'ДІЗНАТИСЯ ПРО ПОВНИЙ ПРОЕКТ →',
+    // Profile — Support the mission
+    support_mission_title: 'ПІДТРИМАТИ МІСІЮ',
+    support_mission_desc:  'NAVA PEACE повністю незалежний.<br>Якщо ви вірите в цю місію, чашка кави допомагає нам продовжувати будувати. ☕',
+    donation_cafe_title:   'ПРИГОСТІТЬ НАС КАВОЮ',
+    donation_cafe_desc:    'Маленький жест, який має велике значення.',
+    donation_dove_title:   'БУДІВНИК МИРУ',
+    donation_dove_desc:    'Підтримайте місію та отримайте значок Будівника Миру.',
+    donation_arch_title:   'ЗАСНОВНИК АРКИ',
+    donation_arch_desc:    'Ваше ім\'я в титрах + значок Засновника Арки + максимальний бонус голубів.',
+    support_stars_note:    '⭐ Telegram Stars доступні лише всередині застосунку Telegram.',
   },
 
 };

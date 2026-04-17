@@ -1460,12 +1460,12 @@
     <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('support-card',true)">
       <p class="section-title">
         <svg class="title-icon" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-        <span>SUPPORT THE MISSION</span>
+        <span data-i18n="support_mission_title">SUPPORT THE MISSION</span>
       </p>
       <span class="card-chevron">▾</span>
     </div>
     <div class="card-body">
-      <p style="font-family:Arial,sans-serif;font-size:15px;color:rgba(255,255,255,0.9);text-align:center;line-height:1.7;margin:0 0 18px;">
+      <p data-i18n-html="support_mission_desc" style="font-family:Arial,sans-serif;font-size:15px;color:rgba(255,255,255,0.9);text-align:center;line-height:1.7;margin:0 0 18px;">
         NAVA PEACE is 100% independent.<br>
         If you believe in this mission, a coffee helps us keep building. ☕
       </p>
@@ -1473,7 +1473,7 @@
         <!-- rendered by initDonation() -->
         <div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-family:Nasalization,Arial,sans-serif;font-size:13px;letter-spacing:2px;">LOADING…</div>
       </div>
-      <p id="support-notg" style="display:none;text-align:center;font-family:Arial,sans-serif;font-size:14px;color:rgba(255,255,255,0.35);margin-top:16px;line-height:1.5;">
+      <p id="support-notg" data-i18n="support_stars_note" style="display:none;text-align:center;font-family:Arial,sans-serif;font-size:14px;color:rgba(255,255,255,0.35);margin-top:16px;line-height:1.5;">
         ⭐ Telegram Stars are only available inside the Telegram app.
       </p>
     </div>
@@ -3651,28 +3651,28 @@
   // ── TELEGRAM STARS DONATION ──────────────────────────────────────────
   const DONATION_TIERS = [
     {
-      key:   'cafe',
-      icon:  '☕',
-      title: 'BUY US A COFFEE',
-      desc:  'A small gesture that makes a big difference.',
+      key:      'cafe',
+      icon:     '☕',
+      titleKey: 'donation_cafe_title',
+      descKey:  'donation_cafe_desc',
       stars: 50,
       doves: 0,
       section: 'donor_cafe',
     },
     {
-      key:   'dove',
-      icon:  '🕊',
-      title: 'PEACE BUILDER',
-      desc:  'Support the mission + receive a Peace Builder badge.',
+      key:      'dove',
+      icon:     '🕊',
+      titleKey: 'donation_dove_title',
+      descKey:  'donation_dove_desc',
       stars: 200,
       doves: 10,
       section: 'donor_dove',
     },
     {
-      key:   'arch',
-      icon:  '🚢',
-      title: 'ARCH FOUNDER',
-      desc:  'Your name in the credits + Arch Founder badge + max bonus.',
+      key:      'arch',
+      icon:     '🚢',
+      titleKey: 'donation_arch_title',
+      descKey:  'donation_arch_desc',
       stars: 500,
       doves: 25,
       section: 'donor_arch',
@@ -3724,11 +3724,11 @@
 
       const titleEl = document.createElement('div');
       titleEl.className = 'donation-tier-title';
-      titleEl.textContent = tier.title;
+      titleEl.textContent = t(tier.titleKey);
 
       const descEl = document.createElement('div');
       descEl.className = 'donation-tier-desc';
-      descEl.textContent = tier.desc + (tier.doves > 0 ? ' +' + tier.doves + ' 🕊' : '');
+      descEl.textContent = t(tier.descKey) + (tier.doves > 0 ? ' +' + tier.doves + ' 🕊' : '');
 
       infoEl.appendChild(titleEl);
       infoEl.appendChild(descEl);
@@ -3816,7 +3816,7 @@
         divEl.style.cursor = 'default';
 
         // 5. Toast
-        showToastMsg('🕊 THANK YOU — ' + tier.title + '!');
+        showToastMsg('🕊 THANK YOU — ' + t(tier.titleKey) + '!');
 
         // 6. Refresh dove count
         loadMyDoves();
