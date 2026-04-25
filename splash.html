@@ -481,7 +481,7 @@
     // ── MAIN SESSION LOGIC ──
     (function init() {
       // Mark splash shown
-      try { sessionStorage.setItem('nava_splash_shown', '1'); } catch(e) {}
+      try { localStorage.setItem('nava_splash_shown', Date.now().toString()); } catch(e) {}
       // Clear stale module cache
       try { localStorage.removeItem('nava_modules'); localStorage.removeItem('nava_modules_ts'); } catch(e) {}
 
