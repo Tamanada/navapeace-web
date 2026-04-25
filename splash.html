@@ -369,6 +369,7 @@
                    window.Telegram.WebApp.initDataUnsafe &&
                    window.Telegram.WebApp.initDataUnsafe.start_param) ||
                   ls('nava_peace_referred_by') || '';
+        autoRef = autoRef.trim().toUpperCase();
       } catch(e) {}
 
       setTimeout(function () {
@@ -377,34 +378,77 @@
         box.style.cssText =
           'display:flex;flex-direction:column;align-items:center;gap:14px;' +
           'width:100%;max-width:300px;padding:0 20px;animation:fadeIn 0.5s ease both;';
-        box.innerHTML =
-          '<p style="font-family:Nasalization,Arial,sans-serif;font-size:10px;letter-spacing:3px;' +
-          'color:rgba(255,255,255,.65);text-transform:uppercase;text-align:center;margin:0">' + lbl.title + '</p>' +
-          '<input id="ref-inp" type="text" maxlength="16" autocomplete="off" spellcheck="false"' +
-          ' placeholder="' + lbl.ph + '"' +
-          ' value="' + autoRef.toUpperCase() + '"' +
-          ' style="width:100%;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.3);' +
-          'border-radius:12px;color:#fff;font-family:Nasalization,Arial,sans-serif;font-size:12px;' +
-          'letter-spacing:3px;padding:13px 16px;text-align:center;outline:none;text-transform:uppercase;box-sizing:border-box">' +
-          '<button id="ref-btn" style="width:100%;padding:14px;border-radius:14px;border:none;cursor:pointer;' +
-          'background:linear-gradient(135deg,#3AACDF,#1E6E9A);color:#fff;' +
-          'font-family:Nasalization,Arial,sans-serif;font-size:10px;letter-spacing:3px">' + lbl.btn + '</button>' +
-          '<button id="skip-btn" style="background:none;border:none;color:rgba(255,255,255,.4);' +
-          'font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:3px;' +
-          'text-transform:uppercase;cursor:pointer;text-decoration:underline">' + lbl.skip + '</button>';
+
+        if (autoRef) {
+          // ── INVITED STATE: show the code prominently ──
+          var INVITED_LABELS = {
+            en: { invited: 'YOU HAVE BEEN INVITED', by: 'WITH THE CODE', join: 'ACCEPT & JOIN', change: 'USE A DIFFERENT CODE' },
+            fr: { invited: 'TU AS ÉTÉ INVITÉ(E)', by: 'AVEC LE CODE', join: 'ACCEPTER & REJOINDRE', change: 'UTILISER UN AUTRE CODE' },
+            es: { invited: 'HAS SIDO INVITADO/A', by: 'CON EL CÓDIGO', join: 'ACEPTAR Y UNIRME', change: 'USAR OTRO CÓDIGO' },
+            pt: { invited: 'VOCÊ FOI CONVIDADO(A)', by: 'COM O CÓDIGO', join: 'ACEITAR E ENTRAR', change: 'USAR OUTRO CÓDIGO' },
+            de: { invited: 'DU WURDEST EINGELADEN', by: 'MIT DEM CODE', join: 'ANNEHMEN & BEITRETEN', change: 'ANDEREN CODE VERWENDEN' },
+            ar: { invited: 'لقد تمت دعوتك', by: 'برمز الدعوة', join: 'قبول والانضمام', change: 'استخدام رمز آخر' },
+            zh: { invited: '您已被邀请', by: '邀请码', join: '接受并加入', change: '使用其他邀请码' },
+            ru: { invited: 'ВАС ПРИГЛАСИЛИ', by: 'С КОДОМ', join: 'ПРИНЯТЬ И ВОЙТИ', change: 'ДРУГОЙ КОД' },
+          };
+          var il = INVITED_LABELS[lang] || INVITED_LABELS.en;
+
+          box.innerHTML =
+            // Dove icon + invited label
+            '<div style="font-size:32px;animation:logoFloat 4s ease-in-out infinite;">🕊</div>' +
+            '<p style="font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:3px;' +
+            'color:rgba(255,255,255,.6);text-transform:uppercase;text-align:center;margin:0;">' + il.invited + '</p>' +
+            // Code badge
+            '<div style="background:rgba(255,255,255,0.12);border:2px solid rgba(255,255,255,0.55);' +
+            'border-radius:14px;padding:14px 28px;text-align:center;">' +
+            '<div style="font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:3px;' +
+            'color:rgba(255,255,255,.5);margin-bottom:8px;text-transform:uppercase;">' + il.by + '</div>' +
+            '<div style="font-family:Nasalization,Arial,sans-serif;font-size:22px;letter-spacing:6px;' +
+            'color:#fff;text-shadow:0 0 20px rgba(255,255,255,0.6);">' + autoRef + '</div>' +
+            '</div>' +
+            // Accept button
+            '<button id="ref-btn" style="width:100%;padding:15px;border-radius:14px;border:none;cursor:pointer;' +
+            'background:linear-gradient(135deg,rgba(255,255,255,0.25),rgba(255,255,255,0.1));' +
+            'border:1.5px solid rgba(255,255,255,0.5);color:#fff;' +
+            'font-family:Nasalization,Arial,sans-serif;font-size:10px;letter-spacing:3px;">' + il.join + '</button>' +
+            // Hidden input to keep the code
+            '<input id="ref-inp" type="hidden" value="' + autoRef + '">' +
+            // Change code link
+            '<button id="skip-btn" style="background:none;border:none;color:rgba(255,255,255,.35);' +
+            'font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:2px;' +
+            'text-transform:uppercase;cursor:pointer;text-decoration:underline;">' + il.change + '</button>';
+
+        } else {
+          // ── NO CODE: standard referral input ──
+          box.innerHTML =
+            '<p style="font-family:Nasalization,Arial,sans-serif;font-size:10px;letter-spacing:3px;' +
+            'color:rgba(255,255,255,.65);text-transform:uppercase;text-align:center;margin:0">' + lbl.title + '</p>' +
+            '<input id="ref-inp" type="text" maxlength="16" autocomplete="off" spellcheck="false"' +
+            ' placeholder="' + lbl.ph + '"' +
+            ' style="width:100%;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.3);' +
+            'border-radius:12px;color:#fff;font-family:Nasalization,Arial,sans-serif;font-size:12px;' +
+            'letter-spacing:3px;padding:13px 16px;text-align:center;outline:none;text-transform:uppercase;box-sizing:border-box">' +
+            '<button id="ref-btn" style="width:100%;padding:14px;border-radius:14px;border:none;cursor:pointer;' +
+            'background:linear-gradient(135deg,#3AACDF,#1E6E9A);color:#fff;' +
+            'font-family:Nasalization,Arial,sans-serif;font-size:10px;letter-spacing:3px">' + lbl.btn + '</button>' +
+            '<button id="skip-btn" style="background:none;border:none;color:rgba(255,255,255,.4);' +
+            'font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:3px;' +
+            'text-transform:uppercase;cursor:pointer;text-decoration:underline">' + lbl.skip + '</button>';
+        }
 
         var s = stage();
         if (s) s.appendChild(box);
 
         var inp = document.getElementById('ref-inp');
-        if (inp) inp.addEventListener('input', function () { this.value = this.value.toUpperCase(); });
+        if (inp && inp.type !== 'hidden') {
+          inp.addEventListener('input', function () { this.value = this.value.toUpperCase(); });
+        }
 
         var _goLock = false;
         function go() {
           if (_goLock) return; _goLock = true;
           var code = (document.getElementById('ref-inp').value || '').trim().toUpperCase();
           if (code) ls('nava_peace_referred_by', code);
-          // Remove form, play BIENVENUE, then go to registration
           var b = document.getElementById('ref-box');
           if (b) { b.style.transition = 'opacity 0.3s'; b.style.opacity = '0'; }
           setTimeout(function () {
@@ -413,11 +457,25 @@
           }, 300);
         }
 
+        // "Change code" → swap to standard input form
+        function showChangeForm() {
+          var b = document.getElementById('ref-box');
+          if (b) { b.style.transition = 'opacity 0.2s'; b.style.opacity = '0'; }
+          setTimeout(function () {
+            if (b) b.remove();
+            autoRef = '';
+            _formShown = false;
+            showForm();
+          }, 200);
+        }
+
         var eb = document.getElementById('ref-btn');
         var sb = document.getElementById('skip-btn');
         if (eb) eb.addEventListener('click', go);
-        if (sb) sb.addEventListener('click', go);
-        if (inp) inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
+        if (sb) sb.addEventListener('click', autoRef ? showChangeForm : go);
+        if (inp && inp.type !== 'hidden') {
+          inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
+        }
 
       }, 400);
     }
