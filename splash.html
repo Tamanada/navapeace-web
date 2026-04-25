@@ -485,13 +485,18 @@
       // Clear stale module cache
       try { localStorage.removeItem('nava_modules'); localStorage.removeItem('nava_modules_ts'); } catch(e) {}
 
-      // Non-Telegram redirect — only after 1.5s delay (time for async CDN script + native injection)
+      // Non-Telegram redirect — comprehensive check, generous 3s timeout
+      // Checks: SDK, native proxy, URL hash, localStorage (returning user)
       setTimeout(function() {
+        var h = window.location.hash || '';
         var hasTg = !!(window.Telegram && window.Telegram.WebApp) ||
+                    !!window.TelegramWebviewProxy ||
+                    h.indexOf('tgWebAppData') !== -1 ||
+                    h.indexOf('tgWebAppVersion') !== -1 ||
                     !!localStorage.getItem('nava_peace_country') ||
                     (localStorage.getItem('nava_peace_uid') || '').indexOf('tg_') === 0;
         if (!hasTg) window.location.replace('https://t.me/NavaPeaceBot/app');
-      }, 1500);
+      }, 3000);
 
       // Call Telegram.WebApp.ready() if available
       try {
