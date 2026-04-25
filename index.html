@@ -46,10 +46,10 @@
       src: url('nasalization.woff') format('woff');
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase_config.js"></script>
-  <script src="block_check.js"></script>
-  <script src="lang.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="supabase_config.js" defer></script>
+  <script src="block_check.js" defer></script>
+  <script src="lang.js" defer></script>
   <style>
     * {
       box-sizing: border-box;
@@ -367,6 +367,40 @@
   </style>
 </head>
 <body>
+
+  <!-- INSTANT LOADING SCREEN — visible immediately, hidden once scripts are ready -->
+  <div id="nava-loading" style="
+    position:fixed;inset:0;z-index:99999;
+    background:radial-gradient(ellipse at 50% 30%,#6DD5F5 0%,#3AACDF 45%,#1E8EC4 100%);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+    transition:opacity 0.5s ease;
+  ">
+    <img src="logo.png" alt="NAVA PEACE"
+         style="width:90px;height:90px;object-fit:contain;filter:brightness(0) invert(1);
+                animation:np-float 3s ease-in-out infinite;"
+         onerror="this.style.display='none'" />
+    <p style="font-family:Nasalization,Arial,sans-serif;font-size:11px;letter-spacing:5px;
+              color:rgba(255,255,255,0.7);text-transform:uppercase;margin:0;">NAVA PEACE</p>
+    <div style="width:36px;height:2px;background:rgba(255,255,255,0.3);border-radius:2px;overflow:hidden;margin-top:4px;">
+      <div style="height:100%;background:#fff;border-radius:2px;animation:np-bar 1.4s ease-in-out infinite;"></div>
+    </div>
+  </div>
+  <style>
+    @keyframes np-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    @keyframes np-bar   { 0%{width:0;margin-left:0} 50%{width:100%;margin-left:0} 100%{width:0;margin-left:100%} }
+  </style>
+  <script>
+    // Hide loading screen once DOM + deferred scripts are ready
+    window.addEventListener('DOMContentLoaded', function() {
+      var el = document.getElementById('nava-loading');
+      if (!el) return;
+      // Give deferred scripts ~800ms to execute, then fade out
+      setTimeout(function() {
+        el.style.opacity = '0';
+        setTimeout(function() { el.style.display = 'none'; }, 500);
+      }, 800);
+    });
+  </script>
 
   <!-- WELCOME BACK OVERLAY -->
   <div id="welcome-overlay">
