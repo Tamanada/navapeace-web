@@ -99,6 +99,7 @@
                  }
                }
                if (target) window.location.replace(target);
+             }
            }
          }).catch(function () {});
       }
