@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
       const size = url.searchParams.get('size') ?? '50';
       const data = await yoyFetch('GET',
         '/api/2025/open/v4/self_store/products',
-        { page, size, synced: 'true' }
+        { page, size }
       );
       return json(data);
     }
