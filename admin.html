@@ -2067,26 +2067,33 @@ async function saveModules() {
     // Sauvegarder localement + timestamp (priorité sur sync Supabase pendant 1h)
     localStorage.setItem('nava_modules', value);
     localStorage.setItem('nava_modules_ts', Date.now().toString());
-    // Try RPC sécurisée d'abord, puis fallback direct upsert
+    // Save via Edge Function (uses service role key, bypasses RLS)
     try {
-      let saved = false;
+      const edgeUrl = SUPABASE_URL + '/functions/v1/yoycol-proxy?action=update_admin_setting';
+      const res = await fetch(edgeUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({ adminCode: _adminCode, key: 'nava_modules', value }),
+      });
+      const result = await res.json();
+      if (!res.ok || result.error) throw new Error(result.error || 'Edge Function error');
+      showToast('✓ MODULES SAVED & SYNCED', 3000);
+    } catch(supaErr) {
+      console.warn('Edge Function save failed, trying direct upsert:', supaErr);
+      // Fallback direct (si RLS permet)
       try {
-        const { error } = await sb.rpc('nava_upsert_admin_setting', {
-          p_key: 'nava_modules', p_value: value, p_code: _adminCode
-        });
-        if (!error) saved = true;
-      } catch(e) { /* RPC non disponible */ }
-
-      if (!saved) {
-        // Fallback : upsert direct (fonctionne si RLS pas encore actif)
         const { error } = await sb.from('admin_settings')
           .upsert({ key: 'nava_modules', value, updated_at: new Date().toISOString() },
                   { onConflict: 'key' });
         if (error) throw error;
+        showToast('✓ MODULES SAVED & SYNCED', 3000);
+      } catch(e2) {
+        showToast('✓ SAVED LOCALLY (sync failed)', 3000);
       }
-      showToast('✓ MODULES SAVED & SYNCED', 3000);
-    } catch(supaErr) {
-      showToast('✓ SAVED LOCALLY', 3000);
     }
     showModulesSaveBar(false);
   } catch(e) {

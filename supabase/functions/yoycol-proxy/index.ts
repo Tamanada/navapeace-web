@@ -190,6 +190,48 @@ Deno.serve(async (req) => {
       return json(tgData);
     }
 
+    // ── POST update admin setting (uses service role to bypass RLS) ─
+    if (action === 'update_admin_setting' && req.method === 'POST') {
+      const SUPA_URL   = Deno.env.get('SUPABASE_URL') ?? '';
+      const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+      if (!SUPA_URL || !SERVICE_KEY) return json({ error: 'Supabase not configured' }, 500);
+
+      const { adminCode, key, value } = await req.json();
+      if (!adminCode || !key || value === undefined) {
+        return json({ error: 'adminCode, key and value are required' }, 400);
+      }
+
+      // 1. Verify admin code is active
+      const verifyRes = await fetch(
+        `${SUPA_URL}/rest/v1/admins?code=eq.${encodeURIComponent(adminCode)}&active=eq.true&select=id&limit=1`,
+        { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } }
+      );
+      const admins = await verifyRes.json();
+      if (!Array.isArray(admins) || admins.length === 0) {
+        return json({ error: 'Invalid or inactive admin code' }, 403);
+      }
+
+      // 2. Upsert into admin_settings with service role (bypasses RLS)
+      const upsertRes = await fetch(
+        `${SUPA_URL}/rest/v1/admin_settings`,
+        {
+          method: 'POST',
+          headers: {
+            apikey: SERVICE_KEY,
+            Authorization: `Bearer ${SERVICE_KEY}`,
+            'Content-Type': 'application/json',
+            Prefer: 'resolution=merge-duplicates',
+          },
+          body: JSON.stringify({ key, value, updated_at: new Date().toISOString() }),
+        }
+      );
+      if (!upsertRes.ok) {
+        const err = await upsertRes.text();
+        return json({ error: `DB write failed: ${err}` }, 500);
+      }
+      return json({ success: true });
+    }
+
     return json({ error: 'unknown action' }, 400);
 
   } catch (e) {
