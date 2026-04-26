@@ -6,11 +6,12 @@
 
 (function () {
 
-  var NAV_ORDER = ['module_peace','module_map','module_stats','module_market','module_profile','module_about'];
+  var NAV_ORDER = ['module_peace','module_map','module_stats','module_merch','module_market','module_profile','module_about'];
   var NAV_PAGES = {
     module_peace:   'peace.html',
     module_map:     'map.html',
     module_stats:   'stats.html',
+    module_merch:   'merch.html',
     module_market:  'market.html',
     module_profile: 'profile.html',
     module_about:   'about.html',
