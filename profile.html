@@ -2387,6 +2387,17 @@
   async function loadMyDoves() {
     const uid = localStorage.getItem('nava_peace_uid');
 
+    // ── Affichage immédiat depuis localStorage (évite les tirets) ──
+    try {
+      const _imm = parseInt(localStorage.getItem('nava_peace_days') || '0', 10);
+      const _immOwn = parseInt(localStorage.getItem('nava_peace_vote_count') || '0', 10);
+      document.getElementById('dove-total').textContent = _imm;
+      document.getElementById('dove-own').textContent   = _immOwn;
+      document.getElementById('dove-ref').textContent   = '0';
+      const _dE = document.getElementById('dove-discovery');   if (_dE) _dE.textContent = '0';
+      const _sE = document.getElementById('dove-streak-display'); if (_sE) _sE.textContent = '0';
+    } catch(_) {}
+
     // ── Vérifier si ce compte est bloqué (source de vérité = DB, non localStorage) ──
     try {
       const sbBlock = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -2424,17 +2435,12 @@
     try {
       if (uid2) {
         const sb2b = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        // Récupérer tous les created_at + referral_code pour calculer le streak réel
+        // Récupérer tous les created_at pour calculer le streak réel
         const { data: voteData } = await sb2b
           .from('peace_votes')
-          .select('created_at, referral_code')
+          .select('created_at')
           .eq('user_uid', uid2)
           .order('created_at', { ascending: false });
-        // Récupérer le refCode depuis la DB si absent du localStorage
-        if (!refCode && voteData) {
-          const rv = voteData.find(v => v.referral_code);
-          if (rv) { refCode = rv.referral_code; localStorage.setItem('nava_peace_ref_code', refCode); }
-        }
         if (voteData && voteData.length > 0) {
           ownActions = voteData.length;
           localStorage.setItem('nava_peace_vote_count', ownActions);
@@ -2456,6 +2462,20 @@
         }
       }
     } catch(e) { console.warn('Own actions load error', e); }
+
+    // Récupérer refCode depuis DB si absent du localStorage
+    if (!refCode && uid2) {
+      try {
+        const sbRef = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { data: refRow } = await sbRef.from('peace_votes')
+          .select('referral_code').eq('user_uid', uid2)
+          .not('referral_code', 'is', null).limit(1).maybeSingle();
+        if (refRow && refRow.referral_code) {
+          refCode = refRow.referral_code;
+          localStorage.setItem('nava_peace_ref_code', refCode);
+        }
+      } catch(e) {}
+    }
 
     // Discovery doves
     let discoveryDoves = 0;
