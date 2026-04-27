@@ -14,7 +14,6 @@
   <meta property="og:image"       content="https://nava-peace.app/og-image.png" />
   <meta name="twitter:card"       content="summary_large_image" />
 
-  <!-- Telegram SDK — async, non-blocking -->
   <script src="https://telegram.org/js/telegram-web-app.js" async></script>
 
   <style>
@@ -24,18 +23,41 @@
       src: url('nasalization.woff') format('woff');
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { --font: 'Nasalization', Arial, sans-serif; }
 
-    html { height: 100%; width: 100%; }
+    html, body { height: 100%; width: 100%; overscroll-behavior: none; }
+
     body {
-      height: 100%; width: 100%;
-      overscroll-behavior: none;
-      font-family: var(--font);
-      background: radial-gradient(ellipse at 50% 20%, #6DD5F5 0%, #3AACDF 45%, #1E8EC4 100%);
+      font-family: 'Nasalization', Arial, sans-serif;
+      /* Start invisible — eliminates any white flash */
+      opacity: 0;
+      background: #071828;
+      animation: bodyReveal 0.35s ease 0.05s both;
     }
 
-    /* No CSS gate — stage always visible. JS handles non-Telegram redirect. */
+    /* Dark → deep blue gradient reveals after body fades in */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background: radial-gradient(ellipse at 50% 25%, #1d7ab5 0%, #0d4e78 45%, #071828 100%);
+      animation: bgReveal 1.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+      pointer-events: none;
+    }
+
     #tg-block { display: none !important; }
+
+    /* ── GLOW ORB behind logo ── */
+    .glow-orb {
+      position: fixed;
+      top: 18%; left: 50%;
+      transform: translateX(-50%);
+      width: 70vw; height: 70vw;
+      max-width: 420px; max-height: 420px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(109,213,245,0.14) 0%, transparent 68%);
+      pointer-events: none;
+      z-index: 1;
+      animation: orbReveal 2s ease 0.6s both, orbPulse 7s ease-in-out 2.6s infinite;
+    }
 
     /* ── STAGE ── */
     .stage {
@@ -43,155 +65,142 @@
       display: flex;
       flex-direction: column;
       align-items: center; justify-content: center;
-      padding-bottom: 90px;
-      transition: opacity 0.6s ease;
-    }
-    .stage::before {
-      content: '';
-      position: fixed; top: -5%; left: 50%;
-      transform: translateX(-50%);
-      width: 130vw; height: 75vh;
-      background: radial-gradient(ellipse, rgba(255,255,255,0.10) 0%, transparent 68%);
-      pointer-events: none;
-      animation: bgBreath 14s ease-in-out infinite;
+      padding-bottom: 72px;
+      z-index: 2;
     }
 
     /* ── LOGO ── */
     .logo-wrap {
-      margin-bottom: min(36px, 3.5vh);
-      animation: logoFadeIn 1.2s ease-out both,
-                 logoFloat 10s 1.3s ease-in-out infinite;
+      margin-bottom: min(28px, 3vh);
+      /* Enter animation — single, clean, no filter conflict */
+      animation: logoIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
+    }
+    .logo-wrap.floating {
+      animation: logoFloat 9s ease-in-out infinite;
     }
     .logo-img {
-      width: min(220px, 26vh); height: min(220px, 26vh); object-fit: contain;
-      filter: brightness(0) invert(1);
-      animation: logoBlur 1.2s ease-out both,
-                 logoGlow 7s 1.3s ease-in-out infinite;
+      width: min(190px, 23vh); height: min(190px, 23vh);
+      object-fit: contain;
+      /* Filter lives only here — no animation conflict */
+      filter: brightness(0) invert(1) drop-shadow(0 6px 28px rgba(255,255,255,0.35));
     }
-    .logo-fallback { font-size: min(140px, 18vh); line-height: 1; }
+    .logo-img.glowing {
+      animation: logoGlow 6s ease-in-out infinite;
+    }
 
     /* ── BRAND ── */
     .brand {
-      font-size: clamp(16px, 3vw, 28px);
-      letter-spacing: clamp(8px, 2vw, 20px);
-      color: rgba(255,255,255,0.72);
+      font-size: clamp(13px, 2.8vw, 21px);
+      letter-spacing: clamp(9px, 2.2vw, 20px);
+      color: rgba(255,255,255,0.55);
       text-transform: uppercase;
-      margin-bottom: 18px;
-      animation: brandReveal 1.8s 1.2s ease-out both;
+      margin-bottom: 14px;
+      animation: brandIn 1s cubic-bezier(0.22, 1, 0.36, 1) 0.75s both;
     }
 
     /* ── HERO ── */
     .hero {
-      font-size: clamp(44px, min(11vw, 9vh), 140px);
-      letter-spacing: clamp(4px, min(1.2vw, 0.8vh), 16px);
+      font-size: clamp(38px, min(9.5vw, 8vh), 110px);
+      letter-spacing: clamp(3px, min(0.9vw, 0.6vh), 13px);
       color: #fff;
       text-transform: uppercase;
       text-align: center;
       line-height: 1;
-      text-shadow: 0 0 60px rgba(255,255,255,0.35), 0 4px 30px rgba(30,100,170,0.4);
-      animation: heroReveal 2s 1.8s ease-out both;
+      text-shadow: 0 0 70px rgba(255,255,255,0.28), 0 2px 35px rgba(109,213,245,0.18);
+      animation: heroIn 0.85s cubic-bezier(0.22, 1, 0.36, 1) 1.1s both;
       user-select: none;
-      transition: opacity 0.4s ease;
     }
+    /* Cross-fade state for welcome word cycling */
+    .hero.cycling        { animation: none; transition: opacity 0.22s ease; }
+    .hero.cycling.fading { opacity: 0; }
 
     /* ── DIVIDER ── */
     .divider {
-      width: clamp(60px, 10vw, 140px); height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
-      margin: 24px auto 14px;
-      animation: fadeIn 2s 3s ease both;
+      width: clamp(48px, 7vw, 110px); height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+      margin: 18px auto 12px;
+      animation: fadeUp 0.7s ease 1.5s both;
     }
 
     /* ── DAILY MSG ── */
     .daily-msg {
-      font-size: clamp(13px, 1.8vw, 20px);
-      letter-spacing: clamp(2px, 0.5vw, 5px);
-      color: rgba(255,255,255,0.55);
+      font-size: clamp(10px, 1.5vw, 16px);
+      letter-spacing: clamp(1.5px, 0.35vw, 3.5px);
+      color: rgba(255,255,255,0.38);
       text-transform: uppercase;
       text-align: center;
-      max-width: 520px;
+      max-width: 460px;
       padding: 0 24px;
-      line-height: 1.65;
-      animation: msgReveal 2s 3.4s ease both;
+      line-height: 1.75;
+      animation: fadeUp 0.7s ease 1.7s both;
     }
     .daily-msg-date {
       display: block;
-      font-size: clamp(9px, 1vw, 12px);
+      font-size: clamp(8px, 0.85vw, 10px);
       letter-spacing: 4px;
-      color: rgba(255,255,255,0.28);
+      color: rgba(255,255,255,0.18);
       margin-bottom: 8px;
     }
 
     /* ── TICKER ── */
     .ticker-wrap {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
-      height: 68px;
-      background: rgba(10,40,80,0.72);
-      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-      border-top: 1px solid rgba(255,255,255,0.18);
+      height: 60px;
+      background: rgba(4,16,36,0.78);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex;
       align-items: center; overflow: hidden;
-      animation: fadeIn 0.8s 0.4s ease both;
+      animation: fadeUp 0.6s ease 0.25s both;
     }
     .ticker-track {
       display: flex; align-items: center;
       white-space: nowrap;
-      animation: ticker 40s linear infinite;
+      animation: ticker 42s linear infinite;
       will-change: transform;
     }
     .ticker-item {
       display: inline-flex; align-items: center;
-      padding: 0 30px;
-      font-size: clamp(13px, 1.8vw, 22px);
-      letter-spacing: clamp(2px, 0.5vw, 6px);
-      color: rgba(255,255,255,0.88);
+      padding: 0 26px;
+      font-size: clamp(10px, 1.5vw, 16px);
+      letter-spacing: clamp(2px, 0.4vw, 5px);
+      color: rgba(255,255,255,0.62);
       text-transform: uppercase; white-space: nowrap; flex-shrink: 0;
     }
-    .ticker-sep { width: 1px; height: 24px; background: rgba(255,255,255,0.22); flex-shrink: 0; }
+    .ticker-sep { width: 1px; height: 16px; background: rgba(255,255,255,0.14); flex-shrink: 0; }
 
-    /* ── ENTER LINK ── */
-    .enter-link {
-      position: fixed; bottom: 86px; right: 28px;
-      font-size: 12px; letter-spacing: 4px;
-      color: rgba(255,255,255,0.55);
-      text-transform: uppercase; text-decoration: none;
-      border-bottom: 1px solid rgba(255,255,255,0.22); padding-bottom: 2px;
-      animation: fadeIn 1s 1.2s ease both; z-index: 10;
-    }
-
-    /* ── ANIMATIONS ── */
-    @keyframes fadeIn    { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes ticker    { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-    @keyframes bgBreath  { 0%,100% { opacity:.55; transform:translateX(-50%) scale(1); } 50% { opacity:1; transform:translateX(-50%) scale(1.18); } }
-    @keyframes logoFadeIn { 0% { opacity:0; transform:scale(0.84); } 60% { opacity:.9; } 100% { opacity:1; transform:scale(1); } }
-    @keyframes logoBlur  { 0% { filter:blur(8px) brightness(1.6); } 50% { filter:blur(2px) brightness(1.1); } 100% { filter:blur(0) brightness(1) drop-shadow(0 12px 50px rgba(255,255,255,.5)) drop-shadow(0 0 70px rgba(109,213,245,.35)); } }
-    @keyframes logoGlow  { 0%,100% { filter:drop-shadow(0 12px 50px rgba(255,255,255,.48)) drop-shadow(0 0 70px rgba(109,213,245,.28)); } 50% { filter:drop-shadow(0 18px 80px rgba(255,255,255,.78)) drop-shadow(0 0 120px rgba(109,213,245,.55)); } }
-    @keyframes logoFloat { 0%,100% { transform:translateY(0) rotate(0deg); } 35% { transform:translateY(-12px) rotate(0.5deg); } 70% { transform:translateY(-6px) rotate(-0.3deg); } }
-    @keyframes brandReveal { 0% { opacity:0; letter-spacing:4px; } 100% { opacity:1; } }
-    @keyframes heroReveal  { 0% { opacity:0; filter:blur(10px); } 50% { opacity:.7; filter:blur(2px); } 100% { opacity:1; filter:blur(0); } }
-    @keyframes msgReveal   { 0% { opacity:0; transform:translateY(10px); } 100% { opacity:1; transform:translateY(0); } }
-    @keyframes tapPulse    { 0%,100% { opacity:.3; } 50% { opacity:.75; } }
+    /* ── KEYFRAMES ── */
+    @keyframes bodyReveal  { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes bgReveal    { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes orbReveal   { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes orbPulse    { 0%,100% { opacity:.55; transform:translateX(-50%) scale(1); } 50% { opacity:1; transform:translateX(-50%) scale(1.14); } }
+    @keyframes logoIn      { from { opacity:0; transform:scale(0.76) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
+    @keyframes logoFloat   { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-10px); } }
+    @keyframes logoGlow    { 0%,100% { filter:brightness(0) invert(1) drop-shadow(0 6px 28px rgba(255,255,255,.38)) drop-shadow(0 0 55px rgba(109,213,245,.18)); } 50% { filter:brightness(0) invert(1) drop-shadow(0 10px 55px rgba(255,255,255,.65)) drop-shadow(0 0 100px rgba(109,213,245,.4)); } }
+    @keyframes brandIn     { from { opacity:0; letter-spacing:3px; transform:translateY(8px); } to { opacity:1; letter-spacing:clamp(9px,2.2vw,20px); transform:translateY(0); } }
+    @keyframes heroIn      { from { opacity:0; transform:translateY(14px); filter:blur(3px); } to { opacity:1; transform:translateY(0); filter:blur(0); } }
+    @keyframes fadeUp      { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes ticker      { from { transform:translateX(0); } to { transform:translateX(-50%); } }
 
     /* ── MOBILE ── */
     @media (max-width: 600px) {
-      .brand { letter-spacing: 7px; font-size: 15px; }
-      .stage { padding-bottom: 72px; }
-      .ticker-wrap { height: 54px; }
-      .ticker-item { padding: 0 16px; font-size: clamp(12px,4vw,16px); }
-      .ticker-track { animation-duration: 30s; }
-      .enter-link { bottom: 66px; right: 16px; font-size: 10px; }
+      .brand { letter-spacing: 7px; font-size: 13px; }
+      .stage { padding-bottom: 62px; }
+      .ticker-wrap { height: 50px; }
+      .ticker-item { padding: 0 14px; font-size: clamp(9px, 3.2vw, 13px); }
     }
   </style>
 </head>
 
 <body>
 
+  <div class="glow-orb"></div>
 
-  <!-- ── MAIN STAGE — renders immediately, CSS animations auto-start ── -->
   <div class="stage" id="main-stage">
-    <div class="logo-wrap">
-      <img class="logo-img" src="logo.png" alt="NAVA PEACE"
+    <div class="logo-wrap" id="logo-wrap">
+      <img class="logo-img" id="logo-img" src="logo.png" alt="NAVA PEACE"
            onerror="this.style.display='none';document.getElementById('logo-fb').style.display='block'" />
-      <span id="logo-fb" style="display:none;font-size:min(140px,18vh);">🕊</span>
+      <span id="logo-fb" style="display:none;font-size:min(130px,17vh);">🕊</span>
     </div>
     <p class="brand">NAVA PEACE</p>
     <h1 class="hero" id="hero">BORN TO GROW</h1>
@@ -202,25 +211,27 @@
     </div>
   </div>
 
-  <!-- ── TICKER ── -->
   <div class="ticker-wrap" aria-label="Born to grow in 13 languages">
     <div class="ticker-track" id="ticker-track"></div>
   </div>
 
-  <!-- ══════════════════════════════════════════════════════════════
-       ③ ALL LOGIC — runs after body is fully parsed & visible
-       No external dependencies — SUPABASE credentials are inlined
-       ══════════════════════════════════════════════════════════════ -->
   <script>
   (function () {
     'use strict';
 
-    // ── SUPABASE CREDENTIALS (inlined — no supabase.js needed) ──
+    // ── Switch logo to float + glow after enter animation ──────────────────
+    setTimeout(function () {
+      var lw = document.getElementById('logo-wrap');
+      var li = document.getElementById('logo-img');
+      if (lw) lw.classList.add('floating');
+      if (li) li.classList.add('glowing');
+    }, 1350);
+
+    // ── SUPABASE CREDENTIALS ──────────────────────────────────────────────
     var SB_URL = 'https://qvbxcxehhenpifhclhvs.supabase.co';
     var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2YnhjeGVoaGVucGlmaGNsaHZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1ODcxNzgsImV4cCI6MjA4MzE2MzE3OH0.emnoT_8qFJzDHHgHa9e6CIAwJvCW6t-NC1CDKGU_pew';
     var SB_H   = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
 
-    // ── HELPERS ──
     function sbGet(path) {
       return fetch(SB_URL + '/rest/v1/' + path, { headers: SB_H }).then(function (r) { return r.json(); });
     }
@@ -228,23 +239,14 @@
       if (v !== undefined) { try { localStorage.setItem(k, v); } catch(e){} }
       else { try { return localStorage.getItem(k); } catch(e){ return null; } }
     }
-    function stage()  { return document.getElementById('main-stage'); }
-    function hero()   { return document.getElementById('hero'); }
+    function hero() { return document.getElementById('hero'); }
 
-    // ── READ startParam FROM URL HASH IMMEDIATELY ──
-    // Telegram passes the referral code as tgWebAppStartParam in the URL hash.
-    // We capture it here at page-load time before any timeout fires, so showForm()
-    // always finds it in localStorage regardless of timing.
+    // ── CAPTURE startParam FROM URL ───────────────────────────────────────
     (function captureStartParam() {
       try {
         var hash = window.location.hash || '';
-        // Try URL hash first (format: #tgWebAppStartParam=CODE&...)
         var m = hash.match(/[?&#]?tgWebAppStartParam=([^&]+)/i);
-        if (m && m[1]) {
-          ls('nava_peace_referred_by', decodeURIComponent(m[1]).toUpperCase());
-          return;
-        }
-        // Also try window.Telegram.WebApp if already injected
+        if (m && m[1]) { ls('nava_peace_referred_by', decodeURIComponent(m[1]).toUpperCase()); return; }
         var sp = window.Telegram && window.Telegram.WebApp &&
                  window.Telegram.WebApp.initDataUnsafe &&
                  window.Telegram.WebApp.initDataUnsafe.start_param;
@@ -252,7 +254,7 @@
       } catch(e) {}
     })();
 
-    // ── TICKER ──
+    // ── TICKER ───────────────────────────────────────────────────────────
     var TICKER_ITEMS = [
       { text: 'BORN TO GROW' }, { text: 'NÉ POUR GRANDIR' }, { text: 'NACIDO PARA CRECER' },
       { text: 'NASCIDO PARA CRESCER' }, { text: 'ZUM WACHSEN GEBOREN' }, { text: 'РОЖДЁН РАСТИ' },
@@ -267,7 +269,7 @@
       if (el) el.innerHTML = html + html;
     })();
 
-    // ── DAILY MESSAGE ──
+    // ── DAILY MESSAGE ─────────────────────────────────────────────────────
     (function setDaily() {
       var msgs = [
         'Peace begins within.','Every choice for peace matters.','We grow together.',
@@ -299,18 +301,18 @@
       var dateStr = now.toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'}).toUpperCase();
       var d = document.getElementById('daily-date');
       var t = document.getElementById('daily-text');
-      if (d) d.textContent  = dateStr;
-      if (t) t.innerHTML    = display;
+      if (d) d.textContent = dateStr;
+      if (t) t.innerHTML   = display;
     })();
 
-    // ── WELCOME WORDS (13 languages) ──
+    // ── WELCOME WORDS (cross-fade cycling) ───────────────────────────────
     var WELCOME_WORDS = [
       'WELCOME','BIENVENUE','BIENVENIDO','BEM-VINDO','WILLKOMMEN',
       'مرحباً','欢迎','ДОБРО ПОЖАЛОВАТЬ','ยินดีต้อนรับ','ようこそ',
       'ကြိုဆိုပါသည်','स्वागत है','ЛАСКАВО ПРОСИМО',
     ];
 
-    // ── REF CODE LABELS ──
+    // ── REF CODE LABELS ──────────────────────────────────────────────────
     var REF_LABELS = {
       en: { title:'GOT A REFERRAL CODE?', ph:'ENTER CODE (OPTIONAL)', btn:'JOIN WITH CODE', skip:'SKIP' },
       fr: { title:'TU AS UN CODE PARRAIN?', ph:'ENTRER LE CODE (FACULTATIF)', btn:'REJOINDRE AVEC CODE', skip:'PASSER' },
@@ -322,21 +324,22 @@
       ru: { title:'ЕСТЬ КОД ПРИГЛАШЕНИЯ?', ph:'ВВЕДИ КОД (НЕОБЯЗАТЕЛЬНО)', btn:'ВОЙТИ С КОДОМ', skip:'ПРОПУСТИТЬ' },
     };
 
-    // ── REDIRECT HELPERS ──
+    // ── FADE & REDIRECT — fades the whole body ───────────────────────────
     function fadeAndGo(url) {
-      var s = stage();
-      if (s) { s.style.opacity = '0'; }
-      setTimeout(function () { window.location.replace(url); }, 600);
+      document.body.style.transition = 'opacity 0.45s ease';
+      document.body.style.opacity    = '0';
+      setTimeout(function () { window.location.replace(url); }, 460);
     }
 
-    // ── BIENVENUE → then go to url ──
+    // ── WELCOME WORD CYCLING (cross-fade) ────────────────────────────────
     var _bTimer = null;
     function playBienvenue(onDone) {
       if (_bTimer) { clearInterval(_bTimer); _bTimer = null; }
       var h = hero();
       if (h) {
-        h.style.cssText = 'opacity:1;filter:blur(0);transform:scale(1);animation:none;transition:none;font-size:clamp(44px,min(11vw,9vh),140px);letter-spacing:clamp(4px,min(1.2vw,0.8vh),16px);color:#fff;text-transform:uppercase;text-align:center;line-height:1;text-shadow:0 0 60px rgba(255,255,255,.35),0 4px 30px rgba(30,100,170,.4);user-select:none;';
+        h.classList.add('cycling');
         h.textContent = WELCOME_WORDS[0];
+        h.style.opacity = '1';
       }
       var idx = 0;
       _bTimer = setInterval(function () {
@@ -346,23 +349,28 @@
           onDone();
           return;
         }
-        if (h) h.textContent = WELCOME_WORDS[idx];
-      }, 600);
+        if (h) {
+          h.classList.add('fading');
+          setTimeout(function () {
+            h.textContent = WELCOME_WORDS[idx];
+            h.classList.remove('fading');
+          }, 220);
+        }
+      }, 620);
     }
 
-    // ── SHOW REGISTRATION FORM ──
+    // ── REGISTRATION FORM ─────────────────────────────────────────────────
     var _formShown = false;
     function showForm() {
       if (_formShown) return;
       _formShown = true;
 
       var h = hero();
-      if (h) { h.style.transition = 'opacity 0.4s'; h.style.opacity = '0'; }
+      if (h) { h.style.transition = 'opacity 0.35s'; h.style.opacity = '0'; }
 
       var lang = (localStorage.getItem('nava_peace_lang') || navigator.language || 'en').substring(0,2).toLowerCase();
       var lbl  = REF_LABELS[lang] || REF_LABELS.en;
 
-      // Auto-ref from Telegram startParam or localStorage
       var autoRef = '';
       try {
         autoRef = (window.Telegram && window.Telegram.WebApp &&
@@ -377,10 +385,9 @@
         box.id  = 'ref-box';
         box.style.cssText =
           'display:flex;flex-direction:column;align-items:center;gap:14px;' +
-          'width:100%;max-width:300px;padding:0 20px;animation:fadeIn 0.5s ease both;';
+          'width:100%;max-width:300px;padding:0 20px;animation:fadeUp 0.5s ease both;';
 
         if (autoRef) {
-          // ── INVITED STATE: show the code prominently ──
           var INVITED_LABELS = {
             en: { invited: 'YOU HAVE BEEN INVITED', by: 'WITH THE CODE', join: 'ACCEPT & JOIN', change: 'USE A DIFFERENT CODE' },
             fr: { invited: 'TU AS ÉTÉ INVITÉ(E)', by: 'AVEC LE CODE', join: 'ACCEPTER & REJOINDRE', change: 'UTILISER UN AUTRE CODE' },
@@ -396,45 +403,39 @@
           box.innerHTML =
             '<p style="font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:3px;' +
             'color:rgba(255,255,255,.6);text-transform:uppercase;text-align:center;margin:0;">' + il.invited + '</p>' +
-            // Code badge
-            '<div style="background:rgba(255,255,255,0.12);border:2px solid rgba(255,255,255,0.55);' +
+            '<div style="background:rgba(255,255,255,0.10);border:1.5px solid rgba(255,255,255,0.45);' +
             'border-radius:14px;padding:14px 28px;text-align:center;">' +
             '<div style="font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:3px;' +
-            'color:rgba(255,255,255,.5);margin-bottom:8px;text-transform:uppercase;">' + il.by + '</div>' +
+            'color:rgba(255,255,255,.45);margin-bottom:8px;text-transform:uppercase;">' + il.by + '</div>' +
             '<div style="font-family:Nasalization,Arial,sans-serif;font-size:22px;letter-spacing:6px;' +
-            'color:#fff;text-shadow:0 0 20px rgba(255,255,255,0.6);">' + autoRef + '</div>' +
+            'color:#fff;text-shadow:0 0 20px rgba(255,255,255,0.5);">' + autoRef + '</div>' +
             '</div>' +
-            // Accept button
-            '<button id="ref-btn" style="width:100%;padding:15px;border-radius:14px;border:none;cursor:pointer;' +
-            'background:linear-gradient(135deg,rgba(255,255,255,0.25),rgba(255,255,255,0.1));' +
-            'border:1.5px solid rgba(255,255,255,0.5);color:#fff;' +
+            '<button id="ref-btn" style="width:100%;padding:15px;border-radius:14px;cursor:pointer;' +
+            'background:linear-gradient(135deg,rgba(255,255,255,0.22),rgba(255,255,255,0.08));' +
+            'border:1.5px solid rgba(255,255,255,0.45);color:#fff;' +
             'font-family:Nasalization,Arial,sans-serif;font-size:10px;letter-spacing:3px;">' + il.join + '</button>' +
-            // Hidden input to keep the code
             '<input id="ref-inp" type="hidden" value="' + autoRef + '">' +
-            // Change code link
-            '<button id="skip-btn" style="background:none;border:none;color:rgba(255,255,255,.35);' +
+            '<button id="skip-btn" style="background:none;border:none;color:rgba(255,255,255,.32);' +
             'font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:2px;' +
             'text-transform:uppercase;cursor:pointer;text-decoration:underline;">' + il.change + '</button>';
-
         } else {
-          // ── NO CODE: standard referral input ──
           box.innerHTML =
             '<p style="font-family:Nasalization,Arial,sans-serif;font-size:10px;letter-spacing:3px;' +
             'color:rgba(255,255,255,.65);text-transform:uppercase;text-align:center;margin:0">' + lbl.title + '</p>' +
             '<input id="ref-inp" type="text" maxlength="16" autocomplete="off" spellcheck="false"' +
             ' placeholder="' + lbl.ph + '"' +
-            ' style="width:100%;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.3);' +
+            ' style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.28);' +
             'border-radius:12px;color:#fff;font-family:Nasalization,Arial,sans-serif;font-size:12px;' +
             'letter-spacing:3px;padding:13px 16px;text-align:center;outline:none;text-transform:uppercase;box-sizing:border-box">' +
-            '<button id="ref-btn" style="width:100%;padding:14px;border-radius:14px;border:none;cursor:pointer;' +
-            'background:linear-gradient(135deg,#3AACDF,#1E6E9A);color:#fff;' +
+            '<button id="ref-btn" style="width:100%;padding:14px;border-radius:14px;cursor:pointer;' +
+            'background:linear-gradient(135deg,#3AACDF,#1E6E9A);border:none;color:#fff;' +
             'font-family:Nasalization,Arial,sans-serif;font-size:10px;letter-spacing:3px">' + lbl.btn + '</button>' +
-            '<button id="skip-btn" style="background:none;border:none;color:rgba(255,255,255,.4);' +
+            '<button id="skip-btn" style="background:none;border:none;color:rgba(255,255,255,.38);' +
             'font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:3px;' +
             'text-transform:uppercase;cursor:pointer;text-decoration:underline">' + lbl.skip + '</button>';
         }
 
-        var s = stage();
+        var s = document.getElementById('main-stage');
         if (s) s.appendChild(box);
 
         var inp = document.getElementById('ref-inp');
@@ -455,7 +456,6 @@
           }, 300);
         }
 
-        // "Change code" → swap to standard input form
         function showChangeForm() {
           var b = document.getElementById('ref-box');
           if (b) { b.style.transition = 'opacity 0.2s'; b.style.opacity = '0'; }
@@ -475,18 +475,15 @@
           inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
         }
 
-      }, 400);
+      }, 380);
     }
 
-    // ── MAIN SESSION LOGIC ──
+    // ── MAIN SESSION LOGIC ────────────────────────────────────────────────
     (function init() {
-      // Mark splash shown
       try { localStorage.setItem('nava_splash_shown', Date.now().toString()); } catch(e) {}
-      // Clear stale module cache
       try { localStorage.removeItem('nava_modules'); localStorage.removeItem('nava_modules_ts'); } catch(e) {}
 
-      // Non-Telegram redirect — comprehensive check, generous 3s timeout
-      // Checks: SDK, native proxy, URL hash, localStorage (returning user)
+      // Non-Telegram redirect
       setTimeout(function() {
         var h = window.location.hash || '';
         var hasTg = !!(window.Telegram && window.Telegram.WebApp) ||
@@ -498,24 +495,21 @@
         if (!hasTg) window.location.replace('https://t.me/NavaPeaceBot/app');
       }, 3000);
 
-      // Call Telegram.WebApp.ready() if available
       try {
         if (window.Telegram && window.Telegram.WebApp) {
           window.Telegram.WebApp.ready();
           window.Telegram.WebApp.expand();
           try {
-            window.Telegram.WebApp.setHeaderColor('#43b4e4');
-            window.Telegram.WebApp.setBackgroundColor('#43b4e4');
+            window.Telegram.WebApp.setHeaderColor('#071828');
+            window.Telegram.WebApp.setBackgroundColor('#071828');
           } catch(e) {}
         }
       } catch(e) {}
 
-      // Check for returning user in localStorage
       var country = ls('nava_peace_country');
       var uid     = ls('nava_peace_uid');
 
       if (uid && country) {
-        // Returning user — refresh pseudo/message from DB in background
         sbGet('peace_messages?select=pseudo,message&user_uid=eq.' + encodeURIComponent(uid) + '&limit=1')
           .then(function (d) {
             if (d && d[0]) {
@@ -523,15 +517,12 @@
               if (d[0].message) ls('nava_peace_message', d[0].message);
             }
           }).catch(function(){});
-
-        // Redirect after logo is visible (~1s)
         var today = new Date().toISOString().split('T')[0];
         var dest  = (ls('nava_peace_voted') === today) ? 'map.html' : 'peace.html';
-        setTimeout(function () { fadeAndGo(dest); }, 1000);
+        setTimeout(function () { fadeAndGo(dest); }, 1100);
         return;
       }
 
-      // New visitor — read Telegram user to check DB
       var _attempts = 0;
       function tryRestore() {
         _attempts++;
@@ -539,13 +530,11 @@
         try { tg = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user; } catch(e) {}
 
         if (tg && tg.id) {
-          // Store uid & startParam
           var myUID = 'tg_' + tg.id;
           ls('nava_peace_uid', myUID);
           try {
             var sp = window.Telegram.WebApp.initDataUnsafe.start_param;
             if (sp) ls('nava_peace_referred_by', sp.toUpperCase());
-            // Store language from Telegram
             if (tg.language_code) {
               var supported = ['en','fr','es','pt','ar','zh','hi','ja','ru','de','ko','uk'];
               var lc = tg.language_code.substring(0,2).toLowerCase();
@@ -553,7 +542,6 @@
             }
           } catch(e) {}
 
-          // Check DB: has this user registered?
           sbGet('peace_votes?select=referral_code,referred_by,country,age,gender,created_at&user_uid=eq.' + encodeURIComponent(myUID) + '&order=created_at.desc&limit=1')
             .then(function (data) {
               if (data && data.length > 0) {
@@ -564,7 +552,6 @@
                 if (row.gender)        ls('nava_peace_gender',      row.gender);
                 if (row.referred_by)   ls('nava_peace_referred_by', row.referred_by);
                 if (row.created_at)    ls('nava_peace_voted',       row.created_at.split('T')[0]);
-                // Also fetch pseudo/message
                 return sbGet('peace_messages?select=pseudo,message&user_uid=eq.' + encodeURIComponent(myUID) + '&limit=1')
                   .then(function (pm) {
                     if (pm && pm[0]) {
@@ -574,41 +561,31 @@
                     fadeAndGo('peace.html');
                   }).catch(function () { fadeAndGo('peace.html'); });
               }
-              // Check nava_discoveries
               return sbGet('nava_discoveries?select=user_uid&user_uid=eq.' + encodeURIComponent(myUID) + '&limit=1')
                 .then(function (disc) {
                   if (disc && disc.length > 0) {
                     ls('nava_peace_uid', myUID);
                     fadeAndGo('peace.html');
                   } else {
-                    showForm(); // Truly new visitor
+                    showForm();
                   }
                 });
             }).catch(function () { showForm(); });
 
         } else if (_attempts < 6) {
-          // WebApp not ready yet — retry
           setTimeout(tryRestore, 300);
         } else {
-          // Give up — show form
           showForm();
         }
       }
 
-      // Hard fallback: show form after 2s no matter what
       setTimeout(function () { showForm(); }, 2000);
-
-      // Start restore after short delay (let WebApp initialize on mobile)
       setTimeout(tryRestore, 250);
     })();
 
   })();
   </script>
 
-  <!-- ④ Support scripts — loaded last, non-blocking.
-       supabase_config.js sets SUPABASE_URL/KEY globals for module_gate.js.
-       telegram.js sets NAVA_TG global used by other pages.
-       module_gate.js hides disabled nav items. -->
   <script src="supabase_config.js"></script>
   <script src="telegram.js"></script>
   <script src="module_gate.js?v=6"></script>
