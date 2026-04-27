@@ -2418,18 +2418,23 @@
 
     // ── Compte actif : chargement depuis DB (source de vérité) ──
     const uid2    = localStorage.getItem('nava_peace_uid');
-    const refCode = localStorage.getItem('nava_peace_ref_code');
+    let refCode = localStorage.getItem('nava_peace_ref_code');
     let ownActions = parseInt(localStorage.getItem('nava_peace_days') || '0', 10);
     let streak = 0;
     try {
       if (uid2) {
         const sb2b = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        // Récupérer tous les created_at pour calculer le streak réel
+        // Récupérer tous les created_at + referral_code pour calculer le streak réel
         const { data: voteData } = await sb2b
           .from('peace_votes')
-          .select('created_at')
+          .select('created_at, referral_code')
           .eq('user_uid', uid2)
           .order('created_at', { ascending: false });
+        // Récupérer le refCode depuis la DB si absent du localStorage
+        if (!refCode && voteData) {
+          const rv = voteData.find(v => v.referral_code);
+          if (rv) { refCode = rv.referral_code; localStorage.setItem('nava_peace_ref_code', refCode); }
+        }
         if (voteData && voteData.length > 0) {
           ownActions = voteData.length;
           localStorage.setItem('nava_peace_vote_count', ownActions);
@@ -3822,20 +3827,15 @@
     try {
       const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-      // Peace points = rows in referral_points for this referrer
+      // referral_points = source de vérité : 1 ligne par ami qui a voté
       const { data: pts } = await sb
         .from('referral_points')
-        .select('id')
+        .select('user_uid')
         .eq('referral_code', refCode);
 
-      // Referred users = active (non-blocked) rows where referred_by = refCode
-      const { data: friends } = await sb
-        .from('active_votes')
-        .select('id')
-        .eq('referred_by', refCode);
-
-      const ptsCount     = pts     ? pts.length     : 0;
-      const friendsCount = friends ? friends.length : 0;
+      const uniqueFriends = new Set((pts || []).map(r => r.user_uid).filter(Boolean));
+      const ptsCount     = pts ? pts.length : 0;
+      const friendsCount = uniqueFriends.size;
 
       document.getElementById('ref-points').textContent  = ptsCount;
       document.getElementById('ref-friends').textContent = friendsCount;
@@ -3886,12 +3886,12 @@
     try {
       const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-      // Unique referred users from peace_votes
+      // Amis référencés depuis referral_points (source de vérité)
       const { data: friendsRaw } = await sb
-        .from('peace_votes')
+        .from('referral_points')
         .select('user_uid')
-        .eq('referred_by', refCode);
-      // Deduplicate
+        .eq('referral_code', refCode);
+      // Dédupliquer
       const seenUids = new Set();
       const friends = (friendsRaw || []).filter(f => {
         if (!f.user_uid || seenUids.has(f.user_uid)) return false;
@@ -3903,13 +3903,12 @@
         return;
       }
 
-      // Count votes per referred user directly from peace_votes (most reliable)
+      // Compter les votes de chaque ami depuis peace_votes
       const uidsForCount = friends.map(f => f.user_uid).filter(Boolean);
       const { data: votesData } = await sb
         .from('peace_votes')
         .select('user_uid')
-        .in('user_uid', uidsForCount)
-        .eq('referred_by', refCode);
+        .in('user_uid', uidsForCount);
 
       // Doves per referred user_uid
       const dovesPerUser = {};
