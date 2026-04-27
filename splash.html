@@ -72,8 +72,7 @@
     .logo-img {
       width: min(190px, 23vh); height: min(190px, 23vh);
       object-fit: contain;
-      /* Filter lives only here — no animation conflict */
-      filter: brightness(0) invert(1) drop-shadow(0 6px 28px rgba(255,255,255,0.35));
+      filter: drop-shadow(0 6px 28px rgba(255,255,255,0.25));
     }
     .logo-img.glowing {
       animation: logoGlow 6s ease-in-out infinite;
@@ -166,7 +165,7 @@
     @keyframes orbPulse    { 0%,100% { opacity:.55; transform:translateX(-50%) scale(1); } 50% { opacity:1; transform:translateX(-50%) scale(1.14); } }
     @keyframes logoIn      { from { opacity:0; transform:scale(0.76) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
     @keyframes logoFloat   { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-10px); } }
-    @keyframes logoGlow    { 0%,100% { filter:brightness(0) invert(1) drop-shadow(0 6px 28px rgba(255,255,255,.38)) drop-shadow(0 0 55px rgba(109,213,245,.18)); } 50% { filter:brightness(0) invert(1) drop-shadow(0 10px 55px rgba(255,255,255,.65)) drop-shadow(0 0 100px rgba(109,213,245,.4)); } }
+    @keyframes logoGlow    { 0%,100% { filter:drop-shadow(0 6px 28px rgba(255,255,255,.28)) drop-shadow(0 0 45px rgba(109,213,245,.18)); } 50% { filter:drop-shadow(0 10px 50px rgba(255,255,255,.5)) drop-shadow(0 0 90px rgba(109,213,245,.38)); } }
     @keyframes brandIn     { from { opacity:0; letter-spacing:3px; transform:translateY(8px); } to { opacity:1; letter-spacing:clamp(9px,2.2vw,20px); transform:translateY(0); } }
     @keyframes heroIn      { from { opacity:0; transform:translateY(14px); filter:blur(3px); } to { opacity:1; transform:translateY(0); filter:blur(0); } }
     @keyframes fadeUp      { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
