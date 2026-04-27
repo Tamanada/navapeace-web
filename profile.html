@@ -4175,12 +4175,24 @@
     const myUid = localStorage.getItem('nava_peace_uid') || '';
     try {
       const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      // 1 · In-app notification banner (shows on peace.html next open)
       await sb.from('notifications').insert({
         to_user_uid:   toUid,
         from_user_uid: myUid,
         type:          'reminder',
         read:          false
       });
+      // 2 · Real phone push (fire-and-forget — fails silently if no subscription)
+      fetch(SUPABASE_URL + '/functions/v1/send-push', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+        body:    JSON.stringify({
+          to_user_uid: toUid,
+          title:       'NAVA PEACE 🕊',
+          body:        t('reminder_banner'),
+          url:         '/peace.html',
+        }),
+      }).catch(() => {});
       localStorage.setItem('nava_remind_' + toUid, Date.now().toString());
       btn.textContent = t('remind_sent');
     } catch(e) {
