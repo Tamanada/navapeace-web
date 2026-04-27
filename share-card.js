@@ -105,41 +105,63 @@
     s.onload=cb; document.head.appendChild(s);
   }
 
-  /* Fetch stats from Supabase */
+  /* Fetch stats from Supabase — each query isolated so one failure never zeroes the rest */
   async function _fetchStats(){
     var stats = { lovers:0, countries:0, doves:0, today:0, days:0 };
+    var sb = null;
     try {
-      var sb = (typeof supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined')
-        ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
-      if (!sb) return stats;
+      if (typeof supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined')
+        sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch(e){}
+    if (!sb) return stats;
 
-      var today = new Date().toISOString().split('T')[0];
+    var today = new Date().toISOString().split('T')[0];
 
+    // Total doves (all votes)
+    try {
       var r1 = await sb.from('peace_votes').select('user_uid', {count:'exact',head:true});
       stats.doves = r1.count || 0;
+    } catch(e){ console.warn('stats:doves', e); }
 
+    // Unique peace lovers
+    try {
       var r2 = await sb.rpc('count_distinct_users');
-      stats.lovers = r2.data || 0;
-      if (!r2.data) {
+      stats.lovers = (r2.data != null) ? r2.data : 0;
+      if (!stats.lovers) {
         var r2b = await sb.from('peace_votes').select('user_uid');
         var uids = new Set((r2b.data||[]).map(function(r){return r.user_uid;}));
         stats.lovers = uids.size;
       }
+    } catch(e){
+      try {
+        var r2b = await sb.from('peace_votes').select('user_uid');
+        var uids = new Set((r2b.data||[]).map(function(r){return r.user_uid;}));
+        stats.lovers = uids.size;
+      } catch(e2){ console.warn('stats:lovers', e2); }
+    }
 
+    // Countries
+    try {
       var r3 = await sb.from('peace_votes').select('country');
       var ctries = new Set((r3.data||[]).filter(function(r){return r.country;}).map(function(r){return r.country;}));
       stats.countries = ctries.size;
+    } catch(e){ console.warn('stats:countries', e); }
 
+    // Today's actions
+    try {
       var r4 = await sb.from('peace_votes').select('id', {count:'exact',head:true}).gte('created_at', today+'T00:00:00Z');
       stats.today = r4.count || 0;
+    } catch(e){ console.warn('stats:today', e); }
 
-      // Days since launch (from admin_settings or fallback)
+    // Days since launch (admin_settings may have RLS → fallback to hardcoded date)
+    try {
       var r5 = await sb.from('admin_settings').select('value').eq('key','launch_date').single();
       var launchDate = r5.data ? r5.data.value.replace(/"/g,'') : '2026-03-08';
-      var diff = Math.floor((Date.now() - new Date(launchDate).getTime()) / 86400000);
-      stats.days = Math.max(0, diff);
+      stats.days = Math.max(0, Math.floor((Date.now() - new Date(launchDate).getTime()) / 86400000));
+    } catch(e){
+      stats.days = Math.max(0, Math.floor((Date.now() - new Date('2026-03-08').getTime()) / 86400000));
+    }
 
-    } catch(e){ console.warn('stats fetch error', e); }
     return stats;
   }
 
