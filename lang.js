@@ -2653,10 +2653,10 @@ document.addEventListener('click', (e) => {
       right: 14px;
       z-index: 500;
     }
-    /* When placed inside the page header — absolute within header (avoids Telegram native controls) */
+    /* When placed inside the page header — fixed below Telegram native header bar (~56px) */
     #lang-switcher.in-header {
-      position: absolute;
-      top: 8px;
+      position: fixed;
+      top: 56px;
       right: 10px;
       z-index: 500;
     }
