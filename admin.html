@@ -2087,7 +2087,6 @@ async function saveModules() {
       console.warn('Edge Function save failed:', errMsg, '| adminCode length:', (_adminCode||'').length);
       showToast('✗ SYNC FAILED: ' + errMsg, 5000);
     }
-    }
     showModulesSaveBar(false);
   } catch(e) {
     showToast('✗ SAVE FAILED: ' + e.message, 4000);
