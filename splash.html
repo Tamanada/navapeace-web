@@ -30,17 +30,8 @@
       font-family: 'Nasalization', Arial, sans-serif;
       /* Start invisible — eliminates any white flash */
       opacity: 0;
-      background: #071828;
+      background: radial-gradient(ellipse at 50% 20%, #6DD5F5 0%, #3AACDF 45%, #1E8EC4 100%);
       animation: bodyReveal 0.35s ease 0.05s both;
-    }
-
-    /* Dark → deep blue gradient reveals after body fades in */
-    body::before {
-      content: '';
-      position: fixed; inset: 0; z-index: 0;
-      background: radial-gradient(ellipse at 50% 25%, #1d7ab5 0%, #0d4e78 45%, #071828 100%);
-      animation: bgReveal 1.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
-      pointer-events: none;
     }
 
     #tg-block { display: none !important; }
@@ -171,7 +162,6 @@
 
     /* ── KEYFRAMES ── */
     @keyframes bodyReveal  { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes bgReveal    { from { opacity: 0; } to { opacity: 1; } }
     @keyframes orbReveal   { from { opacity: 0; } to { opacity: 1; } }
     @keyframes orbPulse    { 0%,100% { opacity:.55; transform:translateX(-50%) scale(1); } 50% { opacity:1; transform:translateX(-50%) scale(1.14); } }
     @keyframes logoIn      { from { opacity:0; transform:scale(0.76) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
@@ -519,7 +509,7 @@
           }).catch(function(){});
         var today = new Date().toISOString().split('T')[0];
         var dest  = (ls('nava_peace_voted') === today) ? 'map.html' : 'peace.html';
-        setTimeout(function () { fadeAndGo(dest); }, 1100);
+        setTimeout(function () { fadeAndGo(dest); }, 3200);
         return;
       }
 
