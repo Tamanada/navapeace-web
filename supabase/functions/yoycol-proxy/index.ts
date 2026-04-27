@@ -190,6 +190,41 @@ Deno.serve(async (req) => {
       return json(tgData);
     }
 
+    // ── POST save user email (no auth needed beyond uid) ───────────
+    if (action === 'save_user_email' && req.method === 'POST') {
+      const SUPA_URL    = Deno.env.get('SUPABASE_URL') ?? '';
+      const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+      if (!SUPA_URL || !SERVICE_KEY) return json({ error: 'Supabase not configured' }, 500);
+
+      const { uid, email } = await req.json();
+      if (!uid || !email) return json({ error: 'uid and email required' }, 400);
+
+      // Basic email format validation
+      const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRe.test(String(email))) return json({ error: 'invalid email format' }, 400);
+
+      // Store as key=user_email_<uid> in admin_settings (no schema change needed)
+      const upsertRes = await fetch(`${SUPA_URL}/rest/v1/admin_settings`, {
+        method: 'POST',
+        headers: {
+          apikey:          SERVICE_KEY,
+          Authorization:   `Bearer ${SERVICE_KEY}`,
+          'Content-Type':  'application/json',
+          Prefer:          'resolution=merge-duplicates',
+        },
+        body: JSON.stringify({
+          key:        `user_email_${String(uid).replace(/[^a-z0-9_\-]/gi, '_')}`,
+          value:      String(email).toLowerCase().trim(),
+          updated_at: new Date().toISOString(),
+        }),
+      });
+      if (!upsertRes.ok) {
+        const err = await upsertRes.text();
+        return json({ error: `DB write failed: ${err}` }, 500);
+      }
+      return json({ success: true });
+    }
+
     // ── POST update admin setting (uses service role to bypass RLS) ─
     if (action === 'update_admin_setting' && req.method === 'POST') {
       const SUPA_URL   = Deno.env.get('SUPABASE_URL') ?? '';

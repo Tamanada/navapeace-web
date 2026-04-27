@@ -853,6 +853,97 @@
     .admin-badge.super { background: rgba(255,200,50,0.15); border-color: rgba(255,200,50,0.5); color: #ffc832; }
     .admin-badge.admin { background: rgba(100,160,255,0.15); border-color: rgba(100,160,255,0.4); color: #7ab4ff; }
 
+    /* ── EMAIL CARD ── */
+    .email-status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .email-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      letter-spacing: 2px;
+      font-weight: 700;
+    }
+    .email-status-badge.linked {
+      background: rgba(80,220,120,0.15);
+      border: 1px solid rgba(80,220,120,0.45);
+      color: #5fdf8f;
+    }
+    .email-status-badge.not-linked {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.45);
+    }
+    .email-address-display {
+      font-size: 14px;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.9);
+      margin-top: 8px;
+      word-break: break-all;
+    }
+    .email-edit-form {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .email-input {
+      width: 100%;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 14px;
+      color: #fff;
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 14px;
+      letter-spacing: 1px;
+      padding: 12px 16px;
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+    .email-input::placeholder { color: rgba(255,255,255,0.3); }
+    .email-input:focus { border-color: rgba(255,255,255,0.6); }
+    .email-hint {
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 1.5px;
+      line-height: 1.5;
+      text-align: center;
+      font-family: Arial, sans-serif;
+    }
+
+    /* ── EMAIL REQUIRED MODAL ── */
+    #emailRequiredOverlay .email-modal-box {
+      background: linear-gradient(160deg,#0a1628,#0d2240);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 20px;
+      padding: 28px 24px;
+      width: 88%;
+      max-width: 360px;
+      text-align: center;
+    }
+    #emailRequiredOverlay .email-modal-title {
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 14px;
+      letter-spacing: 3px;
+      color: #fff;
+      margin: 0 0 6px;
+    }
+    #emailRequiredOverlay .email-modal-desc {
+      font-size: 14px;
+      color: rgba(255,255,255,0.5);
+      font-family: Arial, sans-serif;
+      line-height: 1.55;
+      margin: 0 0 20px;
+    }
+
     /* ── PEACE MESSAGE CARD ── */
     .peace-textarea {
       width: 100%;
@@ -1227,6 +1318,35 @@
     </div>
   </div>
 
+  <!-- MY EMAIL -->
+  <div class="card card-collapse" id="email-card" onclick="toggleCard('email-card')">
+    <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('email-card',true)">
+      <p class="section-title">
+        <svg class="title-icon" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+        <span>MY EMAIL</span>
+      </p>
+      <span class="card-chevron">▾</span>
+    </div>
+    <div class="card-body">
+      <!-- Status row -->
+      <div class="email-status-row" id="email-status-row">
+        <span class="email-status-badge not-linked" id="email-status-badge">⚬ NOT LINKED</span>
+        <button class="edit-btn" id="email-action-btn" onclick="event.stopPropagation();startEditEmail()">LINK EMAIL</button>
+      </div>
+      <div class="email-address-display" id="email-address-display" style="display:none;"></div>
+      <!-- Edit form -->
+      <div class="email-edit-form" id="email-edit-form" onclick="event.stopPropagation()">
+        <input class="email-input" id="email-input" type="email"
+               placeholder="your@email.com" autocomplete="email" inputmode="email" />
+        <p class="email-hint">Your email will be used for badge & NFT confirmations only. It will never be shared.</p>
+        <div class="pseudo-btn-row">
+          <button class="save-btn" onclick="saveEmail()">SAVE</button>
+          <button class="edit-btn" onclick="cancelEditEmail()">CANCEL</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- MY PROFILE -->
   <div class="card card-collapse" id="my-card" onclick="toggleCard('my-card')">
     <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('my-card',true)">
@@ -1489,6 +1609,22 @@
         SEND FEEDBACK
       </button>
       <span id="feedbackBadge" style="display:none;position:absolute;top:-6px;right:-6px;background:#ff5f5f;color:#fff;font-size:13px;font-weight:700;width:18px;height:18px;border-radius:50%;line-height:18px;text-align:center;">!</span>
+    </div>
+  </div>
+
+  <!-- EMAIL REQUIRED MODAL -->
+  <div id="emailRequiredOverlay" onclick="closeEmailModal(event)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:1010;align-items:center;justify-content:center;">
+    <div class="email-modal-box" onclick="event.stopPropagation()">
+      <p class="email-modal-title">✉️ LINK YOUR EMAIL</p>
+      <p class="email-modal-desc">An email address is required to receive your badge or NFT confirmation.</p>
+      <input id="emailModal-input" type="email" class="email-input"
+             placeholder="your@email.com" autocomplete="email" inputmode="email"
+             style="margin-bottom:8px;" />
+      <p id="emailModal-status" style="font-size:13px;color:rgba(255,80,80,0.9);min-height:16px;margin:0 0 14px;font-family:Arial,sans-serif;letter-spacing:1px;"></p>
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button onclick="closeEmailModal()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;color:rgba(255,255,255,0.5);font-family:Nasalization,Arial,sans-serif;font-size:13px;letter-spacing:1.5px;padding:12px 20px;cursor:pointer;">CANCEL</button>
+        <button id="emailModal-save-btn" onclick="saveEmailFromModal()" style="background:rgba(100,160,255,0.2);border:1px solid rgba(100,160,255,0.4);border-radius:12px;color:#7ab4ff;font-family:Nasalization,Arial,sans-serif;font-size:13px;letter-spacing:1.5px;padding:12px 24px;cursor:pointer;">LINK & CONTINUE ›</button>
+      </div>
     </div>
   </div>
 
@@ -1877,6 +2013,148 @@
     if (days) container.innerHTML += `
       <div class="my-badge"><div class="val">${_esc(days)}</div><div class="key">${t('lbl_days_badge')}</div></div>`;
   }
+
+  // ── EMAIL MANAGEMENT ────────────────────────────────────────────────
+
+  function _maskEmail(email) {
+    var at = email.indexOf('@');
+    if (at <= 1) return email;
+    var name = email.slice(0, at);
+    var domain = email.slice(at);
+    var visible = name.slice(0, Math.min(2, name.length));
+    var stars = name.length > 2 ? '***' : '';
+    return visible + stars + domain;
+  }
+
+  function renderEmailStatus() {
+    var email = localStorage.getItem('nava_peace_email') || '';
+    var badge  = document.getElementById('email-status-badge');
+    var dispEl = document.getElementById('email-address-display');
+    var actionBtn = document.getElementById('email-action-btn');
+    if (!badge || !dispEl || !actionBtn) return;
+
+    if (email) {
+      badge.className = 'email-status-badge linked';
+      badge.textContent = '✔ LINKED';
+      dispEl.style.display = 'block';
+      dispEl.textContent = _maskEmail(email);
+      actionBtn.textContent = 'CHANGE';
+    } else {
+      badge.className = 'email-status-badge not-linked';
+      badge.textContent = '⚬ NOT LINKED';
+      dispEl.style.display = 'none';
+      actionBtn.textContent = 'LINK EMAIL';
+    }
+  }
+
+  function startEditEmail() {
+    var form = document.getElementById('email-edit-form');
+    var inp  = document.getElementById('email-input');
+    if (!form || !inp) return;
+    inp.value = localStorage.getItem('nava_peace_email') || '';
+    form.style.display = 'flex';
+    setTimeout(function(){ inp.focus(); }, 80);
+  }
+
+  function cancelEditEmail() {
+    var form = document.getElementById('email-edit-form');
+    if (form) form.style.display = 'none';
+  }
+
+  async function saveEmail() {
+    var inp   = document.getElementById('email-input');
+    var email = (inp ? inp.value : '').trim().toLowerCase();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      if (inp) { inp.style.borderColor = 'rgba(255,80,80,0.7)'; setTimeout(function(){ inp.style.borderColor = ''; }, 1500); }
+      return;
+    }
+    localStorage.setItem('nava_peace_email', email);
+    cancelEditEmail();
+    renderEmailStatus();
+    showToastMsg('✔ EMAIL LINKED');
+
+    // Sync to Supabase (best-effort)
+    try {
+      var uid = localStorage.getItem('nava_peace_uid') || '';
+      if (uid && typeof SUPABASE_URL !== 'undefined') {
+        var edgeUrl = SUPABASE_URL.replace('/rest/v1','').replace(/\/$/,'')
+                    + '/functions/v1/yoycol-proxy?action=save_user_email';
+        await fetch(edgeUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json',
+                     'apikey': SUPABASE_ANON_KEY,
+                     'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+          body: JSON.stringify({ uid: uid, email: email })
+        });
+      }
+    } catch(e) { /* silent — localStorage is the source of truth */ }
+  }
+
+  // ── EMAIL-REQUIRED MODAL ────────────────────────────────────────────
+  var _emailModalCallback = null;
+
+  function showEmailModal(onSuccess) {
+    _emailModalCallback = onSuccess || null;
+    var overlay = document.getElementById('emailRequiredOverlay');
+    var inp     = document.getElementById('emailModal-input');
+    var status  = document.getElementById('emailModal-status');
+    if (!overlay) return;
+    if (inp)    inp.value = '';
+    if (status) status.textContent = '';
+    overlay.style.display = 'flex';
+    setTimeout(function(){ if(inp) inp.focus(); }, 80);
+  }
+
+  function closeEmailModal(evt) {
+    if (evt && evt.target !== document.getElementById('emailRequiredOverlay')) return;
+    _closeEmailModalImpl();
+  }
+
+  function _closeEmailModalImpl() {
+    var overlay = document.getElementById('emailRequiredOverlay');
+    if (overlay) overlay.style.display = 'none';
+    _emailModalCallback = null;
+  }
+
+  async function saveEmailFromModal() {
+    var inp    = document.getElementById('emailModal-input');
+    var status = document.getElementById('emailModal-status');
+    var btn    = document.getElementById('emailModal-save-btn');
+    var email  = (inp ? inp.value : '').trim().toLowerCase();
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      if (status) status.textContent = 'Please enter a valid email address.';
+      return;
+    }
+    if (btn) { btn.disabled = true; btn.textContent = '···'; }
+
+    localStorage.setItem('nava_peace_email', email);
+    renderEmailStatus();
+
+    // Sync to Supabase (best-effort)
+    try {
+      var uid = localStorage.getItem('nava_peace_uid') || '';
+      if (uid && typeof SUPABASE_URL !== 'undefined') {
+        var edgeUrl = SUPABASE_URL.replace('/rest/v1','').replace(/\/$/,'')
+                    + '/functions/v1/yoycol-proxy?action=save_user_email';
+        await fetch(edgeUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json',
+                     'apikey': SUPABASE_ANON_KEY,
+                     'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+          body: JSON.stringify({ uid: uid, email: email })
+        });
+      }
+    } catch(e) { /* silent */ }
+
+    var cb = _emailModalCallback;
+    _closeEmailModalImpl();
+    if (btn) { btn.disabled = false; btn.textContent = 'LINK & CONTINUE ›'; }
+    if (cb) cb();
+  }
+
+  // Init email card on load
+  renderEmailStatus();
 
   function toggleEdit() {
     const form = document.getElementById('edit-form');
@@ -3755,6 +4033,14 @@
   }
 
   async function startDonation(tier, divEl) {
+    // ── Email gate: required before any badge/NFT acquisition ──────────
+    var _email = localStorage.getItem('nava_peace_email') || '';
+    if (!_email) {
+      showEmailModal(function() { startDonation(tier, divEl); });
+      return;
+    }
+    // ──────────────────────────────────────────────────────────────────
+
     divEl.classList.add('donation-tier-loading');
 
     try {
