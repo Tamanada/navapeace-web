@@ -201,14 +201,22 @@ Deno.serve(async (req) => {
         return json({ error: 'adminCode, key and value are required' }, 400);
       }
 
-      // 1. Verify admin code is active
+      // 1. Verify admin code via nava_check_admin RPC (same as admin panel login)
       const verifyRes = await fetch(
-        `${SUPA_URL}/rest/v1/admins?code=eq.${encodeURIComponent(adminCode)}&active=eq.true&select=id&limit=1`,
-        { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } }
+        `${SUPA_URL}/rest/v1/rpc/nava_check_admin`,
+        {
+          method: 'POST',
+          headers: {
+            apikey: SERVICE_KEY,
+            Authorization: `Bearer ${SERVICE_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ input_code: adminCode }),
+        }
       );
-      const admins = await verifyRes.json();
-      if (!Array.isArray(admins) || admins.length === 0) {
-        return json({ error: 'Invalid or inactive admin code' }, 403);
+      const verifyData = await verifyRes.json();
+      if (!verifyData?.valid) {
+        return json({ error: 'Invalid admin code' }, 403);
       }
 
       // 2. Upsert into admin_settings with service role (bypasses RLS)

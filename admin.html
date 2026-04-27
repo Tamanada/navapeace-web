@@ -2080,20 +2080,13 @@ async function saveModules() {
         body: JSON.stringify({ adminCode: _adminCode, key: 'nava_modules', value }),
       });
       const result = await res.json();
-      if (!res.ok || result.error) throw new Error(result.error || 'Edge Function error');
+      if (!res.ok || result.error) throw new Error(result.error || `HTTP ${res.status}`);
       showToast('✓ MODULES SAVED & SYNCED', 3000);
     } catch(supaErr) {
-      console.warn('Edge Function save failed, trying direct upsert:', supaErr);
-      // Fallback direct (si RLS permet)
-      try {
-        const { error } = await sb.from('admin_settings')
-          .upsert({ key: 'nava_modules', value, updated_at: new Date().toISOString() },
-                  { onConflict: 'key' });
-        if (error) throw error;
-        showToast('✓ MODULES SAVED & SYNCED', 3000);
-      } catch(e2) {
-        showToast('✓ SAVED LOCALLY (sync failed)', 3000);
-      }
+      const errMsg = supaErr?.message || String(supaErr);
+      console.warn('Edge Function save failed:', errMsg, '| adminCode length:', (_adminCode||'').length);
+      showToast('✗ SYNC FAILED: ' + errMsg, 5000);
+    }
     }
     showModulesSaveBar(false);
   } catch(e) {
