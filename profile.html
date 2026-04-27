@@ -1321,6 +1321,7 @@
   <!-- MY EMAIL -->
   <div class="card card-collapse" id="email-card" onclick="toggleCard('email-card')">
     <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('email-card',true)">
+      <button class="id-info-btn" onclick="event.stopPropagation();openEmailInfo()" title="Why link my email?">ⓘ</button>
       <p class="section-title">
         <svg class="title-icon" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
         <span>MY EMAIL</span>
@@ -1609,6 +1610,47 @@
         SEND FEEDBACK
       </button>
       <span id="feedbackBadge" style="display:none;position:absolute;top:-6px;right:-6px;background:#ff5f5f;color:#fff;font-size:13px;font-weight:700;width:18px;height:18px;border-radius:50%;line-height:18px;text-align:center;">!</span>
+    </div>
+  </div>
+
+  <!-- EMAIL INFO POPUP -->
+  <div id="email-info-overlay" onclick="closeEmailInfo()" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,0.72);align-items:center;justify-content:center;padding:24px;">
+    <div id="email-info-card" onclick="event.stopPropagation()" style="background:linear-gradient(145deg,rgba(20,55,100,0.98),rgba(10,30,65,0.98));border:1px solid rgba(109,213,245,0.25);border-radius:20px;padding:28px 24px;max-width:340px;width:100%;animation:celebPop 0.3s cubic-bezier(.22,1,.36,1) both;">
+      <p style="font-size:13px;letter-spacing:3px;color:#6DD5F5;margin:0 0 20px;text-align:center;">WHY LINK MY EMAIL?</p>
+
+      <div class="id-info-row">
+        <div class="id-info-icon">🏅</div>
+        <div class="id-info-text">
+          <p>BADGES &amp; NFTs</p>
+          <p>As soon as you earn a badge or an NFT, your email is required to send you the confirmation and delivery details.</p>
+        </div>
+      </div>
+
+      <div class="id-info-row">
+        <div class="id-info-icon">🔒</div>
+        <div class="id-info-text">
+          <p>100% PRIVATE</p>
+          <p>Your email is never visible to other users and will never be sold or shared with third parties.</p>
+        </div>
+      </div>
+
+      <div class="id-info-row">
+        <div class="id-info-icon">✉️</div>
+        <div class="id-info-text">
+          <p>NOTIFICATIONS ONLY</p>
+          <p>We only use it for important account events: badge confirmation, order updates, and major announcements.</p>
+        </div>
+      </div>
+
+      <div class="id-info-row">
+        <div class="id-info-icon">⚙️</div>
+        <div class="id-info-text">
+          <p>OPTIONAL UNTIL IT'S NOT</p>
+          <p>Linking your email is voluntary — until you claim your first badge or NFT, at which point it becomes required.</p>
+        </div>
+      </div>
+
+      <button onclick="closeEmailInfo()" style="display:block;width:100%;margin-top:20px;background:rgba(109,213,245,0.12);border:1px solid rgba(109,213,245,0.35);border-radius:12px;color:#6DD5F5;font-family:Nasalization,Arial,sans-serif;font-size:13px;letter-spacing:2px;padding:12px;cursor:pointer;">GOT IT</button>
     </div>
   </div>
 
@@ -2649,6 +2691,13 @@
   }
   function closeIdentityInfo() {
     document.getElementById('id-info-overlay').classList.remove('open');
+  }
+
+  function openEmailInfo() {
+    document.getElementById('email-info-overlay').style.display = 'flex';
+  }
+  function closeEmailInfo() {
+    document.getElementById('email-info-overlay').style.display = 'none';
   }
 
   function collectStreakMilestone() {
