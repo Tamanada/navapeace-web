@@ -108,11 +108,7 @@
   /* Fetch stats from Supabase — each query isolated so one failure never zeroes the rest */
   async function _fetchStats(){
     var stats = { lovers:0, countries:0, doves:0, today:0, days:0 };
-    var sb = null;
-    try {
-      if (typeof supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined')
-        sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } catch(e){}
+    var sb = window._navaSupabase || null;
     if (!sb) return stats;
 
     var today = new Date().toISOString().split('T')[0];

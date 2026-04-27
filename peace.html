@@ -697,6 +697,8 @@
     let sb = null;
     try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }
     catch(e) { console.warn('Supabase init failed', e); }
+    // Expose globally so share-card.js can reuse this working client
+    window._navaSupabase = sb;
 
     // ── Vérifier si l'utilisateur est bloqué (côté serveur) ────────
     (function checkBlocked() {
