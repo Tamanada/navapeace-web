@@ -2649,15 +2649,15 @@ document.addEventListener('click', (e) => {
     /* When injected into body (fallback) — fixed position */
     #lang-switcher:not(.in-header) {
       position: fixed;
-      top: 56px;
-      right: 14px;
+      bottom: 74px;
+      left: 14px;
       z-index: 500;
     }
-    /* When placed inside the page header — fixed below Telegram native header bar */
+    /* When placed inside the page header — same bottom-left anchor */
     #lang-switcher.in-header {
       position: fixed;
-      top: 80px;
-      right: 10px;
+      bottom: 74px;
+      left: 14px;
       z-index: 500;
     }
     .lang-toggle-btn {
@@ -2679,8 +2679,8 @@ document.addEventListener('click', (e) => {
     #lang-menu {
       display: none;
       position: absolute;
-      top: calc(100% + 8px);
-      right: 0;
+      bottom: calc(100% + 8px);
+      left: 0;
       background: rgba(20,80,140,0.92);
       border: 1px solid rgba(255,255,255,0.3);
       border-radius: 16px;
