@@ -1476,6 +1476,7 @@
         const _yd = new Date(); _yd.setDate(_yd.getDate()-1);
         const _yesterday = _yd.getFullYear()+'-'+String(_yd.getMonth()+1).padStart(2,'0')+'-'+String(_yd.getDate()).padStart(2,'0');
         const _localDates = [...new Set(votes.map(v => _toLocalDate(v.created_at)))].sort().reverse();
+        // Streak actif (depuis aujourd'hui/hier en continu)
         let streak = 0;
         if (_localDates.length && (_localDates[0] === TODAY || _localDates[0] === _yesterday)) {
           streak = 1;
@@ -1486,15 +1487,24 @@
             else break;
           }
         }
+        // Meilleur streak jamais atteint (pour les jalons)
+        let maxStreak = streak, _run = 1;
+        for (let i = 1; i < _localDates.length; i++) {
+          const _d1 = new Date(_localDates[i-1]+'T12:00:00');
+          const _d2 = new Date(_localDates[i]+'T12:00:00');
+          if (Math.round((_d1 - _d2) / 86400000) === 1) { _run++; maxStreak = Math.max(maxStreak, _run); }
+          else _run = 1;
+        }
+        maxStreak = Math.max(maxStreak, streak);
         localStorage.setItem('nava_peace_streak', streak);
 
         // Streak doves déjà attribués
         const alreadyClaimed = new Set((streakRewards||[]).map(r => r.streak_days));
         let streakDovesTotal = (streakRewards||[]).reduce((s,r) => s + (r.doves_awarded||0), 0);
 
-        // Vérifier si de nouveaux jalons sont atteints → attribuer automatiquement
+        // Attribuer jalons basés sur le meilleur streak jamais atteint
         for (const m of STREAK_MILESTONES) {
-          if (streak >= m.days && !alreadyClaimed.has(m.days)) {
+          if (maxStreak >= m.days && !alreadyClaimed.has(m.days)) {
             try {
               const { error } = await sb.from('nava_streak_rewards').insert({
                 user_uid: uid, streak_days: m.days, doves_awarded: m.doves
