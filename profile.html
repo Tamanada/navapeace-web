@@ -3848,18 +3848,17 @@
     try {
       const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-      // referral_points = source de vérité : 1 ligne par ami qui a voté
+      // referral_points = source de vérité : 1 ligne par ami unique (unique constraint)
       const { data: pts } = await sb
         .from('referral_points')
         .select('user_uid')
         .eq('referral_code', refCode);
 
-      const uniqueFriends = new Set((pts || []).map(r => r.user_uid).filter(Boolean));
-      const ptsCount     = pts ? pts.length : 0;
-      const friendsCount = uniqueFriends.size;
+      // unique user_uid = nb amis = nb doves (contrainte unique garantit 1 ligne/ami)
+      const count = new Set((pts || []).map(r => r.user_uid).filter(Boolean)).size;
 
-      document.getElementById('ref-points').textContent  = ptsCount;
-      document.getElementById('ref-friends').textContent = friendsCount;
+      document.getElementById('ref-points').textContent  = count;
+      document.getElementById('ref-friends').textContent = count;
     } catch(e) { console.warn('Peace points error', e); }
   }
 

@@ -1113,14 +1113,13 @@
             localStorage.setItem('nava_peace_days',d.totalDoves);
             localStorage.setItem('nava_peace_streak',d.streak);
           }
-          // Referrals
+          // Referrals — source unique : referral_points
           if (d.refCode) {
-            const [pR,fR] = await Promise.all([
-              sb2.from('referral_points').select('id').eq('referral_code',d.refCode),
-              sb2.from('peace_votes').select('id').eq('referred_by',d.refCode),
-            ]);
-            d.refDoves = pR.data?pR.data.length:0;
-            d.friends  = fR.data?fR.data.length:0;
+            const { data: rp } = await sb2.from('referral_points')
+              .select('user_uid').eq('referral_code', d.refCode);
+            const uniqueFriends = new Set((rp||[]).map(r=>r.user_uid).filter(Boolean));
+            d.refDoves = rp ? rp.length : 0;
+            d.friends  = uniqueFriends.size;
           }
         }
       } catch(e){ console.warn('Progress fetch',e); }
