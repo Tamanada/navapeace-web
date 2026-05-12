@@ -311,14 +311,14 @@
 
     // ── REF CODE LABELS ──────────────────────────────────────────────────
     var REF_LABELS = {
-      en: { title:'INVITATION CODE REQUIRED', ph:'ENTER YOUR CODE', btn:'JOIN NAVA PEACE', required:'INVITATION CODE REQUIRED' },
-      fr: { title:'CODE D\'INVITATION REQUIS', ph:'ENTRER VOTRE CODE', btn:'REJOINDRE NAVA PEACE', required:'CODE D\'INVITATION REQUIS' },
-      es: { title:'CÓDIGO DE INVITACIÓN REQUERIDO', ph:'INGRESA TU CÓDIGO', btn:'UNIRME A NAVA PEACE', required:'CÓDIGO DE INVITACIÓN REQUERIDO' },
-      pt: { title:'CÓDIGO DE CONVITE OBRIGATÓRIO', ph:'INSERIR SEU CÓDIGO', btn:'ENTRAR NO NAVA PEACE', required:'CÓDIGO DE CONVITE OBRIGATÓRIO' },
-      de: { title:'EINLADUNGSCODE ERFORDERLICH', ph:'CODE EINGEBEN', btn:'NAVA PEACE BEITRETEN', required:'EINLADUNGSCODE ERFORDERLICH' },
-      ar: { title:'رمز الدعوة مطلوب', ph:'أدخل رمز الدعوة', btn:'انضم إلى نافا بيس', required:'رمز الدعوة مطلوب' },
-      zh: { title:'需要邀请码', ph:'输入邀请码', btn:'加入 NAVA PEACE', required:'需要邀请码' },
-      ru: { title:'ТРЕБУЕТСЯ КОД ПРИГЛАШЕНИЯ', ph:'ВВЕДИ КОД ПРИГЛАШЕНИЯ', btn:'ВОЙТИ В NAVA PEACE', required:'ТРЕБУЕТСЯ КОД ПРИГЛАШЕНИЯ' },
+      en: { title:'INVITATION CODE REQUIRED', ph:'ENTER YOUR CODE', btn:'JOIN NAVA PEACE', required:'INVITATION CODE REQUIRED', hint:'ASK YOUR FRIENDS IF THEY CAN INVITE YOU ;)' },
+      fr: { title:'CODE D\'INVITATION REQUIS', ph:'ENTRER VOTRE CODE', btn:'REJOINDRE NAVA PEACE', required:'CODE D\'INVITATION REQUIS', hint:'DEMANDE À TES AMIS S\'ILS PEUVENT T\'INVITER ;)' },
+      es: { title:'CÓDIGO DE INVITACIÓN REQUERIDO', ph:'INGRESA TU CÓDIGO', btn:'UNIRME A NAVA PEACE', required:'CÓDIGO DE INVITACIÓN REQUERIDO', hint:'PIDE A TUS AMIGOS QUE TE INVITEN ;)' },
+      pt: { title:'CÓDIGO DE CONVITE OBRIGATÓRIO', ph:'INSERIR SEU CÓDIGO', btn:'ENTRAR NO NAVA PEACE', required:'CÓDIGO DE CONVITE OBRIGATÓRIO', hint:'PEÇA AOS SEUS AMIGOS PARA TE CONVIDAREM ;)' },
+      de: { title:'EINLADUNGSCODE ERFORDERLICH', ph:'CODE EINGEBEN', btn:'NAVA PEACE BEITRETEN', required:'EINLADUNGSCODE ERFORDERLICH', hint:'FRAG DEINE FREUNDE, OB SIE DICH EINLADEN KÖNNEN ;)' },
+      ar: { title:'رمز الدعوة مطلوب', ph:'أدخل رمز الدعوة', btn:'انضم إلى نافا بيس', required:'رمز الدعوة مطلوب', hint:'اسأل أصدقاءك إذا كان بإمكانهم دعوتك ;)' },
+      zh: { title:'需要邀请码', ph:'输入邀请码', btn:'加入 NAVA PEACE', required:'需要邀请码', hint:'问问你的朋友能否邀请你 ;)' },
+      ru: { title:'ТРЕБУЕТСЯ КОД ПРИГЛАШЕНИЯ', ph:'ВВЕДИ КОД ПРИГЛАШЕНИЯ', btn:'ВОЙТИ В NAVA PEACE', required:'ТРЕБУЕТСЯ КОД ПРИГЛАШЕНИЯ', hint:'СПРОСИ ДРУЗЕЙ, МОГУТ ЛИ ОНИ ТЕБЯ ПРИГЛАСИТЬ ;)' },
     };
 
     // ── FADE & REDIRECT — fades the whole body ───────────────────────────
@@ -428,7 +428,10 @@
             'color:rgba(255,100,100,0.9);text-align:center;margin:0;min-height:14px;"></p>' +
             '<button id="ref-btn" style="width:100%;padding:14px;border-radius:14px;cursor:pointer;' +
             'background:linear-gradient(135deg,#3AACDF,#1E6E9A);border:none;color:#fff;' +
-            'font-family:Nasalization,Arial,sans-serif;font-size:10px;letter-spacing:3px">' + lbl.btn + '</button>';
+            'font-family:Nasalization,Arial,sans-serif;font-size:10px;letter-spacing:3px">' + lbl.btn + '</button>' +
+            '<p style="font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:1.5px;' +
+            'color:rgba(255,255,255,0.35);text-align:center;margin:4px 0 0 0;line-height:1.6;">' +
+            (lbl.hint || 'ASK YOUR FRIENDS IF THEY CAN INVITE YOU ;)') + '</p>';
         }
 
         var s = document.getElementById('main-stage');
