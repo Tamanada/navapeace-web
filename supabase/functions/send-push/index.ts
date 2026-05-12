@@ -151,7 +151,15 @@ serve(async (req) => {
   }
 
   try {
-    const { to_user_uid, title, body, url } = await req.json();
+    const { admin_code, to_user_uid, title, body, url } = await req.json();
+
+    // ── Auth gate — reject requests without a valid admin code ────────────────
+    if (!admin_code) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      });
+    }
 
     const VAPID_PUBLIC_KEY  = Deno.env.get('VAPID_PUBLIC_KEY')!;
     const VAPID_PRIVATE_KEY = Deno.env.get('VAPID_PRIVATE_KEY')!;
@@ -162,6 +170,15 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     );
+
+    // Verify admin code against admin_users table
+    const { data: isAdmin, error: authErr } = await supabase.rpc('nava_check_admin', { p_code: admin_code });
+    if (authErr || !isAdmin) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      });
+    }
 
     let query = supabase.from('push_subscriptions').select('subscription');
     if (to_user_uid) query = query.eq('user_uid', to_user_uid);
