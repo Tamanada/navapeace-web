@@ -233,9 +233,17 @@
     // ── CAPTURE startParam FROM URL ───────────────────────────────────────
     (function captureStartParam() {
       try {
+        // ① URL query params (?ref=CODE or ?startapp=CODE) — web share links
+        var _qp = new URLSearchParams(window.location.search);
+        var _urlRef = _qp.get('ref') || _qp.get('startapp');
+        if (_urlRef && _urlRef.trim().length >= 4) {
+          ls('nava_peace_referred_by', _urlRef.trim().toUpperCase()); return;
+        }
+        // ② Telegram hash fragment (#…&tgWebAppStartParam=CODE&…)
         var hash = window.location.hash || '';
         var m = hash.match(/[?&#]?tgWebAppStartParam=([^&]+)/i);
         if (m && m[1]) { ls('nava_peace_referred_by', decodeURIComponent(m[1]).toUpperCase()); return; }
+        // ③ Telegram WebApp SDK — may not be ready yet (also captured in tryRestore)
         var sp = window.Telegram && window.Telegram.WebApp &&
                  window.Telegram.WebApp.initDataUnsafe &&
                  window.Telegram.WebApp.initDataUnsafe.start_param;
@@ -303,14 +311,14 @@
 
     // ── REF CODE LABELS ──────────────────────────────────────────────────
     var REF_LABELS = {
-      en: { title:'GOT A REFERRAL CODE?', ph:'ENTER CODE (OPTIONAL)', btn:'JOIN WITH CODE', skip:'SKIP' },
-      fr: { title:'TU AS UN CODE PARRAIN?', ph:'ENTRER LE CODE (FACULTATIF)', btn:'REJOINDRE AVEC CODE', skip:'PASSER' },
-      es: { title:'¿TIENES UN CÓDIGO?', ph:'INGRESA EL CÓDIGO (OPCIONAL)', btn:'UNIRME CON CÓDIGO', skip:'OMITIR' },
-      pt: { title:'TEM UM CÓDIGO?', ph:'INSERIR CÓDIGO (OPCIONAL)', btn:'ENTRAR COM CÓDIGO', skip:'PULAR' },
-      de: { title:'HAST DU EINEN CODE?', ph:'CODE EINGEBEN (OPTIONAL)', btn:'MIT CODE BEITRETEN', skip:'ÜBERSPRINGEN' },
-      ar: { title:'هل لديك رمز إحالة؟', ph:'أدخل الرمز (اختياري)', btn:'انضم برمز', skip:'تخطي' },
-      zh: { title:'有邀请码？', ph:'输入邀请码（可选）', btn:'用邀请码加入', skip:'跳过' },
-      ru: { title:'ЕСТЬ КОД ПРИГЛАШЕНИЯ?', ph:'ВВЕДИ КОД (НЕОБЯЗАТЕЛЬНО)', btn:'ВОЙТИ С КОДОМ', skip:'ПРОПУСТИТЬ' },
+      en: { title:'GOT A REFERRAL CODE?', ph:'ENTER CODE (OPTIONAL)', btn:'JOIN WITH CODE', skip:'I DON\'T HAVE A CODE' },
+      fr: { title:'TU AS UN CODE PARRAIN?', ph:'ENTRER LE CODE (FACULTATIF)', btn:'REJOINDRE AVEC CODE', skip:'JE N\'AI PAS DE CODE' },
+      es: { title:'¿TIENES UN CÓDIGO?', ph:'INGRESA EL CÓDIGO (OPCIONAL)', btn:'UNIRME CON CÓDIGO', skip:'NO TENGO UN CÓDIGO' },
+      pt: { title:'TEM UM CÓDIGO?', ph:'INSERIR CÓDIGO (OPCIONAL)', btn:'ENTRAR COM CÓDIGO', skip:'NÃO TENHO CÓDIGO' },
+      de: { title:'HAST DU EINEN CODE?', ph:'CODE EINGEBEN (OPTIONAL)', btn:'MIT CODE BEITRETEN', skip:'ICH HABE KEINEN CODE' },
+      ar: { title:'هل لديك رمز إحالة؟', ph:'أدخل الرمز (اختياري)', btn:'انضم برمز', skip:'ليس لدي رمز' },
+      zh: { title:'有邀请码？', ph:'输入邀请码（可选）', btn:'用邀请码加入', skip:'我没有邀请码' },
+      ru: { title:'ЕСТЬ КОД ПРИГЛАШЕНИЯ?', ph:'ВВЕДИ КОД (НЕОБЯЗАТЕЛЬНО)', btn:'ВОЙТИ С КОДОМ', skip:'У МЕНЯ НЕТ КОДА' },
     };
 
     // ── FADE & REDIRECT — fades the whole body ───────────────────────────
