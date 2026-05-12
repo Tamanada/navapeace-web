@@ -311,14 +311,14 @@
 
     // ── REF CODE LABELS ──────────────────────────────────────────────────
     var REF_LABELS = {
-      en: { title:'GOT A REFERRAL CODE?', ph:'ENTER CODE (OPTIONAL)', btn:'JOIN WITH CODE', skip:'I DON\'T HAVE A CODE' },
-      fr: { title:'TU AS UN CODE PARRAIN?', ph:'ENTRER LE CODE (FACULTATIF)', btn:'REJOINDRE AVEC CODE', skip:'JE N\'AI PAS DE CODE' },
-      es: { title:'¿TIENES UN CÓDIGO?', ph:'INGRESA EL CÓDIGO (OPCIONAL)', btn:'UNIRME CON CÓDIGO', skip:'NO TENGO UN CÓDIGO' },
-      pt: { title:'TEM UM CÓDIGO?', ph:'INSERIR CÓDIGO (OPCIONAL)', btn:'ENTRAR COM CÓDIGO', skip:'NÃO TENHO CÓDIGO' },
-      de: { title:'HAST DU EINEN CODE?', ph:'CODE EINGEBEN (OPTIONAL)', btn:'MIT CODE BEITRETEN', skip:'ICH HABE KEINEN CODE' },
-      ar: { title:'هل لديك رمز إحالة؟', ph:'أدخل الرمز (اختياري)', btn:'انضم برمز', skip:'ليس لدي رمز' },
-      zh: { title:'有邀请码？', ph:'输入邀请码（可选）', btn:'用邀请码加入', skip:'我没有邀请码' },
-      ru: { title:'ЕСТЬ КОД ПРИГЛАШЕНИЯ?', ph:'ВВЕДИ КОД (НЕОБЯЗАТЕЛЬНО)', btn:'ВОЙТИ С КОДОМ', skip:'У МЕНЯ НЕТ КОДА' },
+      en: { title:'INVITATION CODE REQUIRED', ph:'ENTER YOUR CODE', btn:'JOIN NAVA PEACE', required:'INVITATION CODE REQUIRED' },
+      fr: { title:'CODE D\'INVITATION REQUIS', ph:'ENTRER VOTRE CODE', btn:'REJOINDRE NAVA PEACE', required:'CODE D\'INVITATION REQUIS' },
+      es: { title:'CÓDIGO DE INVITACIÓN REQUERIDO', ph:'INGRESA TU CÓDIGO', btn:'UNIRME A NAVA PEACE', required:'CÓDIGO DE INVITACIÓN REQUERIDO' },
+      pt: { title:'CÓDIGO DE CONVITE OBRIGATÓRIO', ph:'INSERIR SEU CÓDIGO', btn:'ENTRAR NO NAVA PEACE', required:'CÓDIGO DE CONVITE OBRIGATÓRIO' },
+      de: { title:'EINLADUNGSCODE ERFORDERLICH', ph:'CODE EINGEBEN', btn:'NAVA PEACE BEITRETEN', required:'EINLADUNGSCODE ERFORDERLICH' },
+      ar: { title:'رمز الدعوة مطلوب', ph:'أدخل رمز الدعوة', btn:'انضم إلى نافا بيس', required:'رمز الدعوة مطلوب' },
+      zh: { title:'需要邀请码', ph:'输入邀请码', btn:'加入 NAVA PEACE', required:'需要邀请码' },
+      ru: { title:'ТРЕБУЕТСЯ КОД ПРИГЛАШЕНИЯ', ph:'ВВЕДИ КОД ПРИГЛАШЕНИЯ', btn:'ВОЙТИ В NAVA PEACE', required:'ТРЕБУЕТСЯ КОД ПРИГЛАШЕНИЯ' },
     };
 
     // ── FADE & REDIRECT — fades the whole body ───────────────────────────
@@ -424,12 +424,11 @@
             ' style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.28);' +
             'border-radius:12px;color:#fff;font-family:Nasalization,Arial,sans-serif;font-size:12px;' +
             'letter-spacing:3px;padding:13px 16px;text-align:center;outline:none;text-transform:uppercase;box-sizing:border-box">' +
+            '<p id="ref-err" style="font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:2px;' +
+            'color:rgba(255,100,100,0.9);text-align:center;margin:0;min-height:14px;"></p>' +
             '<button id="ref-btn" style="width:100%;padding:14px;border-radius:14px;cursor:pointer;' +
             'background:linear-gradient(135deg,#3AACDF,#1E6E9A);border:none;color:#fff;' +
-            'font-family:Nasalization,Arial,sans-serif;font-size:10px;letter-spacing:3px">' + lbl.btn + '</button>' +
-            '<button id="skip-btn" style="background:none;border:none;color:rgba(255,255,255,.38);' +
-            'font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:3px;' +
-            'text-transform:uppercase;cursor:pointer;text-decoration:underline">' + lbl.skip + '</button>';
+            'font-family:Nasalization,Arial,sans-serif;font-size:10px;letter-spacing:3px">' + lbl.btn + '</button>';
         }
 
         var s = document.getElementById('main-stage');
@@ -442,9 +441,18 @@
 
         var _goLock = false;
         function go() {
-          if (_goLock) return; _goLock = true;
+          if (_goLock) return;
           var code = (document.getElementById('ref-inp').value || '').trim().toUpperCase();
-          if (code) ls('nava_peace_referred_by', code);
+          // ── INVITE-ONLY GATE: code is mandatory ─────────────────────────
+          if (!code) {
+            var errEl = document.getElementById('ref-err');
+            if (errEl) errEl.textContent = lbl.required || 'INVITATION CODE REQUIRED';
+            var inp2 = document.getElementById('ref-inp');
+            if (inp2) { inp2.style.borderColor = 'rgba(255,100,100,0.7)'; inp2.focus(); }
+            return;
+          }
+          _goLock = true;
+          ls('nava_peace_referred_by', code);
           var b = document.getElementById('ref-box');
           if (b) { b.style.transition = 'opacity 0.3s'; b.style.opacity = '0'; }
           setTimeout(function () {
@@ -467,9 +475,14 @@
         var eb = document.getElementById('ref-btn');
         var sb = document.getElementById('skip-btn');
         if (eb) eb.addEventListener('click', go);
-        if (sb) sb.addEventListener('click', autoRef ? showChangeForm : go);
+        if (sb) sb.addEventListener('click', autoRef ? showChangeForm : null);
         if (inp && inp.type !== 'hidden') {
           inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
+          inp.addEventListener('input', function () {
+            var errEl = document.getElementById('ref-err');
+            if (errEl) errEl.textContent = '';
+            this.style.borderColor = 'rgba(255,255,255,.28)';
+          });
         }
 
       }, 380);

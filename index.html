@@ -658,7 +658,7 @@
     // ── Capture referral code from URL (?ref=XXXX) ─────────────────
     (function() {
       const ref = new URLSearchParams(window.location.search).get('ref');
-      if (ref && ref.length <= 12) {
+      if (ref && ref.length <= 20) {
         localStorage.setItem('nava_peace_referred_by', ref.toUpperCase());
       }
     })();
@@ -668,6 +668,11 @@
     const STORAGE_KEY  = 'nava_peace_voted';
     const votedToday   = localStorage.getItem(STORAGE_KEY) === TODAY;
     const isReturning  = !!localStorage.getItem('nava_peace_country'); // set after 1st vote
+
+    // ── INVITE-ONLY GATE: new users must have a referral code ──────
+    if (!isReturning && !localStorage.getItem('nava_peace_referred_by')) {
+      window.location.replace('splash.html');
+    }
 
     if (isReturning) {
       // Destination selon si déjà voté aujourd'hui
