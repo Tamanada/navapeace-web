@@ -172,8 +172,8 @@ serve(async (req) => {
     );
 
     // Verify admin code against admin_users table
-    const { data: isAdmin, error: authErr } = await supabase.rpc('nava_check_admin', { p_code: admin_code });
-    if (authErr || !isAdmin) {
+    const { data: isAdmin, error: authErr } = await supabase.rpc('nava_check_admin', { input_code: admin_code });
+    if (authErr || !isAdmin?.valid) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
