@@ -854,8 +854,14 @@
             referral_code: referralCode,
             referred_by:   referredBy,
             source: (typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram) ? 'telegram' : 'web',
-            telegram_id: (typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram && NAVA_TG.user) ? String(NAVA_TG.user.id) : null,
           });
+          // Save Telegram link separately in user_telegram (isolated table)
+          if (typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram && NAVA_TG.user?.id) {
+            sb.from('user_telegram').upsert(
+              { user_uid: uid, telegram_id: String(NAVA_TG.user.id), updated_at: new Date().toISOString() },
+              { onConflict: 'user_uid' }
+            ).then(() => {}).catch(() => {});
+          }
           if (error) {
             // Code 23505 = unique constraint violation (déjà voté aujourd'hui)
             if (error.code === '23505' || error.message?.includes('unique')) {
@@ -1388,8 +1394,14 @@
             referral_code: refCode,
             created_at:    created_at,
             source: (typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram) ? 'telegram' : 'web',
-            telegram_id: (typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram && NAVA_TG.user) ? String(NAVA_TG.user.id) : null,
           });
+          // Save Telegram link separately in user_telegram (isolated table)
+          if (typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram && NAVA_TG.user?.id) {
+            sb.from('user_telegram').upsert(
+              { user_uid: uid, telegram_id: String(NAVA_TG.user.id), updated_at: new Date().toISOString() },
+              { onConflict: 'user_uid' }
+            ).then(() => {}).catch(() => {});
+          }
           if (!error || error.code === '23505' || error.message?.includes('unique')) {
             markVoteSynced(entry.date);
           }
