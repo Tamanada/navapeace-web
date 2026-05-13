@@ -2376,9 +2376,9 @@ async function sendPushNotif() {
 
 async function loadPushSubCount() {
   try {
-    const { count } = await sb.from('push_subscriptions').select('*', { count: 'exact', head: true });
+    const { data } = await sb.rpc('nava_count_push_subscribers', { caller_code: _adminCode });
     const el = document.getElementById('push-sub-count');
-    if (el) el.textContent = `📱 ${count || 0} subscriber(s) currently registered`;
+    if (el) el.textContent = `📱 ${data >= 0 ? data : '?'} subscriber(s) currently registered`;
   } catch(_) {}
 }
 
