@@ -2,23 +2,56 @@
   "name": "NAVA PEACE",
   "short_name": "NAVA PEACE",
   "description": "The world talks about peace. Let's practice it.",
+  "lang": "en",
   "start_url": "/peace.html",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#3AACDF",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#0a1628",
   "theme_color": "#3AACDF",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
+  "categories": ["lifestyle", "social", "education"],
   "icons": [
     {
       "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "NAVA PEACE — Daily Peace Vote"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Vote for Peace",
+      "short_name": "Vote",
+      "url": "/peace.html",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

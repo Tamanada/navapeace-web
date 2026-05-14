@@ -409,6 +409,46 @@
     .save-btn:hover { opacity: 0.88; }
 
     /* ── INVITE FRIENDS ── */
+
+    /* Code brut — partage communauté */
+    .ref-code-block {
+      background: rgba(58,172,223,0.12);
+      border: 1.5px solid rgba(109,213,245,0.45);
+      border-radius: 16px;
+      padding: 16px 18px 12px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .ref-code-label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 2.5px;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    .ref-code-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+    }
+    .ref-code-text {
+      font-size: 30px;
+      font-weight: 900;
+      letter-spacing: 5px;
+      color: #6DD5F5;
+      font-family: 'Courier New', monospace;
+    }
+    .ref-code-hint {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.35);
+      margin-top: 10px;
+      line-height: 1.5;
+    }
+
     .invite-link-row {
       display: flex;
       align-items: center;
@@ -1545,6 +1585,16 @@
     <!-- QR code (centered, large) -->
     <div class="qr-wrap">
       <div id="qrcode"></div>
+    </div>
+
+    <!-- MY CODE — partage direct dans la communauté -->
+    <div class="ref-code-block">
+      <span class="ref-code-label">🔑 MY INVITATION CODE</span>
+      <div class="ref-code-row">
+        <span id="ref-code-display" class="ref-code-text">———</span>
+        <button id="copy-code-btn" class="copy-btn" onclick="copyCode()">COPY</button>
+      </div>
+      <span class="ref-code-hint" data-i18n="ref_code_hint">Share this code in the community — anyone can type it to join</span>
     </div>
 
     <!-- Share my invite card button -->
@@ -2786,7 +2836,10 @@
     let inviteText = '';
     let msg        = '';
 
-    // Show link
+    // Show raw code (community share)
+    document.getElementById('ref-code-display').textContent = refCode || '———';
+
+    // Show full link
     document.getElementById('ref-link-display').textContent = inviteURL;
 
     // QR code (enlarged)
@@ -3822,6 +3875,8 @@
       try {
         var fallbackCode = localStorage.getItem('nava_peace_ref_code') || 'NAVA';
         var fallbackURL = getShareLink(fallbackCode);
+        var codeEl = document.getElementById('ref-code-display');
+        if (codeEl) codeEl.textContent = fallbackCode !== 'NAVA' ? fallbackCode : '———';
         document.getElementById('ref-link-display').textContent = fallbackURL;
         new QRCode(document.getElementById('qrcode'), {
           text: fallbackURL, width: 130, height: 130,
@@ -3834,12 +3889,20 @@
 
   initInvite().catch(function(err) { console.error('initInvite failed:', err); });
 
+  function copyCode() {
+    const code = localStorage.getItem('nava_peace_ref_code') || '';
+    if (!code) return;
+    navigator.clipboard.writeText(code).then(() => {
+      const btn = document.getElementById('copy-code-btn');
+      if (btn) { btn.textContent = '✓'; setTimeout(() => btn.textContent = 'COPY', 2000); }
+    });
+  }
+
   function copyLink() {
     const link = getShareLink();
     navigator.clipboard.writeText(link).then(() => {
-      const btn = document.querySelector('.copy-btn');
-      btn.textContent = t('copied_lbl');
-      setTimeout(() => btn.textContent = t('copy_btn'), 2000);
+      const btn = document.getElementById('copy-link-btn') || document.querySelector('.invite-link-row .copy-btn');
+      if (btn) { btn.textContent = t('copied_lbl'); setTimeout(() => btn.textContent = t('copy_btn'), 2000); }
     });
   }
 
