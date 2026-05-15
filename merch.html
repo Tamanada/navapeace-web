@@ -158,17 +158,47 @@
 
     /* ── PRODUCT DETAIL ─────────────────────────────── */
     #detail-overlay .overlay-card{padding-top:0;}
-    .detail-img{
-      width:100%;
-      max-height:280px;
+
+    /* Gallery carousel */
+    .detail-gallery{
+      display:flex;
+      overflow-x:auto;
+      scroll-snap-type:x mandatory;
+      scroll-behavior:smooth;
+      -ms-overflow-style:none;
+      scrollbar-width:none;
+      border-radius:16px;
+      margin-bottom:10px;
+    }
+    .detail-gallery::-webkit-scrollbar{display:none;}
+    .detail-gallery-slide{
+      flex:0 0 100%;
+      scroll-snap-align:start;
+      width:100%;height:260px;
       object-fit:cover;
       border-radius:16px;
-      margin-bottom:16px;
       background:rgba(255,255,255,0.04);
+    }
+    .gallery-placeholder{
+      flex:0 0 100%;height:260px;
       display:flex;align-items:center;justify-content:center;
       font-size:64px;
     }
-    .detail-img img{width:100%;height:280px;object-fit:cover;border-radius:16px;}
+    .gallery-dots{
+      display:flex;justify-content:center;gap:6px;
+      margin-bottom:14px;
+    }
+    .gallery-dot{
+      width:6px;height:6px;border-radius:50%;
+      background:rgba(255,255,255,0.25);
+      transition:background 0.2s,transform 0.2s;
+      cursor:pointer;
+    }
+    .gallery-dot.active{background:var(--accent);transform:scale(1.3);}
+
+    .detail-img{display:none;} /* legacy — replaced by gallery */
+    .detail-name{font-size:14px;letter-spacing:3px;color:var(--white);margin-bottom:8px;}
+    .detail-price-row{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
     .detail-name{font-size:14px;letter-spacing:3px;color:var(--white);margin-bottom:8px;}
     .detail-price-row{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
     .detail-usd{font-size:18px;color:var(--accent);letter-spacing:1px;}
@@ -341,7 +371,8 @@
   <div class="overlay-card" style="position:relative;">
     <div class="overlay-handle"></div>
     <button class="overlay-close" onclick="closeDetail()">×</button>
-    <div id="detail-img" class="detail-img"></div>
+    <div id="detail-gallery" class="detail-gallery"></div>
+    <div id="gallery-dots" class="gallery-dots"></div>
     <div id="detail-name" class="detail-name"></div>
     <div class="detail-price-row">
       <span id="detail-usd" class="detail-usd"></span>
@@ -608,16 +639,18 @@ function normalizeProduct(p, source) {
 }
 
 function normalizeVariant(v) {
-  // mockupImage is an array in template detail response
-  const mockup = Array.isArray(v.mockupImage) ? (v.mockupImage[0]?.url || '') : '';
+  const mockupImages = Array.isArray(v.mockupImage)
+    ? v.mockupImage.map(m => m?.url).filter(Boolean)
+    : [];
   return {
-    skuCode:    v.skuCode    || v.variantCode || v.externalSkuCode || '',
-    variantId:  String(v.variantId || v.mappingVariantId || v.skuId || ''),
-    size:       v.size       || v.sizeName   || v.sizeCode  || '',
-    color:      v.color      || v.colorName  || v.colorCode || '',
-    salesPrice: parseFloat(v.price || v.salesPrice || v.salePrice || v.retailPrice || 0),
-    mockupImage: mockup,
-    available:  v.available !== false && v.status !== 'disable',
+    skuCode:      v.skuCode    || v.variantCode || v.externalSkuCode || '',
+    variantId:    String(v.variantId || v.mappingVariantId || v.skuId || ''),
+    size:         v.size       || v.sizeName   || v.sizeCode  || '',
+    color:        v.color      || v.colorName  || v.colorCode || '',
+    salesPrice:   parseFloat(v.price || v.salesPrice || v.salePrice || v.retailPrice || 0),
+    mockupImage:  mockupImages[0] || '',   // compat
+    mockupImages,                           // all directions (front, back, side…)
+    available:    v.available !== false && v.status !== 'disable',
   };
 }
 
@@ -733,6 +766,41 @@ async function fetchBasePrice(prod) {
   } catch(e) { /* silent */ }
 }
 
+// ── Gallery ────────────────────────────────────────────────
+function renderGallery(images) {
+  const gallery = document.getElementById('detail-gallery');
+  const dots    = document.getElementById('gallery-dots');
+
+  if (!images || !images.length) {
+    gallery.innerHTML = '<div class="gallery-placeholder">🛍</div>';
+    dots.innerHTML = '';
+    return;
+  }
+
+  gallery.innerHTML = images.map(url =>
+    `<img class="detail-gallery-slide" src="${url}" loading="lazy" alt="product"/>`
+  ).join('');
+
+  dots.innerHTML = images.length > 1
+    ? images.map((_, i) =>
+        `<div class="gallery-dot${i === 0 ? ' active' : ''}" onclick="scrollGallery(${i})"></div>`
+      ).join('')
+    : '';
+
+  // Update active dot on scroll
+  gallery.onscroll = () => {
+    const idx = Math.round(gallery.scrollLeft / gallery.offsetWidth);
+    dots.querySelectorAll('.gallery-dot').forEach((d, i) =>
+      d.classList.toggle('active', i === idx)
+    );
+  };
+}
+
+function scrollGallery(idx) {
+  const gallery = document.getElementById('detail-gallery');
+  gallery.scrollTo({ left: idx * gallery.offsetWidth, behavior: 'smooth' });
+}
+
 // ── Product Detail ─────────────────────────────────────────
 async function openDetail(productId) {
   const prod = allProducts.find(p => String(p.id) === String(productId));
@@ -745,11 +813,8 @@ async function openDetail(productId) {
   qty = 1;
   document.getElementById('qty-val').textContent = '1';
 
-  // Set image
-  const imgEl = document.getElementById('detail-img');
-  imgEl.innerHTML = prod.image
-    ? `<img src="${prod.image}" alt="${prod.title}"/>`
-    : '🛍';
+  // Show preview image while variants load
+  renderGallery(prod.image ? [prod.image] : []);
 
   document.getElementById('detail-name').textContent = prod.title;
   document.getElementById('detail-usd').textContent   = '···';
@@ -813,6 +878,12 @@ function renderVariants(variants) {
 
   document.getElementById('detail-variants').innerHTML = html;
 
+  // Show first available variant's images right away
+  const firstImgs = available[0]?.mockupImages?.length
+    ? available[0].mockupImages
+    : (currentProd?.image ? [currentProd.image] : []);
+  renderGallery(firstImgs);
+
   // If only one variant, select it automatically
   if (available.length === 1) {
     selectedVariant = available[0];
@@ -855,11 +926,11 @@ function resolveVariant() {
 
   if (selectedVariant) {
     updateDetailPrice(selectedVariant.salesPrice);
-    // Show variant mockup image if available
-    if (selectedVariant.mockupImage) {
-      const imgEl = document.getElementById('detail-img');
-      imgEl.innerHTML = `<img src="${selectedVariant.mockupImage}" alt="${currentProd.title}"/>`;
-    }
+    // Update gallery with all mockup images of selected variant
+    const imgs = selectedVariant.mockupImages?.length
+      ? selectedVariant.mockupImages
+      : (currentProd.image ? [currentProd.image] : []);
+    renderGallery(imgs);
   }
 }
 
