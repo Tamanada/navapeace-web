@@ -545,6 +545,20 @@ const PROXY_URL = (typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : '')
 // Stars conversion: 1 USD ≈ 100 Stars (covers Telegram's 30% cut + margin)
 const USD_TO_STARS = 100;
 
+// ── Retail price engine ────────────────────────────────────
+// Target: +$7 margin on YOYCOL wholesale cost
+// Output: always X.99, minimum $24.99
+const TARGET_MARGIN = 7;
+const MIN_RETAIL    = 24.99;
+
+function retailPrice(wholesale) {
+  if (!wholesale) return MIN_RETAIL;
+  const withMargin = wholesale + TARGET_MARGIN;
+  const n = Math.floor(withMargin);
+  const price = (n + 0.99 >= withMargin) ? n + 0.99 : n + 1.99;
+  return parseFloat(Math.max(MIN_RETAIL, price).toFixed(2));
+}
+
 // ── State ─────────────────────────────────────────────────
 let allProducts  = [];
 let currentProd  = null;   // normalised product object
@@ -685,10 +699,11 @@ async function fetchBasePrice(prod) {
     const prices = rawVariants.map(v => normalizeVariant(v).salesPrice).filter(p => p > 0);
     if (!prices.length) return;
 
-    const minPrice = Math.min(...prices);
+    const minWholesale = Math.min(...prices);
+    const retail = retailPrice(minWholesale);
     const el = document.getElementById(`price-${prod.id}`);
     if (el) {
-      el.innerHTML = `$${minPrice.toFixed(2)} <span class="product-stars">⭐ ${starsForPrice(minPrice)}</span>`;
+      el.innerHTML = `$${retail.toFixed(2)} <span class="product-stars">⭐ ${starsForPrice(retail)}</span>`;
     }
   } catch(e) { /* silent */ }
 }
@@ -823,14 +838,16 @@ function resolveVariant() {
   }
 }
 
-function updateDetailPrice(price) {
-  if (!price) {
+function updateDetailPrice(wholesale) {
+  if (!wholesale) {
     document.getElementById('detail-usd').textContent = '···';
     document.getElementById('detail-stars-badge').textContent = '';
     return;
   }
-  const stars = starsForPrice(price * qty);
-  document.getElementById('detail-usd').textContent = `$${(price * qty).toFixed(2)}`;
+  const retail = retailPrice(wholesale);
+  const totalRetail = parseFloat((retail * qty).toFixed(2));
+  const stars = starsForPrice(totalRetail);
+  document.getElementById('detail-usd').textContent = `$${totalRetail.toFixed(2)}`;
   document.getElementById('detail-stars-badge').textContent = `⭐ ${stars} STARS`;
 }
 
@@ -848,20 +865,23 @@ function closeDetail() {
 function addToCart() {
   if (!currentProd) return;
 
-  const price = selectedVariant?.salesPrice || 0;
+  const wholesale = selectedVariant?.salesPrice || 0;
 
-  if (!price) { toast('⚠ Select a variant first'); return; }
+  if (!wholesale) { toast('⚠ Select a variant first'); return; }
+
+  const retail = retailPrice(wholesale);
 
   const item = {
-    mappingId:  currentProd.id,         // works for both template and self_store
+    mappingId:  currentProd.id,
     title:      currentProd.title,
     image:      currentProd.image || '',
     size:       selectedVariant.size  || '',
     color:      selectedVariant.color || '',
     skuCode:    selectedVariant.skuCode   || '',
     variantId:  selectedVariant.variantId || '',
-    price,
-    stars:      starsForPrice(price),
+    wholesale,                      // what we pay YOYCOL (used in order creation)
+    price:      retail,             // what customer pays (used for display + Stars)
+    stars:      starsForPrice(retail),
     qty,
   };
 
@@ -1012,8 +1032,8 @@ async function createYoycolOrder(addr) {
     title:           item.title,
     image:           item.image,
     quantity:        item.qty,
-    salesPrice:      item.price,
-    realPrice:       item.price,
+    salesPrice:      item.wholesale || item.price,   // YOYCOL wholesale cost
+    realPrice:       item.wholesale || item.price,
     externalSkuCode: item.skuCode,
   }));
 
