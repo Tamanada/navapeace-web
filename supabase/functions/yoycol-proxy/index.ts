@@ -140,7 +140,7 @@ Deno.serve(async (req) => {
       if (!skuCode) return json({ error: 'skuCode required' }, 400);
       const data = await yoyFetch('GET',
         '/api/2025/open/v4/shipping/sku_quotes',
-        { skuCode, country, quantity }
+        { sku_code: skuCode, country, quantity }
       );
       return json(data);
     }

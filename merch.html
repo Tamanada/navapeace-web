@@ -546,16 +546,17 @@ const PROXY_URL = (typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : '')
 const USD_TO_STARS = 100;
 
 // ── Retail price engine ────────────────────────────────────
-// Target: +$7 margin on YOYCOL wholesale cost
-// Output: always X.99, minimum $24.99
-const TARGET_MARGIN = 7;
-const MIN_RETAIL    = 24.99;
+// Formula: YOYCOL cost + shipping estimate + $7 margin → nearest X.99 → min $24.99
+// Shipping: ~$9 global average (Standard Shipping, YOYCOL confirmed rates)
+const TARGET_MARGIN      = 7;
+const SHIPPING_ESTIMATE  = 9;
+const MIN_RETAIL         = 24.99;
 
 function retailPrice(wholesale) {
   if (!wholesale) return MIN_RETAIL;
-  const withMargin = wholesale + TARGET_MARGIN;
-  const n = Math.floor(withMargin);
-  const price = (n + 0.99 >= withMargin) ? n + 0.99 : n + 1.99;
+  const target = wholesale + SHIPPING_ESTIMATE + TARGET_MARGIN;
+  // Round to nearest X.99  (e.g. 27.69 → 27.99, 27.20 → 26.99)
+  const price = Math.round(target + 0.01) - 0.01;
   return parseFloat(Math.max(MIN_RETAIL, price).toFixed(2));
 }
 
