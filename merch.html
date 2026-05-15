@@ -546,17 +546,41 @@ const PROXY_URL = (typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : '')
 const USD_TO_STARS = 100;
 
 // ── Retail price engine ────────────────────────────────────
-// Formula: YOYCOL cost + shipping estimate + $7 margin → nearest X.99 → min $24.99
-// Shipping: ~$9 global average (Standard Shipping, YOYCOL confirmed rates)
-const TARGET_MARGIN      = 7;
-const SHIPPING_ESTIMATE  = 9;
-const MIN_RETAIL         = 24.99;
+// Formula fallback: YOYCOL cost + $9 shipping + $7 margin → nearest X.99 → min $19.99
+// Per-product overrides take priority (David's pricing table).
+const TARGET_MARGIN     = 7;
+const SHIPPING_ESTIMATE = 9;
+const MIN_RETAIL        = 19.99;
 
-function retailPrice(wholesale) {
+// Fixed retail prices by product name keyword (case-insensitive substring match)
+// Products NOT matched fall back to the formula above.
+const PRICE_MAP = [
+  { kw: 'shorts',              price: 19.99 },
+  { kw: 'iphone',              price: 19.99 },
+  { kw: 'mobile phone case',   price: 19.99 },
+  { kw: 'mug',                 price: 19.99 },
+  { kw: 'airbag',              price: 19.99 },
+  { kw: 'gaiter',              price: 19.99 },
+  { kw: 'tote',                price: 19.99 },
+  { kw: 'peaked cap',          price: 19.99 },
+  { kw: 'playing cards',       price: 24.99 },
+  { kw: 'beach towel',         price: 24.99 },
+  { kw: 'swimsuit',            price: 24.99 },
+  { kw: 't-shirt',             price: 24.99 },
+  { kw: 'chest bag',           price: 24.99 },
+  // dress / bedding / quilt / flag → formula (cost-dependent)
+];
+
+function retailPrice(wholesale, productName) {
+  if (productName) {
+    const name = productName.toLowerCase();
+    for (const { kw, price } of PRICE_MAP) {
+      if (name.includes(kw)) return price;
+    }
+  }
   if (!wholesale) return MIN_RETAIL;
   const target = wholesale + SHIPPING_ESTIMATE + TARGET_MARGIN;
-  // Round to nearest X.99  (e.g. 27.69 → 27.99, 27.20 → 26.99)
-  const price = Math.round(target + 0.01) - 0.01;
+  const price  = Math.round(target + 0.01) - 0.01;   // nearest X.99
   return parseFloat(Math.max(MIN_RETAIL, price).toFixed(2));
 }
 
@@ -701,7 +725,7 @@ async function fetchBasePrice(prod) {
     if (!prices.length) return;
 
     const minWholesale = Math.min(...prices);
-    const retail = retailPrice(minWholesale);
+    const retail = retailPrice(minWholesale, prod.title);
     const el = document.getElementById(`price-${prod.id}`);
     if (el) {
       el.innerHTML = `$${retail.toFixed(2)} <span class="product-stars">⭐ ${starsForPrice(retail)}</span>`;
@@ -845,7 +869,7 @@ function updateDetailPrice(wholesale) {
     document.getElementById('detail-stars-badge').textContent = '';
     return;
   }
-  const retail = retailPrice(wholesale);
+  const retail = retailPrice(wholesale, currentProd?.title);
   const totalRetail = parseFloat((retail * qty).toFixed(2));
   const stars = starsForPrice(totalRetail);
   document.getElementById('detail-usd').textContent = `$${totalRetail.toFixed(2)}`;
@@ -870,7 +894,7 @@ function addToCart() {
 
   if (!wholesale) { toast('⚠ Select a variant first'); return; }
 
-  const retail = retailPrice(wholesale);
+  const retail = retailPrice(wholesale, currentProd?.title);
 
   const item = {
     mappingId:  currentProd.id,
