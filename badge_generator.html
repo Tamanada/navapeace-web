@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>NAVA PEACE — Badge Generator</title>
+<style>
+  @font-face { font-family:'Nasalization'; src:url('nasalization.woff') format('woff'); }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    background: radial-gradient(ellipse at 50% 30%, #6DD5F5 0%, #3AACDF 45%, #1E8EC4 100%);
+    font-family:'Nasalization',Arial,sans-serif;
+    color:white; padding:30px; min-height:100vh;
+  }
+  h1 { text-align:center; color:white; letter-spacing:5px; margin-bottom:6px; font-size:18px;
+       text-shadow:0 0 20px rgba(255,255,255,0.6); }
+  p  { text-align:center; color:rgba(255,255,255,0.6); font-size:11px; margin-bottom:30px; }
+  .grid { display:grid; grid-template-columns:repeat(4,1fr); gap:24px; max-width:1100px; margin:0 auto 40px; }
+  .badge-wrap { display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .label { color:rgba(255,255,255,0.7); font-size:9px; letter-spacing:2px; text-align:center; }
+  canvas { cursor:pointer; border-radius:4px; }
+  canvas:hover { filter:brightness(1.12) drop-shadow(0 0 12px rgba(255,255,255,0.4)); }
+  .btn { background:rgba(255,255,255,0.2); color:white; border:1px solid rgba(255,255,255,0.5);
+         padding:5px 16px; border-radius:20px; font-family:'Nasalization',Arial,sans-serif;
+         font-size:10px; letter-spacing:1px; cursor:pointer; }
+  .btn:hover { background:white; color:#3AACDF; }
+  .btn-all { display:block; margin:0 auto; background:white; color:#1E8EC4;
+             border:none; padding:14px 50px; border-radius:30px;
+             font-family:'Nasalization',Arial,sans-serif; font-size:13px;
+             letter-spacing:3px; cursor:pointer; font-weight:bold; }
+  .btn-all:hover { background:#f0f8ff; }
+</style>
+</head>
+<body>
+<h1>NAVA PEACE · BADGES</h1>
+<p>Click any badge or DOWNLOAD to save as PNG (512×640)</p>
+<div class="grid" id="grid"></div>
+<button class="btn-all" onclick="downloadAll()">↓ &nbsp; DOWNLOAD ALL &nbsp; ↓</button>
+
+<script>
+const W = 512, H = 640;
+
+const BADGES = [
+  { code:'PEACE_LOVER',       name:'PEACE', sub:'LOVER',       multi:'×1',  price:'FREE', accent:'#A8BCC8', glow:'#D8EAF5', dark:'rgba(60,80,100,0.35)' },
+  { code:'PEACE_GARDENER',    name:'PEACE', sub:'GARDENER',    multi:'×2',  price:'$10',  accent:'#27AE60', glow:'#52E08A', dark:'rgba(10,60,25,0.4)'  },
+  { code:'PEACE_GUARDIAN',    name:'PEACE', sub:'GUARDIAN',    multi:'×3',  price:'$20',  accent:'#2980B9', glow:'#6DD5F5', dark:'rgba(10,40,80,0.4)'  },
+  { code:'PEACE_GUIDE',       name:'PEACE', sub:'GUIDE',       multi:'×4',  price:'$30',  accent:'#8E44AD', glow:'#CF8EF4', dark:'rgba(40,10,70,0.4)'  },
+  { code:'PEACE_ILLUMINATOR', name:'PEACE', sub:'ILLUMINATOR', multi:'×5',  price:'$40',  accent:'#D4AC0D', glow:'#FFE566', dark:'rgba(60,45,0,0.4)'   },
+  { code:'PEACE_LEGEND',      name:'PEACE', sub:'LEGEND',      multi:'×6',  price:'$50',  accent:'#CA6F1E', glow:'#FFA550', dark:'rgba(60,25,0,0.4)'   },
+  { code:'ANGEL_OF_PEACE',    name:'ANGEL', sub:'OF PEACE',    multi:'×8',  price:'$100', accent:'#CB4CAF', glow:'#FF9EDA', dark:'rgba(70,0,40,0.4)'   },
+  { code:'PEACE_POWER',       name:'PEACE', sub:'POWER',       multi:'×10', price:'$150', accent:'#C0392B', glow:'#FF6655', dark:'rgba(70,0,0,0.4)'    },
+];
+
+// ── SHIELD PATH ─────────────────────────────────────────────
+function shieldPath(ctx, cx, cy, w, h) {
+  const x = cx-w/2, y = cy-h/2, r = w*0.11;
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y);
+  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h*0.54);
+  ctx.quadraticCurveTo(x+w, y+h*0.80, cx, y+h);
+  ctx.quadraticCurveTo(x, y+h*0.80, x, y+h*0.54);
+  ctx.lineTo(x, y+r);
+  ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
+}
+
+// ── ILLUSTRATED BACKGROUNDS ─────────────────────────────────
+
+// LOVER: Two doves facing, beaks touch forming a heart
+function drawLover(ctx) {
+  ctx.save(); ctx.globalAlpha = 0.18; ctx.fillStyle = 'white';
+  // Left dove body
+  ctx.beginPath(); ctx.ellipse(W/2-55, H/2-40, 35, 22, -0.5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(W/2-82, H/2-55, 18, 12, -0.8, 0, Math.PI*2); ctx.fill(); // head
+  // Left wing
+  ctx.beginPath(); ctx.ellipse(W/2-55, H/2-62, 20, 38, -0.3, 0, Math.PI*2); ctx.fill();
+  // Right dove (mirrored)
+  ctx.beginPath(); ctx.ellipse(W/2+55, H/2-40, 35, 22, 0.5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(W/2+82, H/2-55, 18, 12, 0.8, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(W/2+55, H/2-62, 20, 38, 0.3, 0, Math.PI*2); ctx.fill();
+  // Heart in the middle (formed by beaks meeting)
+  ctx.beginPath();
+  ctx.moveTo(W/2, H/2-30);
+  ctx.bezierCurveTo(W/2-25, H/2-60, W/2-45, H/2-15, W/2, H/2+10);
+  ctx.bezierCurveTo(W/2+45, H/2-15, W/2+25, H/2-60, W/2, H/2-30);
+  ctx.fill();
+  // Olive branches below
+  for(let i=-1;i<=1;i+=2){
+    ctx.beginPath(); ctx.ellipse(W/2+i*30, H/2+60, 8, 20, i*0.5, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.globalAlpha = 1; ctx.restore();
+}
+
+// GARDENER: Figure kneeling, planting a tree, dove above
+function drawGardener(ctx) {
+  ctx.save(); ctx.globalAlpha = 0.18; ctx.fillStyle = 'white';
+  // Tree trunk
+  ctx.fillRect(W/2-6, H/2-120, 12, 130);
+  // Tree canopy
+  ctx.beginPath(); ctx.arc(W/2, H/2-130, 50, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(W/2-35, H/2-115, 32, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(W/2+35, H/2-115, 32, 0, Math.PI*2); ctx.fill();
+  // Kneeling figure
+  ctx.beginPath(); ctx.arc(W/2-65, H/2+30, 14, 0, Math.PI*2); ctx.fill(); // head
+  ctx.beginPath(); ctx.ellipse(W/2-60, H/2+65, 16, 30, 0.3, 0, Math.PI*2); ctx.fill(); // body
+  // Arms reaching to tree base
+  ctx.beginPath(); ctx.moveTo(W/2-50, H/2+55); ctx.quadraticCurveTo(W/2-20, H/2+40, W/2-10, H/2+10);
+  ctx.lineWidth=8; ctx.strokeStyle='white'; ctx.stroke();
+  // Roots
+  for(let i=-2;i<=2;i++){
+    ctx.beginPath(); ctx.moveTo(W/2, H/2+10);
+    ctx.quadraticCurveTo(W/2+i*25, H/2+35, W/2+i*45, H/2+65);
+    ctx.lineWidth=4; ctx.stroke();
+  }
+  ctx.globalAlpha = 1; ctx.restore();
+}
+
+// GUARDIAN: Hooded cloaked figure, staff right hand, cards left hand
+function drawGuardian(ctx) {
+  ctx.save(); ctx.globalAlpha = 0.17; ctx.fillStyle = 'white';
+  // Cape (large flowing)
+  ctx.beginPath();
+  ctx.moveTo(W/2, H/2-110);
+  ctx.bezierCurveTo(W/2+20, H/2-90, W/2+75, H/2-20, W/2+80, H/2+90);
+  ctx.lineTo(W/2-80, H/2+90);
+  ctx.bezierCurveTo(W/2-75, H/2-20, W/2-20, H/2-90, W/2, H/2-110);
+  ctx.fill();
+  // Hood
+  ctx.beginPath(); ctx.arc(W/2, H/2-95, 28, 0, Math.PI*2); ctx.fill();
+  // Inner hood shadow (dark face = mystery)
+  ctx.globalAlpha = 0.05;
+  ctx.beginPath(); ctx.arc(W/2+5, H/2-88, 18, 0, Math.PI*2); ctx.fill();
+  ctx.globalAlpha = 0.17;
+  // Staff (right)
+  ctx.fillRect(W/2+55, H/2-130, 8, 220);
+  ctx.beginPath(); ctx.arc(W/2+59, H/2-135, 10, 0, Math.PI*2); ctx.fill(); // staff top orb
+  // Cards fan (left hand — friend cards)
+  for(let i=0;i<5;i++){
+    ctx.save();
+    ctx.translate(W/2-62, H/2+10);
+    ctx.rotate(-0.4 + i*0.2);
+    ctx.fillRect(-7, -28, 14, 40);
+    ctx.restore();
+  }
+  // Stars/aura around figure
+  ctx.globalAlpha = 0.1;
+  for(let i=0;i<6;i++){
+    const a = (i/6)*Math.PI*2;
+    ctx.beginPath(); ctx.arc(W/2+Math.cos(a)*100, H/2+Math.sin(a)*80, 5, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.globalAlpha = 1; ctx.restore();
+}
+
+// GUIDE: Tall figure leading group forward, light ahead
+function drawGuide(ctx) {
+  ctx.save(); ctx.globalAlpha = 0.17; ctx.fillStyle = 'white';
+  // Light source (ahead)
+  ctx.beginPath(); ctx.arc(W/2+110, H/2-80, 30, 0, Math.PI*2); ctx.fill();
+  ctx.globalAlpha = 0.07;
+  ctx.beginPath(); ctx.arc(W/2+110, H/2-80, 60, 0, Math.PI*2); ctx.fill();
+  ctx.globalAlpha = 0.17;
+  // Main guide figure (tall, arm extended toward light)
+  ctx.beginPath(); ctx.arc(W/2-30, H/2-90, 18, 0, Math.PI*2); ctx.fill(); // head
+  ctx.beginPath(); ctx.ellipse(W/2-30, H/2-40, 14, 40, 0, 0, Math.PI*2); ctx.fill(); // body
+  // Extended arm pointing to light
+  ctx.beginPath(); ctx.moveTo(W/2-20, H/2-55); ctx.lineTo(W/2+80, H/2-75);
+  ctx.lineWidth=9; ctx.strokeStyle='white'; ctx.stroke();
+  // Following figures (smaller, behind)
+  [[-75,20], [-95,50], [-110,25], [-80,70]].forEach(([dx,dy]) => {
+    ctx.beginPath(); ctx.arc(W/2+dx, H/2+dy, 10, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(W/2+dx, H/2+dy+28, 8, 18, 0, 0, Math.PI*2); ctx.fill();
+  });
+  // Path/road forward
+  ctx.beginPath(); ctx.moveTo(W/2-120, H/2+90); ctx.quadraticCurveTo(W/2, H/2+60, W/2+120, H/2-40);
+  ctx.lineWidth=6; ctx.stroke();
+  ctx.globalAlpha = 1; ctx.restore();
+}
+
+// ILLUMINATOR: Figure holding torch high, rays spread, others in dark below
+function drawIlluminator(ctx) {
+  ctx.save(); ctx.globalAlpha = 0.17; ctx.fillStyle = 'white';
+  // Torch rays
+  for(let i=0;i<10;i++){
+    const a = -Math.PI/2 + (i-4.5)*0.22;
+    ctx.beginPath();
+    ctx.moveTo(W/2+5, H/2-120);
+    ctx.lineTo(W/2+5+Math.cos(a)*160, H/2-120+Math.sin(a)*160);
+    ctx.lineWidth=3; ctx.strokeStyle='white'; ctx.globalAlpha=0.08+i*0.01;
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 0.17;
+  // Figure
+  ctx.beginPath(); ctx.arc(W/2-5, H/2-55, 17, 0, Math.PI*2); ctx.fill(); // head
+  ctx.beginPath(); ctx.ellipse(W/2-5, H/2, 13, 38, 0, 0, Math.PI*2); ctx.fill(); // body
+  // Arm raised with torch
+  ctx.beginPath(); ctx.moveTo(W/2+5, H/2-30);
+  ctx.lineTo(W/2+30, H/2-110);
+  ctx.lineWidth=8; ctx.strokeStyle='white'; ctx.stroke();
+  // Torch
+  ctx.fillRect(W/2+22, H/2-130, 10, 25);
+  ctx.beginPath(); ctx.arc(W/2+27, H/2-135, 13, 0, Math.PI*2); ctx.fill();
+  // Figures in shadow below (not yet illuminated)
+  ctx.globalAlpha = 0.10;
+  [[-70,70],[0,80],[70,65]].forEach(([dx,dy]) => {
+    ctx.beginPath(); ctx.arc(W/2+dx, H/2+dy, 9, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(W/2+dx, H/2+dy+22, 7, 16, 0, 0, Math.PI*2); ctx.fill();
+  });
+  ctx.globalAlpha = 1; ctx.restore();
+}
+
+// LEGEND: Figure on summit, arms open wide, dove soaring above, crowd below
+function drawLegend(ctx) {
+  ctx.save(); ctx.globalAlpha = 0.17; ctx.fillStyle = 'white';
+  // Mountain/summit
+  ctx.beginPath(); ctx.moveTo(W/2-160, H/2+90); ctx.lineTo(W/2, H/2-20);
+  ctx.lineTo(W/2+160, H/2+90); ctx.closePath(); ctx.fill();
+  // Figure on top — arms spread wide
+  ctx.beginPath(); ctx.arc(W/2, H/2-55, 16, 0, Math.PI*2); ctx.fill(); // head
+  ctx.beginPath(); ctx.ellipse(W/2, H/2-18, 12, 28, 0, 0, Math.PI*2); ctx.fill(); // body
+  // Arms wide open
+  ctx.beginPath(); ctx.moveTo(W/2-90, H/2-35); ctx.lineTo(W/2+90, H/2-35);
+  ctx.lineWidth=9; ctx.strokeStyle='white'; ctx.stroke();
+  // Crown above head
+  ctx.beginPath(); ctx.moveTo(W/2-16, H/2-73); ctx.lineTo(W/2-16, H/2-88);
+  ctx.lineTo(W/2-6, H/2-80); ctx.lineTo(W/2, H/2-92); ctx.lineTo(W/2+6, H/2-80);
+  ctx.lineTo(W/2+16, H/2-88); ctx.lineTo(W/2+16, H/2-73); ctx.closePath(); ctx.fill();
+  // Dove flying above
+  ctx.beginPath(); ctx.ellipse(W/2, H/2-115, 20, 10, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(W/2-18, H/2-122, 14, 6, -0.5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(W/2+18, H/2-122, 14, 6, 0.5, 0, Math.PI*2); ctx.fill();
+  // Tiny crowd at base
+  ctx.globalAlpha = 0.09;
+  for(let i=-4;i<=4;i++){
+    ctx.beginPath(); ctx.arc(W/2+i*28, H/2+82, 7, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.globalAlpha = 1; ctx.restore();
+}
+
+// ANGEL: Large angelic figure, wings spread, ascending, light below
+function drawAngel(ctx) {
+  ctx.save(); ctx.globalAlpha = 0.17; ctx.fillStyle = 'white';
+  // Massive wings
+  // Left wing
+  ctx.beginPath();
+  ctx.moveTo(W/2-10, H/2-50);
+  ctx.bezierCurveTo(W/2-80, H/2-110, W/2-160, H/2-60, W/2-155, H/2+40);
+  ctx.bezierCurveTo(W/2-130, H/2+20, W/2-80, H/2-30, W/2-10, H/2-10);
+  ctx.fill();
+  // Right wing
+  ctx.beginPath();
+  ctx.moveTo(W/2+10, H/2-50);
+  ctx.bezierCurveTo(W/2+80, H/2-110, W/2+160, H/2-60, W/2+155, H/2+40);
+  ctx.bezierCurveTo(W/2+130, H/2+20, W/2+80, H/2-30, W/2+10, H/2-10);
+  ctx.fill();
+  // Body ascending
+  ctx.beginPath(); ctx.arc(W/2, H/2-70, 20, 0, Math.PI*2); ctx.fill(); // head
+  ctx.beginPath(); ctx.ellipse(W/2, H/2-25, 15, 35, 0, 0, Math.PI*2); ctx.fill(); // body
+  // Halo
+  ctx.globalAlpha = 0.12;
+  ctx.beginPath(); ctx.ellipse(W/2, H/2-95, 30, 8, 0, 0, Math.PI*2);
+  ctx.lineWidth = 5; ctx.strokeStyle = 'white'; ctx.stroke();
+  ctx.globalAlpha = 0.17;
+  // Hands outstretched (giving/blessing)
+  ctx.beginPath(); ctx.moveTo(W/2-15, H/2-25); ctx.quadraticCurveTo(W/2-50, H/2+15, W/2-80, H/2+5);
+  ctx.lineWidth=7; ctx.strokeStyle='white'; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W/2+15, H/2-25); ctx.quadraticCurveTo(W/2+50, H/2+15, W/2+80, H/2+5);
+  ctx.stroke();
+  // Light rays from body
+  ctx.globalAlpha = 0.07;
+  for(let i=0;i<8;i++){
+    const a = (i/8)*Math.PI*2;
+    ctx.beginPath(); ctx.moveTo(W/2, H/2-40);
+    ctx.lineTo(W/2+Math.cos(a)*130, H/2-40+Math.sin(a)*100);
+    ctx.lineWidth=4; ctx.stroke();
+  }
+  ctx.globalAlpha = 1; ctx.restore();
+}
+
+// POWER: Powerful figure, arms raised, earth globe below, energy radiating
+function drawPower(ctx) {
+  ctx.save(); ctx.globalAlpha = 0.17; ctx.fillStyle = 'white';
+  // Energy rings radiating outward
+  ctx.globalAlpha = 0.06;
+  [60,90,120,150].forEach(r => {
+    ctx.beginPath(); ctx.arc(W/2, H/2-30, r, 0, Math.PI*2);
+    ctx.lineWidth = 3; ctx.strokeStyle = 'white'; ctx.stroke();
+  });
+  ctx.globalAlpha = 0.17;
+  // Globe beneath
+  ctx.beginPath(); ctx.arc(W/2, H/2+60, 45, 0, Math.PI*2); ctx.fill();
+  ctx.globalAlpha = 0.08;
+  // Latitude lines on globe
+  [-20,0,20].forEach(dy => {
+    ctx.beginPath(); ctx.ellipse(W/2, H/2+60+dy, 45, 10, 0, 0, Math.PI*2);
+    ctx.lineWidth=2; ctx.strokeStyle='rgba(0,0,80,0.5)'; ctx.stroke();
+  });
+  ctx.globalAlpha = 0.17;
+  // Figure standing on top of globe
+  ctx.beginPath(); ctx.arc(W/2, H/2-70, 20, 0, Math.PI*2); ctx.fill(); // head
+  ctx.beginPath(); ctx.ellipse(W/2, H/2-25, 15, 36, 0, 0, Math.PI*2); ctx.fill(); // body
+  // Both arms raised in triumph/peace
+  ctx.beginPath();
+  ctx.moveTo(W/2-12, H/2-40);
+  ctx.quadraticCurveTo(W/2-60, H/2-80, W/2-90, H/2-60);
+  ctx.lineWidth=9; ctx.strokeStyle='white'; ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(W/2+12, H/2-40);
+  ctx.quadraticCurveTo(W/2+60, H/2-80, W/2+90, H/2-60);
+  ctx.stroke();
+  // Dove on each hand
+  ctx.globalAlpha = 0.13;
+  [-90,90].forEach(dx => {
+    ctx.beginPath(); ctx.ellipse(W/2+dx, H/2-62, 12, 6, 0, 0, Math.PI*2); ctx.fill();
+  });
+  ctx.globalAlpha = 1; ctx.restore();
+}
+
+const DECOS = [drawLover, drawGardener, drawGuardian, drawGuide,
+               drawIlluminator, drawLegend, drawAngel, drawPower];
+
+// ── DRAW BADGE ───────────────────────────────────────────────
+function drawBadge(canvas, badge, deco) {
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+  const cx = W/2, cy = H/2 - 10;
+  const sw = 400, sh = 490;
+
+  // App gradient background
+  const appBg = ctx.createRadialGradient(cx, H*0.28, 0, cx, cy, W);
+  appBg.addColorStop(0,   '#6DD5F5');
+  appBg.addColorStop(0.45,'#3AACDF');
+  appBg.addColorStop(1,   '#1E8EC4');
+  ctx.fillStyle = appBg;
+  ctx.fillRect(0, 0, W, H);
+
+  // Shield outer glow
+  ctx.save();
+  ctx.shadowColor = badge.glow;
+  ctx.shadowBlur = 45;
+  shieldPath(ctx, cx, cy, sw+8, sh+8);
+  ctx.fillStyle = badge.glow;
+  ctx.globalAlpha = 0.12;
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.restore();
+
+  // Shield frosted glass fill
+  shieldPath(ctx, cx, cy, sw, sh);
+  const glassFill = ctx.createRadialGradient(cx, cy-sh*0.12, 0, cx, cy, sh*0.75);
+  glassFill.addColorStop(0, 'rgba(255,255,255,0.30)');
+  glassFill.addColorStop(0.5,'rgba(255,255,255,0.16)');
+  glassFill.addColorStop(1, badge.dark);
+  ctx.fillStyle = glassFill;
+  ctx.fill();
+
+  // Clip for illustration inside shield
+  ctx.save();
+  shieldPath(ctx, cx, cy, sw, sh);
+  ctx.clip();
+  deco(ctx);
+  ctx.restore();
+
+  // Shield border
+  shieldPath(ctx, cx, cy, sw, sh);
+  const borderGrad = ctx.createLinearGradient(cx-sw/2, cy-sh/2, cx+sw/2, cy+sh/2);
+  borderGrad.addColorStop(0, badge.glow);
+  borderGrad.addColorStop(0.5, badge.accent);
+  borderGrad.addColorStop(1, badge.glow);
+  ctx.strokeStyle = borderGrad;
+  ctx.lineWidth = 5;
+  ctx.stroke();
+
+  // Inner border line
+  ctx.save();
+  shieldPath(ctx, cx, cy, sw-22, sh-22);
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  ctx.restore();
+
+  // Logo — 50% bigger (255px)
+  if (logoImg && logoImg.complete) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(255,255,255,0.8)';
+    ctx.shadowBlur = 30;
+    const ls = 255;
+    ctx.drawImage(logoImg, cx-ls/2, cy-ls/2-55, ls, ls);
+    ctx.restore();
+  }
+
+  // Separator
+  ctx.save();
+  const sep = ctx.createLinearGradient(cx-150, 0, cx+150, 0);
+  sep.addColorStop(0, 'transparent');
+  sep.addColorStop(0.5, badge.accent);
+  sep.addColorStop(1, 'transparent');
+  ctx.strokeStyle = sep;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(cx-145, cy+130); ctx.lineTo(cx+145, cy+130);
+  ctx.stroke();
+  ctx.restore();
+
+  // Badge name — WHITE with glow for readability
+  ctx.save();
+  ctx.textAlign = 'center';
+  // "PEACE" / "ANGEL"
+  ctx.shadowColor = 'rgba(255,255,255,0.9)';
+  ctx.shadowBlur = 18;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = `bold 38px Nasalization, Arial`;
+  ctx.fillText(badge.name, cx, cy + 163);
+  // Sub name with white highlight stroke
+  ctx.font = `bold 30px Nasalization, Arial`;
+  ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+  ctx.lineWidth = 5;
+  ctx.lineJoin = 'round';
+  ctx.strokeText(badge.sub, cx, cy + 200);
+  ctx.fillStyle = badge.accent;
+  ctx.fillText(badge.sub, cx, cy + 200);
+  ctx.restore();
+
+  // Multiplier pill (top right of shield)
+  const mx = cx + sw/2 - 42, my = cy - sh/2 + 52;
+  ctx.save();
+  ctx.shadowColor = badge.glow; ctx.shadowBlur = 20;
+  const pillG = ctx.createLinearGradient(mx-32, my-20, mx+32, my+20);
+  pillG.addColorStop(0, badge.glow); pillG.addColorStop(1, badge.accent);
+  ctx.fillStyle = pillG;
+  ctx.beginPath(); ctx.ellipse(mx, my, 36, 24, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.font = `bold 22px Nasalization, Arial`;
+  ctx.textAlign = 'center';
+  ctx.fillText(badge.multi, mx, my+8);
+  ctx.restore();
+
+  // Price pill (top left)
+  const px2 = cx - sw/2 + 42, py = cy - sh/2 + 52;
+  ctx.save();
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.strokeStyle = badge.glow; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.ellipse(px2, py, 34, 22, 0, 0, Math.PI*2);
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#fff';
+  ctx.font = `bold 18px Nasalization, Arial`;
+  ctx.textAlign = 'center';
+  ctx.fillText(badge.price, px2, py+7);
+  ctx.restore();
+
+  // Bottom dots
+  [-14, 0, 14].forEach((o,i) => {
+    ctx.beginPath(); ctx.arc(cx+o, cy+sh/2-35, i===1?5:3, 0, Math.PI*2);
+    ctx.fillStyle = i===1 ? badge.glow : 'rgba(255,255,255,0.5)';
+    ctx.fill();
+  });
+}
+
+// ── BUILD ────────────────────────────────────────────────────
+const canvases = [];
+let logoImg = null;
+let built = false;
+
+function build() {
+  if (built) return; built = true;
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  BADGES.forEach((badge, i) => {
+    const wrap = document.createElement('div'); wrap.className = 'badge-wrap';
+    const canvas = document.createElement('canvas');
+    canvas.width = W; canvas.height = H;
+    canvas.style.width  = '220px';
+    canvas.style.height = Math.round(220*H/W)+'px';
+    canvas.onclick = () => dlOne(canvas, badge.code);
+    drawBadge(canvas, badge, DECOS[i]);
+    canvases.push({canvas, badge, deco: DECOS[i]});
+    const lbl = document.createElement('div'); lbl.className='label';
+    lbl.textContent = badge.name+' '+badge.sub;
+    const btn = document.createElement('button'); btn.className='btn';
+    btn.textContent='DOWNLOAD';
+    btn.onclick = () => dlOne(canvas, badge.code);
+    wrap.append(canvas, lbl, btn); grid.appendChild(wrap);
+  });
+}
+
+function redrawAll() {
+  canvases.forEach(({canvas, badge, deco}) => drawBadge(canvas, badge, deco));
+}
+
+logoImg = new Image();
+logoImg.onload = () => { if (built) redrawAll(); else build(); };
+logoImg.onerror = build;
+logoImg.src = 'logo.png';
+
+const font = new FontFace('Nasalization','url(nasalization.woff)');
+font.load().then(f => { document.fonts.add(f); if(built) redrawAll(); else build(); }).catch(build);
+setTimeout(build, 900);
+
+function dlOne(canvas, code) {
+  const a = document.createElement('a');
+  a.download = code+'_badge.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+}
+function downloadAll() {
+  canvases.forEach(({canvas,badge},i) => setTimeout(()=>dlOne(canvas,badge.code), i*400));
+}
+</script>
+</body>
+</html>

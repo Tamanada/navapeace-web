@@ -457,6 +457,43 @@
 
     .nav-item.active { color: #fff; }
     .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
+
+    /* ── COUNTERS ── */
+    .counters {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      margin-top: 18px;
+    }
+    .cnt-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+    .cnt-num {
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 28px;
+      letter-spacing: 2px;
+      color: #fff;
+      text-shadow: 0 0 20px rgba(255,255,255,0.5);
+      transition: opacity 0.3s;
+    }
+    .cnt-num.loading { opacity: 0.4; }
+    .cnt-lbl {
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(240,237,228,0.7);
+    }
+    .cnt-sep {
+      width: 1px;
+      height: 40px;
+      background: rgba(255,255,255,0.25);
+      align-self: center;
+    }
   </style>
 </head>
 <body>
@@ -509,6 +546,18 @@
       <span class="done-timer" id="countdown">00:00:00</span>
     </div>
 
+    <!-- COUNTERS -->
+    <div class="counters">
+      <div class="cnt-item" onclick="openInfoPop('today')">
+        <span class="cnt-num loading" id="cnt-today">—</span>
+        <span class="cnt-lbl" data-i18n="cnt_today_lbl">TODAY</span>
+      </div>
+      <div class="cnt-sep"></div>
+      <div class="cnt-item" onclick="openInfoPop('total')">
+        <span class="cnt-num loading" id="cnt-total">—</span>
+        <span class="cnt-lbl" data-i18n="cnt_total_lbl">TOTAL ACTIONS</span>
+      </div>
+    </div>
 
     <!-- SHARE PROGRESS BUTTON — disabled -->
     <button id="share-progress-btn" onclick="openShareOverlay()" style="display:none;"></button>
@@ -915,10 +964,34 @@
 
       // Si déjà voté aujourd'hui (ex: autre appareil) → countdown direct sans thank you
       setDone(!alreadyVotedToday);
+
+      // Refresh compteur global pour voir le +1 en live
+      if (!alreadyVotedToday) setTimeout(loadCounters, 800);
     }
 
-    // Compteurs retirés de l'interface — fonction conservée pour compatibilité
-    function loadCounters() { /* compteurs supprimés */ }
+    // Compteur global live — total actions + actions du jour
+    async function loadCounters() {
+      if (!sb) return;
+      try {
+        const _now = new Date();
+        const _tomorrow = new Date(_now);
+        _tomorrow.setDate(_tomorrow.getDate() + 1);
+        const TOMORROW = _tomorrow.getFullYear() + '-' + String(_tomorrow.getMonth()+1).padStart(2,'0') + '-' + String(_tomorrow.getDate()).padStart(2,'0');
+
+        const [totalRes, todayRes] = await Promise.all([
+          sb.from('peace_votes').select('*', { count: 'exact', head: true }),
+          sb.from('peace_votes').select('*', { count: 'exact', head: true })
+            .gte('created_at', TODAY + 'T00:00:00Z')
+            .lt('created_at', TOMORROW + 'T00:00:00Z'),
+        ]);
+        const total = totalRes.count ?? 0;
+        const today = todayRes.count ?? 0;
+        const totalEl = document.getElementById('cnt-total');
+        const todayEl = document.getElementById('cnt-today');
+        if (totalEl) { totalEl.textContent = total.toLocaleString('fr-FR'); totalEl.classList.remove('loading'); }
+        if (todayEl) { todayEl.textContent = today.toLocaleString('fr-FR'); todayEl.classList.remove('loading'); }
+      } catch(e) { console.warn('loadCounters error', e); }
+    }
 
     // ── Countdown to next midnight ──────────────────────────────────
     function startCountdown() {
@@ -1585,6 +1658,8 @@
     initPush();
     initAndSync(); // ← sync offline votes au démarrage
     awardWelcomeDove(); // P1 · welcome dove — first open only
+    loadCounters();
+    setInterval(loadCounters, 60000); // refresh chaque minute
 
     // ── BOOM SLOGAN ROTATION ────────────────────────────────────────────
     (function rotateBoomSlogan() {
