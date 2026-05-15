@@ -328,14 +328,14 @@
 
     // ── REF CODE LABELS ──────────────────────────────────────────────────
     var REF_LABELS = {
-      en: { title:'INVITATION CODE REQUIRED', ph:'ENTER YOUR CODE', btn:'JOIN NAVA PEACE', required:'INVITATION CODE REQUIRED', hint:'ASK YOUR FRIENDS IF THEY CAN INVITE YOU ;)', community:'JOIN OUR COMMUNITY → GET INVITED' },
-      fr: { title:'CODE D\'INVITATION REQUIS', ph:'ENTRER VOTRE CODE', btn:'REJOINDRE NAVA PEACE', required:'CODE D\'INVITATION REQUIS', hint:'DEMANDE À TES AMIS S\'ILS PEUVENT T\'INVITER ;)', community:'REJOINS LA COMMUNAUTÉ → OBTIENS UNE INVITATION' },
-      es: { title:'CÓDIGO DE INVITACIÓN REQUERIDO', ph:'INGRESA TU CÓDIGO', btn:'UNIRME A NAVA PEACE', required:'CÓDIGO DE INVITACIÓN REQUERIDO', hint:'PIDE A TUS AMIGOS QUE TE INVITEN ;)', community:'ÚNETE A LA COMUNIDAD → CONSIGUE INVITACIÓN' },
-      pt: { title:'CÓDIGO DE CONVITE OBRIGATÓRIO', ph:'INSERIR SEU CÓDIGO', btn:'ENTRAR NO NAVA PEACE', required:'CÓDIGO DE CONVITE OBRIGATÓRIO', hint:'PEÇA AOS SEUS AMIGOS PARA TE CONVIDAREM ;)', community:'ENTRE NA COMUNIDADE → RECEBA UM CONVITE' },
-      de: { title:'EINLADUNGSCODE ERFORDERLICH', ph:'CODE EINGEBEN', btn:'NAVA PEACE BEITRETEN', required:'EINLADUNGSCODE ERFORDERLICH', hint:'FRAG DEINE FREUNDE, OB SIE DICH EINLADEN KÖNNEN ;)', community:'COMMUNITY BEITRETEN → EINLADUNG ERHALTEN' },
-      ar: { title:'رمز الدعوة مطلوب', ph:'أدخل رمز الدعوة', btn:'انضم إلى نافا بيس', required:'رمز الدعوة مطلوب', hint:'اسأل أصدقاءك إذا كان بإمكانهم دعوتك ;)', community:'انضم للمجتمع ← احصل على دعوة' },
-      zh: { title:'需要邀请码', ph:'输入邀请码', btn:'加入 NAVA PEACE', required:'需要邀请码', hint:'问问你的朋友能否邀请你 ;)', community:'加入社区 → 获得邀请' },
-      ru: { title:'ТРЕБУЕТСЯ КОД ПРИГЛАШЕНИЯ', ph:'ВВЕДИ КОД ПРИГЛАШЕНИЯ', btn:'ВОЙТИ В NAVA PEACE', required:'ТРЕБУЕТСЯ КОД ПРИГЛАШЕНИЯ', hint:'СПРОСИ ДРУЗЕЙ, МОГУТ ЛИ ОНИ ТЕБЯ ПРИГЛАСИТЬ ;)', community:'ВСТУПИ В СООБЩЕСТВО → ПОЛУЧИ ПРИГЛАШЕНИЕ' },
+      en: { title:'INVITATION CODE REQUIRED', ph:'ENTER YOUR CODE', btn:'JOIN NAVA PEACE', required:'INVITATION CODE REQUIRED', invalid:'INVALID INVITATION CODE', error:'CONNECTION ERROR — TRY AGAIN', hint:'ASK YOUR FRIENDS IF THEY CAN INVITE YOU ;)', community:'JOIN OUR COMMUNITY → GET INVITED' },
+      fr: { title:'CODE D\'INVITATION REQUIS', ph:'ENTRER VOTRE CODE', btn:'REJOINDRE NAVA PEACE', required:'CODE D\'INVITATION REQUIS', invalid:'CODE D\'INVITATION INVALIDE', error:'ERREUR DE CONNEXION — RÉESSAIE', hint:'DEMANDE À TES AMIS S\'ILS PEUVENT T\'INVITER ;)', community:'REJOINS LA COMMUNAUTÉ → OBTIENS UNE INVITATION' },
+      es: { title:'CÓDIGO DE INVITACIÓN REQUERIDO', ph:'INGRESA TU CÓDIGO', btn:'UNIRME A NAVA PEACE', required:'CÓDIGO DE INVITACIÓN REQUERIDO', invalid:'CÓDIGO DE INVITACIÓN INVÁLIDO', error:'ERROR DE CONEXIÓN — INTÉNTALO DE NUEVO', hint:'PIDE A TUS AMIGOS QUE TE INVITEN ;)', community:'ÚNETE A LA COMUNIDAD → CONSIGUE INVITACIÓN' },
+      pt: { title:'CÓDIGO DE CONVITE OBRIGATÓRIO', ph:'INSERIR SEU CÓDIGO', btn:'ENTRAR NO NAVA PEACE', required:'CÓDIGO DE CONVITE OBRIGATÓRIO', invalid:'CÓDIGO DE CONVITE INVÁLIDO', error:'ERRO DE CONEXÃO — TENTE NOVAMENTE', hint:'PEÇA AOS SEUS AMIGOS PARA TE CONVIDAREM ;)', community:'ENTRE NA COMUNIDADE → RECEBA UM CONVITE' },
+      de: { title:'EINLADUNGSCODE ERFORDERLICH', ph:'CODE EINGEBEN', btn:'NAVA PEACE BEITRETEN', required:'EINLADUNGSCODE ERFORDERLICH', invalid:'UNGÜLTIGER EINLADUNGSCODE', error:'VERBINDUNGSFEHLER — ERNEUT VERSUCHEN', hint:'FRAG DEINE FREUNDE, OB SIE DICH EINLADEN KÖNNEN ;)', community:'COMMUNITY BEITRETEN → EINLADUNG ERHALTEN' },
+      ar: { title:'رمز الدعوة مطلوب', ph:'أدخل رمز الدعوة', btn:'انضم إلى نافا بيس', required:'رمز الدعوة مطلوب', invalid:'رمز الدعوة غير صالح', error:'خطأ في الاتصال — حاول مجدداً', hint:'اسأل أصدقاءك إذا كان بإمكانهم دعوتك ;)', community:'انضم للمجتمع ← احصل على دعوة' },
+      zh: { title:'需要邀请码', ph:'输入邀请码', btn:'加入 NAVA PEACE', required:'需要邀请码', invalid:'邀请码无效', error:'连接错误 — 请重试', hint:'问问你的朋友能否邀请你 ;)', community:'加入社区 → 获得邀请' },
+      ru: { title:'ТРЕБУЕТСЯ КОД ПРИГЛАШЕНИЯ', ph:'ВВЕДИ КОД ПРИГЛАШЕНИЯ', btn:'ВОЙТИ В NAVA PEACE', required:'ТРЕБУЕТСЯ КОД ПРИГЛАШЕНИЯ', invalid:'НЕДЕЙСТВИТЕЛЬНЫЙ КОД ПРИГЛАШЕНИЯ', error:'ОШИБКА СОЕДИНЕНИЯ — ПОПРОБУЙ СНОВА', hint:'СПРОСИ ДРУЗЕЙ, МОГУТ ЛИ ОНИ ТЕБЯ ПРИГЛАСИТЬ ;)', community:'ВСТУПИ В СООБЩЕСТВО → ПОЛУЧИ ПРИГЛАШЕНИЕ' },
     };
 
     // ── FADE & REDIRECT — fades the whole body ───────────────────────────
@@ -469,7 +469,8 @@
         function go() {
           if (_goLock) return;
           var code = (document.getElementById('ref-inp').value || '').trim().toUpperCase();
-          // ── INVITE-ONLY GATE: code is mandatory ─────────────────────────
+
+          // ── Empty check ──────────────────────────────────────────────────
           if (!code) {
             var errEl = document.getElementById('ref-err');
             if (errEl) errEl.textContent = lbl.required || 'INVITATION CODE REQUIRED';
@@ -477,14 +478,47 @@
             if (inp2) { inp2.style.borderColor = 'rgba(255,100,100,0.7)'; inp2.focus(); }
             return;
           }
+
+          // ── Lock UI + show loading ────────────────────────────────────────
           _goLock = true;
-          ls('nava_peace_referred_by', code);
-          var b = document.getElementById('ref-box');
-          if (b) { b.style.transition = 'opacity 0.3s'; b.style.opacity = '0'; }
-          setTimeout(function () {
-            if (b) b.remove();
-            playBienvenue(function () { fadeAndGo('index.html'); });
-          }, 300);
+          var btn = document.getElementById('ref-btn');
+          var origBtnText = btn ? btn.textContent : '';
+          if (btn) btn.textContent = '···';
+
+          // ── Server-side validation: code must exist in peace_votes ────────
+          fetch(SB_URL + '/rest/v1/rpc/nava_validate_ref_code', {
+            method: 'POST',
+            headers: Object.assign({}, SB_H, { 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ input_code: code })
+          })
+          .then(function(r) { return r.json(); })
+          .then(function(valid) {
+            if (!valid) {
+              // Code not found in database — reject
+              _goLock = false;
+              if (btn) btn.textContent = origBtnText;
+              var errEl = document.getElementById('ref-err');
+              if (errEl) errEl.textContent = lbl.invalid || 'INVALID INVITATION CODE';
+              var inp2 = document.getElementById('ref-inp');
+              if (inp2) { inp2.style.borderColor = 'rgba(255,100,100,0.7)'; inp2.focus(); }
+              return;
+            }
+            // ── Code is valid — proceed ─────────────────────────────────────
+            ls('nava_peace_referred_by', code);
+            var b = document.getElementById('ref-box');
+            if (b) { b.style.transition = 'opacity 0.3s'; b.style.opacity = '0'; }
+            setTimeout(function () {
+              if (b) b.remove();
+              playBienvenue(function () { fadeAndGo('index.html'); });
+            }, 300);
+          })
+          .catch(function() {
+            // Network error — unlock gracefully, let user retry
+            _goLock = false;
+            if (btn) btn.textContent = origBtnText;
+            var errEl = document.getElementById('ref-err');
+            if (errEl) errEl.textContent = lbl.error || 'CONNECTION ERROR — TRY AGAIN';
+          });
         }
 
         function showChangeForm() {
