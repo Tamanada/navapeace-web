@@ -560,22 +560,25 @@ let cart = JSON.parse(localStorage.getItem('nava_merch_cart') || '[]');
 // the product came from self_store or product templates.
 function normalizeProduct(p, source) {
   return {
-    id:       String(p.productId || p.id || p.mappingId || ''),
-    mappingId:String(p.mappingId || p.productId || p.id || ''), // keep for variant compat
+    id:       String(p.id || p.productId || p.mappingId || ''),
+    mappingId:String(p.mappingId || p.id || p.productId || ''),
     title:    p.productName || p.name || p.title || 'Product',
-    image:    p.mainImage   || p.coverImage || p.image || p.imageUrl || '',
+    image:    p.previewImage || p.mainImage || p.coverImage || p.image || p.imageUrl || '',
     source,   // 'template' | 'self_store'
   };
 }
 
 function normalizeVariant(v) {
+  // mockupImage is an array in template detail response
+  const mockup = Array.isArray(v.mockupImage) ? (v.mockupImage[0]?.url || '') : '';
   return {
-    skuCode:   v.skuCode   || v.variantCode || v.externalSkuCode || '',
-    variantId: v.variantId || v.mappingVariantId || v.skuId || '',
-    size:      v.size      || v.sizeName  || v.sizeCode  || '',
-    color:     v.color     || v.colorName || v.colorCode || '',
-    salesPrice: parseFloat(v.salesPrice || v.salePrice || v.price || v.retailPrice || 0),
-    available: v.available !== false && v.status !== 'disable',
+    skuCode:    v.skuCode    || v.variantCode || v.externalSkuCode || '',
+    variantId:  String(v.variantId || v.mappingVariantId || v.skuId || ''),
+    size:       v.size       || v.sizeName   || v.sizeCode  || '',
+    color:      v.color      || v.colorName  || v.colorCode || '',
+    salesPrice: parseFloat(v.price || v.salesPrice || v.salePrice || v.retailPrice || 0),
+    mockupImage: mockup,
+    available:  v.available !== false && v.status !== 'disable',
   };
 }
 
@@ -810,7 +813,14 @@ function resolveVariant() {
     return sizeMatch && colorMatch;
   }) || null;
 
-  if (selectedVariant) updateDetailPrice(selectedVariant.salesPrice);
+  if (selectedVariant) {
+    updateDetailPrice(selectedVariant.salesPrice);
+    // Show variant mockup image if available
+    if (selectedVariant.mockupImage) {
+      const imgEl = document.getElementById('detail-img');
+      imgEl.innerHTML = `<img src="${selectedVariant.mockupImage}" alt="${currentProd.title}"/>`;
+    }
+  }
 }
 
 function updateDetailPrice(price) {

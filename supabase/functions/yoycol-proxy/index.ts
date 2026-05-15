@@ -157,15 +157,14 @@ Deno.serve(async (req) => {
     }
 
     // ── GET product templates (full Yoycol catalog) ────────
-    // For Open API stores: products must be fetched via listProductTemplates,
-    // not from self_store (which is always empty for API-connected stores).
+    // Confirmed path: /api/2025/open/v4/product_templates
     if (action === 'templates' && req.method === 'GET') {
       const page       = url.searchParams.get('page')       ?? '1';
       const size       = url.searchParams.get('size')       ?? '50';
       const categoryId = url.searchParams.get('categoryId') ?? '';
       const params: Record<string, string> = { page, size };
       if (categoryId) params.categoryId = categoryId;
-      const data = await yoyFetch('GET', '/api/2025/open/v4/products', params);
+      const data = await yoyFetch('GET', '/api/2025/open/v4/product_templates', params);
       return json(data);
     }
 
@@ -173,7 +172,7 @@ Deno.serve(async (req) => {
     if (action === 'template' && req.method === 'GET') {
       const productId = url.searchParams.get('productId') ?? '';
       if (!productId) return json({ error: 'productId required' }, 400);
-      const data = await yoyFetch('GET', `/api/2025/open/v4/products/${productId}`);
+      const data = await yoyFetch('GET', `/api/2025/open/v4/product_templates/${productId}`);
       return json(data);
     }
 
