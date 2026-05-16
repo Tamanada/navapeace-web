@@ -1384,11 +1384,11 @@ function renderCart() {
   el.innerHTML = cart.map((item, idx) => `
     <div class="cart-item">
       <div class="cart-item-img">
-        ${item.image ? `<img src="${item.image}" alt="${item.title}"/>` : '🛍'}
+        ${item.image ? `<img src="${esc(item.image)}" alt="${esc(item.title)}"/>` : '🛍'}
       </div>
       <div class="cart-item-info">
-        <div class="cart-item-name">${item.title}</div>
-        <div class="cart-item-sub">${[item.size, item.color].filter(Boolean).join(' · ')} × ${item.qty}</div>
+        <div class="cart-item-name">${esc(item.title)}</div>
+        <div class="cart-item-sub">${esc([item.size, item.color].filter(Boolean).join(' · '))} × ${item.qty}</div>
       </div>
       <span class="cart-item-price">⭐ ${item.stars * item.qty}</span>
       <button class="cart-remove" onclick="removeFromCart(${idx})">✕</button>
@@ -1471,6 +1471,9 @@ async function placeOrder() {
     if (!invoiceLink) throw new Error('Could not create invoice');
 
     // 2. Open Telegram payment
+    if (typeof Telegram?.WebApp?.openInvoice !== 'function') {
+      throw new Error('Please update your Telegram app to pay with Stars');
+    }
     Telegram.WebApp.openInvoice(invoiceLink, async (status) => {
       if (status !== 'paid') {
         btn.disabled = false;
@@ -1531,6 +1534,15 @@ async function createYoycolOrder(addr) {
       }),
     });
     const data = await res.json();
+
+    // Guard: Yoycol must return a data object — otherwise the order was rejected
+    if (!data?.data && data?.code && data.code !== '100000') {
+      throw new Error(data?.message || data?.msg || `Yoycol error ${data?.code}`);
+    }
+    if (!data?.data && !data?.orderId) {
+      throw new Error(data?.message || 'Order rejected by supplier — please contact support');
+    }
+
     const yoyOrderId = data?.data?.orderId || data?.data?.id || orderSn;
 
     // 4. Clear pending state + cart + show confirmation

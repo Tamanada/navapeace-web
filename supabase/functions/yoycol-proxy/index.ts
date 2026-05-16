@@ -627,6 +627,17 @@ Deno.serve(async (req) => {
 
     // ── GET orders list (admin dashboard) ─────────────────
     if (action === 'orders' && req.method === 'GET') {
+      // Require admin code — verify via nava_check_admin RPC
+      const adminCode = url.searchParams.get('adminCode') ?? '';
+      if (!adminCode) return json({ error: 'adminCode required' }, 403);
+      const verifyRes = await fetch(`${SUPA_URL}/rest/v1/rpc/nava_check_admin`, {
+        method: 'POST',
+        headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input_code: adminCode }),
+      });
+      const verifyData = await verifyRes.json();
+      if (!verifyData?.valid) return json({ error: 'Unauthorized' }, 403);
+
       const page   = url.searchParams.get('page')   ?? '1';
       const size   = url.searchParams.get('size')   ?? '20';
       const status = url.searchParams.get('status') ?? '';
@@ -638,6 +649,17 @@ Deno.serve(async (req) => {
 
     // ── GET account balance (admin dashboard) ─────────────
     if (action === 'balance' && req.method === 'GET') {
+      // Require admin code — verify via nava_check_admin RPC
+      const adminCode = url.searchParams.get('adminCode') ?? '';
+      if (!adminCode) return json({ error: 'adminCode required' }, 403);
+      const verifyRes = await fetch(`${SUPA_URL}/rest/v1/rpc/nava_check_admin`, {
+        method: 'POST',
+        headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input_code: adminCode }),
+      });
+      const verifyData = await verifyRes.json();
+      if (!verifyData?.valid) return json({ error: 'Unauthorized' }, 403);
+
       const data = await yoyFetch('GET', '/api/2025/open/v4/account/balance');
       return json(data);
     }
