@@ -545,6 +545,13 @@ let qty = 1;
 function lsGet(key, fallback) { try { return JSON.parse(localStorage.getItem(key) || 'null') ?? fallback; } catch { return fallback; } }
 function lsSet(key, val)      { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
 
+// HTML escape — prevents XSS from YOYCOL API data injected into innerHTML
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])
+  );
+}
+
 let cart          = lsGet('nava_shop_cart', []);
 const priceCache  = {}; // productId → display string, persists across filter changes
 let priceOverrides = {}; // productId → admin-set retail price (from admin_settings)
@@ -706,9 +713,7 @@ async function startCheckout() {
 
     const data = await res.json();
     if (data.url) {
-      // Clear cart before redirect (confirmed intent)
-      cart = [];
-      saveCart();
+      // Cart is cleared only after Stripe confirms payment (in checkSuccess)
       window.location.href = data.url;
     } else {
       throw new Error(data.error || 'Stripe session creation failed');
@@ -803,14 +808,14 @@ function renderGrid(products) {
   grid.innerHTML = products.map(p => {
     const cached = priceCache[p.id];
     return `
-    <div class="product-card" onclick="openDetail('${p.id}')">
+    <div class="product-card" onclick="openDetail('${esc(p.id)}')">
       <div class="product-img">
-        ${p.image ? `<img src="${p.image}" alt="${p.title}" loading="lazy"/>` : '🛍'}
+        ${p.image ? `<img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy"/>` : '🛍'}
       </div>
       <div class="product-info">
-        <div class="product-name">${p.title}</div>
+        <div class="product-name">${esc(p.title)}</div>
         <div class="product-price-row">
-          <span class="product-price${cached ? '' : ' loading'}" id="price-${p.id}">${cached || '···'}</span>
+          <span class="product-price${cached ? '' : ' loading'}" id="price-${esc(p.id)}">${cached || '···'}</span>
         </div>
       </div>
     </div>`;
@@ -927,9 +932,6 @@ function filterVariantSizes(sizes) {
 
 function renderVariants(variants) {
   const available = variants.filter(v => v.available);
-  // DEBUG — visible price dump (remove after diagnosis)
-  const dbg = available.map(v => `${v.size||v.color||'?'}=$${v.salesPrice}`).join(' | ');
-  document.getElementById('detail-info').innerHTML = `<p style="font-size:9px;color:#FFD700;word-break:break-all;opacity:0.7">${dbg}</p>`;
   if (!available.length) { document.getElementById('detail-variants').innerHTML = ''; updateDetailPrice(0); return; }
 
   const rawSizes = [...new Set(available.map(v => v.size).filter(Boolean))];
@@ -942,7 +944,7 @@ function renderVariants(variants) {
     selectedSize = sizes[0];
     html += `<p class="variant-label">SIZE</p><div class="chips" id="size-chips">`;
     html += sizes.map((s, i) =>
-      `<div class="chip${i===0?' selected':''}" data-type="size" data-val="${s.replace(/"/g,'&quot;')}">${s}</div>`
+      `<div class="chip${i===0?' selected':''}" data-type="size" data-val="${esc(s)}">${esc(s)}</div>`
     ).join('');
     html += '</div>';
   } else if (sizes.length === 1) { selectedSize = sizes[0]; }
@@ -951,7 +953,7 @@ function renderVariants(variants) {
     selectedColor = colors[0];
     html += `<p class="variant-label">COLOR</p><div class="chips" id="color-chips">`;
     html += colors.map((c, i) =>
-      `<div class="chip${i===0?' selected':''}" data-type="color" data-val="${c.replace(/"/g,'&quot;')}">${c}</div>`
+      `<div class="chip${i===0?' selected':''}" data-type="color" data-val="${esc(c)}">${esc(c)}</div>`
     ).join('');
     html += '</div>';
   } else if (colors.length === 1) { selectedColor = colors[0]; }
@@ -1088,7 +1090,8 @@ async function checkSuccess() {
   // Clean URL immediately
   window.history.replaceState({}, '', window.location.pathname);
 
-  // Show banner right away (payment confirmed by Stripe redirect)
+  // Payment confirmed — clear cart and show banner
+  cart = []; saveCart(); updateCartBadge();
   const banner = document.getElementById('success-banner');
   banner.classList.add('show');
   banner.scrollIntoView({ behavior: 'smooth', block: 'center' });

@@ -806,6 +806,13 @@ let qty = 1;
 function lsGet(key, fallback) { try { return JSON.parse(localStorage.getItem(key) || 'null') ?? fallback; } catch { return fallback; } }
 function lsSet(key, val)      { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
 
+// HTML escape — prevents XSS from YOYCOL API data injected into innerHTML
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])
+  );
+}
+
 let cart          = lsGet('nava_merch_cart', []);
 let priceOverrides = {}; // productId → admin-set retail price
 
@@ -923,7 +930,7 @@ function renderDetailInfo(prod, variants) {
 
   html += '<div class="detail-specs">';
   html += specs.map(([k, v]) =>
-    `<div class="spec-row"><span class="spec-key">${k}</span><span class="spec-val">${v}</span></div>`
+    `<div class="spec-row"><span class="spec-key">${esc(k)}</span><span class="spec-val">${esc(v)}</span></div>`
   ).join('');
   html += '</div>';
 
@@ -1000,14 +1007,14 @@ function renderGrid(products) {
   const grid = document.getElementById('products-grid');
   grid.innerHTML = products.map(p => {
     const imgHtml = p.image
-      ? `<img src="${p.image}" alt="${p.title}" loading="lazy"/>`
+      ? `<img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy"/>`
       : '🛍';
     return `
-      <div class="product-card" onclick="openDetail('${p.id}')">
+      <div class="product-card" onclick="openDetail('${esc(p.id)}')">
         <div class="product-img">${imgHtml}</div>
         <div class="product-info">
-          <div class="product-name">${p.title}</div>
-          <div class="product-price" id="price-${p.id}">···</div>
+          <div class="product-name">${esc(p.title)}</div>
+          <div class="product-price" id="price-${esc(p.id)}">···</div>
         </div>
       </div>`;
   }).join('');
@@ -1178,7 +1185,7 @@ function renderVariants(variants) {
     selectedSize = sizes[0]; // pre-select first chip
     html += `<p class="variant-label">SIZE</p><div class="chips" id="size-chips">`;
     html += sizes.map((s, i) =>
-      `<div class="chip${i === 0 ? ' selected' : ''}" data-type="size" data-val="${s.replace(/"/g,'&quot;')}">${s}</div>`
+      `<div class="chip${i === 0 ? ' selected' : ''}" data-type="size" data-val="${esc(s)}">${esc(s)}</div>`
     ).join('');
     html += '</div>';
   } else if (sizes.length === 1) {
@@ -1189,7 +1196,7 @@ function renderVariants(variants) {
     selectedColor = colors[0]; // pre-select first chip
     html += `<p class="variant-label">COLOR</p><div class="chips" id="color-chips">`;
     html += colors.map((c, i) =>
-      `<div class="chip${i === 0 ? ' selected' : ''}" data-type="color" data-val="${c.replace(/"/g,'&quot;')}">${c}</div>`
+      `<div class="chip${i === 0 ? ' selected' : ''}" data-type="color" data-val="${esc(c)}">${esc(c)}</div>`
     ).join('');
     html += '</div>';
   } else if (colors.length === 1) {
@@ -1393,6 +1400,12 @@ function validateForm() {
       return null;
     }
   }
+  const emailVal = document.getElementById('f-email').value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+    document.getElementById('checkout-err').textContent = '✗ Please enter a valid email address';
+    document.getElementById('f-email').focus();
+    return null;
+  }
   return {
     firstName: document.getElementById('f-first').value.trim(),
     lastName:  document.getElementById('f-last').value.trim(),
@@ -1456,6 +1469,8 @@ async function placeOrder() {
 async function createYoycolOrder(addr) {
   const uid = localStorage.getItem('nava_peace_uid') || 'guest';
   const orderSn = `NP_${uid}_${Date.now()}`;
+  // Save pending order state BEFORE calling YOYCOL — protects against double-pay if network fails
+  lsSet('nava_pending_order', { orderSn, addr, items: cart.slice(), ts: Date.now() });
 
   const items = cart.map((item, i) => ({
     thirdItemId:     `item_${i}`,
@@ -1493,7 +1508,8 @@ async function createYoycolOrder(addr) {
     const data = await res.json();
     const yoyOrderId = data?.data?.orderId || data?.data?.id || orderSn;
 
-    // 4. Clear cart + show confirmation
+    // 4. Clear pending state + cart + show confirmation
+    lsSet('nava_pending_order', null);
     cart = [];
     saveCart();
     updateCartBadge();
