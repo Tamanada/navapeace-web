@@ -833,6 +833,18 @@ async function fetchBasePrice(prod) {
     if (el) { el.textContent = label; el.classList.remove('loading'); }
     return;
   }
+  // Check per-variant overrides (find cheapest)
+  const variantKeys = Object.keys(priceOverrides).filter(k => k.startsWith(prod.id + ':'));
+  if (variantKeys.length > 0 && priceOverrides[prod.id] === undefined) {
+    const prices = variantKeys.map(k => parseFloat(priceOverrides[k])).filter(p => p > 0);
+    if (prices.length) {
+      const label = `from $${Math.min(...prices).toFixed(2)}`;
+      priceCache[prod.id] = label;
+      const el = document.getElementById(`price-${prod.id}`);
+      if (el) { el.textContent = label; el.classList.remove('loading'); }
+      return;
+    }
+  }
   try {
     const res  = await fetch(`${PROXY_URL}?action=template&productId=${prod.id}`, { headers: AUTH_HEADERS });
     const data = await res.json();
@@ -986,9 +998,12 @@ function resolveVariant() {
 
 function updateDetailPrice(wholesale) {
   if (!wholesale) { document.getElementById('detail-usd').textContent = '···'; return; }
-  const retail = (currentProd && priceOverrides[currentProd.id] !== undefined)
-    ? parseFloat(priceOverrides[currentProd.id])
-    : retailPrice(wholesale);
+  const _dvKey = currentProd ? (currentProd.id + ':' + (selectedVariant?.skuCode || selectedVariant?.variantId || '')) : '';
+  const retail = (priceOverrides[_dvKey] !== undefined)
+    ? parseFloat(priceOverrides[_dvKey])
+    : (currentProd && priceOverrides[currentProd.id] !== undefined)
+      ? parseFloat(priceOverrides[currentProd.id])
+      : retailPrice(wholesale);
   document.getElementById('detail-usd').textContent = `$${(retail * qty).toFixed(2)}`;
 }
 
@@ -1030,9 +1045,12 @@ function closeDetail() { document.getElementById('detail-overlay').classList.rem
 function addToCart() {
   if (!currentProd || !selectedVariant) { toast('⚠ Please select a variant first'); return; }
   const wholesale = selectedVariant.salesPrice;
-  const price     = (priceOverrides[currentProd.id] !== undefined)
-    ? parseFloat(priceOverrides[currentProd.id])
-    : retailPrice(wholesale);
+  const _vKey = currentProd.id + ':' + (selectedVariant?.skuCode || selectedVariant?.variantId || '');
+  const price = (priceOverrides[_vKey] !== undefined)
+    ? parseFloat(priceOverrides[_vKey])
+    : (priceOverrides[currentProd.id] !== undefined)
+      ? parseFloat(priceOverrides[currentProd.id])
+      : retailPrice(wholesale);
 
   // Check if same variant already in cart
   const existing = cart.find(i =>

@@ -863,6 +863,17 @@ async function fetchBasePrice(prod) {
     if (el) el.innerHTML = `$${retail.toFixed(2)} <span class="product-stars">⭐ ${starsForPrice(retail)}</span>`;
     return;
   }
+  // Check per-variant overrides (find cheapest)
+  const variantKeys = Object.keys(priceOverrides).filter(k => k.startsWith(prod.id + ':'));
+  if (variantKeys.length > 0 && priceOverrides[prod.id] === undefined) {
+    const prices = variantKeys.map(k => parseFloat(priceOverrides[k])).filter(p => p > 0);
+    if (prices.length) {
+      const label = `from $${Math.min(...prices).toFixed(2)}`;
+      const el = document.getElementById(`price-${prod.id}`);
+      if (el) el.innerHTML = `${label} <span class="product-stars">⭐ ${starsForPrice(Math.min(...prices))}</span>`;
+      return;
+    }
+  }
   try {
     let rawVariants = [];
     if (prod.source === 'template') {
@@ -1093,9 +1104,12 @@ function updateDetailPrice(wholesale) {
     document.getElementById('detail-stars-badge').textContent = '';
     return;
   }
-  const retail = (currentProd && priceOverrides[currentProd.id] !== undefined)
-    ? parseFloat(priceOverrides[currentProd.id])
-    : retailPrice(wholesale);
+  const _dvKey = currentProd ? (currentProd.id + ':' + (selectedVariant?.skuCode || selectedVariant?.variantId || '')) : '';
+  const retail = (priceOverrides[_dvKey] !== undefined)
+    ? parseFloat(priceOverrides[_dvKey])
+    : (currentProd && priceOverrides[currentProd.id] !== undefined)
+      ? parseFloat(priceOverrides[currentProd.id])
+      : retailPrice(wholesale);
   const totalRetail = parseFloat((retail * qty).toFixed(2));
   const stars = starsForPrice(totalRetail);
   document.getElementById('detail-usd').textContent = `$${totalRetail.toFixed(2)}`;
@@ -1120,9 +1134,12 @@ function addToCart() {
 
   if (!wholesale) { toast('⚠ Select a variant first'); return; }
 
-  const retail = (priceOverrides[currentProd.id] !== undefined)
-    ? parseFloat(priceOverrides[currentProd.id])
-    : retailPrice(wholesale);
+  const _vKey = currentProd.id + ':' + (selectedVariant?.skuCode || selectedVariant?.variantId || '');
+  const retail = (priceOverrides[_vKey] !== undefined)
+    ? parseFloat(priceOverrides[_vKey])
+    : (priceOverrides[currentProd.id] !== undefined)
+      ? parseFloat(priceOverrides[currentProd.id])
+      : retailPrice(wholesale);
 
   const item = {
     mappingId:  currentProd.id,

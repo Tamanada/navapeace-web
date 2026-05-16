@@ -355,7 +355,8 @@
     .yoy-products-toggle{width:100%;padding:13px 18px;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.15);border-radius:12px;font-family:var(--font);font-size:9px;letter-spacing:3px;color:var(--w80);cursor:pointer;text-align:left;display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;transition:background 0.2s;}
     .yoy-products-toggle:hover{background:rgba(255,255,255,0.12);}
     .yoy-products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:12px;}
-    .yoy-product-card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px;}
+    .yoy-product-card{background:linear-gradient(135deg,rgba(5,20,50,0.88),rgba(8,32,68,0.82));border:1px solid rgba(109,213,245,0.25);border-radius:10px;padding:12px;cursor:pointer;transition:border-color 0.2s,transform 0.15s;}
+    .yoy-product-card:hover{border-color:rgba(109,213,245,0.6);transform:translateY(-2px);}
     .yoy-product-thumb{width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;margin-bottom:8px;background:rgba(255,255,255,0.05);}
     .yoy-product-name{font-size:8px;letter-spacing:1px;color:var(--white);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .yoy-product-price{font-size:9px;color:var(--gold);}
@@ -367,7 +368,34 @@
     .yoy-save-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:5px;color:var(--w60);font-size:11px;cursor:pointer;padding:3px 7px;flex-shrink:0;transition:all 0.15s;font-family:var(--font);}
     .yoy-save-btn:hover{background:rgba(74,222,128,0.15);color:#4ade80;border-color:rgba(74,222,128,0.4);}
     .yoy-save-btn:disabled{opacity:0.4;cursor:default;}
-    .yoy-margin-badge{font-size:8px;letter-spacing:0.5px;color:var(--w40);margin-top:5px;line-height:1.5;min-height:13px;transition:color 0.15s;}
+    /* YOYCOL Detail Modal */
+    #yoy-detail-overlay{position:fixed;inset:0;z-index:820;background:rgba(0,0,0,0.78);display:none;align-items:flex-start;justify-content:center;padding:24px;overflow-y:auto;}
+    #yoy-detail-overlay.open{display:flex;}
+    .yoy-detail-modal{background:linear-gradient(160deg,#0d2a3e 0%,#1a4a6e 100%);border:1.5px solid rgba(255,255,255,0.15);border-radius:20px;width:100%;max-width:980px;padding:28px 32px;margin:auto;}
+    .yoy-dm-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;gap:16px;}
+    .yoy-dm-meta{display:flex;align-items:center;gap:14px;}
+    .yoy-dm-thumb{width:72px;height:72px;object-fit:cover;border-radius:8px;background:rgba(255,255,255,0.05);flex-shrink:0;}
+    .yoy-dm-title{font-size:12px;letter-spacing:3px;color:var(--white);margin-bottom:4px;}
+    .yoy-dm-sub{font-size:8px;letter-spacing:1px;color:var(--w40);}
+    .yoy-dm-close{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:var(--w60);font-size:14px;cursor:pointer;padding:6px 12px;flex-shrink:0;transition:background 0.2s;}
+    .yoy-dm-close:hover{background:rgba(255,255,255,0.18);color:var(--white);}
+    .yoy-dm-hint{font-size:8px;letter-spacing:1px;color:var(--w40);margin-bottom:14px;padding:10px 14px;background:rgba(255,255,255,0.05);border-radius:8px;border-left:3px solid rgba(58,172,223,0.5);}
+    .yoy-dm-table{width:100%;border-collapse:collapse;font-size:10px;}
+    .yoy-dm-table th{padding:10px 12px;font-size:8px;letter-spacing:2px;color:var(--w40);border-bottom:1px solid rgba(255,255,255,0.1);text-align:left;white-space:nowrap;}
+    .yoy-dm-table td{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,0.05);vertical-align:middle;}
+    .yoy-dm-table tr:last-child td{border-bottom:none;}
+    .yoy-dm-table tr:hover td{background:rgba(255,255,255,0.04);}
+    .yoy-dm-footer{display:flex;align-items:center;justify-content:space-between;margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);}
+    .yoy-dm-save{padding:11px 28px;background:rgba(74,222,128,0.15);border:1.5px solid rgba(74,222,128,0.45);border-radius:10px;color:#4ade80;font-family:var(--font);font-size:9px;letter-spacing:3px;cursor:pointer;transition:background 0.2s;}
+    .yoy-dm-save:hover{background:rgba(74,222,128,0.28);}
+    .yoy-dm-save:disabled{opacity:0.4;cursor:default;}
+    .yoy-dm-cancel{padding:11px 20px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:var(--w60);font-family:var(--font);font-size:9px;letter-spacing:2px;cursor:pointer;transition:background 0.2s;}
+    .yoy-dm-cancel:hover{background:rgba(255,255,255,0.12);color:var(--white);}
+    .yoy-ri{width:76px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:5px;color:var(--white);font-family:var(--font);font-size:10px;padding:5px 8px;outline:none;appearance:textfield;-moz-appearance:textfield;}
+    .yoy-ri::-webkit-inner-spin-button,.yoy-ri::-webkit-outer-spin-button{-webkit-appearance:none;}
+    .yoy-ri:focus{border-color:rgba(58,172,223,0.6);}
+    .yoy-ri::placeholder{color:var(--w40);font-size:9px;}
+    .yoy-margin-badge{font-size:8px;letter-spacing:0.5px;color:var(--w60);margin-top:5px;line-height:1.5;min-height:13px;transition:color 0.15s;}
 
     /* ── LOADING ──────────────────────────────────── */
     .spinner{text-align:center;padding:60px;}
@@ -3244,8 +3272,9 @@ async function _loadYoyProducts() {
         ids.push(id);
         const img      = p.previewImage || p.mainImage || p.coverImage || p.image || p.imageUrl || '';
         const name     = p.title || p.productName || p.name || '—';
+        _yoyProductMap.set(id, { id, name, img: p.previewImage || p.mainImage || p.coverImage || p.image || p.imageUrl || '' });
         const override = _yoyPriceOverrides[id];
-        return `<div class="yoy-product-card">
+        return `<div class="yoy-product-card" onclick="openYoyDetail('${escHtml(id)}')">
           ${img ? `<img class="yoy-product-thumb" src="${escHtml(img)}" alt="" loading="lazy">` : '<div class="yoy-product-thumb" style="display:flex;align-items:center;justify-content:center;color:var(--w40);font-size:22px;">🛍</div>'}
           <div class="yoy-product-name" title="${escHtml(name)}">${escHtml(name)}</div>
           <div class="yoy-price-row">
@@ -3254,10 +3283,11 @@ async function _loadYoyProducts() {
               type="number" min="0" step="0.01"
               value="${override !== undefined ? override : ''}"
               placeholder="auto $"
-              oninput="_yoyUpdateMargin('${escHtml(id)}',this)"
+              oninput="event.stopPropagation();_yoyUpdateMargin('${escHtml(id)}',this)"
               onkeydown="if(event.key==='Enter')yoySavePrice('${escHtml(id)}',this)"
+              onclick="event.stopPropagation()"
             />
-            <button class="yoy-save-btn" onclick="yoySavePrice('${escHtml(id)}',this.previousElementSibling)" title="Save override price">💾</button>
+            <button class="yoy-save-btn" onclick="event.stopPropagation();yoySavePrice('${escHtml(id)}',this.previousElementSibling)" title="Save override price">💾</button>
           </div>
           <div class="yoy-margin-badge" id="yoy-margin-${escHtml(id)}">coût ···</div>
         </div>`;
@@ -3273,6 +3303,187 @@ async function _loadYoyProducts() {
     grid.style.display = 'block';
   }
   document.getElementById('yoy-products-spin').style.display = 'none';
+}
+
+// ── YOYCOL product detail modal ───────────────────────────
+const _yoyProductMap   = new Map(); // id → { id, name, img }
+let   _yoyDetailPid    = null;
+let   _yoyDetailVars   = [];        // { label, skuCode, prod, ship }
+const YOY_MIN_RETAIL   = 19.99;
+
+function _dmRetailFormula(prod) {
+  // Same formula as shop.html: wholesale + $9 + $7 → nearest X.99, min $19.99
+  return Math.max(YOY_MIN_RETAIL, parseFloat((Math.round(prod + 9 + 7 + 0.01) - 0.01).toFixed(2)));
+}
+function _dmFmtMargin(m) {
+  const c = m >= 5 ? '#4ade80' : m >= 0 ? '#f9c74f' : '#ff5b5b';
+  return `<span style="color:${c};">${m >= 0 ? '+' : ''}$${Math.abs(m).toFixed(2)}</span>`;
+}
+function _dmFmtPct(m, cost) {
+  if (!cost) return '—';
+  const pct = (m / cost * 100).toFixed(0);
+  const c   = m >= 5 ? '#4ade80' : m >= 0 ? '#f9c74f' : '#ff5b5b';
+  return `<span style="color:${c};">${pct}%</span>`;
+}
+
+function dmLiveRow(idx) {
+  const v      = _yoyDetailVars[idx];
+  const input  = document.getElementById(`yoy-ri-${idx}`);
+  if (!input || !v) return;
+  const ship   = v.ship ?? 9;
+  const cost   = v.prod + ship;
+  const raw    = parseFloat(input.value);
+  const retail = (raw > 0 && !isNaN(raw)) ? raw : _dmRetailFormula(v.prod);
+  const margin = retail - cost;
+  const mEl    = document.getElementById(`yoy-rdm-${idx}`);
+  const pEl    = document.getElementById(`yoy-pdm-${idx}`);
+  if (mEl) mEl.innerHTML = _dmFmtMargin(margin);
+  if (pEl) pEl.innerHTML = _dmFmtPct(margin, cost);
+}
+
+function _dmRenderRows() {
+  const pid   = _yoyDetailPid;
+  const tbody = document.getElementById('yoy-dm-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = _yoyDetailVars.map((v, idx) => {
+    const vKey    = pid + ':' + v.skuCode;
+    const stored  = _yoyPriceOverrides[vKey]; // variant-level override only
+    const ship    = v.ship;
+    const cost    = v.prod + (ship ?? 9);
+    const formula = _dmRetailFormula(v.prod);
+    const retail  = stored ?? formula;
+    const margin  = retail - cost;
+    return `<tr>
+      <td style="font-size:9px;color:var(--w80);">${escHtml(v.label)}</td>
+      <td style="color:var(--w60);">$${v.prod.toFixed(2)}</td>
+      <td id="yoy-ship-dm-${idx}" style="color:var(--w60);">${ship !== null && ship !== undefined ? '$'+ship.toFixed(2) : '<span style="color:var(--w40);">···</span>'}</td>
+      <td id="yoy-cost-dm-${idx}" style="color:var(--w60);">$${cost.toFixed(2)}</td>
+      <td><input class="yoy-ri" id="yoy-ri-${idx}"
+        type="number" min="0" step="0.01"
+        value="${stored !== undefined ? stored : ''}"
+        placeholder="$${formula.toFixed(2)}"
+        oninput="dmLiveRow(${idx})"
+        data-sku="${escHtml(v.skuCode)}"
+      /></td>
+      <td id="yoy-rdm-${idx}">${_dmFmtMargin(margin)}</td>
+      <td id="yoy-pdm-${idx}">${_dmFmtPct(margin, cost)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function _dmUpdateRow(idx) {
+  const v    = _yoyDetailVars[idx];
+  const ship = v.ship;
+  if (ship === null || ship === undefined) return;
+  const cost   = v.prod + ship;
+  const input  = document.getElementById(`yoy-ri-${idx}`);
+  const formula= _dmRetailFormula(v.prod);
+  const raw    = input ? parseFloat(input.value) : NaN;
+  const retail = (raw > 0 && !isNaN(raw)) ? raw : ((input && input.value === '') ? formula : formula);
+  const margin = retail - cost;
+  const shipEl = document.getElementById(`yoy-ship-dm-${idx}`);
+  const costEl = document.getElementById(`yoy-cost-dm-${idx}`);
+  const mEl    = document.getElementById(`yoy-rdm-${idx}`);
+  const pEl    = document.getElementById(`yoy-pdm-${idx}`);
+  if (shipEl) shipEl.textContent = '$' + ship.toFixed(2);
+  if (costEl) costEl.textContent = '$' + cost.toFixed(2);
+  if (input)  input.placeholder  = '$' + formula.toFixed(2);
+  if (mEl)    mEl.innerHTML      = _dmFmtMargin(margin);
+  if (pEl)    pEl.innerHTML      = _dmFmtPct(margin, cost);
+  if (input && input.value) dmLiveRow(idx);
+}
+
+async function openYoyDetail(productId) {
+  const p   = _yoyProductMap.get(productId) || {};
+  const ov  = document.getElementById('yoy-detail-overlay');
+  ov.classList.add('open');
+  document.getElementById('yoy-dm-title').textContent = p.name || productId;
+  document.getElementById('yoy-dm-sub').textContent   = 'ID: ' + productId;
+  const thumb = document.getElementById('yoy-dm-thumb');
+  thumb.src = p.img || ''; thumb.style.display = p.img ? '' : 'none';
+  document.getElementById('yoy-dm-yoycol-link').href =
+    `https://www.yoycol.com/personal_center/store_spu_list/${productId}`;
+  document.getElementById('yoy-dm-spin').style.display = 'block';
+  document.getElementById('yoy-dm-body').style.display = 'none';
+  _yoyDetailPid  = productId;
+  _yoyDetailVars = [];
+
+  try {
+    const res  = await fetch(`${YOY_PROXY}?action=template&productId=${encodeURIComponent(productId)}`, { headers: YOY_AUTH });
+    const data = await res.json();
+    const rawV = data?.data?.skuList || data?.data?.variants || data?.data?.records || data?.data?.skus || [];
+    _yoyDetailVars = rawV.map(v => ({
+      label:   [v.size || v.sizeName, v.color || v.colorName].filter(Boolean).join(' / ') || v.variantName || v.name || '—',
+      skuCode: v.skuCode || v.sku_code || v.code || '',
+      prod:    parseFloat(v.price || v.salesPrice || v.costPrice || v.basePrice || 0),
+      ship:    null,
+    })).filter(v => v.prod > 0);
+
+    _dmRenderRows();
+    document.getElementById('yoy-dm-spin').style.display = 'none';
+    document.getElementById('yoy-dm-body').style.display = 'block';
+
+    // Fetch shipping per SKU in background
+    const BATCH = 5;
+    for (let i = 0; i < _yoyDetailVars.length; i += BATCH) {
+      if (_yoyDetailPid !== productId) break; // modal was closed/changed
+      await Promise.all(_yoyDetailVars.slice(i, i + BATCH).map(async (v, j) => {
+        if (!v.skuCode) return;
+        try {
+          const sRes  = await fetch(
+            `${YOY_PROXY}?action=shipping&skuCode=${encodeURIComponent(v.skuCode)}&country=US&quantity=1`,
+            { headers: YOY_AUTH }
+          );
+          const sData = await sRes.json();
+          const list  = sData?.data?.list ?? sData?.data ?? [];
+          if (Array.isArray(list) && list.length) {
+            const prices = list.map(m => parseFloat(m.freightAmount ?? m.shippingPrice ?? m.price ?? m.freight ?? 0)).filter(p => p > 0);
+            if (prices.length) { _yoyDetailVars[i + j].ship = Math.min(...prices); _dmUpdateRow(i + j); }
+          }
+        } catch(_) {}
+      }));
+      if (i + BATCH < _yoyDetailVars.length) await new Promise(r => setTimeout(r, 150));
+    }
+  } catch(e) {
+    document.getElementById('yoy-dm-spin').style.display = 'none';
+    document.getElementById('yoy-dm-body').innerHTML =
+      `<p style="color:var(--danger);padding:20px;text-align:center;font-size:9px;">${escHtml(e.message)}</p>`;
+    document.getElementById('yoy-dm-body').style.display = 'block';
+  }
+}
+
+async function yoyDetailSaveAll() {
+  const btn = document.getElementById('yoy-dm-save-btn');
+  btn.disabled = true; btn.textContent = '···';
+  const pid = _yoyDetailPid;
+
+  _yoyDetailVars.forEach((v, idx) => {
+    const input = document.getElementById(`yoy-ri-${idx}`);
+    if (!input) return;
+    const raw = parseFloat(input.value);
+    const key = pid + ':' + v.skuCode;
+    if (raw > 0 && !isNaN(raw)) { _yoyPriceOverrides[key] = parseFloat(raw.toFixed(2)); }
+    else { delete _yoyPriceOverrides[key]; }
+  });
+
+  try {
+    const res  = await fetch(`${YOY_PROXY}?action=update_admin_setting`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...YOY_AUTH },
+      body: JSON.stringify({ adminCode: _adminCode, key: 'yoycol_price_overrides', value: JSON.stringify(_yoyPriceOverrides) }),
+    });
+    const json = await res.json();
+    if (json.success) { showToast('✓ Prix sauvegardés — shop update ~30s'); closeYoyDetail(); }
+    else showToast('Error: ' + (json.error || 'unknown'));
+  } catch(e) { showToast('Erreur save: ' + e.message); }
+
+  btn.disabled = false; btn.textContent = '💾 SAUVEGARDER';
+}
+
+function closeYoyDetail() {
+  document.getElementById('yoy-detail-overlay').classList.remove('open');
+  _yoyDetailPid  = null;
+  _yoyDetailVars = [];
 }
 </script>
 
@@ -3356,5 +3567,46 @@ async function _loadYoyProducts() {
 </div>
   <!-- Excel-style column filter popup -->
   <div id="col-filter-popup"></div>
+
+<!-- ══ YOYCOL PRODUCT DETAIL ════════════════════════════ -->
+<div id="yoy-detail-overlay" onclick="if(event.target===this)closeYoyDetail()">
+  <div class="yoy-detail-modal">
+    <div class="yoy-dm-header">
+      <div class="yoy-dm-meta">
+        <img class="yoy-dm-thumb" id="yoy-dm-thumb" src="" alt="" />
+        <div>
+          <div class="yoy-dm-title" id="yoy-dm-title">—</div>
+          <div class="yoy-dm-sub" id="yoy-dm-sub">—</div>
+        </div>
+      </div>
+      <button class="yoy-dm-close" onclick="closeYoyDetail()">✕</button>
+    </div>
+    <div class="yoy-dm-hint">💡 Laisser vide = prix calculé automatiquement par la formule (wholesale + $9 ship + $7 marge). Les prix per-variant remplacent le prix global de la carte.</div>
+    <div id="yoy-dm-spin" class="spinner"><div class="spin"></div></div>
+    <div id="yoy-dm-body" style="display:none;">
+      <div class="table-wrap">
+        <table class="yoy-dm-table">
+          <thead><tr>
+            <th>VARIANT</th>
+            <th>PROD $</th>
+            <th>SHIP US $</th>
+            <th>COÛT TOTAL</th>
+            <th>RETAIL $</th>
+            <th>MARGE $</th>
+            <th>%</th>
+          </tr></thead>
+          <tbody id="yoy-dm-tbody"></tbody>
+        </table>
+      </div>
+      <div class="yoy-dm-footer">
+        <a id="yoy-dm-yoycol-link" href="https://www.yoycol.com/personal_center/products" target="_blank" style="font-size:8px;letter-spacing:2px;color:var(--w40);text-decoration:underline;">MODIFIER SUR YOYCOL →</a>
+        <div style="display:flex;gap:10px;">
+          <button class="yoy-dm-cancel" onclick="closeYoyDetail()">ANNULER</button>
+          <button class="yoy-dm-save" id="yoy-dm-save-btn" onclick="yoyDetailSaveAll()">💾 SAUVEGARDER</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
