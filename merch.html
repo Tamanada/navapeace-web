@@ -39,10 +39,10 @@
       --grad:radial-gradient(ellipse at 50% 30%,#6DD5F5 0%,#3AACDF 45%,#1E8EC4 100%);
     }
     html{
-      background:#3AACDF; /* fallback for WebViews that clip the gradient */
+      background:#3AACDF !important; /* fallback for WebViews that clip the gradient */
     }
     body{
-      background:var(--grad);
+      background:var(--grad) !important;
       color:var(--white);
       font-family:var(--font);
       min-height:100vh;
@@ -1557,9 +1557,21 @@ document.addEventListener('click', e => {
   if (chip.dataset.type === 'color') selectColor(val);
 });
 
+// ── Force reload when new SW takes control (cache busting) ─
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    window.location.reload();
+  });
+}
+
 // ── Init ──────────────────────────────────────────────────
 window.addEventListener('load', () => {
-  if (typeof Telegram !== 'undefined') Telegram.WebApp.ready();
+  if (typeof Telegram !== 'undefined') {
+    Telegram.WebApp.ready();
+    // Tell Telegram our background so its chrome matches
+    try { Telegram.WebApp.setBackgroundColor('#3AACDF'); } catch(_) {}
+    try { Telegram.WebApp.setHeaderColor('#3AACDF'); } catch(_) {}
+  }
   updateCartBadge();
   loadProducts();
   loadPriceOverrides().then(() => {
