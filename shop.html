@@ -545,8 +545,23 @@ let qty = 1;
 function lsGet(key, fallback) { try { return JSON.parse(localStorage.getItem(key) || 'null') ?? fallback; } catch { return fallback; } }
 function lsSet(key, val)      { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
 
-let cart       = lsGet('nava_shop_cart', []);
-const priceCache = {}; // productId → display string, persists across filter changes
+let cart          = lsGet('nava_shop_cart', []);
+const priceCache  = {}; // productId → display string, persists across filter changes
+let priceOverrides = {}; // productId → admin-set retail price (from admin_settings)
+
+async function loadPriceOverrides() {
+  try {
+    const res  = await fetch(
+      `${SUPABASE_URL}/rest/v1/admin_settings?key=eq.yoycol_price_overrides&select=value`,
+      { headers: AUTH_HEADERS }
+    );
+    const rows = await res.json();
+    if (Array.isArray(rows) && rows[0]?.value) {
+      const val = rows[0].value;
+      priceOverrides = typeof val === 'object' ? val : JSON.parse(val);
+    }
+  } catch(_) {}
+}
 
 // ── Normalise ──────────────────────────────────────────────
 function normalizeProduct(p) {
@@ -816,6 +831,14 @@ async function fetchBasePrice(prod) {
     if (el) { el.textContent = priceCache[prod.id]; el.classList.remove('loading'); }
     return;
   }
+  // Admin-set price override → skip variant fetch
+  if (priceOverrides[prod.id] !== undefined) {
+    const label = `$${parseFloat(priceOverrides[prod.id]).toFixed(2)}`;
+    priceCache[prod.id] = label;
+    const el = document.getElementById(`price-${prod.id}`);
+    if (el) { el.textContent = label; el.classList.remove('loading'); }
+    return;
+  }
   try {
     const res  = await fetch(`${PROXY_URL}?action=template&productId=${prod.id}`, { headers: AUTH_HEADERS });
     const data = await res.json();
@@ -969,7 +992,9 @@ function resolveVariant() {
 
 function updateDetailPrice(wholesale) {
   if (!wholesale) { document.getElementById('detail-usd').textContent = '···'; return; }
-  const retail = retailPrice(wholesale);
+  const retail = (currentProd && priceOverrides[currentProd.id] !== undefined)
+    ? parseFloat(priceOverrides[currentProd.id])
+    : retailPrice(wholesale);
   document.getElementById('detail-usd').textContent = `$${(retail * qty).toFixed(2)}`;
 }
 
@@ -1011,7 +1036,9 @@ function closeDetail() { document.getElementById('detail-overlay').classList.rem
 function addToCart() {
   if (!currentProd || !selectedVariant) { toast('⚠ Please select a variant first'); return; }
   const wholesale = selectedVariant.salesPrice;
-  const price     = retailPrice(wholesale);
+  const price     = (priceOverrides[currentProd.id] !== undefined)
+    ? parseFloat(priceOverrides[currentProd.id])
+    : retailPrice(wholesale);
 
   // Check if same variant already in cart
   const existing = cart.find(i =>
@@ -1081,7 +1108,7 @@ document.addEventListener('click', e => {
 window.addEventListener('load', () => {
   checkSuccess();
   updateCartBadge();
-  loadProducts();
+  loadPriceOverrides().then(() => loadProducts());
   document.querySelectorAll('.overlay').forEach(el => {
     el.addEventListener('click', e => { if (e.target === el) el.classList.remove('active'); });
   });
