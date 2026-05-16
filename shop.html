@@ -851,7 +851,7 @@ async function fetchBasePrice(prod) {
     const raw  = data?.data || {};
     const rawVariants = raw?.variants || raw?.skuList || [];
     if (!rawVariants.length) return;
-    const prices = rawVariants.map(v => parseFloat(v.price || 0)).filter(p => p > 0);
+    const prices = rawVariants.map(v => normalizeVariant(v).salesPrice).filter(p => p > 0);
     if (!prices.length) return;
     const lo     = retailPrice(Math.min(...prices));
     const hi     = retailPrice(Math.max(...prices));
@@ -1120,7 +1120,14 @@ document.addEventListener('click', e => {
 window.addEventListener('load', () => {
   checkSuccess();
   updateCartBadge();
-  loadPriceOverrides().then(() => loadProducts());
+  loadProducts();
+  loadPriceOverrides().then(() => {
+    // Refresh prices that may now have admin overrides
+    if (allProducts.length) {
+      Object.keys(priceCache).forEach(k => delete priceCache[k]);
+      allProducts.forEach(p => fetchBasePrice(p));
+    }
+  }).catch(() => {});
   document.querySelectorAll('.overlay').forEach(el => {
     el.addEventListener('click', e => { if (e.target === el) el.classList.remove('active'); });
   });

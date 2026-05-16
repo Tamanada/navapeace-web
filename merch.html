@@ -1367,7 +1367,11 @@ document.addEventListener('click', e => {
 window.addEventListener('load', () => {
   if (typeof Telegram !== 'undefined') Telegram.WebApp.ready();
   updateCartBadge();
-  loadPriceOverrides().then(() => loadProducts());
+  loadProducts();
+  loadPriceOverrides().then(() => {
+    // Refresh prices that may now have admin overrides
+    if (allProducts.length) allProducts.forEach(p => fetchBasePrice(p));
+  }).catch(() => {});
 
   // Close overlay when tapping the dark backdrop (outside the card)
   document.querySelectorAll('.overlay').forEach(el => {
