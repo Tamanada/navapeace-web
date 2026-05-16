@@ -4,14 +4,32 @@
 // ═══════════════════════════════════════════════════════════
 
 const YOYCOL_BASE  = 'https://www.yoycol.com';
-const ACCESS_KEY   = Deno.env.get('YOYCOL_ACCESS_KEY') ?? '';
-const SECRET_KEY   = Deno.env.get('YOYCOL_SECRET_KEY') ?? '';
+const ACCESS_KEY   = Deno.env.get('YOYCOL_ACCESS_KEY')           ?? '';
+const SECRET_KEY   = Deno.env.get('YOYCOL_SECRET_KEY')           ?? '';
+const STRIPE_KEY   = Deno.env.get('STRIPE_SECRET_KEY')           ?? '';
+const SUPA_URL     = Deno.env.get('SUPABASE_URL')                ?? '';
+const SERVICE_KEY  = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')   ?? '';
 
 const CORS = {
   'Access-Control-Allow-Origin':  '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
 };
+
+// ── Stripe form-encoder (Stripe API uses URL-encoded, not JSON) ─
+function encodeStripeForm(obj: unknown, prefix = ''): string {
+  if (Array.isArray(obj)) {
+    return obj.map((item, i) => encodeStripeForm(item, `${prefix}[${i}]`))
+      .filter(Boolean).join('&');
+  }
+  if (obj !== null && typeof obj === 'object') {
+    return Object.entries(obj as Record<string, unknown>)
+      .map(([k, v]) => encodeStripeForm(v, prefix ? `${prefix}[${k}]` : k))
+      .filter(Boolean).join('&');
+  }
+  if (obj === null || obj === undefined) return '';
+  return `${encodeURIComponent(prefix)}=${encodeURIComponent(String(obj))}`;
+}
 
 // ── Helpers ─────────────────────────────────────────────────
 function nonce32(): string {
@@ -293,6 +311,203 @@ Deno.serve(async (req) => {
         return json({ error: `DB write failed: ${err}` }, 500);
       }
       return json({ success: true });
+    }
+
+    // ── POST create Stripe Checkout Session (web shop) ─────
+    if (action === 'create_checkout_session' && req.method === 'POST') {
+      if (!STRIPE_KEY) return json({ error: 'STRIPE_SECRET_KEY not configured' }, 500);
+
+      const { items, customer_email, success_url, cancel_url } = await req.json();
+      if (!items?.length)              return json({ error: 'items required' }, 400);
+      if (!success_url || !cancel_url) return json({ error: 'success_url and cancel_url required' }, 400);
+
+      const orderId  = crypto.randomUUID();
+      const orderSn  = `NP_WEB_${Date.now()}`;
+      const totalUsd = items.reduce((s: number, i: {retail_price: number; qty: number}) =>
+        s + (i.retail_price * i.qty), 0);
+
+      // Build Stripe Checkout Session payload
+      const lineItems = items.map((item: {title: string; image?: string; retail_price: number; qty: number}) => ({
+        price_data: {
+          currency:     'usd',
+          unit_amount:  Math.round(item.retail_price * 100),
+          product_data: {
+            name:   item.title.slice(0, 227),
+            images: item.image ? [item.image] : [],
+          },
+        },
+        quantity: item.qty,
+      }));
+
+      const stripePayload: Record<string, unknown> = {
+        mode:      'payment',
+        success_url: `${success_url}?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url,
+        line_items: lineItems,
+        shipping_address_collection: {
+          allowed_countries: [
+            'US','GB','CA','AU','FR','DE','TH','SG','JP','NL','IT','ES','PT',
+            'BE','CH','SE','NO','DK','PL','MY','ID','PH','VN','IN','BR','MX',
+            'AE','ZA','HK','TW','KR','NZ','AT','FI','IE','CZ','HU','RO',
+          ],
+        },
+        phone_number_collection: { enabled: true },
+        metadata: { order_id: orderId, order_sn: orderSn },
+      };
+      if (customer_email) stripePayload.customer_email = customer_email;
+
+      const stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+        method: 'POST',
+        headers: {
+          Authorization:  `Bearer ${STRIPE_KEY}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: encodeStripeForm(stripePayload),
+      });
+      const session = await stripeRes.json() as Record<string, unknown>;
+      if (!session.id) {
+        const err = (session.error as {message?: string})?.message ?? 'Stripe error';
+        return json({ error: err }, 500);
+      }
+
+      // Persist pending order with the Stripe session ID
+      if (SUPA_URL && SERVICE_KEY) {
+        await fetch(`${SUPA_URL}/rest/v1/merch_orders`, {
+          method: 'POST',
+          headers: {
+            apikey:         SERVICE_KEY,
+            Authorization:  `Bearer ${SERVICE_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id:               orderId,
+            stripe_session_id: session.id,
+            yoycol_order_sn:  orderSn,
+            status:           'pending',
+            items,
+            customer_email:   customer_email || null,
+            total_usd:        parseFloat(totalUsd.toFixed(2)),
+          }),
+        });
+      }
+
+      return json({ url: session.url, session_id: session.id });
+    }
+
+    // ── GET confirm Stripe payment + create YOYCOL order ──
+    // Called from success page after Stripe redirects back.
+    // No webhook needed — we verify the session server-side.
+    if (action === 'confirm_order' && req.method === 'GET') {
+      const sessionId = url.searchParams.get('session_id') ?? '';
+      if (!sessionId) return json({ error: 'session_id required' }, 400);
+      if (!STRIPE_KEY)   return json({ error: 'STRIPE_SECRET_KEY not configured' }, 500);
+      if (!SUPA_URL || !SERVICE_KEY) return json({ error: 'Supabase not configured' }, 500);
+
+      const sbHeaders = {
+        apikey:         SERVICE_KEY,
+        Authorization:  `Bearer ${SERVICE_KEY}`,
+        'Content-Type': 'application/json',
+      };
+
+      // 1. Check if already fulfilled (idempotent — user may refresh success page)
+      const existRes  = await fetch(
+        `${SUPA_URL}/rest/v1/merch_orders?stripe_session_id=eq.${encodeURIComponent(sessionId)}`,
+        { headers: sbHeaders }
+      );
+      const existing = (await existRes.json() as Record<string, unknown>[])?.[0];
+      if (existing?.status === 'fulfilled') {
+        return json({ success: true, already: true, order_sn: existing.yoycol_order_sn });
+      }
+
+      // 2. Retrieve Stripe session to verify payment
+      const stripeRes = await fetch(
+        `https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(sessionId)}?expand[]=customer_details&expand[]=shipping_details`,
+        { headers: { Authorization: `Bearer ${STRIPE_KEY}` } }
+      );
+      const session = await stripeRes.json() as Record<string, unknown>;
+
+      if (session.payment_status !== 'paid') {
+        return json({ error: 'Payment not completed', status: session.payment_status }, 402);
+      }
+
+      // 3. Fetch our pending order from DB
+      const orderId  = (session.metadata as Record<string,string>)?.order_id;
+      const orderSn  = (session.metadata as Record<string,string>)?.order_sn
+                    || existing?.yoycol_order_sn as string
+                    || `NP_WEB_${Date.now()}`;
+
+      let order = existing;
+      if (!order && orderId) {
+        const oRes = await fetch(
+          `${SUPA_URL}/rest/v1/merch_orders?id=eq.${orderId}`,
+          { headers: sbHeaders }
+        );
+        order = (await oRes.json() as Record<string, unknown>[])?.[0];
+      }
+      if (!order) return json({ error: 'Order record not found' }, 404);
+
+      // 4. Build YOYCOL address from Stripe shipping_details
+      const shipping = (session.shipping_details || session.shipping || {}) as Record<string, unknown>;
+      const customer = (session.customer_details || {}) as Record<string, unknown>;
+      const addr     = (shipping.address || {}) as Record<string, unknown>;
+      const fullName = ((shipping.name || customer.name || 'Customer') as string).trim();
+      const spaceIdx = fullName.indexOf(' ');
+      const yoyAddress = {
+        firstName:   spaceIdx > -1 ? fullName.slice(0, spaceIdx) : fullName,
+        lastName:    spaceIdx > -1 ? fullName.slice(spaceIdx + 1) : '-',
+        email:       (customer.email as string)        || '',
+        phone:       (customer.phone as string)        || '',
+        countryCode: (addr.country as string)          || 'US',
+        stateCode:   (addr.state as string)            || '',
+        city:        (addr.city as string)             || '',
+        address:     [(addr.line1 as string) || '', (addr.line2 as string) || ''].filter(Boolean).join(', '),
+        zip:         (addr.postal_code as string)      || '',
+      };
+
+      // 5. Mark as paid in DB
+      await fetch(
+        `${SUPA_URL}/rest/v1/merch_orders?${orderId ? `id=eq.${orderId}` : `stripe_session_id=eq.${sessionId}`}`,
+        { method: 'PATCH', headers: sbHeaders,
+          body: JSON.stringify({ status: 'paid', shipping: yoyAddress,
+            customer_email: yoyAddress.email || order.customer_email }) }
+      );
+
+      // 6. Create YOYCOL order
+      const items = order.items as Array<Record<string, unknown>>;
+      const yoyItems = items.map((item, i) => ({
+        thirdItemId: `item_${i}`,
+        skuCode:     item.skuCode,
+        quantity:    item.qty,
+        salesPrice:  item.wholesale || item.retail_price,
+        realPrice:   item.wholesale || item.retail_price,
+      }));
+
+      const yoyData = await yoyFetch('POST', '/api/2025/open/v4/orders', {}, {
+        storeOrderSn: orderSn,
+        address:      yoyAddress,
+        items:        yoyItems,
+        currency:     'USD',
+      });
+
+      // 7. Update DB with result
+      const fulfilled = yoyData?.code === '100000' || !!yoyData?.data;
+      const patchKey  = orderId ? `id=eq.${orderId}` : `stripe_session_id=eq.${sessionId}`;
+      await fetch(
+        `${SUPA_URL}/rest/v1/merch_orders?${patchKey}`,
+        { method: 'PATCH', headers: sbHeaders,
+          body: JSON.stringify(fulfilled
+            ? { status: 'fulfilled', yoycol_order_sn: orderSn }
+            : { status: 'failed',   error_detail: JSON.stringify(yoyData).slice(0, 500) })
+        }
+      );
+
+      if (!fulfilled) {
+        console.error('confirm_order: YOYCOL error', JSON.stringify(yoyData).slice(0, 300));
+        // Payment succeeded — don't return error to user, still show success
+        return json({ success: true, order_sn: orderSn, yoycol_warning: true });
+      }
+
+      return json({ success: true, order_sn: orderSn });
     }
 
     return json({ error: 'unknown action' }, 400);

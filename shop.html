@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NAVA PEACE — Shop</title>
+  <meta name="description" content="Official NAVA PEACE merchandise. Every purchase supports the Foundation's peace mission worldwide."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --navy:#0a1628;--navy2:#0b1e36;--navy3:#0d2240;
+      --accent:#6DD5F5;--accent2:#3AACDF;
+      --gold:#FFD700;--gold2:#b8860b;
+      --white:#ffffff;--w80:rgba(255,255,255,0.8);
+      --w60:rgba(255,255,255,0.6);--w40:rgba(255,255,255,0.4);--w20:rgba(255,255,255,0.2);
+      --border:rgba(109,213,245,0.18);
+      --font:'Rajdhani',sans-serif;
+      --radius:16px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:var(--navy);color:var(--white);
+      font-family:var(--font);min-height:100vh;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    /* ── HEADER ─────────────────────────────────────────── */
+    .site-header{
+      position:sticky;top:0;z-index:100;
+      background:rgba(10,22,40,0.92);
+      backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 24px;height:64px;
+    }
+    .logo{
+      display:flex;align-items:center;gap:10px;
+      text-decoration:none;
+    }
+    .logo-mark{
+      width:36px;height:36px;border-radius:50%;
+      background:linear-gradient(135deg,var(--accent2),var(--gold));
+      display:flex;align-items:center;justify-content:center;
+      font-size:16px;font-weight:700;color:var(--navy);
+    }
+    .logo-text{
+      font-size:16px;font-weight:700;letter-spacing:4px;color:var(--white);
+    }
+    .header-right{display:flex;align-items:center;gap:16px;}
+    .cart-btn{
+      position:relative;
+      background:rgba(109,213,245,0.1);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:8px 16px;
+      color:var(--accent);font-family:var(--font);
+      font-size:12px;letter-spacing:2px;cursor:pointer;
+      display:flex;align-items:center;gap:8px;
+      transition:background 0.2s;
+    }
+    .cart-btn:hover{background:rgba(109,213,245,0.18);}
+    .cart-badge{
+      background:var(--gold);color:var(--navy);
+      border-radius:50%;width:18px;height:18px;
+      font-size:10px;font-weight:700;
+      display:none;align-items:center;justify-content:center;
+    }
+
+    /* ── HERO BANNER ─────────────────────────────────────── */
+    .hero{
+      text-align:center;padding:60px 24px 48px;
+      background:linear-gradient(180deg,rgba(58,172,223,0.08) 0%,transparent 100%);
+    }
+    .hero-eyebrow{
+      font-size:10px;letter-spacing:5px;color:var(--accent);
+      margin-bottom:12px;text-transform:uppercase;
+    }
+    .hero-title{
+      font-size:clamp(32px,6vw,56px);font-weight:700;
+      letter-spacing:6px;line-height:1.1;
+      background:linear-gradient(135deg,var(--white),var(--accent));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;margin-bottom:16px;
+    }
+    .hero-sub{
+      font-size:13px;color:var(--w60);letter-spacing:1px;
+      max-width:480px;margin:0 auto 32px;line-height:1.7;
+    }
+    .hero-mission{
+      display:inline-flex;align-items:center;gap:8px;
+      background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.25);
+      border-radius:50px;padding:8px 20px;
+      font-size:11px;letter-spacing:2px;color:var(--gold);
+    }
+
+    /* ── FILTERS ─────────────────────────────────────────── */
+    .filters{
+      display:flex;align-items:center;gap:8px;
+      padding:0 24px 24px;overflow-x:auto;
+      scrollbar-width:none;
+    }
+    .filters::-webkit-scrollbar{display:none;}
+    .filter-chip{
+      flex-shrink:0;
+      padding:6px 16px;border-radius:50px;
+      background:rgba(255,255,255,0.05);
+      border:1px solid var(--border);
+      font-size:11px;letter-spacing:2px;color:var(--w60);
+      cursor:pointer;transition:all 0.15s;white-space:nowrap;
+    }
+    .filter-chip.active{
+      background:rgba(109,213,245,0.15);
+      border-color:var(--accent);color:var(--accent);
+    }
+
+    /* ── PRODUCT GRID ────────────────────────────────────── */
+    .products-section{padding:0 16px 80px;}
+    .products-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+      gap:16px;
+    }
+    @media(min-width:640px){
+      .products-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:20px;}
+    }
+    @media(min-width:1024px){
+      .products-grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:24px;}
+    }
+    .product-card{
+      background:var(--navy2);
+      border:1px solid var(--border);
+      border-radius:var(--radius);overflow:hidden;
+      cursor:pointer;transition:transform 0.2s,border-color 0.2s,box-shadow 0.2s;
+    }
+    .product-card:hover{
+      transform:translateY(-4px);
+      border-color:rgba(109,213,245,0.4);
+      box-shadow:0 12px 32px rgba(109,213,245,0.1);
+    }
+    .product-img{
+      width:100%;aspect-ratio:1;overflow:hidden;
+      background:rgba(255,255,255,0.04);
+      display:flex;align-items:center;justify-content:center;
+    }
+    .product-img img{width:100%;height:100%;object-fit:cover;transition:transform 0.3s;}
+    .product-card:hover .product-img img{transform:scale(1.05);}
+    .product-info{padding:14px;}
+    .product-name{
+      font-size:12px;letter-spacing:1.5px;color:var(--white);
+      line-height:1.4;margin-bottom:8px;
+      display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+    }
+    .product-price-row{display:flex;align-items:center;justify-content:space-between;}
+    .product-price{font-size:14px;font-weight:600;color:var(--accent);letter-spacing:1px;}
+    .product-price.loading{color:var(--w40);font-size:11px;}
+
+    /* ── SPINNER ─────────────────────────────────────────── */
+    .spinner{display:flex;justify-content:center;padding:80px 0;}
+    .spin{
+      width:32px;height:32px;border-radius:50%;
+      border:2px solid rgba(109,213,245,0.2);
+      border-top-color:var(--accent);
+      animation:spin 0.8s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* ── OVERLAY BASE ────────────────────────────────────── */
+    .overlay{
+      position:fixed;inset:0;z-index:300;
+      background:rgba(0,0,0,0.8);
+      display:none;
+      align-items:flex-end;justify-content:center;
+    }
+    .overlay.active{display:flex;}
+    @media(min-width:640px){
+      .overlay{align-items:center;}
+    }
+    .overlay-card{
+      background:var(--navy2);
+      border:1px solid var(--border);
+      border-radius:24px 24px 0 0;
+      width:100%;max-width:560px;
+      max-height:92vh;overflow-y:auto;
+      padding:24px 20px 40px;
+      position:relative;
+    }
+    @media(min-width:640px){
+      .overlay-card{border-radius:24px;max-height:88vh;}
+    }
+    .overlay-handle{
+      width:40px;height:4px;border-radius:2px;
+      background:var(--w20);margin:0 auto 20px;
+    }
+    .overlay-close{
+      position:absolute;top:20px;right:20px;
+      background:rgba(11,30,54,0.9);
+      border:1px solid rgba(109,213,245,0.3);
+      border-radius:50%;width:32px;height:32px;
+      color:var(--white);font-size:20px;font-weight:700;
+      cursor:pointer;display:flex;align-items:center;justify-content:center;
+      z-index:10;
+    }
+
+    /* ── PRODUCT DETAIL ──────────────────────────────────── */
+    #detail-overlay .overlay-card{padding-top:0;}
+    .detail-gallery{
+      display:flex;overflow-x:auto;
+      scroll-snap-type:x mandatory;scroll-behavior:smooth;
+      -ms-overflow-style:none;scrollbar-width:none;
+      border-radius:16px;margin-bottom:10px;
+    }
+    .detail-gallery::-webkit-scrollbar{display:none;}
+    .detail-gallery-slide{
+      flex:0 0 100%;scroll-snap-align:start;
+      width:100%;height:320px;object-fit:contain;
+      border-radius:16px;background:#fff;
+    }
+    .gallery-placeholder{
+      flex:0 0 100%;height:300px;
+      display:flex;align-items:center;justify-content:center;font-size:64px;
+    }
+    .gallery-dots{display:flex;justify-content:center;gap:6px;margin-bottom:14px;}
+    .gallery-dot{
+      width:6px;height:6px;border-radius:50%;
+      background:var(--w20);transition:background 0.2s,transform 0.2s;cursor:pointer;
+    }
+    .gallery-dot.active{background:var(--accent);transform:scale(1.3);}
+    .detail-name{font-size:14px;letter-spacing:3px;color:var(--white);margin-bottom:8px;font-weight:600;}
+    .detail-price-row{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+    .detail-usd{font-size:22px;font-weight:700;color:var(--accent);letter-spacing:1px;}
+    .variant-label{font-size:9px;letter-spacing:3px;color:var(--w40);margin-bottom:8px;text-transform:uppercase;}
+    .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+    .chip{
+      padding:6px 12px;background:rgba(255,255,255,0.06);
+      border:1px solid var(--border);border-radius:8px;
+      font-size:11px;letter-spacing:1px;color:var(--w60);cursor:pointer;transition:all 0.15s;
+      touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;
+    }
+    .chip.selected{background:rgba(109,213,245,0.15);border-color:rgba(109,213,245,0.6);color:var(--accent);}
+
+    /* Description & Specs */
+    .detail-info{margin:16px 0 20px;}
+    .detail-desc{font-size:11px;line-height:1.8;color:var(--w60);letter-spacing:0.5px;margin-bottom:14px;}
+    .detail-specs{border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px;}
+    .spec-row{display:flex;align-items:baseline;gap:10px;padding:9px 14px;border-bottom:1px solid var(--border);font-size:10px;}
+    .spec-row:last-child{border-bottom:none;}
+    .spec-key{color:var(--w40);letter-spacing:2px;text-transform:uppercase;flex:0 0 80px;}
+    .spec-val{color:var(--w60);letter-spacing:0.5px;flex:1;line-height:1.5;}
+    .detail-shipping{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:1px;color:var(--w40);padding:6px 0;}
+
+    /* Qty + Add */
+    .qty-row{display:flex;align-items:center;gap:14px;margin-bottom:20px;}
+    .qty-label{font-size:9px;letter-spacing:3px;color:var(--w40);}
+    .qty-ctrl{display:flex;align-items:center;gap:10px;}
+    .qty-btn{
+      width:32px;height:32px;border-radius:8px;
+      background:rgba(255,255,255,0.08);border:1px solid var(--border);
+      color:var(--white);font-size:16px;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .qty-val{font-size:16px;letter-spacing:2px;min-width:24px;text-align:center;}
+    .btn-primary{
+      width:100%;padding:16px;
+      background:linear-gradient(135deg,var(--accent2),var(--accent));
+      border:none;border-radius:14px;
+      color:var(--navy);font-family:var(--font);font-size:13px;letter-spacing:3px;font-weight:700;
+      cursor:pointer;transition:opacity 0.2s;
+    }
+    .btn-primary:hover{opacity:0.88;}
+    .btn-primary:disabled{opacity:0.4;cursor:default;}
+    .btn-gold{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#1a0f00;}
+
+    /* ── CART OVERLAY ────────────────────────────────────── */
+    .cart-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+    .cart-item-img{width:56px;height:56px;border-radius:10px;background:rgba(255,255,255,0.06);overflow:hidden;flex-shrink:0;}
+    .cart-item-img img{width:100%;height:100%;object-fit:cover;}
+    .cart-item-info{flex:1;min-width:0;}
+    .cart-item-name{font-size:11px;letter-spacing:1px;color:var(--white);margin-bottom:4px;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .cart-item-meta{font-size:10px;color:var(--w40);letter-spacing:0.5px;}
+    .cart-item-price{font-size:13px;color:var(--accent);letter-spacing:1px;flex-shrink:0;}
+    .cart-item-remove{background:none;border:none;color:var(--w40);cursor:pointer;font-size:18px;padding:4px;flex-shrink:0;}
+    .cart-total-row{display:flex;justify-content:space-between;align-items:center;padding:16px 0;margin-top:4px;}
+    .cart-total-label{font-size:11px;letter-spacing:3px;color:var(--w60);}
+    .cart-total-val{font-size:20px;font-weight:700;color:var(--white);}
+    .cart-empty{text-align:center;padding:40px 0;color:var(--w40);font-size:12px;letter-spacing:2px;}
+
+    /* ── CHECKOUT OVERLAY ────────────────────────────────── */
+    .checkout-title{font-size:16px;letter-spacing:4px;margin-bottom:6px;font-weight:700;}
+    .checkout-sub{font-size:11px;color:var(--w60);letter-spacing:1px;margin-bottom:24px;line-height:1.6;}
+    .field-label{font-size:9px;letter-spacing:3px;color:var(--w40);margin-bottom:6px;display:block;}
+    .field-input{
+      width:100%;padding:14px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid var(--border);border-radius:10px;
+      color:var(--white);font-family:var(--font);font-size:13px;letter-spacing:1px;
+      outline:none;transition:border-color 0.2s;margin-bottom:20px;
+    }
+    .field-input:focus{border-color:rgba(109,213,245,0.6);}
+    .field-input.error{border-color:rgba(255,100,100,0.6);}
+    .field-err{font-size:10px;color:#ff6b6b;letter-spacing:1px;margin-top:-14px;margin-bottom:14px;}
+    .checkout-summary{
+      background:rgba(255,255,255,0.04);border:1px solid var(--border);
+      border-radius:12px;padding:16px;margin-bottom:20px;
+    }
+    .checkout-summary-row{
+      display:flex;justify-content:space-between;align-items:center;
+      font-size:11px;letter-spacing:1px;padding:4px 0;
+    }
+    .checkout-summary-row.total{
+      border-top:1px solid var(--border);margin-top:8px;padding-top:12px;
+      font-size:14px;font-weight:700;
+    }
+    .checkout-summary-row.total .val{color:var(--accent);}
+    .checkout-note{font-size:10px;color:var(--w40);letter-spacing:0.5px;line-height:1.6;margin-bottom:20px;}
+
+    /* ── SUCCESS BANNER ──────────────────────────────────── */
+    .success-banner{
+      display:none;
+      background:linear-gradient(135deg,rgba(58,172,223,0.12),rgba(109,213,245,0.08));
+      border:1px solid rgba(109,213,245,0.4);
+      border-radius:var(--radius);margin:24px 16px;padding:32px 24px;text-align:center;
+    }
+    .success-banner.show{display:block;}
+    .success-icon{font-size:48px;margin-bottom:16px;}
+    .success-title{font-size:18px;letter-spacing:4px;font-weight:700;margin-bottom:8px;}
+    .success-sub{font-size:12px;color:var(--w60);letter-spacing:1px;line-height:1.7;}
+
+    /* ── TOAST ───────────────────────────────────────────── */
+    .toast{
+      position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+      background:rgba(11,30,54,0.95);border:1px solid var(--border);
+      border-radius:50px;padding:10px 24px;
+      font-size:11px;letter-spacing:2px;color:var(--white);
+      opacity:0;transition:opacity 0.25s,transform 0.25s;z-index:999;white-space:nowrap;
+    }
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+    /* ── FOOTER ──────────────────────────────────────────── */
+    .site-footer{
+      border-top:1px solid var(--border);
+      padding:32px 24px;text-align:center;
+      font-size:10px;letter-spacing:2px;color:var(--w40);line-height:2;
+    }
+    .site-footer a{color:var(--accent);text-decoration:none;}
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ─────────────────────────────────────────────── -->
+<header class="site-header">
+  <a class="logo" href="https://nava-peace.world">
+    <div class="logo-mark">☮</div>
+    <span class="logo-text">NAVA PEACE</span>
+  </a>
+  <div class="header-right">
+    <button class="cart-btn" onclick="openCart()">
+      🛒 CART
+      <span class="cart-badge" id="cart-badge">0</span>
+    </button>
+  </div>
+</header>
+
+<!-- ── HERO ───────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-eyebrow">OFFICIAL MERCHANDISE &nbsp;·&nbsp; <span style="color:var(--gold);font-size:9px;">v16</span></div>
+  <h1 class="hero-title">WEAR THE<br>MISSION</h1>
+  <p class="hero-sub">Every item is printed on demand and ships worldwide.</p>
+</section>
+
+<!-- ── SUCCESS BANNER (shown after Stripe redirect) ───────── -->
+<div class="success-banner" id="success-banner">
+  <div class="success-icon">✅</div>
+  <div class="success-title">ORDER CONFIRMED</div>
+  <p class="success-sub">
+    Thank you — your order is in production.<br>
+    You'll receive a confirmation email shortly.<br>
+    Typical shipping: 7–14 business days.
+  </p>
+</div>
+
+<!-- ── FILTERS ────────────────────────────────────────────── -->
+<div class="filters" id="filters"></div>
+
+<!-- ── PRODUCTS ───────────────────────────────────────────── -->
+<section class="products-section">
+  <div class="spinner" id="products-loading"><div class="spin"></div></div>
+  <div class="products-grid" id="products-grid" style="display:none;"></div>
+  <div id="products-empty" style="display:none;text-align:center;padding:80px 24px;color:var(--w40);font-size:12px;letter-spacing:2px;">
+    NO PRODUCTS FOUND
+  </div>
+</section>
+
+<!-- ── PRODUCT DETAIL OVERLAY ─────────────────────────────── -->
+<div class="overlay" id="detail-overlay">
+  <div class="overlay-card" style="position:relative;">
+    <div class="overlay-handle"></div>
+    <button class="overlay-close" onclick="closeDetail()">×</button>
+    <div id="detail-gallery" class="detail-gallery"></div>
+    <div id="gallery-dots" class="gallery-dots"></div>
+    <div id="detail-name" class="detail-name"></div>
+    <div class="detail-price-row">
+      <span id="detail-usd" class="detail-usd"></span>
+    </div>
+    <div id="detail-variants"></div>
+    <div id="detail-info" class="detail-info"></div>
+    <div class="qty-row">
+      <span class="qty-label">QTY</span>
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="changeQty(-1)">−</button>
+        <span class="qty-val" id="qty-val">1</span>
+        <button class="qty-btn" onclick="changeQty(1)">+</button>
+      </div>
+    </div>
+    <button class="btn-primary" id="detail-buy-btn" onclick="addToCart()">ADD TO CART</button>
+  </div>
+</div>
+
+<!-- ── CART OVERLAY ───────────────────────────────────────── -->
+<div class="overlay" id="cart-overlay">
+  <div class="overlay-card" style="position:relative;">
+    <div class="overlay-handle"></div>
+    <button class="overlay-close" onclick="closeCart()">×</button>
+    <h2 style="font-size:14px;letter-spacing:4px;margin-bottom:20px;">YOUR CART</h2>
+    <div id="cart-items"></div>
+    <div id="cart-total-row" class="cart-total-row" style="display:none;">
+      <span class="cart-total-label">TOTAL</span>
+      <span class="cart-total-val" id="cart-total"></span>
+    </div>
+    <button class="btn-primary btn-gold" id="checkout-btn" onclick="openCheckout()" style="margin-top:8px;display:none;">
+      CHECKOUT →
+    </button>
+  </div>
+</div>
+
+<!-- ── CHECKOUT OVERLAY ───────────────────────────────────── -->
+<div class="overlay" id="checkout-overlay">
+  <div class="overlay-card" style="position:relative;">
+    <div class="overlay-handle"></div>
+    <button class="overlay-close" onclick="closeCheckout()">×</button>
+    <div class="checkout-title">CHECKOUT</div>
+    <p class="checkout-sub">Enter your email and we'll redirect you to secure Stripe payment. Shipping address collected on the next page.</p>
+
+    <label class="field-label" for="checkout-email">EMAIL ADDRESS</label>
+    <input class="field-input" id="checkout-email" type="email" placeholder="your@email.com" autocomplete="email"/>
+    <div class="field-err" id="checkout-email-err" style="display:none;"></div>
+
+    <div class="checkout-summary" id="checkout-summary"></div>
+
+    <p class="checkout-note">
+      🔒 Secure payment via Stripe &nbsp;·&nbsp; Visa, Mastercard, Amex, Apple Pay, Google Pay<br>
+      📦 Ships worldwide · Fulfilled by Yoycol · 3–7 business day production
+    </p>
+
+    <button class="btn-primary btn-gold" id="pay-btn" onclick="startCheckout()">
+      PAY WITH STRIPE →
+    </button>
+  </div>
+</div>
+
+<!-- ── FOOTER ─────────────────────────────────────────────── -->
+<footer class="site-footer">
+  <div>© 2025 NAVA PEACE FOUNDATION &nbsp;·&nbsp; <a href="https://nava-peace.world">nava-peace.world</a></div>
+  <div style="margin-top:8px;">Merchandise fulfilled by <a href="https://www.yoycol.com" target="_blank">Yoycol</a> · Print on demand worldwide</div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  NAVA PEACE — WEB SHOP  (Stripe + Yoycol)
+// ══════════════════════════════════════════════════════════
+
+const SUPABASE_URL  = 'https://qvbxcxehhenpifhclhvs.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2YnhjeGVoaGVucGlmaGNsaHZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1ODcxNzgsImV4cCI6MjA4MzE2MzE3OH0.emnoT_8qFJzDHHgHa9e6CIAwJvCW6t-NC1CDKGU_pew';
+const PROXY_URL     = SUPABASE_URL + '/functions/v1/yoycol-proxy';
+const SHOP_URL      = 'https://nava-peace.world/shop.html';
+
+// Auth headers required by Supabase gateway (anon key = public, safe in client JS)
+const AUTH_HEADERS  = { 'Authorization': `Bearer ${SUPABASE_ANON}`, 'apikey': SUPABASE_ANON };
+
+// ── Retail pricing (same as Telegram app) ─────────────────
+const TARGET_MARGIN     = 7;
+const SHIPPING_ESTIMATE = 9;
+const MIN_RETAIL        = 19.99;
+
+// PRICE_MAP removed — formula applies to all products so prices vary by size
+// formula: YOYCOL wholesale + $9 shipping + $7 margin → nearest X.99, min $19.99
+function retailPrice(wholesale) {
+  if (!(wholesale > 0)) return MIN_RETAIL;
+  const target = wholesale + SHIPPING_ESTIMATE + TARGET_MARGIN;
+  return parseFloat(Math.max(MIN_RETAIL, Math.round(target + 0.01) - 0.01).toFixed(2));
+}
+
+// ── Product descriptions ───────────────────────────────────
+const PRODUCT_DESCRIPTIONS = [
+  { kw:'bikini',        desc:'Striking all-over print bikini set crafted for poolside confidence. Chlorine-resistant fabric with brilliant, fade-proof NAVA PEACE artwork.' },
+  { kw:'swimsuit',      desc:'Premium all-over print swimsuit built for style and comfort. Quick-dry, chlorine-resistant fabric.' },
+  { kw:'iphone',        desc:'Slim silicone case with full-wrap custom print. Shock-absorbing edges, precise cutouts for every port and button.' },
+  { kw:'samsung',       desc:'Custom-printed phone case with military-grade drop protection. Precise cutouts, raised screen and camera lip.' },
+  { kw:'phone case',    desc:'Custom-printed phone case with precise cutouts for all ports. Lightweight protection with vibrant NAVA PEACE artwork.' },
+  { kw:'airbag',        desc:'Airbag phone case with air-cushion corners for superior drop protection. Ultra-slim, transparent back.' },
+  { kw:'t-shirt',       desc:'Unisex all-over print tee in soft, breathable fabric. True-to-size cut, colorfast after dozens of washes.' },
+  { kw:'dress',         desc:'Flowing all-over print dress with NAVA PEACE artwork. Lightweight woven fabric, flattering silhouette.' },
+  { kw:'shorts',        desc:'Comfortable all-over print shorts with elastic drawstring waist. Breathable fabric for beach, gym or everyday.' },
+  { kw:'mug',           desc:'Ceramic mug with vivid full-wrap NAVA PEACE print. 11 oz, dishwasher safe. Every sip supports the peace mission.' },
+  { kw:'tote',          desc:'Durable all-over print canvas tote. Reinforced shoulder straps, roomy interior — carry a message.' },
+  { kw:'beach towel',   desc:'Oversized microfiber beach towel with full-bleed NAVA PEACE artwork. Ultra-absorbent and quick-dry.' },
+  { kw:'peaked cap',    desc:'Structured peaked cap with custom NAVA PEACE print. Adjustable back strap for a perfect fit.' },
+  { kw:'chest bag',     desc:'Compact all-over print chest bag. Water-resistant shell, multiple pockets, adjustable strap.' },
+  { kw:'gaiter',        desc:'Stretchy all-over print neck gaiter. One size fits all — neck warmer, bandana, or headband.' },
+  { kw:'playing cards', desc:'Premium 54-card deck with exclusive NAVA PEACE artwork. Casino-quality cardstock with smooth finish.' },
+  { kw:'flag',          desc:'Vibrant all-over print polyester flag. Brass grommets for easy mounting, UV-resistant ink.' },
+  { kw:'quilt',         desc:'All-over print microfiber quilt with lightweight warming fill. Machine washable, multiple sizes.' },
+  { kw:'bedding',       desc:'All-over print bedding set with vivid NAVA PEACE artwork. Soft microfiber, machine washable.' },
+];
+
+const PRINT_METHODS = [
+  { kw:'all-over print', label:'All-Over Print' },
+  { kw:'sublimation',    label:'Dye Sublimation' },
+  { kw:'embroidered',    label:'Embroidered' },
+  { kw:'dtg',            label:'DTG Print' },
+  { kw:'silicone',       label:'UV Print on Silicone' },
+];
+
+function getDesc(title) {
+  if (!title) return '';
+  const t = title.toLowerCase();
+  for (const { kw, desc } of PRODUCT_DESCRIPTIONS) if (t.includes(kw)) return desc;
+  return 'Custom print merchandise featuring original NAVA PEACE artwork. Every purchase supports the Foundation\'s peace mission worldwide.';
+}
+
+// ── State ──────────────────────────────────────────────────
+let allProducts    = [];
+let currentProd    = null;
+let currentVariants = [];
+let currentFiltered = [];
+let selectedSize   = null;
+let selectedColor  = null;
+let selectedVariant = null;
+let qty = 1;
+// Safe localStorage (throws in iOS Safari private mode)
+function lsGet(key, fallback) { try { return JSON.parse(localStorage.getItem(key) || 'null') ?? fallback; } catch { return fallback; } }
+function lsSet(key, val)      { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
+
+let cart       = lsGet('nava_shop_cart', []);
+const priceCache = {}; // productId → display string, persists across filter changes
+
+// ── Normalise ──────────────────────────────────────────────
+function normalizeProduct(p) {
+  return {
+    id:        String(p.id || p.productId || ''),
+    title:     p.productName || p.name || 'Product',
+    image:     p.previewImage || p.mainImage || p.coverImage || '',
+    source:    'template',
+  };
+}
+
+function normalizeVariant(v) {
+  const mockupImages = Array.isArray(v.mockupImage)
+    ? v.mockupImage.map(m => m?.url).filter(Boolean) : [];
+  return {
+    skuCode:     v.skuCode    || v.externalSkuCode || '',
+    variantId:   String(v.variantId || v.mappingVariantId || ''),
+    size:        v.size       || v.sizeName   || '',
+    color:       v.color      || v.colorName  || '',
+    salesPrice:  parseFloat(v.price > 0 ? v.price : (v.salesPrice || v.salePrice || v.costPrice || v.basePrice || 0)),
+    mockupImages,
+    available:   v.available !== false && v.status !== 'disable',
+  };
+}
+
+// ── Toast ──────────────────────────────────────────────────
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+// ── Cart ───────────────────────────────────────────────────
+function saveCart() { lsSet('nava_shop_cart', cart); }
+
+function updateCartBadge() {
+  const total = cart.reduce((s, i) => s + i.qty, 0);
+  const badge = document.getElementById('cart-badge');
+  badge.textContent = total;
+  badge.style.display = total > 0 ? 'flex' : 'none';
+}
+
+function renderCart() {
+  const container = document.getElementById('cart-items');
+  const totalRow  = document.getElementById('cart-total-row');
+  const checkBtn  = document.getElementById('checkout-btn');
+
+  if (!cart.length) {
+    container.innerHTML = '<div class="cart-empty">YOUR CART IS EMPTY</div>';
+    totalRow.style.display = 'none';
+    checkBtn.style.display = 'none';
+    return;
+  }
+
+  const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+
+  container.innerHTML = cart.map((item, idx) => `
+    <div class="cart-item">
+      <div class="cart-item-img">
+        ${item.image ? `<img src="${item.image}" loading="lazy"/>` : '🛍'}
+      </div>
+      <div class="cart-item-info">
+        <div class="cart-item-name">${item.title}</div>
+        <div class="cart-item-meta">${[item.size, item.color].filter(Boolean).join(' · ')} · Qty ${item.qty}</div>
+      </div>
+      <div class="cart-item-price">$${(item.price * item.qty).toFixed(2)}</div>
+      <button class="cart-item-remove" onclick="removeFromCart(${idx})">×</button>
+    </div>
+  `).join('');
+
+  document.getElementById('cart-total').textContent = `$${total.toFixed(2)}`;
+  totalRow.style.display = 'flex';
+  checkBtn.style.display = 'block';
+}
+
+function removeFromCart(idx) {
+  cart.splice(idx, 1);
+  saveCart(); updateCartBadge(); renderCart();
+}
+
+function openCart()  { renderCart(); document.getElementById('cart-overlay').classList.add('active'); }
+function closeCart() { document.getElementById('cart-overlay').classList.remove('active'); }
+
+// ── Checkout ───────────────────────────────────────────────
+function openCheckout() {
+  // Build order summary
+  const items = cart;
+  const summary = document.getElementById('checkout-summary');
+  const total = items.reduce((s, i) => s + i.price * i.qty, 0);
+  summary.innerHTML = items.map(i =>
+    `<div class="checkout-summary-row">
+      <span>${i.title.slice(0, 30)}${i.title.length > 30 ? '…' : ''} ×${i.qty}</span>
+      <span class="val">$${(i.price * i.qty).toFixed(2)}</span>
+    </div>`
+  ).join('') + `
+    <div class="checkout-summary-row total">
+      <span>TOTAL</span>
+      <span class="val">$${total.toFixed(2)}</span>
+    </div>`;
+
+  closeCart();
+  document.getElementById('checkout-overlay').classList.add('active');
+  document.getElementById('checkout-email').focus();
+}
+function closeCheckout() { document.getElementById('checkout-overlay').classList.remove('active'); }
+
+async function startCheckout() {
+  const emailEl = document.getElementById('checkout-email');
+  const errEl   = document.getElementById('checkout-email-err');
+  const payBtn  = document.getElementById('pay-btn');
+
+  const email = emailEl.value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    emailEl.classList.add('error');
+    errEl.textContent = 'Please enter a valid email address';
+    errEl.style.display = 'block';
+    emailEl.focus();
+    return;
+  }
+  emailEl.classList.remove('error');
+  errEl.style.display = 'none';
+
+  payBtn.disabled = true;
+  payBtn.textContent = 'REDIRECTING…';
+
+  try {
+    const stripeItems = cart.map(i => ({
+      title:        i.title,
+      image:        i.image   || '',
+      skuCode:      i.skuCode || '',
+      variantId:    i.variantId || '',
+      qty:          i.qty,
+      retail_price: i.price,
+      wholesale:    i.wholesale || 0,
+    }));
+
+    const res = await fetch(`${PROXY_URL}?action=create_checkout_session`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...AUTH_HEADERS },
+      body: JSON.stringify({
+        items:        stripeItems,
+        customer_email: email,
+        success_url:  SHOP_URL,
+        cancel_url:   SHOP_URL,
+      }),
+    });
+
+    const data = await res.json();
+    if (data.url) {
+      // Clear cart before redirect (confirmed intent)
+      cart = [];
+      saveCart();
+      window.location.href = data.url;
+    } else {
+      throw new Error(data.error || 'Stripe session creation failed');
+    }
+  } catch (e) {
+    toast('⚠ Payment error — please try again');
+    payBtn.disabled = false;
+    payBtn.textContent = 'PAY WITH STRIPE →';
+  }
+}
+
+// ── Product loading ────────────────────────────────────────
+async function loadProducts() {
+  document.getElementById('products-loading').style.display = 'flex';
+  try {
+    let rawRecords = [];
+    let page = 1;
+
+    // Fetch all pages (up to 5 = 250 products)
+    while (page <= 5) {
+      const res  = await fetch(`${PROXY_URL}?action=templates&page=${page}&size=50`, { headers: AUTH_HEADERS });
+      const data = await res.json();
+      const records = data?.data?.records || data?.data?.list || [];
+      if (!records.length) break;
+      rawRecords = rawRecords.concat(records);
+      if (records.length < 50) break;
+      page++;
+    }
+
+    if (!rawRecords.length) throw new Error('No products');
+
+    allProducts = rawRecords.map(normalizeProduct);
+    document.getElementById('products-loading').style.display = 'none';
+    buildFilters();
+    renderGrid(allProducts);
+    allProducts.forEach(p => fetchBasePrice(p));
+  } catch(e) {
+    document.getElementById('products-loading').style.display = 'none';
+    const emptyEl = document.getElementById('products-empty');
+    emptyEl.style.display = 'block';
+    emptyEl.innerHTML = `<div style="color:#ff6b6b;font-size:11px;letter-spacing:1px;text-align:center;padding:20px;">
+      LOAD ERROR<br><span style="color:var(--w60);font-size:10px;word-break:break-all;">${String(e).slice(0,200)}</span>
+    </div>`;
+  }
+}
+
+// ── Filters ────────────────────────────────────────────────
+const FILTER_KEYWORDS = [
+  { label: 'ALL',           kw: '' },
+  { label: 'CLOTHING',      kw: 'shirt dress shorts' },
+  { label: 'SWIMWEAR',      kw: 'swimsuit bikini' },
+  { label: 'ACCESSORIES',   kw: 'bag cap tote gaiter bandana balaclava scarf glove' },
+  { label: 'PHONE CASES',   kw: 'phone iphone samsung airbag' },
+  { label: 'HOME & DECOR',  kw: 'mug towel quilt bedding pillow curtain blanket' },
+  { label: 'FLAGS & PRINTS',kw: 'flag banner poster print canvas' },
+  { label: 'LIFESTYLE',     kw: 'playing cards puzzle keychain sticker notebook journal' },
+];
+let activeFilter = '';
+
+// Only render categories that have at least 1 matching product
+function buildFilters() {
+  const el = document.getElementById('filters');
+  el.innerHTML = FILTER_KEYWORDS.filter(f => {
+    if (!f.kw) return true; // always show ALL
+    const words = f.kw.split(' ');
+    return allProducts.some(p => words.some(k => p.title.toLowerCase().includes(k)));
+  }).map((f, i) =>
+    `<div class="filter-chip${i === 0 ? ' active' : ''}" data-kw="${f.kw}" onclick="applyFilter(this, '${f.kw}')">${f.label}</div>`
+  ).join('');
+}
+
+function applyFilter(el, kw) {
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  activeFilter = kw;
+  const filtered = kw
+    ? allProducts.filter(p => kw.split(' ').some(k => p.title.toLowerCase().includes(k)))
+    : allProducts;
+  renderGrid(filtered);
+  // Re-apply cached prices (DOM was just rebuilt)
+  filtered.forEach(p => fetchBasePrice(p));
+}
+
+// ── Grid ───────────────────────────────────────────────────
+function renderGrid(products) {
+  const grid = document.getElementById('products-grid');
+  if (!products.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--w40);font-size:12px;letter-spacing:2px;">NO PRODUCTS IN THIS CATEGORY</div>';
+    grid.style.display = 'grid';
+    return;
+  }
+  grid.innerHTML = products.map(p => {
+    const cached = priceCache[p.id];
+    return `
+    <div class="product-card" onclick="openDetail('${p.id}')">
+      <div class="product-img">
+        ${p.image ? `<img src="${p.image}" alt="${p.title}" loading="lazy"/>` : '🛍'}
+      </div>
+      <div class="product-info">
+        <div class="product-name">${p.title}</div>
+        <div class="product-price-row">
+          <span class="product-price${cached ? '' : ' loading'}" id="price-${p.id}">${cached || '···'}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  grid.style.display = 'grid';
+}
+
+async function fetchBasePrice(prod) {
+  // Already cached → just update DOM if card is visible
+  if (priceCache[prod.id]) {
+    const el = document.getElementById(`price-${prod.id}`);
+    if (el) { el.textContent = priceCache[prod.id]; el.classList.remove('loading'); }
+    return;
+  }
+  try {
+    const res  = await fetch(`${PROXY_URL}?action=template&productId=${prod.id}`, { headers: AUTH_HEADERS });
+    const data = await res.json();
+    const raw  = data?.data || {};
+    const rawVariants = raw?.variants || raw?.skuList || [];
+    if (!rawVariants.length) return;
+    const prices = rawVariants.map(v => parseFloat(v.price || 0)).filter(p => p > 0);
+    if (!prices.length) return;
+    const lo     = retailPrice(Math.min(...prices));
+    const hi     = retailPrice(Math.max(...prices));
+    const label  = lo === hi ? `$${lo.toFixed(2)}` : `from $${lo.toFixed(2)}`;
+    priceCache[prod.id] = label;
+    const el = document.getElementById(`price-${prod.id}`);
+    if (el) { el.textContent = label; el.classList.remove('loading'); }
+  } catch { /* silent */ }
+}
+
+// ── Gallery ────────────────────────────────────────────────
+function renderGallery(images) {
+  const gallery = document.getElementById('detail-gallery');
+  const dots    = document.getElementById('gallery-dots');
+  if (!images?.length) {
+    gallery.innerHTML = '<div class="gallery-placeholder">🛍</div>';
+    dots.innerHTML = '';
+    return;
+  }
+  gallery.innerHTML = images.map(url =>
+    `<img class="detail-gallery-slide" src="${url}" loading="lazy" alt="product"/>`).join('');
+  dots.innerHTML = images.length > 1
+    ? images.map((_, i) => `<div class="gallery-dot${i===0?' active':''}" onclick="scrollGallery(${i})"></div>`).join('')
+    : '';
+  gallery.onscroll = () => {
+    const idx = Math.round(gallery.scrollLeft / gallery.offsetWidth);
+    dots.querySelectorAll('.gallery-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+  };
+}
+
+function scrollGallery(idx) {
+  document.getElementById('detail-gallery').scrollTo({ left: idx * document.getElementById('detail-gallery').offsetWidth, behavior: 'smooth' });
+}
+
+// ── Product Detail ─────────────────────────────────────────
+async function openDetail(productId) {
+  const prod = allProducts.find(p => String(p.id) === String(productId));
+  if (!prod) return;
+
+  currentProd = prod;
+  currentFiltered = [];
+  selectedSize = selectedColor = selectedVariant = null;
+  qty = 1;
+  document.getElementById('qty-val').textContent = '1';
+  renderGallery(prod.image ? [prod.image] : []);
+  document.getElementById('detail-name').textContent = prod.title;
+  document.getElementById('detail-usd').textContent = '···';
+  document.getElementById('detail-variants').innerHTML = '<div class="spinner" style="min-height:60px;"><div class="spin"></div></div>';
+  document.getElementById('detail-info').innerHTML = '';
+  document.getElementById('detail-overlay').classList.add('active');
+
+  try {
+    const res  = await fetch(`${PROXY_URL}?action=template&productId=${productId}`, { headers: AUTH_HEADERS });
+    const data = await res.json();
+    const raw  = data?.data || {};
+    currentProd.spuCode    = raw?.product?.spuCode    || '';
+    currentProd.designCode = raw?.designCode          || '';
+    const rawVariants = raw?.variants || raw?.skuList || [];
+    currentVariants = rawVariants.map(normalizeVariant);
+    renderVariants(currentVariants);
+    renderDetailInfo(currentProd, currentVariants);
+  } catch {
+    document.getElementById('detail-variants').innerHTML = '<p style="color:#ff6b6b;font-size:10px;text-align:center;">Failed to load variants</p>';
+  }
+}
+
+// Remove clothing size codes when product has dimension-based sizes
+function filterVariantSizes(sizes) {
+  const CLOTHING_RE = /^(2?XS|XS|S|M|N|L|XM|XL|2XL|3XL|4XL|5XL|6XL|7XL|8XL|XXL|XXXL|ONE\s*SIZE)$/i;
+  const hasDims = sizes.some(s => /\d+\s*x\s*\d+/i.test(s) || /^\d+\s*cm/i.test(s));
+  return hasDims ? sizes.filter(s => !CLOTHING_RE.test(s.trim())) : sizes;
+}
+
+function renderVariants(variants) {
+  const available = variants.filter(v => v.available);
+  // DEBUG — visible price dump (remove after diagnosis)
+  const dbg = available.map(v => `${v.size||v.color||'?'}=$${v.salesPrice}`).join(' | ');
+  document.getElementById('detail-info').innerHTML = `<p style="font-size:9px;color:#FFD700;word-break:break-all;opacity:0.7">${dbg}</p>`;
+  if (!available.length) { document.getElementById('detail-variants').innerHTML = ''; updateDetailPrice(0); return; }
+
+  const rawSizes = [...new Set(available.map(v => v.size).filter(Boolean))];
+  const sizes    = filterVariantSizes(rawSizes);
+  currentFiltered = available.filter(v => !v.size || sizes.includes(v.size));
+  const colors    = [...new Set(currentFiltered.map(v => v.color).filter(Boolean))];
+  let html = '';
+
+  if (sizes.length > 1) {
+    selectedSize = sizes[0];
+    html += `<p class="variant-label">SIZE</p><div class="chips" id="size-chips">`;
+    html += sizes.map((s, i) =>
+      `<div class="chip${i===0?' selected':''}" data-type="size" data-val="${s.replace(/"/g,'&quot;')}">${s}</div>`
+    ).join('');
+    html += '</div>';
+  } else if (sizes.length === 1) { selectedSize = sizes[0]; }
+
+  if (colors.length > 1) {
+    selectedColor = colors[0];
+    html += `<p class="variant-label">COLOR</p><div class="chips" id="color-chips">`;
+    html += colors.map((c, i) =>
+      `<div class="chip${i===0?' selected':''}" data-type="color" data-val="${c.replace(/"/g,'&quot;')}">${c}</div>`
+    ).join('');
+    html += '</div>';
+  } else if (colors.length === 1) { selectedColor = colors[0]; }
+
+  document.getElementById('detail-variants').innerHTML = html;
+  resolveVariant();
+}
+
+function selectSize(size) {
+  selectedSize = size;
+  document.querySelectorAll('#size-chips .chip').forEach(c => c.classList.toggle('selected', c.dataset.val === size));
+  resolveVariant();
+}
+
+function selectColor(color) {
+  selectedColor = color;
+  document.querySelectorAll('#color-chips .chip').forEach(c => c.classList.toggle('selected', c.dataset.val === color));
+  resolveVariant();
+}
+
+function resolveVariant() {
+  const available = currentFiltered.length ? currentFiltered : currentVariants.filter(v => v.available);
+  selectedVariant = available.find(v => {
+    const sm = !selectedSize  || v.size  === selectedSize;
+    const cm = !selectedColor || v.color === selectedColor;
+    return sm && cm;
+  }) || null;
+
+  if (selectedVariant) {
+    updateDetailPrice(selectedVariant.salesPrice);
+    const imgs = selectedVariant.mockupImages?.length ? selectedVariant.mockupImages : (currentProd.image ? [currentProd.image] : []);
+    renderGallery(imgs);
+  } else {
+    const fallback = (selectedSize ? available.find(v => v.size === selectedSize) : null) || available[0];
+    if (fallback) renderGallery(fallback.mockupImages?.length ? fallback.mockupImages : (currentProd.image ? [currentProd.image] : []));
+    const prices = available.map(v => v.salesPrice).filter(p => p > 0);
+    if (prices.length) {
+      const lo = retailPrice(Math.min(...prices));
+      const hi = retailPrice(Math.max(...prices));
+      document.getElementById('detail-usd').textContent = lo === hi ? `$${lo.toFixed(2)}` : `$${lo.toFixed(2)} – $${hi.toFixed(2)}`;
+    }
+  }
+}
+
+function updateDetailPrice(wholesale) {
+  if (!wholesale) { document.getElementById('detail-usd').textContent = '···'; return; }
+  const retail = retailPrice(wholesale);
+  document.getElementById('detail-usd').textContent = `$${(retail * qty).toFixed(2)}`;
+}
+
+function renderDetailInfo(prod, variants) {
+  const el = document.getElementById('detail-info');
+  if (!el) return;
+  const available = variants.filter(v => v.available);
+  const sizes  = [...new Set(available.map(v => v.size).filter(Boolean))];
+  const colors = [...new Set(available.map(v => v.color).filter(Boolean))];
+  const prices = available.map(v => v.salesPrice).filter(p => p > 0);
+
+  const titleLow = (prod.title || '').toLowerCase();
+  let printLabel = 'Custom Print';
+  for (const { kw, label } of PRINT_METHODS) if (titleLow.includes(kw)) { printLabel = label; break; }
+
+  let html = `<p class="detail-desc">${getDesc(prod.title)}</p>`;
+  const specs = [
+    ['Print',  printLabel],
+    ...(sizes.length  ? [['Sizes',  sizes.length  <= 8 ? sizes.join(' · ')  : `${sizes.length} sizes`]] : []),
+    ...(colors.length ? [['Colors', colors.length <= 6 ? colors.join(' · ') : `${colors.length} colors`]] : []),
+    ...(prices.length ? [['Price',  (() => { const lo = retailPrice(Math.min(...prices)), hi = retailPrice(Math.max(...prices)); return lo === hi ? `$${lo.toFixed(2)}` : `$${lo.toFixed(2)} – $${hi.toFixed(2)}`; })()] ] : []),
+    ...(prod.spuCode  ? [['Ref',    prod.spuCode]] : []),
+  ];
+  html += '<div class="detail-specs">' + specs.map(([k, v]) =>
+    `<div class="spec-row"><span class="spec-key">${k}</span><span class="spec-val">${v}</span></div>`
+  ).join('') + '</div>';
+  html += `<div class="detail-shipping">🚚&nbsp; Ships in 3–7 business days &nbsp;·&nbsp; Fulfilled by Yoycol</div>`;
+  el.innerHTML = html;
+}
+
+function changeQty(delta) {
+  qty = Math.max(1, Math.min(10, qty + delta));
+  document.getElementById('qty-val').textContent = qty;
+  if (selectedVariant) updateDetailPrice(selectedVariant.salesPrice);
+}
+
+function closeDetail() { document.getElementById('detail-overlay').classList.remove('active'); }
+
+function addToCart() {
+  if (!currentProd || !selectedVariant) { toast('⚠ Please select a variant first'); return; }
+  const wholesale = selectedVariant.salesPrice;
+  const price     = retailPrice(wholesale);
+
+  // Check if same variant already in cart
+  const existing = cart.find(i =>
+    i.mappingId === currentProd.id &&
+    i.skuCode   === selectedVariant.skuCode
+  );
+  if (existing) {
+    existing.qty = Math.min(10, existing.qty + qty);
+  } else {
+    cart.push({
+      mappingId:  currentProd.id,
+      title:      currentProd.title,
+      image:      selectedVariant.mockupImages?.[0] || currentProd.image || '',
+      size:       selectedVariant.size  || '',
+      color:      selectedVariant.color || '',
+      skuCode:    selectedVariant.skuCode   || '',
+      variantId:  selectedVariant.variantId || '',
+      wholesale,
+      price,
+      qty,
+    });
+  }
+  saveCart();
+  updateCartBadge();
+  closeDetail();
+  toast(`✓ Added to cart — $${price.toFixed(2)}`);
+}
+
+// ── Success detection + order confirmation ─────────────────
+async function checkSuccess() {
+  const params    = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session_id');
+  if (!sessionId) return;
+
+  // Clean URL immediately
+  window.history.replaceState({}, '', window.location.pathname);
+
+  // Show banner right away (payment confirmed by Stripe redirect)
+  const banner = document.getElementById('success-banner');
+  banner.classList.add('show');
+  banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  // Confirm order in background (creates YOYCOL order)
+  try {
+    const res  = await fetch(`${PROXY_URL}?action=confirm_order&session_id=${encodeURIComponent(sessionId)}`, { headers: AUTH_HEADERS });
+    const data = await res.json();
+    if (data.order_sn) {
+      document.querySelector('#success-banner .success-sub').innerHTML =
+        `Thank you — your order is being printed!<br>` +
+        `Order ref: <strong>${data.order_sn}</strong><br>` +
+        `You'll receive a confirmation email shortly.<br>` +
+        `Typical shipping: 7–14 business days.`;
+    }
+  } catch { /* silent — payment succeeded, YOYCOL order will be retried manually if needed */ }
+}
+
+// ── Event delegation for variant chips (more reliable on mobile than onclick) ──
+document.addEventListener('click', e => {
+  const chip = e.target.closest('[data-type="size"],[data-type="color"]');
+  if (!chip) return;
+  const val = chip.dataset.val;
+  if (chip.dataset.type === 'size')  selectSize(val);
+  if (chip.dataset.type === 'color') selectColor(val);
+});
+
+// ── Overlay backdrop close ─────────────────────────────────
+window.addEventListener('load', () => {
+  checkSuccess();
+  updateCartBadge();
+  loadProducts();
+  document.querySelectorAll('.overlay').forEach(el => {
+    el.addEventListener('click', e => { if (e.target === el) el.classList.remove('active'); });
+  });
+});
+</script>
+</body>
+</html>

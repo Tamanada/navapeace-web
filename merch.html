@@ -149,11 +149,13 @@
     }
     .overlay-close{
       position:absolute;top:20px;right:20px;
-      background:rgba(255,255,255,0.1);
-      border:none;border-radius:50%;
+      background:rgba(11,30,54,0.85);
+      border:1px solid rgba(109,213,245,0.3);
+      border-radius:50%;
       width:32px;height:32px;
-      color:var(--w60);font-size:18px;
+      color:var(--white);font-size:20px;font-weight:700;
       cursor:pointer;display:flex;align-items:center;justify-content:center;
+      z-index:20;
     }
 
     /* ── PRODUCT DETAIL ─────────────────────────────── */
@@ -174,10 +176,10 @@
     .detail-gallery-slide{
       flex:0 0 100%;
       scroll-snap-align:start;
-      width:100%;height:260px;
-      object-fit:cover;
+      width:100%;height:280px;
+      object-fit:contain;
       border-radius:16px;
-      background:rgba(255,255,255,0.04);
+      background:#fff;
     }
     .gallery-placeholder{
       flex:0 0 100%;height:260px;
@@ -221,6 +223,9 @@
       font-size:11px;letter-spacing:1px;
       color:var(--w60);cursor:pointer;
       transition:all 0.15s;
+      touch-action:manipulation;  /* no 300ms tap delay on mobile */
+      -webkit-tap-highlight-color:transparent;
+      user-select:none;
     }
     .chip.selected{
       background:rgba(109,213,245,0.15);
@@ -240,6 +245,36 @@
       display:flex;align-items:center;justify-content:center;
     }
     .qty-val{font-size:16px;letter-spacing:2px;min-width:24px;text-align:center;}
+
+    /* ── PRODUCT INFO (description + specs) ──────── */
+    .detail-info{margin:20px 0 24px;}
+    .detail-desc{
+      font-size:11px;line-height:1.8;color:var(--w60);
+      letter-spacing:0.5px;margin-bottom:16px;
+    }
+    .detail-specs{
+      border:1px solid var(--border);
+      border-radius:12px;
+      overflow:hidden;
+      margin-bottom:14px;
+    }
+    .spec-row{
+      display:flex;align-items:baseline;gap:10px;
+      padding:9px 14px;
+      border-bottom:1px solid var(--border);
+      font-size:10px;
+    }
+    .spec-row:last-child{border-bottom:none;}
+    .spec-key{
+      color:var(--w40);letter-spacing:2px;text-transform:uppercase;
+      flex:0 0 80px;
+    }
+    .spec-val{color:var(--w60);letter-spacing:0.5px;flex:1;line-height:1.5;}
+    .detail-shipping{
+      display:flex;align-items:center;gap:8px;
+      font-size:10px;letter-spacing:1px;color:var(--w40);
+      padding:8px 0;
+    }
 
     /* Add to cart / buy button */
     .btn-primary{
@@ -379,6 +414,7 @@
       <span id="detail-stars-badge" class="detail-stars-badge"></span>
     </div>
     <div id="detail-variants"></div>
+    <div id="detail-info" class="detail-info"></div>
     <div class="qty-row">
       <span class="qty-label">QTY</span>
       <div class="qty-ctrl">
@@ -569,9 +605,13 @@
 //  NAVA PEACE — MERCH  (Yoycol Integration)
 // ══════════════════════════════════════════════════════════
 
-const PROXY_URL = (typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : '')
-  .replace('https://', 'https://')
+const PROXY_URL = (typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : 'https://qvbxcxehhenpifhclhvs.supabase.co')
   + '/functions/v1/yoycol-proxy';
+
+const SUPA_ANON  = typeof SUPABASE_ANON_KEY !== 'undefined'
+  ? SUPABASE_ANON_KEY
+  : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2YnhjeGVoaGVucGlmaGNsaHZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1ODcxNzgsImV4cCI6MjA4MzE2MzE3OH0.emnoT_8qFJzDHHgHa9e6CIAwJvCW6t-NC1CDKGU_pew';
+const AUTH_H     = { 'Authorization': `Bearer ${SUPA_ANON}`, 'apikey': SUPA_ANON };
 
 // Stars conversion: 1 USD ≈ 100 Stars (covers Telegram's 30% cut + margin)
 const USD_TO_STARS = 100;
@@ -583,47 +623,28 @@ const TARGET_MARGIN     = 7;
 const SHIPPING_ESTIMATE = 9;
 const MIN_RETAIL        = 19.99;
 
-// Fixed retail prices by product name keyword (case-insensitive substring match)
-// Products NOT matched fall back to the formula above.
-const PRICE_MAP = [
-  { kw: 'shorts',              price: 19.99 },
-  { kw: 'iphone',              price: 19.99 },
-  { kw: 'mobile phone case',   price: 19.99 },
-  { kw: 'mug',                 price: 19.99 },
-  { kw: 'airbag',              price: 19.99 },
-  { kw: 'gaiter',              price: 19.99 },
-  { kw: 'tote',                price: 19.99 },
-  { kw: 'peaked cap',          price: 19.99 },
-  { kw: 'playing cards',       price: 24.99 },
-  { kw: 'beach towel',         price: 24.99 },
-  { kw: 'swimsuit',            price: 24.99 },
-  { kw: 't-shirt',             price: 24.99 },
-  { kw: 'chest bag',           price: 24.99 },
-  // dress / bedding / quilt / flag → formula (cost-dependent)
-];
-
-function retailPrice(wholesale, productName) {
-  if (productName) {
-    const name = productName.toLowerCase();
-    for (const { kw, price } of PRICE_MAP) {
-      if (name.includes(kw)) return price;
-    }
-  }
-  if (!wholesale) return MIN_RETAIL;
+// Formula-only pricing — prices vary by size based on YOYCOL wholesale cost
+// wholesale + $9 shipping + $7 margin → nearest X.99, min $19.99
+function retailPrice(wholesale) {
+  if (!(wholesale > 0)) return MIN_RETAIL;
   const target = wholesale + SHIPPING_ESTIMATE + TARGET_MARGIN;
-  const price  = Math.round(target + 0.01) - 0.01;   // nearest X.99
-  return parseFloat(Math.max(MIN_RETAIL, price).toFixed(2));
+  return parseFloat(Math.max(MIN_RETAIL, Math.round(target + 0.01) - 0.01).toFixed(2));
 }
 
 // ── State ─────────────────────────────────────────────────
 let allProducts  = [];
 let currentProd  = null;   // normalised product object
-let currentVariants = [];  // normalised variant objects
+let currentVariants = [];  // all normalised variants
+let currentFiltered = []; // variants after size-filter (no parasitic clothing sizes)
 let selectedSize  = null;
 let selectedColor = null;
 let selectedVariant = null;
 let qty = 1;
-let cart = JSON.parse(localStorage.getItem('nava_merch_cart') || '[]');
+// Safe localStorage (throws in iOS Safari private mode)
+function lsGet(key, fallback) { try { return JSON.parse(localStorage.getItem(key) || 'null') ?? fallback; } catch { return fallback; } }
+function lsSet(key, val)      { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
+
+let cart = lsGet('nava_merch_cart', []);
 
 // ── Normalisation helpers ──────────────────────────────────
 // YOYCOL returns different field names depending on whether
@@ -647,11 +668,98 @@ function normalizeVariant(v) {
     variantId:    String(v.variantId || v.mappingVariantId || v.skuId || ''),
     size:         v.size       || v.sizeName   || v.sizeCode  || '',
     color:        v.color      || v.colorName  || v.colorCode || '',
-    salesPrice:   parseFloat(v.price || v.salesPrice || v.salePrice || v.retailPrice || 0),
+    salesPrice:   parseFloat(v.price > 0 ? v.price : (v.salesPrice || v.salePrice || v.costPrice || v.basePrice || v.retailPrice || 0)),
     mockupImage:  mockupImages[0] || '',   // compat
     mockupImages,                           // all directions (front, back, side…)
     available:    v.available !== false && v.status !== 'disable',
   };
+}
+
+// ── Product descriptions (YOYCOL API has no description field) ──
+const PRODUCT_DESCRIPTIONS = [
+  { kw:'bikini',        desc:'Striking all-over print bikini set crafted for poolside confidence. Chlorine-resistant fabric with brilliant, fade-proof NAVA PEACE artwork.' },
+  { kw:'swimsuit',      desc:'Premium all-over print swimsuit built for style and comfort. Quick-dry, chlorine-resistant fabric — your NAVA PEACE moment at the water.' },
+  { kw:'iphone',        desc:'Slim silicone case with full-wrap custom print. Shock-absorbing edges, precise cutouts for every port and button. Scratch-resistant matte finish.' },
+  { kw:'samsung',       desc:'Custom-printed phone case with military-grade drop protection. Precise cutouts, raised screen and camera lip, slim profile.' },
+  { kw:'phone case',    desc:'Custom-printed phone case with precise cutouts for all ports. Lightweight protection with vibrant NAVA PEACE artwork.' },
+  { kw:'airbag',        desc:'Airbag phone case with air-cushion corners for superior drop protection. Ultra-slim, transparent back showcases the NAVA PEACE design.' },
+  { kw:'t-shirt',       desc:'Unisex all-over print tee in soft, breathable fabric. True-to-size cut, colorfast after dozens of washes. Wear the mission.' },
+  { kw:'dress',         desc:'Flowing all-over print dress with NAVA PEACE artwork. Lightweight woven fabric, flattering silhouette perfect for any occasion.' },
+  { kw:'shorts',        desc:'Comfortable all-over print shorts with elastic drawstring waist. Breathable fabric — great for the beach, gym or just everyday life.' },
+  { kw:'mug',           desc:'Ceramic mug with vivid full-wrap NAVA PEACE print. 11 oz, dishwasher safe. Every sip supports the peace mission.' },
+  { kw:'tote',          desc:'Durable all-over print canvas tote. Reinforced shoulder straps, roomy interior — the everyday bag that carries a message.' },
+  { kw:'beach towel',   desc:'Oversized microfiber beach towel with full-bleed NAVA PEACE artwork. Ultra-absorbent, quick-dry and sand-resistant.' },
+  { kw:'peaked cap',    desc:'Structured peaked cap with custom NAVA PEACE print. Adjustable back strap for a comfortable fit in any weather.' },
+  { kw:'chest bag',     desc:'Compact all-over print chest bag. Water-resistant shell, multiple pockets, adjustable strap — essentials covered in style.' },
+  { kw:'gaiter',        desc:'Stretchy all-over print neck gaiter / face covering. One size fits all. Wear it as a neck warmer, bandana or headband.' },
+  { kw:'playing cards', desc:'Premium 54-card deck (52 + 2 jokers) with exclusive NAVA PEACE artwork. Casino-quality cardstock with smooth finish.' },
+  { kw:'flag',          desc:'Vibrant all-over print polyester flag. Brass grommets for easy mounting, UV-resistant ink. Indoors or outdoors, make the statement.' },
+  { kw:'quilt',         desc:'All-over print microfiber quilt with lightweight warming fill. Machine washable, available in multiple sizes. Art you sleep under.' },
+  { kw:'bedding',       desc:'All-over print bedding set with vivid NAVA PEACE artwork. Soft microfiber, machine washable — transform your bedroom.' },
+];
+
+const PRINT_METHODS = [
+  { kw:'all-over print',   label:'All-Over Print' },
+  { kw:'sublimation',      label:'Dye Sublimation' },
+  { kw:'embroidered',      label:'Embroidered' },
+  { kw:'dtg',              label:'DTG Print' },
+  { kw:'silicone',         label:'UV Print on Silicone' },
+];
+
+function getProductDescription(title) {
+  if (!title) return '';
+  const t = title.toLowerCase();
+  for (const { kw, desc } of PRODUCT_DESCRIPTIONS) {
+    if (t.includes(kw)) return desc;
+  }
+  return 'Exclusive custom-print merchandise featuring original NAVA PEACE artwork. Every purchase directly supports the Foundation\'s peace mission worldwide.';
+}
+
+function renderDetailInfo(prod, variants) {
+  const el = document.getElementById('detail-info');
+  if (!el) return;
+
+  const available = variants.filter(v => v.available);
+  const sizes  = [...new Set(available.map(v => v.size).filter(Boolean))];
+  const colors = [...new Set(available.map(v => v.color).filter(Boolean))];
+  const prices = available.map(v => v.salesPrice).filter(p => p > 0);
+
+  // Detect print method from title
+  const titleLow = (prod.title || '').toLowerCase();
+  let printLabel = 'Custom Print';
+  for (const { kw, label } of PRINT_METHODS) {
+    if (titleLow.includes(kw)) { printLabel = label; break; }
+  }
+
+  // Description paragraph
+  const desc = getProductDescription(prod.title);
+  let html = '';
+  if (desc) {
+    html += `<p class="detail-desc">${desc}</p>`;
+  }
+
+  // Specs table
+  const specs = [];
+  specs.push(['Print',    printLabel]);
+  if (sizes.length)  specs.push(['Sizes',   sizes.length <= 8 ? sizes.join(' · ') : `${sizes.length} sizes available`]);
+  if (colors.length) specs.push(['Colors',  colors.length <= 6 ? colors.join(' · ') : `${colors.length} colors`]);
+  if (prices.length) {
+    const lo = retailPrice(Math.min(...prices));
+    const hi = retailPrice(Math.max(...prices));
+    specs.push(['Price', lo === hi ? `$${lo.toFixed(2)}` : `$${lo.toFixed(2)} – $${hi.toFixed(2)}`]);
+  }
+  if (prod.spuCode)  specs.push(['Ref',     prod.spuCode]);
+
+  html += '<div class="detail-specs">';
+  html += specs.map(([k, v]) =>
+    `<div class="spec-row"><span class="spec-key">${k}</span><span class="spec-val">${v}</span></div>`
+  ).join('');
+  html += '</div>';
+
+  // Shipping note
+  html += `<div class="detail-shipping">🚚&nbsp; Ships in 3–7 business days &nbsp;·&nbsp; Fulfilled by Yoycol</div>`;
+
+  el.innerHTML = html;
 }
 
 // ── Toast ─────────────────────────────────────────────────
@@ -663,7 +771,7 @@ function toast(msg) {
 }
 
 // ── Cart helpers ──────────────────────────────────────────
-function saveCart() { localStorage.setItem('nava_merch_cart', JSON.stringify(cart)); }
+function saveCart() { lsSet('nava_merch_cart', cart); }
 
 function updateCartBadge() {
   const total = cart.reduce((s, i) => s + i.qty, 0);
@@ -686,7 +794,7 @@ async function loadProducts() {
 
     // 1. Try product templates
     try {
-      const res  = await fetch(`${PROXY_URL}?action=templates&size=100`);
+      const res  = await fetch(`${PROXY_URL}?action=templates&size=100`, { headers: AUTH_H });
       const data = await res.json();
       rawRecords = data?.data?.records || data?.data?.list || [];
     } catch(_) { rawRecords = []; }
@@ -695,7 +803,7 @@ async function loadProducts() {
     if (!rawRecords.length) {
       source = 'self_store';
       try {
-        const res  = await fetch(`${PROXY_URL}?action=products`);
+        const res  = await fetch(`${PROXY_URL}?action=products`, { headers: AUTH_H });
         const data = await res.json();
         rawRecords = data?.data?.records || [];
       } catch(_) { rawRecords = []; }
@@ -743,12 +851,12 @@ async function fetchBasePrice(prod) {
     let rawVariants = [];
     if (prod.source === 'template') {
       // Template: variants are in the product detail response
-      const res  = await fetch(`${PROXY_URL}?action=template&productId=${prod.id}`);
+      const res  = await fetch(`${PROXY_URL}?action=template&productId=${prod.id}`, { headers: AUTH_H });
       const data = await res.json();
       rawVariants = data?.data?.skuList || data?.data?.variants ||
                     data?.data?.records || data?.data?.skus || [];
     } else {
-      const res  = await fetch(`${PROXY_URL}?action=variants&mappingId=${prod.mappingId}`);
+      const res  = await fetch(`${PROXY_URL}?action=variants&mappingId=${prod.mappingId}`, { headers: AUTH_H });
       const data = await res.json();
       rawVariants = data?.data?.records || data?.data || [];
     }
@@ -758,7 +866,7 @@ async function fetchBasePrice(prod) {
     if (!prices.length) return;
 
     const minWholesale = Math.min(...prices);
-    const retail = retailPrice(minWholesale, prod.title);
+    const retail = retailPrice(minWholesale);
     const el = document.getElementById(`price-${prod.id}`);
     if (el) {
       el.innerHTML = `$${retail.toFixed(2)} <span class="product-stars">⭐ ${starsForPrice(retail)}</span>`;
@@ -807,6 +915,7 @@ async function openDetail(productId) {
   if (!prod) return;
 
   currentProd = prod;
+  currentFiltered = [];
   selectedSize    = null;
   selectedColor   = null;
   selectedVariant = null;
@@ -823,25 +932,38 @@ async function openDetail(productId) {
 
   document.getElementById('detail-overlay').classList.add('active');
 
+  // Clear info section while loading
+  document.getElementById('detail-info').innerHTML = '';
+
   // Fetch variants
   try {
     let rawVariants = [];
     if (prod.source === 'template') {
-      const res  = await fetch(`${PROXY_URL}?action=template&productId=${productId}`);
+      const res  = await fetch(`${PROXY_URL}?action=template&productId=${productId}`, { headers: AUTH_H });
       const data = await res.json();
-      // Template response: variants under skuList, variants, records, or skus
-      rawVariants = data?.data?.skuList || data?.data?.variants ||
-                    data?.data?.records || data?.data?.skus || [];
+      const raw  = data?.data || {};
+      // Enrich currentProd with template metadata
+      currentProd.spuCode    = raw?.product?.spuCode    || '';
+      currentProd.designCode = raw?.designCode          || '';
+      rawVariants = raw?.variants || raw?.skuList || raw?.records || raw?.skus || [];
     } else {
-      const res  = await fetch(`${PROXY_URL}?action=variants&mappingId=${prod.mappingId}`);
+      const res  = await fetch(`${PROXY_URL}?action=variants&mappingId=${prod.mappingId}`, { headers: AUTH_H });
       const data = await res.json();
       rawVariants = data?.data?.records || data?.data || [];
     }
     currentVariants = rawVariants.map(normalizeVariant);
     renderVariants(currentVariants);
+    renderDetailInfo(currentProd, currentVariants);
   } catch(e) {
     document.getElementById('detail-variants').innerHTML = '<p style="color:#ff6b6b;font-size:10px;text-align:center;">Failed to load variants</p>';
   }
+}
+
+// Filter clothing size codes out when product has dimension-based sizes
+function filterVariantSizes(sizes) {
+  const CLOTHING_RE = /^(2?XS|XS|S|M|N|L|XM|XL|2XL|3XL|4XL|5XL|6XL|7XL|8XL|XXL|XXXL|ONE\s*SIZE)$/i;
+  const hasDims = sizes.some(s => /\d+\s*x\s*\d+/i.test(s) || /^\d+\s*cm/i.test(s));
+  return hasDims ? sizes.filter(s => !CLOTHING_RE.test(s.trim())) : sizes;
 }
 
 function renderVariants(variants) {
@@ -854,23 +976,32 @@ function renderVariants(variants) {
     return;
   }
 
-  // Extract unique sizes and colors (from normalised fields)
-  const sizes  = [...new Set(available.map(v => v.size).filter(Boolean))];
-  const colors = [...new Set(available.map(v => v.color).filter(Boolean))];
+  // Extract unique sizes, removing clothing codes when dimension sizes are present
+  const rawSizes = [...new Set(available.map(v => v.size).filter(Boolean))];
+  const sizes    = filterVariantSizes(rawSizes);
+  // Only keep variants whose size passed the filter
+  currentFiltered = available.filter(v => !v.size || sizes.includes(v.size));
+  const colors    = [...new Set(currentFiltered.map(v => v.color).filter(Boolean))];
 
   let html = '';
 
   if (sizes.length > 1) {
+    selectedSize = sizes[0]; // pre-select first chip
     html += `<p class="variant-label">SIZE</p><div class="chips" id="size-chips">`;
-    html += sizes.map(s => `<div class="chip" onclick="selectSize('${s}')">${s}</div>`).join('');
+    html += sizes.map((s, i) =>
+      `<div class="chip${i === 0 ? ' selected' : ''}" data-type="size" data-val="${s.replace(/"/g,'&quot;')}">${s}</div>`
+    ).join('');
     html += '</div>';
   } else if (sizes.length === 1) {
     selectedSize = sizes[0];
   }
 
   if (colors.length > 1) {
+    selectedColor = colors[0]; // pre-select first chip
     html += `<p class="variant-label">COLOR</p><div class="chips" id="color-chips">`;
-    html += colors.map(c => `<div class="chip" onclick="selectColor('${c}')">${c}</div>`).join('');
+    html += colors.map((c, i) =>
+      `<div class="chip${i === 0 ? ' selected' : ''}" data-type="color" data-val="${c.replace(/"/g,'&quot;')}">${c}</div>`
+    ).join('');
     html += '</div>';
   } else if (colors.length === 1) {
     selectedColor = colors[0];
@@ -878,32 +1009,14 @@ function renderVariants(variants) {
 
   document.getElementById('detail-variants').innerHTML = html;
 
-  // Show first available variant's images right away
-  const firstImgs = available[0]?.mockupImages?.length
-    ? available[0].mockupImages
-    : (currentProd?.image ? [currentProd.image] : []);
-  renderGallery(firstImgs);
-
-  // If only one variant, select it automatically
-  if (available.length === 1) {
-    selectedVariant = available[0];
-    updateDetailPrice(selectedVariant.salesPrice);
-  } else {
-    // Show price range
-    const prices = available.map(v => v.salesPrice).filter(p => p > 0);
-    if (prices.length) {
-      const min = Math.min(...prices), max = Math.max(...prices);
-      const label = min === max ? `$${min.toFixed(2)}` : `$${min.toFixed(2)} – $${max.toFixed(2)}`;
-      document.getElementById('detail-usd').textContent = label;
-    }
-    resolveVariant();
-  }
+  // resolveVariant handles gallery + price for the auto-selected combo
+  resolveVariant();
 }
 
 function selectSize(size) {
   selectedSize = size;
   document.querySelectorAll('#size-chips .chip').forEach(c => {
-    c.classList.toggle('selected', c.textContent === size);
+    c.classList.toggle('selected', c.dataset.val === size);
   });
   resolveVariant();
 }
@@ -911,14 +1024,15 @@ function selectSize(size) {
 function selectColor(color) {
   selectedColor = color;
   document.querySelectorAll('#color-chips .chip').forEach(c => {
-    c.classList.toggle('selected', c.textContent === color);
+    c.classList.toggle('selected', c.dataset.val === color);
   });
   resolveVariant();
 }
 
 function resolveVariant() {
-  selectedVariant = currentVariants.find(v => {
-    if (!v.available) return false;
+  const available = currentFiltered.length ? currentFiltered : currentVariants.filter(v => v.available);
+
+  selectedVariant = available.find(v => {
     const sizeMatch  = !selectedSize  || v.size  === selectedSize;
     const colorMatch = !selectedColor || v.color === selectedColor;
     return sizeMatch && colorMatch;
@@ -926,11 +1040,34 @@ function resolveVariant() {
 
   if (selectedVariant) {
     updateDetailPrice(selectedVariant.salesPrice);
-    // Update gallery with all mockup images of selected variant
     const imgs = selectedVariant.mockupImages?.length
       ? selectedVariant.mockupImages
       : (currentProd.image ? [currentProd.image] : []);
     renderGallery(imgs);
+  } else {
+    // Partial match fallback: show images for any variant matching just the size
+    const sizeMatch = selectedSize
+      ? available.find(v => v.size === selectedSize)
+      : null;
+    const fallback = sizeMatch || available[0];
+    if (fallback) {
+      const imgs = fallback.mockupImages?.length
+        ? fallback.mockupImages
+        : (currentProd.image ? [currentProd.image] : []);
+      renderGallery(imgs);
+    }
+    // Show price range while combo is incomplete
+    const prices = available.map(v => v.salesPrice).filter(p => p > 0);
+    if (prices.length) {
+      const min = Math.min(...prices), max = Math.max(...prices);
+      const minR = retailPrice(min);
+      const maxR = retailPrice(max);
+      const label = minR === maxR
+        ? `$${minR.toFixed(2)}`
+        : `$${minR.toFixed(2)} – $${maxR.toFixed(2)}`;
+      document.getElementById('detail-usd').textContent = label;
+      document.getElementById('detail-stars-badge').textContent = '';
+    }
   }
 }
 
@@ -940,7 +1077,7 @@ function updateDetailPrice(wholesale) {
     document.getElementById('detail-stars-badge').textContent = '';
     return;
   }
-  const retail = retailPrice(wholesale, currentProd?.title);
+  const retail = retailPrice(wholesale);
   const totalRetail = parseFloat((retail * qty).toFixed(2));
   const stars = starsForPrice(totalRetail);
   document.getElementById('detail-usd').textContent = `$${totalRetail.toFixed(2)}`;
@@ -965,7 +1102,7 @@ function addToCart() {
 
   if (!wholesale) { toast('⚠ Select a variant first'); return; }
 
-  const retail = retailPrice(wholesale, currentProd?.title);
+  const retail = retailPrice(wholesale);
 
   const item = {
     mappingId:  currentProd.id,
@@ -1084,7 +1221,7 @@ async function placeOrder() {
     // 1. Create Stars invoice
     const invRes = await fetch(`${PROXY_URL}?action=create_merch_invoice`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...AUTH_H },
       body: JSON.stringify({
         title:       'NAVA PEACE MERCH',
         description: `${cart.length} item(s) — shipped by Yoycol`,
@@ -1136,7 +1273,7 @@ async function createYoycolOrder(addr) {
   try {
     const res = await fetch(`${PROXY_URL}?action=create_order`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...AUTH_H },
       body: JSON.stringify({
         storeOrderSn: orderSn,
         address: {
@@ -1180,11 +1317,27 @@ function closeAll() {
   });
 }
 
+// ── Event delegation for variant chips (reliable on mobile) ──────────────────
+document.addEventListener('click', e => {
+  const chip = e.target.closest('[data-type="size"],[data-type="color"]');
+  if (!chip) return;
+  const val = chip.dataset.val;
+  if (chip.dataset.type === 'size')  selectSize(val);
+  if (chip.dataset.type === 'color') selectColor(val);
+});
+
 // ── Init ──────────────────────────────────────────────────
 window.addEventListener('load', () => {
   if (typeof Telegram !== 'undefined') Telegram.WebApp.ready();
   updateCartBadge();
   loadProducts();
+
+  // Close overlay when tapping the dark backdrop (outside the card)
+  document.querySelectorAll('.overlay').forEach(el => {
+    el.addEventListener('click', e => {
+      if (e.target === el) el.classList.remove('active');
+    });
+  });
 });
 </script>
 </body>
