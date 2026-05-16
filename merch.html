@@ -1536,6 +1536,10 @@ window.addEventListener('load', () => {
   }).catch(() => {});
 
   // Close overlay when tapping the dark backdrop (outside the card)
+  // stopPropagation on the card prevents ghost-clicks from bubbling to the backdrop
+  document.querySelectorAll('.overlay-card').forEach(card => {
+    card.addEventListener('click', e => e.stopPropagation());
+  });
   document.querySelectorAll('.overlay').forEach(el => {
     el.addEventListener('click', e => {
       if (e.target === el) el.classList.remove('active');
