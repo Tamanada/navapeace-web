@@ -121,6 +121,38 @@ async function yoyFetch(
   return res.json();
 }
 
+// ── Alert admin via Telegram ─────────────────────────────────
+async function alertAdmin(botToken: string, message: string): Promise<void> {
+  if (!botToken) return;
+  await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: '788992758',
+      text: `🚨 <b>NAVA MERCH ALERT</b>\n\n${message}`,
+      parse_mode: 'HTML',
+    }),
+  }).catch(() => {}); // never throw on notification failure
+}
+
+// ── Verify Stripe webhook signature (HMAC-SHA256) ────────────
+async function verifyStripeWebhook(sigHeader: string, rawBody: string, secret: string): Promise<boolean> {
+  const ts = sigHeader.match(/t=(\d+)/)?.[1] ?? '';
+  const v1 = sigHeader.match(/v1=([a-f0-9]+)/)?.[1] ?? '';
+  if (!ts || !v1) return false;
+  const key = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  );
+  const buf      = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(`${ts}.${rawBody}`));
+  const computed = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  // Constant-time comparison to prevent timing attacks
+  if (computed.length !== v1.length) return false;
+  let diff = 0;
+  for (let i = 0; i < computed.length; i++) diff |= computed.charCodeAt(i) ^ v1.charCodeAt(i);
+  return diff === 0;
+}
+
 // ── Router ───────────────────────────────────────────────────
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
@@ -163,14 +195,53 @@ Deno.serve(async (req) => {
       return json(data);
     }
 
-    // ── POST create order ───────────────────────────────────
+    // ── POST create order (Telegram Stars flow) ────────────
     if (action === 'create_order' && req.method === 'POST') {
       const body = await req.json();
-      // Validate minimum required fields
       if (!body.storeOrderSn || !body.address || !body.items?.length) {
         return json({ error: 'storeOrderSn, address and items required' }, 400);
       }
-      const data = await yoyFetch('POST', '/api/2025/open/v4/orders', {}, body);
+
+      // Save Stars order to DB before calling YOYCOL (audit trail + retry support)
+      const orderId  = crypto.randomUUID();
+      const sbH      = { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, 'Content-Type': 'application/json' };
+      if (SUPA_URL && SERVICE_KEY) {
+        await fetch(`${SUPA_URL}/rest/v1/merch_orders`, {
+          method: 'POST',
+          headers: sbH,
+          body: JSON.stringify({
+            id:              orderId,
+            yoycol_order_sn: body.storeOrderSn,
+            status:          'pending_stars',
+            items:           body.items,
+            customer_email:  body.address?.email || null,
+            total_usd:       parseFloat((body.items as Array<{salesPrice?:number;quantity?:number}>)
+              .reduce((s, i) => s + (i.salesPrice || 0) * (i.quantity || 1), 0).toFixed(2)),
+          }),
+        }).catch(() => {});
+      }
+
+      const data      = await yoyFetch('POST', '/api/2025/open/v4/orders', {}, body);
+      const fulfilled = data?.code === '100000' || !!data?.data;
+
+      // Update DB status
+      if (SUPA_URL && SERVICE_KEY) {
+        await fetch(`${SUPA_URL}/rest/v1/merch_orders?id=eq.${orderId}`, {
+          method: 'PATCH', headers: sbH,
+          body: JSON.stringify(fulfilled
+            ? { status: 'fulfilled' }
+            : { status: 'failed', error_detail: JSON.stringify(data).slice(0, 500) }),
+        }).catch(() => {});
+      }
+
+      // Alert admin immediately on failure — client has already paid Stars
+      if (!fulfilled) {
+        const BOT = Deno.env.get('TELEGRAM_BOT_TOKEN') ?? '';
+        await alertAdmin(BOT,
+          `⭐ Stars order FAILED!\n\nOrder: <code>${body.storeOrderSn}</code>\nCustomer: ${body.address?.email || 'unknown'}\nItems: ${body.items.length}\n\nYOYCOL: <code>${JSON.stringify(data).slice(0, 200)}</code>`
+        );
+      }
+
       return json(data);
     }
 
@@ -446,8 +517,7 @@ Deno.serve(async (req) => {
       // 3. Fetch our pending order from DB
       const orderId  = (session.metadata as Record<string,string>)?.order_id;
       const orderSn  = (session.metadata as Record<string,string>)?.order_sn
-                    || existing?.yoycol_order_sn as string
-                    || `NP_WEB_${Date.now()}`;
+                    || existing?.yoycol_order_sn as string;
 
       let order = existing;
       if (!order && orderId) {
@@ -457,7 +527,24 @@ Deno.serve(async (req) => {
         );
         order = (await oRes.json() as Record<string, unknown>[])?.[0];
       }
-      if (!order) return json({ error: 'Order record not found' }, 404);
+      // No order in DB → alert admin rather than creating orphan orderSn
+      if (!order || !orderSn) {
+        const BOT = Deno.env.get('TELEGRAM_BOT_TOKEN') ?? '';
+        await alertAdmin(BOT, `⚠️ confirm_order: no DB record!\n\nSession: <code>${sessionId}</code>\nAmount: $${((session.amount_total as number || 0) / 100).toFixed(2)}`);
+        return json({ error: 'Order record not found' }, 404);
+      }
+
+      // 3b. Atomic lock — prevents race condition on rapid page refresh
+      const patchKey   = orderId ? `id=eq.${orderId}` : `stripe_session_id=eq.${encodeURIComponent(sessionId)}`;
+      const lockRes    = await fetch(`${SUPA_URL}/rest/v1/merch_orders?${patchKey}&status=eq.pending`, {
+        method: 'PATCH', headers: { ...sbHeaders, Prefer: 'return=representation' },
+        body: JSON.stringify({ status: 'processing' }),
+      });
+      const locked = await lockRes.json() as Record<string, unknown>[];
+      if (!locked?.length) {
+        // Another request already took the lock — return current state
+        return json({ success: true, already: true, order_sn: orderSn });
+      }
 
       // 4. Build YOYCOL address from Stripe shipping_details
       const shipping = (session.shipping_details || session.shipping || {}) as Record<string, unknown>;
@@ -478,12 +565,11 @@ Deno.serve(async (req) => {
       };
 
       // 5. Mark as paid in DB
-      await fetch(
-        `${SUPA_URL}/rest/v1/merch_orders?${orderId ? `id=eq.${orderId}` : `stripe_session_id=eq.${sessionId}`}`,
-        { method: 'PATCH', headers: sbHeaders,
-          body: JSON.stringify({ status: 'paid', shipping: yoyAddress,
-            customer_email: yoyAddress.email || order.customer_email }) }
-      );
+      await fetch(`${SUPA_URL}/rest/v1/merch_orders?${patchKey}`, {
+        method: 'PATCH', headers: sbHeaders,
+        body: JSON.stringify({ status: 'paid', shipping: yoyAddress,
+          customer_email: yoyAddress.email || order.customer_email }),
+      });
 
       // 6. Create YOYCOL order
       const items = order.items as Array<Record<string, unknown>>;
@@ -504,19 +590,19 @@ Deno.serve(async (req) => {
 
       // 7. Update DB with result
       const fulfilled = yoyData?.code === '100000' || !!yoyData?.data;
-      const patchKey  = orderId ? `id=eq.${orderId}` : `stripe_session_id=eq.${sessionId}`;
-      await fetch(
-        `${SUPA_URL}/rest/v1/merch_orders?${patchKey}`,
-        { method: 'PATCH', headers: sbHeaders,
-          body: JSON.stringify(fulfilled
-            ? { status: 'fulfilled', yoycol_order_sn: orderSn }
-            : { status: 'failed',   error_detail: JSON.stringify(yoyData).slice(0, 500) })
-        }
-      );
+      await fetch(`${SUPA_URL}/rest/v1/merch_orders?${patchKey}`, {
+        method: 'PATCH', headers: sbHeaders,
+        body: JSON.stringify(fulfilled
+          ? { status: 'fulfilled', yoycol_order_sn: orderSn }
+          : { status: 'failed',   error_detail: JSON.stringify(yoyData).slice(0, 500) }),
+      });
 
       if (!fulfilled) {
-        console.error('confirm_order: YOYCOL error', JSON.stringify(yoyData).slice(0, 300));
-        // Payment succeeded — don't return error to user, still show success
+        // Alert admin immediately — payment succeeded but YOYCOL failed
+        const BOT = Deno.env.get('TELEGRAM_BOT_TOKEN') ?? '';
+        await alertAdmin(BOT,
+          `🚨 YOYCOL failed after Stripe payment!\n\nOrder: <code>${orderSn}</code>\nSession: <code>${sessionId}</code>\nCustomer: ${yoyAddress.email}\nAmount: $${((session.amount_total as number || 0) / 100).toFixed(2)}\n\nYOYCOL: <code>${JSON.stringify(yoyData).slice(0, 200)}</code>`
+        );
         return json({ success: true, order_sn: orderSn, yoycol_warning: true });
       }
 
@@ -554,6 +640,116 @@ Deno.serve(async (req) => {
     if (action === 'balance' && req.method === 'GET') {
       const data = await yoyFetch('GET', '/api/2025/open/v4/account/balance');
       return json(data);
+    }
+
+    // ── POST Stripe webhook (server-side fulfillment) ─────
+    // Register in Stripe Dashboard: POST /functions/v1/yoycol-proxy?action=stripe_webhook
+    // Event: checkout.session.completed
+    if (action === 'stripe_webhook' && req.method === 'POST') {
+      const WEBHOOK_SECRET = Deno.env.get('STRIPE_WEBHOOK_SECRET') ?? '';
+      if (!WEBHOOK_SECRET) return json({ error: 'STRIPE_WEBHOOK_SECRET not configured' }, 500);
+      if (!STRIPE_KEY)     return json({ error: 'STRIPE_SECRET_KEY not configured' }, 500);
+      if (!SUPA_URL || !SERVICE_KEY) return json({ error: 'Supabase not configured' }, 500);
+
+      const rawBody   = await req.text();
+      const sigHeader = req.headers.get('stripe-signature') ?? '';
+      const valid     = await verifyStripeWebhook(sigHeader, rawBody, WEBHOOK_SECRET);
+      if (!valid) return json({ error: 'Invalid signature' }, 400);
+
+      const event = JSON.parse(rawBody) as Record<string, unknown>;
+
+      // Acknowledge all events — only process checkout.session.completed
+      if (event.type !== 'checkout.session.completed') {
+        return json({ received: true });
+      }
+
+      const session   = (event.data as Record<string, unknown>)?.object as Record<string, unknown>;
+      const sessionId = session?.id as string;
+      const sbH2      = { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, 'Content-Type': 'application/json' };
+      const BOT       = Deno.env.get('TELEGRAM_BOT_TOKEN') ?? '';
+
+      // Idempotency: already fulfilled?
+      const existRes  = await fetch(
+        `${SUPA_URL}/rest/v1/merch_orders?stripe_session_id=eq.${encodeURIComponent(sessionId)}`,
+        { headers: sbH2 }
+      );
+      const existing  = (await existRes.json() as Record<string, unknown>[])?.[0];
+      if (existing?.status === 'fulfilled') return json({ received: true, already: true });
+
+      if (session.payment_status !== 'paid') return json({ received: true, skipped: 'not paid' });
+
+      // Find order in DB
+      const orderId  = (session.metadata as Record<string, string>)?.order_id;
+      const orderSn  = (session.metadata as Record<string, string>)?.order_sn
+                    || existing?.yoycol_order_sn as string;
+
+      let wOrder = existing;
+      if (!wOrder && orderId) {
+        const oRes = await fetch(`${SUPA_URL}/rest/v1/merch_orders?id=eq.${orderId}`, { headers: sbH2 });
+        wOrder = (await oRes.json() as Record<string, unknown>[])?.[0];
+      }
+      if (!wOrder || !orderSn) {
+        await alertAdmin(BOT, `⚠️ Webhook: order not in DB!\n\nSession: <code>${sessionId}</code>\nAmount: $${((session.amount_total as number || 0) / 100).toFixed(2)}`);
+        return json({ received: true, warning: 'order not found' });
+      }
+
+      // Atomic lock — prevent race with client-side confirm_order
+      const wPatchKey = orderId ? `id=eq.${orderId}` : `stripe_session_id=eq.${encodeURIComponent(sessionId)}`;
+      const lockRes   = await fetch(`${SUPA_URL}/rest/v1/merch_orders?${wPatchKey}&status=eq.pending`, {
+        method: 'PATCH', headers: { ...sbH2, Prefer: 'return=representation' },
+        body: JSON.stringify({ status: 'processing' }),
+      });
+      const locked = await lockRes.json() as Record<string, unknown>[];
+      if (!locked?.length) return json({ received: true, skipped: 'already processing' });
+
+      // Build YOYCOL address
+      const wShip    = (session.shipping_details || session.shipping || {}) as Record<string, unknown>;
+      const wCust    = (session.customer_details || {}) as Record<string, unknown>;
+      const wAddr    = (wShip.address || {}) as Record<string, unknown>;
+      const wName    = ((wShip.name || wCust.name || 'Customer') as string).trim();
+      const wSpace   = wName.indexOf(' ');
+      const yoyAddr2 = {
+        firstName:   wSpace > -1 ? wName.slice(0, wSpace) : wName,
+        lastName:    wSpace > -1 ? wName.slice(wSpace + 1) : '-',
+        email:       (wCust.email as string)       || '',
+        phone:       (wCust.phone as string)       || '',
+        countryCode: (wAddr.country as string)     || 'US',
+        stateCode:   (wAddr.state as string)       || '',
+        city:        (wAddr.city as string)        || '',
+        address:     [(wAddr.line1 as string) || '', (wAddr.line2 as string) || ''].filter(Boolean).join(', '),
+        zip:         (wAddr.postal_code as string) || '',
+      };
+
+      await fetch(`${SUPA_URL}/rest/v1/merch_orders?${wPatchKey}`, {
+        method: 'PATCH', headers: sbH2,
+        body: JSON.stringify({ status: 'paid', shipping: yoyAddr2, customer_email: yoyAddr2.email || wOrder.customer_email }),
+      });
+
+      // Create YOYCOL order
+      const wItems    = (wOrder.items as Array<Record<string, unknown>>).map((item, i) => ({
+        thirdItemId: `item_${i}`, skuCode: item.skuCode, quantity: item.qty,
+        salesPrice: item.wholesale || item.retail_price,
+        realPrice:  item.wholesale || item.retail_price,
+      }));
+      const wYoyData  = await yoyFetch('POST', '/api/2025/open/v4/orders', {}, {
+        storeOrderSn: orderSn, address: yoyAddr2, items: wItems, currency: 'USD',
+      });
+      const wFulfilled = wYoyData?.code === '100000' || !!wYoyData?.data;
+
+      await fetch(`${SUPA_URL}/rest/v1/merch_orders?${wPatchKey}`, {
+        method: 'PATCH', headers: sbH2,
+        body: JSON.stringify(wFulfilled
+          ? { status: 'fulfilled', yoycol_order_sn: orderSn }
+          : { status: 'failed', error_detail: JSON.stringify(wYoyData).slice(0, 500) }),
+      });
+
+      if (!wFulfilled) {
+        await alertAdmin(BOT,
+          `🚨 Webhook: YOYCOL failed after Stripe!\n\nOrder: <code>${orderSn}</code>\nSession: <code>${sessionId}</code>\nCustomer: ${yoyAddr2.email}\nAmount: $${((session.amount_total as number || 0) / 100).toFixed(2)}\n\nYOYCOL: <code>${JSON.stringify(wYoyData).slice(0, 200)}</code>`
+        );
+      }
+
+      return json({ received: true, fulfilled: wFulfilled });
     }
 
     return json({ error: 'unknown action' }, 400);
