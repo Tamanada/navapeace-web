@@ -510,6 +510,23 @@ Deno.serve(async (req) => {
       return json({ success: true, order_sn: orderSn });
     }
 
+    // ── GET orders list (admin dashboard) ─────────────────
+    if (action === 'orders' && req.method === 'GET') {
+      const page   = url.searchParams.get('page')   ?? '1';
+      const size   = url.searchParams.get('size')   ?? '20';
+      const status = url.searchParams.get('status') ?? '';
+      const params: Record<string, string> = { page, size };
+      if (status) params.status = status;
+      const data = await yoyFetch('GET', '/api/2025/open/v4/orders', params);
+      return json(data);
+    }
+
+    // ── GET account balance (admin dashboard) ─────────────
+    if (action === 'balance' && req.method === 'GET') {
+      const data = await yoyFetch('GET', '/api/2025/open/v4/account/balance');
+      return json(data);
+    }
+
     return json({ error: 'unknown action' }, 400);
 
   } catch (e) {
