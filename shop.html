@@ -168,6 +168,7 @@
     .product-price-row{display:flex;align-items:center;justify-content:space-between;}
     .product-price{font-size:14px;font-weight:700;color:#fff;letter-spacing:1px;text-shadow:0 1px 3px rgba(0,50,110,0.3);}
     .product-price.loading{color:rgba(255,255,255,0.6);font-size:11px;}
+    .product-ship{font-size:10px;color:rgba(255,255,255,0.72);letter-spacing:0.5px;margin-top:4px;}
 
     /* ── SPINNER ─────────────────────────────────────────── */
     .spinner{display:flex;justify-content:center;padding:80px 0;}
@@ -386,7 +387,7 @@
 <section class="hero">
   <div class="hero-eyebrow">OFFICIAL MERCHANDISE &nbsp;·&nbsp; <span style="color:var(--gold);font-size:9px;">v16</span></div>
   <h1 class="hero-title">WEAR THE<br>MISSION</h1>
-  <p class="hero-sub">Every item is printed on demand and ships worldwide.</p>
+  <p class="hero-sub">Every item is printed on demand and ships worldwide. <br><strong>Shipping is included in the price.</strong></p>
 </section>
 
 <!-- ── SUCCESS BANNER (shown after Stripe redirect) ───────── -->
@@ -836,6 +837,7 @@ function renderGrid(products) {
         <div class="product-price-row">
           <span class="product-price${cached ? '' : ' loading'}" id="price-${esc(p.id)}">${cached || '···'}</span>
         </div>
+        <div class="product-ship">✓ Shipping included</div>
       </div>
     </div>`;
   }).join('');
@@ -1051,7 +1053,7 @@ function renderDetailInfo(prod, variants) {
   html += '<div class="detail-specs">' + specs.map(([k, v]) =>
     `<div class="spec-row"><span class="spec-key">${k}</span><span class="spec-val">${v}</span></div>`
   ).join('') + '</div>';
-  html += `<div class="detail-shipping">🚚&nbsp; Ships in 3–7 business days &nbsp;·&nbsp; Fulfilled by Yoycol</div>`;
+  html += `<div class="detail-shipping">✅&nbsp; <b>Shipping included in price</b> &nbsp;·&nbsp; 🚚 Ships in 3–7 business days &nbsp;·&nbsp; Fulfilled by Yoycol</div>`;
   el.innerHTML = html;
 }
 
