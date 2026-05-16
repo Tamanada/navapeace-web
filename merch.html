@@ -644,7 +644,16 @@ let qty = 1;
 function lsGet(key, fallback) { try { return JSON.parse(localStorage.getItem(key) || 'null') ?? fallback; } catch { return fallback; } }
 function lsSet(key, val)      { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
 
-let cart = lsGet('nava_merch_cart', []);
+let cart          = lsGet('nava_merch_cart', []);
+let priceOverrides = {}; // productId → admin-set retail price
+
+async function loadPriceOverrides() {
+  try {
+    const res  = await fetch(`${PROXY_URL}?action=get_price_overrides`, { headers: AUTH_H });
+    const data = await res.json();
+    if (data && typeof data === 'object' && !data.error) priceOverrides = data;
+  } catch(_) {}
+}
 
 // ── Normalisation helpers ──────────────────────────────────
 // YOYCOL returns different field names depending on whether
@@ -847,6 +856,13 @@ function renderGrid(products) {
 }
 
 async function fetchBasePrice(prod) {
+  // Admin-set price override → skip variant fetch
+  if (priceOverrides[prod.id] !== undefined) {
+    const retail = parseFloat(priceOverrides[prod.id]);
+    const el = document.getElementById(`price-${prod.id}`);
+    if (el) el.innerHTML = `$${retail.toFixed(2)} <span class="product-stars">⭐ ${starsForPrice(retail)}</span>`;
+    return;
+  }
   try {
     let rawVariants = [];
     if (prod.source === 'template') {
@@ -1077,7 +1093,9 @@ function updateDetailPrice(wholesale) {
     document.getElementById('detail-stars-badge').textContent = '';
     return;
   }
-  const retail = retailPrice(wholesale);
+  const retail = (currentProd && priceOverrides[currentProd.id] !== undefined)
+    ? parseFloat(priceOverrides[currentProd.id])
+    : retailPrice(wholesale);
   const totalRetail = parseFloat((retail * qty).toFixed(2));
   const stars = starsForPrice(totalRetail);
   document.getElementById('detail-usd').textContent = `$${totalRetail.toFixed(2)}`;
@@ -1102,7 +1120,9 @@ function addToCart() {
 
   if (!wholesale) { toast('⚠ Select a variant first'); return; }
 
-  const retail = retailPrice(wholesale);
+  const retail = (priceOverrides[currentProd.id] !== undefined)
+    ? parseFloat(priceOverrides[currentProd.id])
+    : retailPrice(wholesale);
 
   const item = {
     mappingId:  currentProd.id,
@@ -1330,7 +1350,7 @@ document.addEventListener('click', e => {
 window.addEventListener('load', () => {
   if (typeof Telegram !== 'undefined') Telegram.WebApp.ready();
   updateCartBadge();
-  loadProducts();
+  loadPriceOverrides().then(() => loadProducts());
 
   // Close overlay when tapping the dark backdrop (outside the card)
   document.querySelectorAll('.overlay').forEach(el => {

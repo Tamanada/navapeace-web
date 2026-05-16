@@ -510,6 +510,22 @@ Deno.serve(async (req) => {
       return json({ success: true, order_sn: orderSn });
     }
 
+    // ── GET price overrides (public — admin_settings may have RLS) ─
+    if (action === 'get_price_overrides' && req.method === 'GET') {
+      if (!SUPA_URL || !SERVICE_KEY) return json({});
+      const settRes = await fetch(
+        `${SUPA_URL}/rest/v1/admin_settings?key=eq.yoycol_price_overrides&select=value`,
+        { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } }
+      );
+      const rows = await settRes.json() as Array<Record<string, unknown>>;
+      const val  = rows?.[0]?.value;
+      if (!val) return json({});
+      try {
+        const overrides = typeof val === 'object' ? val : JSON.parse(val as string);
+        return json(overrides);
+      } catch { return json({}); }
+    }
+
     // ── GET orders list (admin dashboard) ─────────────────
     if (action === 'orders' && req.method === 'GET') {
       const page   = url.searchParams.get('page')   ?? '1';

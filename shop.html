@@ -551,15 +551,9 @@ let priceOverrides = {}; // productId → admin-set retail price (from admin_set
 
 async function loadPriceOverrides() {
   try {
-    const res  = await fetch(
-      `${SUPABASE_URL}/rest/v1/admin_settings?key=eq.yoycol_price_overrides&select=value`,
-      { headers: AUTH_HEADERS }
-    );
-    const rows = await res.json();
-    if (Array.isArray(rows) && rows[0]?.value) {
-      const val = rows[0].value;
-      priceOverrides = typeof val === 'object' ? val : JSON.parse(val);
-    }
+    const res  = await fetch(`${PROXY_URL}?action=get_price_overrides`, { headers: AUTH_HEADERS });
+    const data = await res.json();
+    if (data && typeof data === 'object' && !data.error) priceOverrides = data;
   } catch(_) {}
 }
 
