@@ -3060,40 +3060,77 @@ function yoyChangePage(delta) {
   _loadYoyOrders();
 }
 
-// ── Wholesale cost cache ──────────────────────────────────
-const _yoyCost = {};           // productId → minWholesale + $9 shipping
-const YOY_SHIP = 9;            // same as shop.html SHIPPING_ESTIMATE
-const YOY_AUTO_MARGIN = 7;     // same as shop.html TARGET_MARGIN
+// ── Wholesale + shipping cost cache ──────────────────────
+const _yoyCost     = {};   // productId → wholesale + actual shipping
+const _yoyBreakdown= {};   // productId → { prod, ship } for tooltip
+const YOY_SHIP_FB  = 9;    // fallback estimate if API fails
+const YOY_AUTO_MARGIN = 7; // same as shop.html TARGET_MARGIN
 
 function _yoyUpdateMargin(productId, inputEl) {
   const badge = document.getElementById(`yoy-margin-${productId}`);
   if (!badge) return;
   const cost = _yoyCost[productId];
-  if (cost === undefined) { badge.textContent = 'coût ···'; badge.style.color = ''; return; }
-  const costFmt = `$${cost.toFixed(2)}`;
+  const bd   = _yoyBreakdown[productId];
+  if (cost === undefined) { badge.textContent = 'coût ···'; badge.style.color = ''; badge.title = ''; return; }
+
   const raw = parseFloat(inputEl.value);
+  const costFmt = `$${cost.toFixed(2)}`;
+
+  // Build tooltip: prod $X + ship $Y = $Z
+  const tooltip = bd
+    ? `Prod: $${bd.prod.toFixed(2)} + Ship (US): $${bd.ship.toFixed(2)} = $${cost.toFixed(2)}`
+    : `Total coût: $${cost.toFixed(2)}`;
+  badge.title = tooltip;
+
   if (!raw || isNaN(raw) || raw <= 0) {
-    // No override → show auto formula margin
-    badge.textContent = `coût ~${costFmt} · auto +$${YOY_AUTO_MARGIN.toFixed(2)}`;
+    badge.textContent = `coût ~${costFmt} · auto`;
     badge.style.color = 'rgba(255,255,255,0.35)';
     return;
   }
   const margin = raw - cost;
   const sign   = margin >= 0 ? '+' : '';
-  badge.textContent  = `coût ~${costFmt} · marge ${sign}$${margin.toFixed(2)}`;
-  badge.style.color  = margin >= 0 ? '#4ade80' : '#ff5b5b';
+  badge.textContent = `coût ~${costFmt} · marge ${sign}$${margin.toFixed(2)}`;
+  badge.style.color = margin >= 5 ? '#4ade80' : margin >= 0 ? '#f9c74f' : '#ff5b5b';
 }
 
 async function _yoyFetchWholesale(productId) {
   if (_yoyCost[productId] !== undefined) return;
   try {
+    // 1. Fetch template variants
     const res  = await fetch(`${YOY_PROXY}?action=template&productId=${encodeURIComponent(productId)}`, { headers: YOY_AUTH });
     const data = await res.json();
     const rawV = data?.data?.skuList || data?.data?.variants || data?.data?.records || data?.data?.skus || [];
-    const prices = rawV.map(v => parseFloat(v.price || v.salesPrice || v.costPrice || v.basePrice || 0)).filter(p => p > 0);
-    if (!prices.length) return;
-    _yoyCost[productId] = Math.min(...prices) + YOY_SHIP;
-    // Update badge with real cost data
+    const variants = rawV.map(v => ({
+      price:   parseFloat(v.price || v.salesPrice || v.costPrice || v.basePrice || 0),
+      skuCode: v.skuCode || v.sku_code || v.code || '',
+    })).filter(v => v.price > 0).sort((a, b) => a.price - b.price);
+    if (!variants.length) return;
+
+    const minProd   = variants[0].price;
+    const cheapSku  = variants[0].skuCode;
+
+    // 2. Fetch real shipping quote for cheapest SKU → US
+    let ship = YOY_SHIP_FB;
+    if (cheapSku) {
+      try {
+        const sRes  = await fetch(
+          `${YOY_PROXY}?action=shipping&skuCode=${encodeURIComponent(cheapSku)}&country=US&quantity=1`,
+          { headers: YOY_AUTH }
+        );
+        const sData = await sRes.json();
+        const methods = sData?.data?.list ?? sData?.data ?? [];
+        if (Array.isArray(methods) && methods.length) {
+          const prices = methods
+            .map(m => parseFloat(m.freightAmount ?? m.shippingPrice ?? m.price ?? m.freight ?? 0))
+            .filter(p => p > 0);
+          if (prices.length) ship = Math.min(...prices);
+        }
+      } catch(_) { /* keep fallback */ }
+    }
+
+    _yoyCost[productId]      = minProd + ship;
+    _yoyBreakdown[productId] = { prod: minProd, ship };
+
     const input = document.getElementById(`yoy-input-${productId}`);
     if (input) _yoyUpdateMargin(productId, input);
   } catch(_) {}
