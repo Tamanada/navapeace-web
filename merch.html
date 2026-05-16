@@ -132,6 +132,27 @@
     .product-stars{font-size:10px;color:var(--gold);letter-spacing:0.5px;text-shadow:0 1px 2px rgba(0,0,0,0.2);}
     .product-ship{font-size:9px;color:rgba(255,255,255,0.7);letter-spacing:0.5px;margin-top:3px;}
 
+    /* ── SORT BAR ───────────────────────────────────── */
+    .sort-bar{
+      display:flex;align-items:center;gap:6px;
+      padding:4px 16px 8px;
+    }
+    .sort-label{font-size:8px;letter-spacing:2px;color:rgba(255,255,255,0.45);flex-shrink:0;}
+    .sort-pill{
+      padding:4px 11px;border-radius:50px;
+      border:1px solid rgba(255,255,255,0.3);
+      background:transparent;
+      color:rgba(255,255,255,0.55);
+      font-family:var(--font);font-size:8px;letter-spacing:1px;
+      cursor:pointer;transition:all 0.15s;white-space:nowrap;
+      -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+    }
+    .sort-pill.active{
+      background:rgba(255,255,255,0.18);
+      border-color:rgba(255,255,255,0.65);
+      color:#fff;
+    }
+
     /* ── TAB BAR ────────────────────────────────────── */
     .tab-bar{
       display:flex;
@@ -465,6 +486,16 @@
 
 <!-- Tab bar -->
 <div class="tab-bar" id="tab-bar" style="display:none;"></div>
+
+<!-- Sort bar -->
+<div class="sort-bar" id="sort-bar" style="display:none;">
+  <span class="sort-label">SORT</span>
+  <button class="sort-pill active" data-sort="default" onclick="selectSort('default')">DEFAULT</button>
+  <button class="sort-pill" data-sort="alpha-asc"  onclick="selectSort('alpha-asc')">A→Z</button>
+  <button class="sort-pill" data-sort="alpha-desc" onclick="selectSort('alpha-desc')">Z→A</button>
+  <button class="sort-pill" data-sort="price-asc"  onclick="selectSort('price-asc')">PRICE ↑</button>
+  <button class="sort-pill" data-sort="price-desc" onclick="selectSort('price-desc')">PRICE ↓</button>
+</div>
 
 <!-- Products -->
 <div id="products-loading" class="spinner"><div class="spin"></div></div>
@@ -890,8 +921,29 @@ function esc(s) {
 let cart          = lsGet('nava_merch_cart', []);
 let priceOverrides = {}; // productId → admin-set retail price
 
+// ── Sort ──────────────────────────────────────────────────
+let activeSort   = 'default';
+const productPrices = {}; // id → retail price (populated by fetchBasePrice)
+
+function selectSort(sort) {
+  activeSort = sort;
+  document.querySelectorAll('.sort-pill').forEach(p =>
+    p.classList.toggle('active', p.dataset.sort === sort)
+  );
+  filterByTab();
+}
+
+function sortedProducts(list) {
+  const arr = [...list];
+  if (activeSort === 'alpha-asc')  return arr.sort((a,b) => (a.title||'').localeCompare(b.title||''));
+  if (activeSort === 'alpha-desc') return arr.sort((a,b) => (b.title||'').localeCompare(a.title||''));
+  if (activeSort === 'price-asc')  return arr.sort((a,b) => (productPrices[a.id]||9999) - (productPrices[b.id]||9999));
+  if (activeSort === 'price-desc') return arr.sort((a,b) => (productPrices[b.id]||0)    - (productPrices[a.id]||0));
+  return arr;
+}
+
 // ── Merch Tabs ─────────────────────────────────────────────
-const TAB_NAMES = ['ALL','CLOTHING','SWIMWEAR','ACCESSORIES','PHONE CASES','HOME & DECOR','FLAGS & PRINTS','LIFESTYLE'];
+const DEFAULT_TABS = ['CLOTHING','SWIMWEAR','ACCESSORIES','PHONE CASES','HOME & DECOR','FLAGS & PRINTS','LIFESTYLE'];
 let merchTabs  = {};   // { 'CLOTHING': ['id1','id2'], ... } from admin
 let activeTab  = 'ALL';
 
@@ -903,12 +955,19 @@ async function loadMerchTabs() {
   } catch(_) {}
 }
 
+function getTabNames() {
+  const keys = Object.keys(merchTabs);
+  return ['ALL', ...(keys.length ? keys : DEFAULT_TABS)];
+}
+
 function renderTabBar() {
-  const bar = document.getElementById('tab-bar');
-  bar.innerHTML = TAB_NAMES.map(t =>
+  const tabs = getTabNames();
+  const bar  = document.getElementById('tab-bar');
+  bar.innerHTML = tabs.map(t =>
     `<button class="tab-pill${t === activeTab ? ' active' : ''}" data-tab="${esc(t)}" onclick="selectTab('${esc(t)}')">${esc(t)}</button>`
   ).join('');
   bar.style.display = 'flex';
+  document.getElementById('sort-bar').style.display = 'flex';
 }
 
 function selectTab(tab) {
@@ -921,15 +980,16 @@ function selectTab(tab) {
 
 function filterByTab() {
   const grid = document.getElementById('products-grid');
-  if (activeTab === 'ALL' || !Object.keys(merchTabs).length) {
-    renderGrid(allProducts); return;
+  let list = allProducts;
+  if (activeTab !== 'ALL' && Object.keys(merchTabs).length) {
+    const ids = (merchTabs[activeTab] || []).map(String);
+    if (!ids.length) {
+      grid.innerHTML = '<div class="tab-empty">NO PRODUCTS IN THIS CATEGORY YET</div>';
+      grid.style.display = 'grid'; return;
+    }
+    list = allProducts.filter(p => ids.includes(String(p.id)));
   }
-  const ids = (merchTabs[activeTab] || []).map(String);
-  if (!ids.length) {
-    grid.innerHTML = '<div class="tab-empty">NO PRODUCTS IN THIS CATEGORY YET</div>';
-    grid.style.display = 'grid'; return;
-  }
-  renderGrid(allProducts.filter(p => ids.includes(String(p.id))));
+  renderGrid(sortedProducts(list));
 }
 
 async function loadPriceOverrides() {
@@ -1189,6 +1249,7 @@ async function fetchBasePrice(prod) {
     if (el) {
       el.innerHTML = `$${retail.toFixed(2)} <span class="product-stars">⭐ ${starsForPrice(retail)}</span>`;
     }
+    productPrices[prod.id] = retail; // store for sort
   } catch(e) { /* silent */ }
 }
 

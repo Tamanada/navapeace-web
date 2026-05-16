@@ -1199,6 +1199,13 @@
           </div>
           <!-- Tab columns -->
           <p class="yoy-section-title" style="margin-bottom:8px;">🗂 ONGLETS</p>
+          <!-- Add new tab -->
+          <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center;">
+            <input id="tmgr-newtab-input" type="text" placeholder="Nom du nouvel onglet…"
+              style="flex:1;padding:8px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:#fff;font-family:var(--font);font-size:10px;letter-spacing:1px;outline:none;"
+              onkeydown="if(event.key==='Enter')tmgrAddTab()"/>
+            <button onclick="tmgrAddTab()" style="padding:8px 16px;background:rgba(109,213,245,0.15);border:1px solid rgba(109,213,245,0.4);border-radius:8px;color:#6DD5F5;font-family:var(--font);font-size:9px;letter-spacing:1.5px;cursor:pointer;">+ ADD TAB</button>
+          </div>
           <div class="tab-mgr-board" id="tmgr-board"></div>
           <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:6px;">
             <button class="tab-mgr-save" id="tmgr-save-btn" onclick="tmgrSave()">💾 SAVE TABS</button>
@@ -3535,7 +3542,7 @@ function closeYoyDetail() {
 // ══════════════════════════════════════════════════════════
 //  MERCH TAB MANAGER — drag & drop
 // ══════════════════════════════════════════════════════════
-const TMGR_TABS   = ['CLOTHING','SWIMWEAR','ACCESSORIES','PHONE CASES','HOME & DECOR','FLAGS & PRINTS','LIFESTYLE'];
+let TMGR_TABS     = ['CLOTHING','SWIMWEAR','ACCESSORIES','PHONE CASES','HOME & DECOR','FLAGS & PRINTS','LIFESTYLE'];
 let _tmgrOpen     = false;
 let _tmgrLoaded   = false;
 let _tmgrConfig   = {}; // { TAB: [id, ...] }
@@ -3549,12 +3556,35 @@ async function tmgrToggle() {
   if (_tmgrOpen && !_tmgrLoaded) { _tmgrLoaded = true; await tmgrLoad(); }
 }
 
+function tmgrAddTab() {
+  const input = document.getElementById('tmgr-newtab-input');
+  const name  = (input.value || '').trim().toUpperCase();
+  if (!name) return;
+  if (TMGR_TABS.includes(name)) { input.value = ''; return; }
+  TMGR_TABS.push(name);
+  if (!_tmgrConfig[name]) _tmgrConfig[name] = [];
+  input.value = '';
+  tmgrRender();
+}
+
+function tmgrDeleteTab(tab) {
+  if (!confirm(`Supprimer l'onglet "${tab}" ? Les produits reviendront dans NON CLASSÉS.`)) return;
+  TMGR_TABS = TMGR_TABS.filter(t => t !== tab);
+  delete _tmgrConfig[tab];
+  tmgrRender();
+}
+
 async function tmgrLoad() {
   // Load current tab config from Supabase
   try {
     const res  = await fetch(`${YOY_PROXY}?action=get_merch_tabs`, { headers: YOY_AUTH });
     const data = await res.json();
-    if (data && typeof data === 'object' && !data.error) _tmgrConfig = data;
+    if (data && typeof data === 'object' && !data.error) {
+      _tmgrConfig = data;
+      // Restore tab order from config keys (includes custom tabs)
+      const loaded = Object.keys(data);
+      TMGR_TABS = [...new Set([...TMGR_TABS, ...loaded])];
+    }
   } catch(_) {}
 
   // Load products (reuse _yoyProductMap if already loaded, else fetch)
@@ -3591,7 +3621,7 @@ function tmgrRender() {
     col.ondragleave = e => tmgrDragLeave(e);
     const ids = (_tmgrConfig[tab] || []).map(String);
     const products = ids.map(id => _yoyProductMap.get(id)).filter(Boolean);
-    col.innerHTML = `<div class="tab-col-head">${tab}</div><div class="tab-col-items" id="tcol-${tab.replace(/\s/g,'_')}"></div>`;
+    col.innerHTML = `<div class="tab-col-head" style="display:flex;align-items:center;justify-content:space-between;">${tab}<button onclick="tmgrDeleteTab('${tab.replace(/'/g,"\\'")}')\" style="background:none;border:none;color:rgba(255,80,80,0.5);cursor:pointer;font-size:11px;padding:0;" title="Supprimer">🗑</button></div><div class="tab-col-items" id="tcol-${tab.replace(/\s/g,'_')}"></div>`;
     board.appendChild(col);
     const items = col.querySelector('.tab-col-items');
     products.forEach(p => items.appendChild(tmgrMakeCard(p, tab)));
