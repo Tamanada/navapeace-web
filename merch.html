@@ -1144,7 +1144,7 @@ function starsForPrice(usd) {
 async function loadProducts() {
   // Load tabs config in parallel with products
   loadMerchTabs().then(() => {
-    if (allProducts.length) filterByTab(); // re-filter if products already loaded
+    if (allProducts.length) { renderTabBar(); filterByTab(); }
   });
   try {
     let rawRecords = [];

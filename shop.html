@@ -794,42 +794,71 @@ async function loadProducts() {
   }
 }
 
-// ── Filters ────────────────────────────────────────────────
-const FILTER_KEYWORDS = [
-  { label: 'ALL',           kw: '' },
-  { label: 'CLOTHING',      kw: 'shirt dress shorts' },
-  { label: 'SWIMWEAR',      kw: 'swimsuit bikini' },
-  { label: 'ACCESSORIES',   kw: 'bag cap tote gaiter bandana balaclava scarf glove' },
-  { label: 'PHONE CASES',   kw: 'phone iphone samsung airbag' },
-  { label: 'HOME & DECOR',  kw: 'mug towel quilt bedding pillow curtain blanket' },
-  { label: 'FLAGS & PRINTS',kw: 'flag banner poster print canvas' },
-  { label: 'LIFESTYLE',     kw: 'playing cards puzzle keychain sticker notebook journal' },
-];
-let activeFilter = '';
+// ── Filters — driven by admin merch_tabs config ────────────
+let _shopTabs    = {}; // { TAB: [id,...] } loaded from admin
+let activeFilter = 'ALL';
 
-// Only render categories that have at least 1 matching product
-function buildFilters() {
-  const el = document.getElementById('filters');
-  el.innerHTML = FILTER_KEYWORDS.filter(f => {
-    if (!f.kw) return true; // always show ALL
-    const words = f.kw.split(' ');
-    return allProducts.some(p => words.some(k => p.title.toLowerCase().includes(k)));
-  }).map((f, i) =>
-    `<div class="filter-chip${i === 0 ? ' active' : ''}" data-kw="${f.kw}" onclick="applyFilter(this, '${f.kw}')">${f.label}</div>`
-  ).join('');
+async function loadShopTabs() {
+  try {
+    const res  = await fetch(`${PROXY_URL}?action=get_merch_tabs`, { headers: AUTH_HEADERS });
+    const data = await res.json();
+    if (data && typeof data === 'object' && !data.error && Object.keys(data).length) {
+      _shopTabs = data;
+    }
+  } catch(_) {}
 }
 
-function applyFilter(el, kw) {
+function buildFilters() {
+  const el   = document.getElementById('filters');
+  const tabs = Object.keys(_shopTabs);
+  if (tabs.length) {
+    // Admin config available — use tab names + ID-based filtering
+    el.innerHTML = ['ALL', ...tabs].map((t, i) =>
+      `<div class="filter-chip${i === 0 ? ' active' : ''}" data-tab="${esc(t)}" onclick="applyTabFilter(this,'${esc(t)}')">${esc(t)}</div>`
+    ).join('');
+  } else {
+    // Fallback: keyword-based (no admin config yet)
+    const KW = [
+      { label:'ALL', kw:'' },
+      { label:'CLOTHING',       kw:'shirt dress shorts' },
+      { label:'SWIMWEAR',       kw:'swimsuit bikini' },
+      { label:'ACCESSORIES',    kw:'bag cap tote gaiter' },
+      { label:'PHONE CASES',    kw:'phone iphone samsung airbag' },
+      { label:'HOME & DECOR',   kw:'mug towel quilt bedding' },
+      { label:'FLAGS & PRINTS', kw:'flag banner poster' },
+      { label:'LIFESTYLE',      kw:'playing cards puzzle keychain sticker' },
+    ];
+    el.innerHTML = KW.filter(f => !f.kw || allProducts.some(p =>
+      f.kw.split(' ').some(k => p.title.toLowerCase().includes(k))
+    )).map((f, i) =>
+      `<div class="filter-chip${i === 0 ? ' active' : ''}" data-tab="${f.label}" onclick="applyTabFilter(this,'${f.label}')" data-kw="${f.kw}">${f.label}</div>`
+    ).join('');
+  }
+}
+
+function applyTabFilter(el, tab) {
   document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
-  activeFilter = kw;
-  const filtered = kw
-    ? allProducts.filter(p => kw.split(' ').some(k => p.title.toLowerCase().includes(k)))
-    : allProducts;
+  activeFilter = tab;
+
+  let filtered;
+  if (tab === 'ALL') {
+    filtered = allProducts;
+  } else if (Object.keys(_shopTabs).length) {
+    // ID-based (admin config)
+    const ids = (_shopTabs[tab] || []).map(String);
+    filtered = allProducts.filter(p => ids.includes(String(p.id)));
+  } else {
+    // Keyword fallback
+    const kw = el.dataset.kw || '';
+    filtered = kw ? allProducts.filter(p => kw.split(' ').some(k => p.title.toLowerCase().includes(k))) : allProducts;
+  }
   renderGrid(filtered);
-  // Re-apply cached prices (DOM was just rebuilt)
   filtered.forEach(p => fetchBasePrice(p));
 }
+
+// Legacy alias (kept for any inline refs)
+function applyFilter(el, kw) { applyTabFilter(el, el.dataset.tab || 'ALL'); }
 
 // ── Grid ───────────────────────────────────────────────────
 function renderGrid(products) {
@@ -1158,6 +1187,8 @@ document.addEventListener('click', e => {
 window.addEventListener('load', () => {
   checkSuccess();
   updateCartBadge();
+  // Load tabs + products in parallel; rebuild filters when tabs arrive
+  loadShopTabs().then(() => { if (allProducts.length) buildFilters(); });
   loadProducts();
   loadPriceOverrides().then(() => {
     // Refresh prices that may now have admin overrides
