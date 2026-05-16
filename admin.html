@@ -367,6 +367,7 @@
     .yoy-save-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:5px;color:var(--w60);font-size:11px;cursor:pointer;padding:3px 7px;flex-shrink:0;transition:all 0.15s;font-family:var(--font);}
     .yoy-save-btn:hover{background:rgba(74,222,128,0.15);color:#4ade80;border-color:rgba(74,222,128,0.4);}
     .yoy-save-btn:disabled{opacity:0.4;cursor:default;}
+    .yoy-margin-badge{font-size:8px;letter-spacing:0.5px;color:var(--w40);margin-top:5px;line-height:1.5;min-height:13px;transition:color 0.15s;}
 
     /* ── LOADING ──────────────────────────────────── */
     .spinner{text-align:center;padding:60px;}
@@ -3059,6 +3060,53 @@ function yoyChangePage(delta) {
   _loadYoyOrders();
 }
 
+// ── Wholesale cost cache ──────────────────────────────────
+const _yoyCost = {};           // productId → minWholesale + $9 shipping
+const YOY_SHIP = 9;            // same as shop.html SHIPPING_ESTIMATE
+const YOY_AUTO_MARGIN = 7;     // same as shop.html TARGET_MARGIN
+
+function _yoyUpdateMargin(productId, inputEl) {
+  const badge = document.getElementById(`yoy-margin-${productId}`);
+  if (!badge) return;
+  const cost = _yoyCost[productId];
+  if (cost === undefined) { badge.textContent = 'coût ···'; badge.style.color = ''; return; }
+  const costFmt = `$${cost.toFixed(2)}`;
+  const raw = parseFloat(inputEl.value);
+  if (!raw || isNaN(raw) || raw <= 0) {
+    // No override → show auto formula margin
+    badge.textContent = `coût ~${costFmt} · auto +$${YOY_AUTO_MARGIN.toFixed(2)}`;
+    badge.style.color = 'rgba(255,255,255,0.35)';
+    return;
+  }
+  const margin = raw - cost;
+  const sign   = margin >= 0 ? '+' : '';
+  badge.textContent  = `coût ~${costFmt} · marge ${sign}$${margin.toFixed(2)}`;
+  badge.style.color  = margin >= 0 ? '#4ade80' : '#ff5b5b';
+}
+
+async function _yoyFetchWholesale(productId) {
+  if (_yoyCost[productId] !== undefined) return;
+  try {
+    const res  = await fetch(`${YOY_PROXY}?action=template&productId=${encodeURIComponent(productId)}`, { headers: YOY_AUTH });
+    const data = await res.json();
+    const rawV = data?.data?.skuList || data?.data?.variants || data?.data?.records || data?.data?.skus || [];
+    const prices = rawV.map(v => parseFloat(v.price || v.salesPrice || v.costPrice || v.basePrice || 0)).filter(p => p > 0);
+    if (!prices.length) return;
+    _yoyCost[productId] = Math.min(...prices) + YOY_SHIP;
+    // Update badge with real cost data
+    const input = document.getElementById(`yoy-input-${productId}`);
+    if (input) _yoyUpdateMargin(productId, input);
+  } catch(_) {}
+}
+
+async function _yoyFetchAllWholesale(ids) {
+  const BATCH = 5;
+  for (let i = 0; i < ids.length; i += BATCH) {
+    await Promise.all(ids.slice(i, i + BATCH).map(id => _yoyFetchWholesale(id)));
+    if (i + BATCH < ids.length) await new Promise(r => setTimeout(r, 200));
+  }
+}
+
 // ── Price overrides ───────────────────────────────────────
 let _yoyPriceOverrides = {}; // { [productId]: customRetailPrice }
 
@@ -3153,28 +3201,35 @@ async function _loadYoyProducts() {
       grid.innerHTML = `<p style="color:var(--w40);font-size:9px;letter-spacing:2px;grid-column:1/-1;padding:20px;">NO PRODUCTS FOUND</p>`;
       grid.style.display = 'block';
     } else {
+      const ids = [];
       grid.innerHTML = list.map(p => {
         const id  = (p.id || p.mappingId || p.productId || '').toString();
-        // YOYCOL templates use previewImage / mainImage / coverImage
-        const img  = p.previewImage || p.mainImage || p.coverImage || p.image || p.imageUrl || '';
-        const name = p.title || p.productName || p.name || '—';
+        ids.push(id);
+        const img      = p.previewImage || p.mainImage || p.coverImage || p.image || p.imageUrl || '';
+        const name     = p.title || p.productName || p.name || '—';
         const override = _yoyPriceOverrides[id];
         return `<div class="yoy-product-card">
           ${img ? `<img class="yoy-product-thumb" src="${escHtml(img)}" alt="" loading="lazy">` : '<div class="yoy-product-thumb" style="display:flex;align-items:center;justify-content:center;color:var(--w40);font-size:22px;">🛍</div>'}
           <div class="yoy-product-name" title="${escHtml(name)}">${escHtml(name)}</div>
           <div class="yoy-price-row">
-            <input class="yoy-price-input" type="number" min="0" step="0.01"
+            <input class="yoy-price-input"
+              id="yoy-input-${escHtml(id)}"
+              type="number" min="0" step="0.01"
               value="${override !== undefined ? override : ''}"
               placeholder="auto $"
+              oninput="_yoyUpdateMargin('${escHtml(id)}',this)"
               onkeydown="if(event.key==='Enter')yoySavePrice('${escHtml(id)}',this)"
             />
             <button class="yoy-save-btn" onclick="yoySavePrice('${escHtml(id)}',this.previousElementSibling)" title="Save override price">💾</button>
           </div>
+          <div class="yoy-margin-badge" id="yoy-margin-${escHtml(id)}">coût ···</div>
         </div>`;
       }).join('');
       document.querySelector('.yoy-products-toggle span:first-child').textContent =
         `🏪 STORE PRODUCTS (${list.length})`;
       grid.style.display = 'grid';
+      // Fetch wholesale in background — batches of 5, 200ms apart
+      _yoyFetchAllWholesale(ids);
     }
   } catch(e) {
     grid.innerHTML = `<p style="color:var(--danger);font-size:9px;grid-column:1/-1;padding:20px;">${escHtml(e.message)}</p>`;
