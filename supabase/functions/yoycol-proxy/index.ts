@@ -609,6 +609,22 @@ Deno.serve(async (req) => {
       return json({ success: true, order_sn: orderSn });
     }
 
+    // ── GET merch product order (public) ──────────────────
+    if (action === 'get_merch_order' && req.method === 'GET') {
+      if (!SUPA_URL || !SERVICE_KEY) return json([]);
+      const r = await fetch(
+        `${SUPA_URL}/rest/v1/admin_settings?key=eq.merch_product_order&select=value`,
+        { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } }
+      );
+      const rows = await r.json() as Array<Record<string, unknown>>;
+      const val  = rows?.[0]?.value;
+      if (!val) return json([]);
+      try {
+        const order = typeof val === 'object' ? val : JSON.parse(val as string);
+        return json(order);
+      } catch { return json([]); }
+    }
+
     // ── GET merch tab assignments (public) ────────────────
     if (action === 'get_merch_tabs' && req.method === 'GET') {
       if (!SUPA_URL || !SERVICE_KEY) return json({});

@@ -352,6 +352,12 @@
     .yoy-badge-unknown{background:rgba(255,255,255,0.1);color:var(--w60);border:1px solid rgba(255,255,255,0.2);}
     .yoy-track-link{font-size:9px;color:#3aacdf;text-decoration:underline;white-space:nowrap;}
     .yoy-section-title{font-size:10px;letter-spacing:3px;color:var(--w60);text-transform:uppercase;margin-bottom:14px;}
+    .yoy-product-card[draggable="true"]{cursor:grab;position:relative;}
+    .yoy-product-card[draggable="true"]:active{cursor:grabbing;}
+    .yoy-product-card.yoy-drag-over{border-color:rgba(109,213,245,0.8)!important;box-shadow:0 0 0 2px rgba(109,213,245,0.35);}
+    .yoy-product-card.yoy-dragging{opacity:0.3;}
+    .yoy-drag-handle{position:absolute;top:6px;left:6px;color:rgba(255,255,255,0.3);font-size:13px;cursor:grab;line-height:1;}
+
     .yoy-products-toggle{width:100%;padding:13px 18px;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.15);border-radius:12px;font-family:var(--font);font-size:9px;letter-spacing:3px;color:var(--w80);cursor:pointer;text-align:left;display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;transition:background 0.2s;}
     .yoy-products-toggle:hover{background:rgba(255,255,255,0.12);}
     .yoy-products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:12px;}
@@ -1170,10 +1176,14 @@
       </div>
 
       <!-- Store products (collapsible) -->
-      <button class="yoy-products-toggle" onclick="yoyToggleProducts()">
-        <span>🏪 STORE PRODUCTS</span>
-        <span id="yoy-prod-chevron">▼</span>
-      </button>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <button class="yoy-products-toggle" style="margin-bottom:0;flex:1;" onclick="yoyToggleProducts()">
+          <span>🏪 STORE PRODUCTS</span>
+          <span id="yoy-prod-chevron">▼</span>
+        </button>
+        <button id="yoy-save-order-btn" onclick="_yoySaveOrder()" style="display:none;padding:10px 16px;background:rgba(109,213,245,0.15);border:1px solid rgba(109,213,245,0.4);border-radius:10px;color:#6DD5F5;font-family:var(--font);font-size:8px;letter-spacing:1.5px;cursor:pointer;white-space:nowrap;">💾 SAVE ORDER</button>
+      </div>
+      <span id="yoy-order-status" style="font-size:8px;letter-spacing:1px;color:var(--w40);display:block;min-height:14px;margin-bottom:6px;"></span>
       <div id="yoy-products-section" style="display:none;">
         <div id="yoy-products-spin" class="spinner" style="padding:30px;"><div class="spin"></div></div>
         <div id="yoy-products-grid" class="yoy-products-grid" style="display:none;"></div>
@@ -3327,7 +3337,14 @@ async function _loadYoyProducts() {
         const name     = p.title || p.productName || p.name || '—';
         _yoyProductMap.set(id, { id, name, img: p.previewImage || p.mainImage || p.coverImage || p.image || p.imageUrl || '' });
         const override = _yoyPriceOverrides[id];
-        return `<div class="yoy-product-card" onclick="openYoyDetail('${escHtml(id)}')">
+        return `<div class="yoy-product-card" data-pid="${escHtml(id)}" draggable="true"
+            ondragstart="_yoyDragStart(event,'${escHtml(id)}')"
+            ondragover="_yoyDragOver(event)"
+            ondragleave="_yoyDragLeave(event)"
+            ondrop="_yoyDrop(event,'${escHtml(id)}')"
+            ondragend="_yoyDragEnd(event)"
+            onclick="openYoyDetail('${escHtml(id)}')">
+          <span class="yoy-drag-handle">⠿</span>
           ${img ? `<img class="yoy-product-thumb" src="${escHtml(img)}" alt="" loading="lazy">` : '<div class="yoy-product-thumb" style="display:flex;align-items:center;justify-content:center;color:var(--w40);font-size:22px;">🛍</div>'}
           <div class="yoy-product-name" title="${escHtml(name)}">${escHtml(name)}</div>
           <div class="yoy-price-row">
@@ -3348,7 +3365,9 @@ async function _loadYoyProducts() {
       document.querySelector('.yoy-products-toggle span:first-child').textContent =
         `🏪 STORE PRODUCTS (${list.length})`;
       grid.style.display = 'grid';
-      // Fetch wholesale in background — batches of 5, 200ms apart
+      document.getElementById('yoy-save-order-btn').style.display = 'inline-block';
+      // Apply saved order then fetch prices
+      await _yoyApplySavedOrder();
       _yoyFetchAllWholesale(ids);
     }
   } catch(e) {
@@ -3537,6 +3556,73 @@ function closeYoyDetail() {
   document.getElementById('yoy-detail-overlay').classList.remove('open');
   _yoyDetailPid  = null;
   _yoyDetailVars = [];
+}
+
+// ══════════════════════════════════════════════════════════
+//  PRODUCT ORDER — drag & drop reorder
+// ══════════════════════════════════════════════════════════
+let _yoyDragId = null;
+
+function _yoyDragStart(e, id) {
+  _yoyDragId = id;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', id);
+  setTimeout(() => e.currentTarget.classList.add('yoy-dragging'), 0);
+}
+function _yoyDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  e.currentTarget.classList.add('yoy-drag-over');
+}
+function _yoyDragLeave(e) { e.currentTarget.classList.remove('yoy-drag-over'); }
+function _yoyDragEnd(e)   { e.currentTarget.classList.remove('yoy-dragging'); _yoyDragId = null; }
+
+function _yoyDrop(e, targetId) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('yoy-drag-over');
+  if (!_yoyDragId || _yoyDragId === targetId) return;
+  const grid = document.getElementById('yoy-products-grid');
+  const src  = grid.querySelector(`[data-pid="${_yoyDragId}"]`);
+  const tgt  = grid.querySelector(`[data-pid="${targetId}"]`);
+  if (src && tgt) { src.classList.remove('yoy-dragging'); grid.insertBefore(src, tgt); }
+  _yoyDragId = null;
+}
+
+async function _yoyApplySavedOrder() {
+  try {
+    const res  = await fetch(`${YOY_PROXY}?action=get_merch_order`, { headers: YOY_AUTH });
+    const data = await res.json();
+    if (!Array.isArray(data) || !data.length) return;
+    const grid = document.getElementById('yoy-products-grid');
+    data.forEach(id => {
+      const card = grid.querySelector(`[data-pid="${id}"]`);
+      if (card) grid.appendChild(card);
+    });
+  } catch(_) {}
+}
+
+async function _yoySaveOrder() {
+  const grid  = document.getElementById('yoy-products-grid');
+  const order = [...grid.querySelectorAll('[data-pid]')].map(c => c.dataset.pid);
+  const btn   = document.getElementById('yoy-save-order-btn');
+  const st    = document.getElementById('yoy-order-status');
+  btn.disabled = true; st.textContent = 'Saving…'; st.style.color = '';
+  try {
+    const res = await fetch(`${YOY_PROXY}?action=update_admin_setting`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', ...YOY_AUTH },
+      body:    JSON.stringify({ adminCode: _adminCode, key: 'merch_product_order', value: order }),
+    });
+    if (res.ok) {
+      st.textContent = `✓ Ordre sauvegardé (${order.length} produits)`;
+      st.style.color = '#6DD5F5';
+    } else throw new Error('Save failed');
+  } catch(e) {
+    st.textContent = '✗ ' + e.message; st.style.color = '#ff6b6b';
+  } finally {
+    btn.disabled = false;
+    setTimeout(() => { st.textContent = ''; }, 3000);
+  }
 }
 
 // ══════════════════════════════════════════════════════════

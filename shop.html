@@ -798,6 +798,17 @@ async function loadProducts() {
 let _shopTabs    = {}; // { TAB: [id,...] } loaded from admin
 let activeFilter = 'ALL';
 
+async function loadShopOrder() {
+  try {
+    const res  = await fetch(`${PROXY_URL}?action=get_merch_order`, { headers: AUTH_HEADERS });
+    const data = await res.json();
+    if (!Array.isArray(data) || !data.length) return;
+    const orderMap = {};
+    data.forEach((id, i) => { orderMap[String(id)] = i; });
+    allProducts.sort((a, b) => (orderMap[String(a.id)] ?? 9999) - (orderMap[String(b.id)] ?? 9999));
+  } catch(_) {}
+}
+
 async function loadShopTabs() {
   try {
     const res  = await fetch(`${PROXY_URL}?action=get_merch_tabs`, { headers: AUTH_HEADERS });
@@ -1187,8 +1198,9 @@ document.addEventListener('click', e => {
 window.addEventListener('load', () => {
   checkSuccess();
   updateCartBadge();
-  // Load tabs + products in parallel; rebuild filters when tabs arrive
+  // Load tabs + order in parallel; rebuild when ready
   loadShopTabs().then(() => { if (allProducts.length) buildFilters(); });
+  loadShopOrder().then(() => { if (allProducts.length) { renderGrid(allProducts); allProducts.forEach(p => fetchBasePrice(p)); } });
   loadProducts();
   loadPriceOverrides().then(() => {
     // Refresh prices that may now have admin overrides

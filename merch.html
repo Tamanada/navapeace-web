@@ -947,6 +947,17 @@ const DEFAULT_TABS = ['CLOTHING','SWIMWEAR','ACCESSORIES','PHONE CASES','HOME & 
 let merchTabs  = {};   // { 'CLOTHING': ['id1','id2'], ... } from admin
 let activeTab  = 'ALL';
 
+async function loadProductOrder() {
+  try {
+    const res  = await fetch(`${PROXY_URL}?action=get_merch_order`, { headers: AUTH_H });
+    const data = await res.json();
+    if (!Array.isArray(data) || !data.length) return;
+    const orderMap = {};
+    data.forEach((id, i) => { orderMap[String(id)] = i; });
+    allProducts.sort((a, b) => (orderMap[String(a.id)] ?? 9999) - (orderMap[String(b.id)] ?? 9999));
+  } catch(_) {}
+}
+
 async function loadMerchTabs() {
   try {
     const res  = await fetch(`${PROXY_URL}?action=get_merch_tabs`, { headers: AUTH_H });
@@ -1142,8 +1153,8 @@ function starsForPrice(usd) {
 // Strategy: try product templates first (correct for Open API stores).
 // If empty, fall back to self_store products (for legacy manual stores).
 async function loadProducts() {
-  // Load tabs config in parallel with products
-  loadMerchTabs().then(() => {
+  // Load tabs + order in parallel with products
+  Promise.all([loadMerchTabs(), loadProductOrder()]).then(() => {
     if (allProducts.length) { renderTabBar(); filterByTab(); }
   });
   try {
