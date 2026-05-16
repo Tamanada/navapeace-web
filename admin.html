@@ -355,6 +355,24 @@
     .yoy-products-toggle{width:100%;padding:13px 18px;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.15);border-radius:12px;font-family:var(--font);font-size:9px;letter-spacing:3px;color:var(--w80);cursor:pointer;text-align:left;display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;transition:background 0.2s;}
     .yoy-products-toggle:hover{background:rgba(255,255,255,0.12);}
     .yoy-products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:12px;}
+
+    /* ── MERCH TAB MANAGER ─────────────────────────────── */
+    .tab-mgr-pool{display:flex;flex-wrap:wrap;gap:8px;padding:12px;background:rgba(255,255,255,0.04);border-radius:12px;min-height:80px;margin-bottom:20px;border:1.5px dashed rgba(255,255,255,0.15);}
+    .tab-mgr-board{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;}
+    .tab-mgr-board::-webkit-scrollbar{height:4px;}
+    .tab-mgr-board::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.2);border-radius:2px;}
+    .tab-col{flex:0 0 170px;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.12);border-radius:12px;padding:10px 8px;transition:border-color 0.15s;}
+    .tab-col.drag-over{border-color:rgba(109,213,245,0.7);background:rgba(109,213,245,0.08);}
+    .tab-col-head{font-size:8px;letter-spacing:2.5px;color:var(--w60);margin-bottom:8px;text-align:center;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.1);}
+    .tab-col-items{display:flex;flex-direction:column;gap:6px;min-height:60px;}
+    .tmgr-card{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.08);border-radius:8px;padding:6px 8px;cursor:grab;user-select:none;border:1px solid rgba(255,255,255,0.1);transition:opacity 0.15s;}
+    .tmgr-card:active{cursor:grabbing;}
+    .tmgr-card.dragging{opacity:0.4;}
+    .tmgr-thumb{width:32px;height:32px;border-radius:6px;object-fit:contain;background:rgba(255,255,255,0.1);flex-shrink:0;}
+    .tmgr-name{font-size:8px;letter-spacing:0.5px;color:var(--w80);line-height:1.3;flex:1;}
+    .tmgr-rm{background:none;border:none;color:rgba(255,80,80,0.6);cursor:pointer;font-size:13px;padding:0 2px;flex-shrink:0;}
+    .tab-mgr-save{margin-top:14px;padding:12px 24px;background:linear-gradient(135deg,#1a7bbf,#3AACDF);border:none;border-radius:10px;color:#fff;font-family:var(--font);font-size:9px;letter-spacing:2px;cursor:pointer;}
+    .tab-mgr-save:disabled{opacity:0.4;cursor:default;}
     .yoy-product-card{background:linear-gradient(135deg,rgba(5,20,50,0.88),rgba(8,32,68,0.82));border:1px solid rgba(109,213,245,0.25);border-radius:10px;padding:12px;cursor:pointer;transition:border-color 0.2s,transform 0.15s;}
     .yoy-product-card:hover{border-color:rgba(109,213,245,0.6);transform:translateY(-2px);}
     .yoy-product-thumb{width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;margin-bottom:8px;background:rgba(255,255,255,0.05);}
@@ -1159,6 +1177,34 @@
       <div id="yoy-products-section" style="display:none;">
         <div id="yoy-products-spin" class="spinner" style="padding:30px;"><div class="spin"></div></div>
         <div id="yoy-products-grid" class="yoy-products-grid" style="display:none;"></div>
+      </div>
+
+      <!-- ── MERCH TAB MANAGER ───────────────────────────── -->
+      <div style="margin-top:20px;">
+        <button class="yoy-products-toggle" onclick="tmgrToggle()">
+          <span>🗂 MERCH TABS</span>
+          <span id="tmgr-chevron">▼</span>
+        </button>
+        <div id="tmgr-section" style="display:none;margin-top:10px;">
+          <p style="font-size:9px;letter-spacing:1.5px;color:var(--w40);margin-bottom:10px;">
+            Glisse les produits dans leur onglet · Ceux sans onglet apparaissent dans ALL
+          </p>
+          <!-- Unassigned pool -->
+          <p class="yoy-section-title" style="margin-bottom:6px;">📦 NON CLASSÉS</p>
+          <div class="tab-mgr-pool" id="tmgr-pool"
+               ondragover="tmgrDragOver(event,'__pool__')"
+               ondrop="tmgrDrop(event,'__pool__')"
+               ondragleave="tmgrDragLeave(event)">
+            <p id="tmgr-pool-empty" style="font-size:9px;color:var(--w40);letter-spacing:1px;margin:auto;">Tous les produits sont classés ✓</p>
+          </div>
+          <!-- Tab columns -->
+          <p class="yoy-section-title" style="margin-bottom:8px;">🗂 ONGLETS</p>
+          <div class="tab-mgr-board" id="tmgr-board"></div>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:6px;">
+            <button class="tab-mgr-save" id="tmgr-save-btn" onclick="tmgrSave()">💾 SAVE TABS</button>
+            <span id="tmgr-status" style="font-size:9px;letter-spacing:1px;color:var(--w40);"></span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -3484,6 +3530,154 @@ function closeYoyDetail() {
   document.getElementById('yoy-detail-overlay').classList.remove('open');
   _yoyDetailPid  = null;
   _yoyDetailVars = [];
+}
+
+// ══════════════════════════════════════════════════════════
+//  MERCH TAB MANAGER — drag & drop
+// ══════════════════════════════════════════════════════════
+const TMGR_TABS   = ['CLOTHING','SWIMWEAR','ACCESSORIES','PHONE CASES','HOME & DECOR','FLAGS & PRINTS','LIFESTYLE'];
+let _tmgrOpen     = false;
+let _tmgrLoaded   = false;
+let _tmgrConfig   = {}; // { TAB: [id, ...] }
+let _tmgrDragId   = null;
+let _tmgrDragFrom = null;
+
+async function tmgrToggle() {
+  _tmgrOpen = !_tmgrOpen;
+  document.getElementById('tmgr-section').style.display = _tmgrOpen ? 'block' : 'none';
+  document.getElementById('tmgr-chevron').textContent   = _tmgrOpen ? '▲' : '▼';
+  if (_tmgrOpen && !_tmgrLoaded) { _tmgrLoaded = true; await tmgrLoad(); }
+}
+
+async function tmgrLoad() {
+  // Load current tab config from Supabase
+  try {
+    const res  = await fetch(`${YOY_PROXY}?action=get_merch_tabs`, { headers: YOY_AUTH });
+    const data = await res.json();
+    if (data && typeof data === 'object' && !data.error) _tmgrConfig = data;
+  } catch(_) {}
+
+  // Load products (reuse _yoyProductMap if already loaded, else fetch)
+  if (!_yoyProductMap.size) {
+    await _yoyLoadPriceOverrides();
+    await _loadYoyProducts();
+  }
+  tmgrRender();
+}
+
+function tmgrRender() {
+  // Build reverse map: id → tab
+  const idToTab = {};
+  TMGR_TABS.forEach(t => (_tmgrConfig[t] || []).forEach(id => { idToTab[String(id)] = t; }));
+
+  // Pool: unassigned products
+  const pool  = document.getElementById('tmgr-pool');
+  const empty = document.getElementById('tmgr-pool-empty');
+  const unassigned = [..._yoyProductMap.values()].filter(p => !idToTab[String(p.id)]);
+  pool.innerHTML = '';
+  pool.appendChild(empty);
+  empty.style.display = unassigned.length ? 'none' : 'block';
+  unassigned.forEach(p => pool.appendChild(tmgrMakeCard(p, '__pool__')));
+
+  // Tab columns
+  const board = document.getElementById('tmgr-board');
+  board.innerHTML = '';
+  TMGR_TABS.forEach(tab => {
+    const col = document.createElement('div');
+    col.className = 'tab-col';
+    col.dataset.tab = tab;
+    col.ondragover  = e => tmgrDragOver(e, tab);
+    col.ondrop      = e => tmgrDrop(e, tab);
+    col.ondragleave = e => tmgrDragLeave(e);
+    const ids = (_tmgrConfig[tab] || []).map(String);
+    const products = ids.map(id => _yoyProductMap.get(id)).filter(Boolean);
+    col.innerHTML = `<div class="tab-col-head">${tab}</div><div class="tab-col-items" id="tcol-${tab.replace(/\s/g,'_')}"></div>`;
+    board.appendChild(col);
+    const items = col.querySelector('.tab-col-items');
+    products.forEach(p => items.appendChild(tmgrMakeCard(p, tab)));
+  });
+}
+
+function tmgrMakeCard(p, fromTab) {
+  const card = document.createElement('div');
+  card.className   = 'tmgr-card';
+  card.draggable   = true;
+  card.dataset.id  = String(p.id);
+  card.dataset.tab = fromTab;
+  card.innerHTML   = `
+    <img class="tmgr-thumb" src="${p.img || ''}" onerror="this.style.display='none'"/>
+    <span class="tmgr-name">${p.name || p.id}</span>
+    ${fromTab !== '__pool__' ? `<button class="tmgr-rm" title="Retirer" onclick="tmgrRemove('${String(p.id)}','${fromTab}')">✕</button>` : ''}
+  `;
+  card.ondragstart = e => {
+    _tmgrDragId   = String(p.id);
+    _tmgrDragFrom = fromTab;
+    e.dataTransfer.setData('text/plain', _tmgrDragId);
+    card.classList.add('dragging');
+  };
+  card.ondragend = () => card.classList.remove('dragging');
+  return card;
+}
+
+function tmgrDragOver(e, tab) {
+  e.preventDefault();
+  const el = tab === '__pool__'
+    ? document.getElementById('tmgr-pool')
+    : document.querySelector(`.tab-col[data-tab="${tab}"]`);
+  if (el) el.classList.add('drag-over');
+}
+function tmgrDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+function tmgrDrop(e, tab) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  const id   = _tmgrDragId;
+  const from = _tmgrDragFrom;
+  if (!id || from === tab) return;
+
+  // Remove from source tab
+  if (from !== '__pool__') {
+    _tmgrConfig[from] = (_tmgrConfig[from] || []).filter(x => String(x) !== id);
+  }
+  // Add to dest tab
+  if (tab !== '__pool__') {
+    if (!_tmgrConfig[tab]) _tmgrConfig[tab] = [];
+    if (!_tmgrConfig[tab].map(String).includes(id)) _tmgrConfig[tab].push(id);
+  }
+  tmgrRender();
+}
+
+function tmgrRemove(id, tab) {
+  _tmgrConfig[tab] = (_tmgrConfig[tab] || []).filter(x => String(x) !== String(id));
+  tmgrRender();
+}
+
+async function tmgrSave() {
+  const btn = document.getElementById('tmgr-save-btn');
+  const st  = document.getElementById('tmgr-status');
+  btn.disabled = true;
+  st.textContent = 'Saving…';
+  try {
+    const res = await fetch(`${YOY_PROXY}?action=update_admin_setting`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', ...YOY_AUTH },
+      body:    JSON.stringify({ adminCode: _adminCode, key: 'merch_tabs', value: _tmgrConfig }),
+    });
+    const data = await res.json();
+    if (data?.ok || data?.success || res.ok) {
+      st.textContent = '✓ Saved!';
+      st.style.color = '#6DD5F5';
+    } else {
+      throw new Error(data?.error || 'Save failed');
+    }
+  } catch(e) {
+    st.textContent = '✗ ' + e.message;
+    st.style.color = '#ff6b6b';
+  } finally {
+    btn.disabled = false;
+    setTimeout(() => { st.textContent = ''; st.style.color = ''; }, 3000);
+  }
 }
 </script>
 

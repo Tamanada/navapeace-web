@@ -132,6 +132,53 @@
     .product-stars{font-size:10px;color:var(--gold);letter-spacing:0.5px;text-shadow:0 1px 2px rgba(0,0,0,0.2);}
     .product-ship{font-size:9px;color:rgba(255,255,255,0.7);letter-spacing:0.5px;margin-top:3px;}
 
+    /* ── TAB BAR ────────────────────────────────────── */
+    .tab-bar{
+      display:flex;
+      gap:8px;
+      padding:10px 16px 8px;
+      overflow-x:auto;
+      -webkit-overflow-scrolling:touch;
+      scrollbar-width:none;
+      position:sticky;
+      top:52px;
+      z-index:45;
+      background:rgba(58,172,223,0.12);
+      backdrop-filter:blur(8px);
+      -webkit-backdrop-filter:blur(8px);
+    }
+    .tab-bar::-webkit-scrollbar{display:none;}
+    .tab-pill{
+      flex:0 0 auto;
+      padding:7px 16px;
+      border-radius:50px;
+      border:1.5px solid rgba(255,255,255,0.45);
+      background:transparent;
+      color:rgba(255,255,255,0.75);
+      font-family:var(--font);
+      font-size:9px;
+      letter-spacing:1.5px;
+      cursor:pointer;
+      transition:all 0.18s;
+      white-space:nowrap;
+      -webkit-tap-highlight-color:transparent;
+      touch-action:manipulation;
+    }
+    .tab-pill.active{
+      background:rgba(255,255,255,0.25);
+      border-color:rgba(255,255,255,0.85);
+      color:#fff;
+      font-weight:700;
+    }
+    .tab-empty{
+      grid-column:1/-1;
+      text-align:center;
+      padding:48px 24px;
+      color:rgba(255,255,255,0.4);
+      font-size:10px;
+      letter-spacing:2px;
+    }
+
     /* ── EMPTY STATE ────────────────────────────────── */
     .empty-state{
       text-align:center;
@@ -415,6 +462,9 @@
     <span class="cart-badge" id="cart-badge">0</span>
   </button>
 </div>
+
+<!-- Tab bar -->
+<div class="tab-bar" id="tab-bar" style="display:none;"></div>
 
 <!-- Products -->
 <div id="products-loading" class="spinner"><div class="spin"></div></div>
@@ -840,6 +890,48 @@ function esc(s) {
 let cart          = lsGet('nava_merch_cart', []);
 let priceOverrides = {}; // productId → admin-set retail price
 
+// ── Merch Tabs ─────────────────────────────────────────────
+const TAB_NAMES = ['ALL','CLOTHING','SWIMWEAR','ACCESSORIES','PHONE CASES','HOME & DECOR','FLAGS & PRINTS','LIFESTYLE'];
+let merchTabs  = {};   // { 'CLOTHING': ['id1','id2'], ... } from admin
+let activeTab  = 'ALL';
+
+async function loadMerchTabs() {
+  try {
+    const res  = await fetch(`${PROXY_URL}?action=get_merch_tabs`, { headers: AUTH_H });
+    const data = await res.json();
+    if (data && typeof data === 'object' && !data.error) merchTabs = data;
+  } catch(_) {}
+}
+
+function renderTabBar() {
+  const bar = document.getElementById('tab-bar');
+  bar.innerHTML = TAB_NAMES.map(t =>
+    `<button class="tab-pill${t === activeTab ? ' active' : ''}" data-tab="${esc(t)}" onclick="selectTab('${esc(t)}')">${esc(t)}</button>`
+  ).join('');
+  bar.style.display = 'flex';
+}
+
+function selectTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.tab-pill').forEach(p =>
+    p.classList.toggle('active', p.dataset.tab === tab)
+  );
+  filterByTab();
+}
+
+function filterByTab() {
+  const grid = document.getElementById('products-grid');
+  if (activeTab === 'ALL' || !Object.keys(merchTabs).length) {
+    renderGrid(allProducts); return;
+  }
+  const ids = (merchTabs[activeTab] || []).map(String);
+  if (!ids.length) {
+    grid.innerHTML = '<div class="tab-empty">NO PRODUCTS IN THIS CATEGORY YET</div>';
+    grid.style.display = 'grid'; return;
+  }
+  renderGrid(allProducts.filter(p => ids.includes(String(p.id))));
+}
+
 async function loadPriceOverrides() {
   try {
     const res  = await fetch(`${PROXY_URL}?action=get_price_overrides`, { headers: AUTH_H });
@@ -990,6 +1082,10 @@ function starsForPrice(usd) {
 // Strategy: try product templates first (correct for Open API stores).
 // If empty, fall back to self_store products (for legacy manual stores).
 async function loadProducts() {
+  // Load tabs config in parallel with products
+  loadMerchTabs().then(() => {
+    if (allProducts.length) filterByTab(); // re-filter if products already loaded
+  });
   try {
     let rawRecords = [];
     let source = 'template';
@@ -1019,7 +1115,8 @@ async function loadProducts() {
     }
 
     allProducts = rawRecords.map(p => normalizeProduct(p, source));
-    renderGrid(allProducts);
+    renderTabBar();
+    filterByTab();
   } catch (e) {
     console.error('loadProducts', e);
     document.getElementById('products-loading').style.display = 'none';
