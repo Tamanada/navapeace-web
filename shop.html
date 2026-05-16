@@ -94,8 +94,21 @@
     }
     .hero-sub{
       font-size:13px;color:rgba(255,255,255,0.85);letter-spacing:1px;
-      max-width:480px;margin:0 auto 32px;line-height:1.7;
+      max-width:480px;margin:0 auto 20px;line-height:1.7;
       text-shadow:0 1px 4px rgba(0,60,140,0.2);
+    }
+    .hero-ship{
+      display:inline-block;
+      font-size:clamp(17px,4vw,22px);font-weight:700;
+      letter-spacing:1px;
+      color:#fff;
+      background:rgba(255,255,255,0.22);
+      border:2px solid rgba(255,255,255,0.55);
+      border-radius:50px;
+      padding:12px 28px;
+      margin-bottom:32px;
+      text-shadow:0 2px 8px rgba(0,60,140,0.3);
+      box-shadow:0 4px 20px rgba(0,60,120,0.2);
     }
     .hero-mission{
       display:inline-flex;align-items:center;gap:8px;
@@ -387,7 +400,8 @@
 <section class="hero">
   <div class="hero-eyebrow">OFFICIAL MERCHANDISE &nbsp;·&nbsp; <span style="color:var(--gold);font-size:9px;">v16</span></div>
   <h1 class="hero-title">WEAR THE<br>MISSION</h1>
-  <p class="hero-sub">Every item is printed on demand and ships worldwide. <br><strong>Shipping is included in the price.</strong></p>
+  <p class="hero-sub">Every item is printed on demand and ships worldwide.</p>
+  <div class="hero-ship">✅ Shipping is included in the price</div>
 </section>
 
 <!-- ── SUCCESS BANNER (shown after Stripe redirect) ───────── -->
