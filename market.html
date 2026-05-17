@@ -1231,6 +1231,10 @@
 
     try {
       // Get invoice link from edge function
+      // Map NFT tier code → Stars donation tier (cafe=50⭐ / dove=200⭐ / arch=500⭐)
+      var starsMap = { 50:'cafe', 200:'dove', 500:'arch' };
+      var donationTier = starsMap[starsAmt] || 'cafe';
+
       var res = await fetch(SUPABASE_URL + '/functions/v1/create-stars-invoice', {
         method: 'POST',
         headers: {
@@ -1239,19 +1243,16 @@
           'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
         },
         body: JSON.stringify({
-          tier_code:   p.tier.code,
-          is_bundle:   p.isBundle,
+          tier:        donationTier,
+          initData:    tgWebApp.initData || '',
           user_uid:    uid,
           tg_user_id:  tgWebApp.initDataUnsafe && tgWebApp.initDataUnsafe.user
                          ? tgWebApp.initDataUnsafe.user.id : null,
-          stars_price: starsAmt,
-          tier_name:   p.tier.name,
-          multiplier:  p.tier.multiplier,
-          items_count: p.items.length
         })
       });
       var data = await res.json();
-      if (!data.invoice_link) throw new Error(data.error || 'No invoice link');
+      if (!data.link) throw new Error(data.error || 'No invoice link');
+      data.invoice_link = data.link; // compat alias
 
       // Open Telegram Stars payment
       tgWebApp.openInvoice(data.invoice_link, async function(status) {
