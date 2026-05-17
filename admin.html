@@ -1287,22 +1287,27 @@ function _startLockoutTick() {
   tick();
 }
 
-// ── TOTP / 2FA ────────────────────────────────────────────
-const TOTP_SECRET_KEY  = 'nava_totp_secret';
-const TOTP_ENABLED_KEY = 'nava_totp_enabled';
+// ── TOTP / 2FA — server-side (H-5) ────────────────────────────
+// Secret stored in admin_users.totp_secret (DB, service role only).
+// Verification done via Edge Function admin-totp.
+// NOTHING TOTP-related is stored in localStorage anymore.
 
-function _totpEnabled() { return localStorage.getItem(TOTP_ENABLED_KEY) === '1'; }
-function _totpSecret()  { return localStorage.getItem(TOTP_SECRET_KEY) || ''; }
+const TOTP_EF = `${SUPABASE_URL}/functions/v1/admin-totp`;
 
-function _totpVerify(code) {
-  try {
-    const totp = new OTPAuth.TOTP({
-      secret: OTPAuth.Secret.fromBase32(_totpSecret()),
-      digits: 6, period: 30, algorithm: 'SHA1',
-    });
-    return totp.validate({ token: code, window: 1 }) !== null;
-  } catch(e) { return false; }
+// In-session memory only (cleared on page reload — intentional)
+let _totpEnabledSession = false; // set after checkPassword() queries status
+let _pendingTotpSecret  = null;  // set during setup, cleared after confirm
+
+async function _callTotpEF(payload) {
+  const res  = await fetch(TOTP_EF, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+    body:    JSON.stringify({ ...payload, admin_code: _adminCode }),
+  });
+  return res.json();
 }
+
+function _totpEnabled() { return _totpEnabledSession; }
 
 function _totpGetCode(prefix = 't') {
   return ['d0','d1','d2','d3','d4','d5'].map(s => (document.getElementById(prefix + s)?.value || '')).join('');
@@ -1326,18 +1331,26 @@ function totpBack(event, el, prevIdx, prefix = 't') {
   }
 }
 
-function verifyTOTP() {
+async function verifyTOTP() {
   const code = _totpGetCode('t');
   if (code.length < 6) return;
-  if (_totpVerify(code)) {
-    sessionStorage.setItem('nava_admin_totp_ok', '1'); // validé pour cette session
-    document.getElementById('totp-screen').style.display = 'none';
-    unlockPanel();
-  } else {
-    document.getElementById('totp-err').textContent = '✗ INVALID CODE';
-    ['td0','td1','td2','td3','td4','td5'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
-    document.getElementById('td0').focus();
-    setTimeout(() => { document.getElementById('totp-err').textContent = ''; }, 2500);
+  const errEl = document.getElementById('totp-err');
+  errEl.textContent = '···';
+  try {
+    const data = await _callTotpEF({ action: 'verify', token: code });
+    if (data.ok) {
+      sessionStorage.setItem('nava_admin_totp_ok', '1');
+      document.getElementById('totp-screen').style.display = 'none';
+      unlockPanel();
+    } else {
+      errEl.textContent = '✗ INVALID CODE';
+      ['td0','td1','td2','td3','td4','td5'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+      document.getElementById('td0').focus();
+      setTimeout(() => { errEl.textContent = ''; }, 2500);
+    }
+  } catch(e) {
+    errEl.textContent = '✗ ERROR — TRY AGAIN';
+    setTimeout(() => { errEl.textContent = ''; }, 3000);
   }
 }
 
@@ -1345,85 +1358,91 @@ function showTotpCancel() {
   document.getElementById('totp-screen').style.display = 'none';
   document.getElementById('lock-screen').style.display = 'flex';
   ['td0','td1','td2','td3','td4','td5'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
-  // Annuler la session si elle était en cours (auto-login interrompu)
   localStorage.removeItem('nava_admin_ok');
   sessionStorage.removeItem('nava_admin_totp_ok');
   sessionStorage.removeItem('nava_admin_code');
 }
 
-function renderTOTPStatus() {
-  const enabled = _totpEnabled();
+async function renderTOTPStatus() {
   const badge = document.getElementById('totp-status-badge');
-  if (badge) {
-    badge.textContent = enabled ? '✓ ENABLED' : '✗ NOT CONFIGURED';
-    badge.style.color = enabled ? '#4ade80' : 'var(--warn)';
-  }
+  if (!badge) return;
+  badge.textContent = '···';
+  try {
+    const data = await _callTotpEF({ action: 'status' });
+    _totpEnabledSession = !!data.enabled;
+  } catch(e) { /* keep previous state */ }
+  const enabled = _totpEnabledSession;
+  badge.textContent  = enabled ? '✓ ENABLED' : '✗ NOT CONFIGURED';
+  badge.style.color  = enabled ? '#4ade80' : 'var(--warn)';
   const ev = document.getElementById('totp-enabled-view');
   const sv = document.getElementById('totp-setup-view');
   if (ev) ev.style.display = enabled ? 'block' : 'none';
   if (sv) sv.style.display = enabled ? 'none' : 'block';
 }
 
-let _pendingTotpSecret = null;
-
 async function startTOTPSetup() {
-  const secret = new OTPAuth.Secret({ size: 20 });
-  _pendingTotpSecret = secret.base32;
+  const btn = document.getElementById('totp-start-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '···'; }
+  try {
+    const data = await _callTotpEF({ action: 'generate' });
+    if (!data.secret) throw new Error(data.error || 'No secret returned');
 
-  const totp = new OTPAuth.TOTP({
-    issuer: 'NAVA PEACE',
-    label: 'Admin',
-    algorithm: 'SHA1',
-    digits: 6,
-    period: 30,
-    secret,
-  });
-  const uri = totp.toString();
+    _pendingTotpSecret = data.secret; // in-memory only (never in localStorage)
 
-  // Show QR
-  const wrap = document.getElementById('totp-qr-canvas');
-  wrap.innerHTML = '';
-  new QRCode(wrap, { text: uri, width: 200, height: 200, correctLevel: QRCode.CorrectLevel.M });
-  document.getElementById('totp-secret-display').textContent = _pendingTotpSecret;
-  document.getElementById('totp-qr-section').style.display = 'block';
-  document.getElementById('totp-start-btn').style.display = 'none';
-  document.getElementById('sd0').focus();
+    // Show QR using the otpauth URI from server
+    const wrap = document.getElementById('totp-qr-canvas');
+    wrap.innerHTML = '';
+    new QRCode(wrap, { text: data.uri, width: 200, height: 200, correctLevel: QRCode.CorrectLevel.M });
+    document.getElementById('totp-secret-display').textContent = data.secret;
+    document.getElementById('totp-qr-section').style.display = 'block';
+    if (btn) btn.style.display = 'none';
+    document.getElementById('sd0').focus();
+  } catch(e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'SET UP GOOGLE AUTHENTICATOR →'; }
+    showToast('✗ Setup error: ' + e.message, 'error');
+  }
 }
 
-function confirmTOTPSetup() {
+async function confirmTOTPSetup() {
   const code = _totpGetCode('s');
   if (code.length < 6) return;
+  const errEl = document.getElementById('totp-setup-err');
+  errEl.textContent = '···';
   try {
-    const totp = new OTPAuth.TOTP({
-      secret: OTPAuth.Secret.fromBase32(_pendingTotpSecret),
-      digits: 6, period: 30, algorithm: 'SHA1',
-    });
-    if (totp.validate({ token: code, window: 1 }) !== null) {
-      localStorage.setItem(TOTP_SECRET_KEY, _pendingTotpSecret);
-      localStorage.setItem(TOTP_ENABLED_KEY, '1');
+    const data = await _callTotpEF({ action: 'confirm', token: code, pending_secret: _pendingTotpSecret });
+    if (data.ok) {
       _pendingTotpSecret = null;
+      _totpEnabledSession = true;
       document.getElementById('totp-qr-section').style.display = 'none';
-      document.getElementById('totp-start-btn').style.display = 'inline-block';
+      const btn = document.getElementById('totp-start-btn');
+      if (btn) { btn.style.display = 'inline-block'; btn.disabled = false; }
+      errEl.textContent = '';
       renderTOTPStatus();
+      showToast('✓ 2FA activated', 'success');
     } else {
-      document.getElementById('totp-setup-err').textContent = '✗ WRONG CODE — TRY AGAIN';
+      errEl.textContent = '✗ WRONG CODE — TRY AGAIN';
       ['sd0','sd1','sd2','sd3','sd4','sd5'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
       document.getElementById('sd0').focus();
     }
   } catch(e) {
-    document.getElementById('totp-setup-err').textContent = '✗ ERROR: ' + e.message;
+    errEl.textContent = '✗ ERROR: ' + (e.message || e);
   }
 }
 
-function disableTOTP() {
+async function disableTOTP() {
   const code = prompt('Enter your current authenticator code to disable 2FA:');
   if (!code) return;
-  if (_totpVerify(code.trim())) {
-    localStorage.removeItem(TOTP_SECRET_KEY);
-    localStorage.removeItem(TOTP_ENABLED_KEY);
-    renderTOTPStatus();
-  } else {
-    alert('✗ Invalid code. 2FA not disabled.');
+  try {
+    const data = await _callTotpEF({ action: 'disable', token: code.trim() });
+    if (data.ok) {
+      _totpEnabledSession = false;
+      renderTOTPStatus();
+      showToast('✓ 2FA disabled', 'success');
+    } else {
+      showToast('✗ Invalid code — 2FA not disabled', 'error');
+    }
+  } catch(e) {
+    showToast('✗ Error: ' + e.message, 'error');
   }
 }
 
@@ -1444,6 +1463,14 @@ async function checkPassword() {
       localStorage.setItem('nava_admin_role',  _adminRole);
       localStorage.setItem('nava_admin_name',  _adminName);
       sessionStorage.setItem('nava_admin_code', _adminCode);
+      // Query server for TOTP status — sets _totpEnabledSession in memory
+      try {
+        const statusData = await _callTotpEF({ action: 'status' });
+        _totpEnabledSession = !!statusData.enabled;
+      } catch(e) {
+        console.warn('TOTP status check failed, assuming disabled', e);
+        _totpEnabledSession = false;
+      }
       if (_totpEnabled()) {
         document.getElementById('lock-screen').style.display = 'none';
         const ts = document.getElementById('totp-screen');
@@ -2839,28 +2866,40 @@ async function revokeAdminAccess() {
 // allReferrals, etc.) seraient en TDZ quand loadAll() s'exécute via
 // le cache navigateur (réponse Supabase instantanée au refresh).
 // ── AUTO-LOGIN avec vérification d'expiration de session ──
-const _adminExpiry = parseInt(localStorage.getItem('nava_admin_ok') || '0', 10);
-if (_adminExpiry && Date.now() < _adminExpiry) {
-  // Restore role, name & code for the active session
-  _adminRole = localStorage.getItem('nava_admin_role')   || 'super_admin';
-  _adminName = localStorage.getItem('nava_admin_name')   || '';
-  _adminCode = sessionStorage.getItem('nava_admin_code') || '';
-  // Si TOTP activé et pas encore vérifié dans cet onglet → demander le code
-  if (_totpEnabled() && !sessionStorage.getItem('nava_admin_totp_ok')) {
-    document.getElementById('lock-screen').style.display = 'none';
-    const ts = document.getElementById('totp-screen');
-    ts.style.display = 'flex';
-    document.getElementById('td0').focus();
-  } else {
-    unlockPanel();
+(async () => {
+  const _adminExpiry = parseInt(localStorage.getItem('nava_admin_ok') || '0', 10);
+  if (_adminExpiry && Date.now() < _adminExpiry) {
+    // Restore role, name & code for the active session
+    _adminRole = localStorage.getItem('nava_admin_role')   || 'super_admin';
+    _adminName = localStorage.getItem('nava_admin_name')   || '';
+    _adminCode = sessionStorage.getItem('nava_admin_code') || '';
+    // Query server for TOTP status before deciding whether to show TOTP screen
+    if (_adminCode) {
+      try {
+        const statusData = await _callTotpEF({ action: 'status' });
+        _totpEnabledSession = !!statusData.enabled;
+      } catch(e) {
+        console.warn('TOTP status check failed on auto-login, assuming disabled', e);
+        _totpEnabledSession = false;
+      }
+    }
+    // Si TOTP activé et pas encore vérifié dans cet onglet → demander le code
+    if (_totpEnabled() && !sessionStorage.getItem('nava_admin_totp_ok')) {
+      document.getElementById('lock-screen').style.display = 'none';
+      const ts = document.getElementById('totp-screen');
+      ts.style.display = 'flex';
+      document.getElementById('td0').focus();
+    } else {
+      unlockPanel();
+    }
+  } else if (_adminExpiry) {
+    // Session expirée → nettoyer
+    localStorage.removeItem('nava_admin_ok');
+    localStorage.removeItem('nava_admin_role');
+    localStorage.removeItem('nava_admin_name');
+    sessionStorage.removeItem('nava_admin_code');
   }
-} else if (_adminExpiry) {
-  // Session expirée → nettoyer
-  localStorage.removeItem('nava_admin_ok');
-  localStorage.removeItem('nava_admin_role');
-  localStorage.removeItem('nava_admin_name');
-  sessionStorage.removeItem('nava_admin_code');
-}
+})();
 
 // ── FEEDBACK ─────────────────────────────────────────────
 let _fbFilter = 'unread';
