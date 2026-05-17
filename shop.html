@@ -781,9 +781,7 @@ async function loadProducts() {
 
     allProducts = rawRecords.map(normalizeProduct);
     document.getElementById('products-loading').style.display = 'none';
-    buildFilters();
-    renderGrid(allProducts);
-    allProducts.forEach(p => fetchBasePrice(p));
+    // buildFilters + renderGrid called by init() after Promise.all — do NOT call here
   } catch(e) {
     document.getElementById('products-loading').style.display = 'none';
     const emptyEl = document.getElementById('products-empty');
@@ -1195,20 +1193,26 @@ document.addEventListener('click', e => {
 });
 
 // ── Overlay backdrop close ─────────────────────────────────
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
   checkSuccess();
   updateCartBadge();
-  // Load tabs + order in parallel; rebuild when ready
-  loadShopTabs().then(() => { if (allProducts.length) buildFilters(); });
-  loadShopOrder().then(() => { if (allProducts.length) { renderGrid(allProducts); allProducts.forEach(p => fetchBasePrice(p)); } });
-  loadProducts();
+
+  // Wait for tabs + order + products — all 3 must be ready before rendering
+  await Promise.all([loadShopTabs(), loadShopOrder(), loadProducts()]);
+
+  // Now all data is loaded — build filters with real tabs, render sorted grid
+  buildFilters();
+  renderGrid(allProducts);
+  allProducts.forEach(p => fetchBasePrice(p));
+
+  // Price overrides — background refresh after initial render
   loadPriceOverrides().then(() => {
-    // Refresh prices that may now have admin overrides
     if (allProducts.length) {
       Object.keys(priceCache).forEach(k => delete priceCache[k]);
       allProducts.forEach(p => fetchBasePrice(p));
     }
   }).catch(() => {});
+
   document.querySelectorAll('.overlay').forEach(el => {
     el.addEventListener('click', e => { if (e.target === el) el.classList.remove('active'); });
   });
