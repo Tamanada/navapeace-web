@@ -5,12 +5,11 @@
   <script>
   (function(){
     var h = window.location.hash || '';
+    // Strict Telegram detection — localStorage alone is NOT enough
     var isTg = h.indexOf('tgWebAppData') !== -1 ||
                h.indexOf('tgWebAppVersion') !== -1 ||
                !!window.TelegramWebviewProxy ||
-               !!(window.Telegram && window.Telegram.WebApp) ||
-               !!localStorage.getItem('nava_peace_country') ||
-               (localStorage.getItem('nava_peace_uid') || '').indexOf('tg_') === 0;
+               !!(window.Telegram && window.Telegram.WebApp);
     if (!isTg) window.location.replace('https://t.me/NavaPeaceBot/app');
   })();
   </script>
@@ -424,7 +423,7 @@
 
   <!-- HEADER -->
   <div class="header" style="position:relative;">
-    <a href="https://www.nava-peace.world" target="_blank" style="text-decoration:none;color:inherit;display:contents;" onclick="if(typeof NAVA_TG!=='undefined'&&NAVA_TG.isTelegram){event.preventDefault();Telegram.WebApp.openLink('https://www.nava-peace.world');}">
+    <a href="https://www.nava-peace.world" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit;display:contents;" onclick="if(typeof NAVA_TG!=='undefined'&&NAVA_TG.isTelegram){event.preventDefault();Telegram.WebApp.openLink('https://www.nava-peace.world');}">
     <img src="logo.png" alt="NAVA PEACE" />
     <h1>NAVA PEACE</h1>
     </a>
@@ -575,7 +574,7 @@
   </div>
 
   <!-- Website link -->
-  <a href="https://www.nava-peace.world" target="_blank"
+  <a href="https://www.nava-peace.world" target="_blank" rel="noopener noreferrer"
      style="display:flex;align-items:center;justify-content:center;gap:10px;
             background:rgba(255,255,255,0.18);border:2px solid rgba(255,255,255,0.6);
             border-radius:16px;padding:16px;margin:0 16px 16px;
@@ -672,7 +671,7 @@
       <a href="merch.html" style="flex:1;display:block;text-align:center;background:linear-gradient(135deg,rgba(58,172,223,0.2),rgba(30,80,140,0.25));border:1px solid rgba(100,210,255,0.35);border-radius:12px;padding:13px 8px;color:#64D2FF;font-size:13px;letter-spacing:2px;text-decoration:none;">
         VIEW IN APP →
       </a>
-      <a href="https://www.nava-peace.world" target="_blank" style="flex:1;display:block;text-align:center;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:13px 8px;color:rgba(255,255,255,0.6);font-size:13px;letter-spacing:2px;text-decoration:none;" onclick="if(typeof Telegram!=='undefined'&&Telegram.WebApp&&Telegram.WebApp.openLink){event.preventDefault();Telegram.WebApp.openLink('https://www.nava-peace.world');}">
+      <a href="https://www.nava-peace.world" target="_blank" rel="noopener noreferrer" style="flex:1;display:block;text-align:center;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:13px 8px;color:rgba(255,255,255,0.6);font-size:13px;letter-spacing:2px;text-decoration:none;" onclick="if(typeof Telegram!=='undefined'&&Telegram.WebApp&&Telegram.WebApp.openLink){event.preventDefault();Telegram.WebApp.openLink('https://www.nava-peace.world');}">
         FULL DETAILS ↗
       </a>
     </div>

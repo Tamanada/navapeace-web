@@ -449,7 +449,7 @@
             '<p style="font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:1.5px;' +
             'color:rgba(255,255,255,0.35);text-align:center;margin:4px 0 0 0;line-height:1.6;">' +
             (lbl.hint || 'ASK YOUR FRIENDS IF THEY CAN INVITE YOU ;)') + '</p>' +
-            '<a href="https://t.me/+89fB2Zrp4r5hODg9" target="_blank" ' +
+            '<a href="https://t.me/+89fB2Zrp4r5hODg9" target="_blank" rel="noopener noreferrer" ' +
             'style="display:block;margin-top:14px;padding:11px 16px;border-radius:12px;' +
             'background:rgba(41,182,246,0.10);border:1px solid rgba(41,182,246,0.28);' +
             'color:rgba(100,210,255,0.9);font-family:Nasalization,Arial,sans-serif;' +
@@ -556,12 +556,11 @@
       // Non-Telegram redirect
       setTimeout(function() {
         var h = window.location.hash || '';
+        // Strict Telegram detection — localStorage alone is NOT enough
         var hasTg = !!(window.Telegram && window.Telegram.WebApp) ||
                     !!window.TelegramWebviewProxy ||
                     h.indexOf('tgWebAppData') !== -1 ||
-                    h.indexOf('tgWebAppVersion') !== -1 ||
-                    !!localStorage.getItem('nava_peace_country') ||
-                    (localStorage.getItem('nava_peace_uid') || '').indexOf('tg_') === 0;
+                    h.indexOf('tgWebAppVersion') !== -1;
         if (!hasTg) window.location.replace('https://t.me/NavaPeaceBot/app');
       }, 3000);
 

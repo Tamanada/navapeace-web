@@ -10,11 +10,22 @@ const STRIPE_KEY   = Deno.env.get('STRIPE_SECRET_KEY')           ?? '';
 const SUPA_URL     = Deno.env.get('SUPABASE_URL')                ?? '';
 const SERVICE_KEY  = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')   ?? '';
 
-const CORS = {
-  'Access-Control-Allow-Origin':  '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-};
+const ALLOWED_ORIGINS = [
+  'https://nava-peace.app',
+  'https://nava-peace.world',
+  'https://navapeace-web.david-dancingelephant.workers.dev',
+];
+
+function corsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get('origin') ?? '';
+  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin':  allowed,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Vary': 'Origin',
+  };
+}
 
 // ── Stripe form-encoder (Stripe API uses URL-encoded, not JSON) ─
 function encodeStripeForm(obj: unknown, prefix = ''): string {
@@ -37,13 +48,6 @@ function nonce32(): string {
   const buf   = new Uint8Array(32);
   crypto.getRandomValues(buf);
   return Array.from(buf).map(b => chars[b % chars.length]).join('');
-}
-
-function json(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { ...CORS, 'Content-Type': 'application/json' },
-  });
 }
 
 // ── HMAC V4 Signing ─────────────────────────────────────────
@@ -155,6 +159,13 @@ async function verifyStripeWebhook(sigHeader: string, rawBody: string, secret: s
 
 // ── Router ───────────────────────────────────────────────────
 Deno.serve(async (req) => {
+  const CORS = corsHeaders(req);
+  const json = (data: unknown, status = 200): Response =>
+    new Response(JSON.stringify(data), {
+      status,
+      headers: { ...CORS, 'Content-Type': 'application/json' },
+    });
+
   if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
 
   const url    = new URL(req.url);
@@ -392,18 +403,110 @@ Deno.serve(async (req) => {
       if (!items?.length)              return json({ error: 'items required' }, 400);
       if (!success_url || !cancel_url) return json({ error: 'success_url and cancel_url required' }, 400);
 
+      // ── C-1 FIX: server-side price calculation ──────────────
+      // retail_price from the client is IGNORED entirely.
+      // For each item we fetch the Yoycol template server-side,
+      // find the matching variant by skuCode, then apply the same
+      // pricing formula as shop.html:
+      //   target  = wholesale + SHIPPING_ESTIMATE($9) + TARGET_MARGIN($7)
+      //   retail  = max(MIN_RETAIL($19.99), Math.round(target + 0.01) - 0.01)
+      // Admin price overrides (yoycol_price_overrides in admin_settings) take
+      // precedence exactly as in the client.
+      const SHIPPING_ESTIMATE = 9;
+      const TARGET_MARGIN     = 7;
+      const MIN_RETAIL        = 19.99;
+      const MAX_QTY_PER_ITEM  = 10;
+
+      function calcRetailPrice(wholesale: number): number {
+        if (!(wholesale > 0)) return MIN_RETAIL;
+        const target = wholesale + SHIPPING_ESTIMATE + TARGET_MARGIN;
+        return parseFloat(Math.max(MIN_RETAIL, Math.round(target + 0.01) - 0.01).toFixed(2));
+      }
+
+      // Fetch admin price overrides once (productId → price, or "productId:skuCode" → price)
+      let priceOverrides: Record<string, number> = {};
+      if (SUPA_URL && SERVICE_KEY) {
+        try {
+          const ovRes = await fetch(
+            `${SUPA_URL}/rest/v1/admin_settings?key=eq.yoycol_price_overrides&select=value`,
+            { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } }
+          );
+          const ovRows = await ovRes.json() as Array<Record<string, unknown>>;
+          const ovVal  = ovRows?.[0]?.value;
+          if (ovVal && typeof ovVal === 'object') {
+            priceOverrides = ovVal as Record<string, number>;
+          } else if (typeof ovVal === 'string') {
+            priceOverrides = JSON.parse(ovVal);
+          }
+        } catch { /* non-fatal — fall back to formula */ }
+      }
+
+      // Validate and price each item server-side
+      type RawItem = { title?: string; image?: string; mappingId?: string; skuCode?: string; variantId?: string; qty?: unknown };
+      type PricedItem = { title: string; image: string; mappingId: string; skuCode: string; variantId: string; qty: number; retail_price: number; wholesale: number };
+
+      const pricedItems: PricedItem[] = [];
+
+      for (const raw of items as RawItem[]) {
+        const mappingId = String(raw.mappingId || '').trim();
+        const skuCode   = String(raw.skuCode   || '').trim();
+        const title     = String(raw.title     || 'Product').slice(0, 227);
+        const image     = String(raw.image     || '');
+        const variantId = String(raw.variantId || '');
+
+        // Cap qty — never trust the client
+        const qty = Math.min(MAX_QTY_PER_ITEM, Math.max(1, Math.floor(Number(raw.qty) || 1)));
+
+        if (!mappingId || !skuCode) {
+          return json({ error: `Item "${title}" is missing mappingId or skuCode` }, 400);
+        }
+
+        // Fetch Yoycol template to get the real wholesale price
+        const tmplData = await yoyFetch('GET', `/api/2025/open/v4/product_templates/${mappingId}`);
+        if (!tmplData?.data) {
+          return json({ error: `Product not found: ${mappingId}` }, 400);
+        }
+
+        const rawVariants: Array<Record<string, unknown>> = tmplData.data?.variants ?? tmplData.data?.skuList ?? [];
+        if (!rawVariants.length) {
+          return json({ error: `No variants found for product: ${mappingId}` }, 400);
+        }
+
+        // Find matching variant by skuCode
+        const variant = rawVariants.find(v =>
+          (v.skuCode ?? v.externalSkuCode) === skuCode
+        );
+        if (!variant) {
+          return json({ error: `Variant not found: skuCode=${skuCode} in product ${mappingId}` }, 400);
+        }
+
+        // Extract wholesale price using same normalisation as shop.html normalizeVariant()
+        const wholesale = parseFloat(
+          String(Number(variant.price) > 0 ? variant.price : (variant.salesPrice ?? variant.salePrice ?? variant.costPrice ?? variant.basePrice ?? 0))
+        );
+
+        // Apply admin price override if set (keyed by "mappingId:skuCode" or "mappingId")
+        const overrideKey   = `${mappingId}:${skuCode}`;
+        const overridePrice = priceOverrides[overrideKey] ?? priceOverrides[mappingId];
+        const retail_price  = overridePrice !== undefined
+          ? parseFloat(String(overridePrice))
+          : calcRetailPrice(wholesale);
+
+        pricedItems.push({ title, image, mappingId, skuCode, variantId, qty, retail_price, wholesale });
+      }
+
+      // All items validated — proceed to Stripe
       const orderId  = crypto.randomUUID();
       const orderSn  = `NP_WEB_${Date.now()}`;
-      const totalUsd = items.reduce((s: number, i: {retail_price: number; qty: number}) =>
-        s + (i.retail_price * i.qty), 0);
+      const totalUsd = pricedItems.reduce((s, i) => s + i.retail_price * i.qty, 0);
 
-      // Build Stripe Checkout Session payload
-      const lineItems = items.map((item: {title: string; image?: string; retail_price: number; qty: number}) => ({
+      // Build Stripe line items using server-computed prices
+      const lineItems = pricedItems.map(item => ({
         price_data: {
           currency:     'usd',
           unit_amount:  Math.round(item.retail_price * 100),
           product_data: {
-            name:   item.title.slice(0, 227),
+            name:   item.title,
             images: item.image ? [item.image] : [],
           },
         },
@@ -454,7 +557,7 @@ Deno.serve(async (req) => {
         return json({ error: err }, 500);
       }
 
-      // Persist pending order with the Stripe session ID
+      // Persist pending order — items stored with server-computed prices
       if (SUPA_URL && SERVICE_KEY) {
         await fetch(`${SUPA_URL}/rest/v1/merch_orders`, {
           method: 'POST',
@@ -464,13 +567,13 @@ Deno.serve(async (req) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            id:               orderId,
+            id:                orderId,
             stripe_session_id: session.id,
-            yoycol_order_sn:  orderSn,
-            status:           'pending',
-            items,
-            customer_email:   customer_email || null,
-            total_usd:        parseFloat(totalUsd.toFixed(2)),
+            yoycol_order_sn:   orderSn,
+            status:            'pending',
+            items:             pricedItems,
+            customer_email:    customer_email || null,
+            total_usd:         parseFloat(totalUsd.toFixed(2)),
           }),
         });
       }

@@ -5,12 +5,11 @@
   <script>
   (function(){
     var h = window.location.hash || '';
+    // Strict Telegram detection — localStorage alone is NOT enough
     var isTg = h.indexOf('tgWebAppData') !== -1 ||
                h.indexOf('tgWebAppVersion') !== -1 ||
                !!window.TelegramWebviewProxy ||
-               !!(window.Telegram && window.Telegram.WebApp) ||
-               !!localStorage.getItem('nava_peace_country') ||
-               (localStorage.getItem('nava_peace_uid') || '').indexOf('tg_') === 0;
+               !!(window.Telegram && window.Telegram.WebApp);
     if (!isTg) window.location.replace('https://t.me/NavaPeaceBot/app');
   })();
   </script>
@@ -507,7 +506,7 @@
 
   <!-- HEADER -->
   <div class="header" style="position:relative;">
-    <a href="https://www.nava-peace.world" target="_blank" style="text-decoration:none;color:inherit;display:flex;flex-direction:column;align-items:center;width:100%;" onclick="if(typeof NAVA_TG!=='undefined'&&NAVA_TG.isTelegram){event.preventDefault();Telegram.WebApp.openLink('https://www.nava-peace.world');}">
+    <a href="https://www.nava-peace.world" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit;display:flex;flex-direction:column;align-items:center;width:100%;" onclick="if(typeof NAVA_TG!=='undefined'&&NAVA_TG.isTelegram){event.preventDefault();Telegram.WebApp.openLink('https://www.nava-peace.world');}">
     <img src="logo.png" alt="NAVA PEACE" />
     <h1>NAVA PEACE</h1>
     </a>
@@ -649,7 +648,7 @@
   <div style="padding:0 16px 16px;">
 
     <!-- Lien site -->
-    <a href="https://www.nava-peace.world" target="_blank"
+    <a href="https://www.nava-peace.world" target="_blank" rel="noopener noreferrer"
        style="display:flex;align-items:center;justify-content:center;gap:10px;
               background:rgba(255,255,255,0.22);border:2px solid rgba(255,255,255,0.75);
               border-radius:14px;padding:16px;margin-bottom:16px;

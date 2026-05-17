@@ -16,6 +16,23 @@
 import { serve }        from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
+const ALLOWED_ORIGINS = [
+  'https://nava-peace.app',
+  'https://nava-peace.world',
+  'https://navapeace-web.david-dancingelephant.workers.dev',
+];
+
+function corsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get('origin') ?? '';
+  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin':  allowed,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Vary': 'Origin',
+  };
+}
+
 // ── Minimal Web Push implementation (no npm dependency) ──────────────────────
 // Uses the Web Crypto API available in Deno to sign VAPID JWTs and encrypt
 // the push message payload.
@@ -146,8 +163,10 @@ async function sendPushToEndpoint(
 
 // ── Main handler ─────────────────────────────────────────────────────────────
 serve(async (req) => {
+  const CORS = corsHeaders(req);
+
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, content-type' } });
+    return new Response(null, { headers: CORS });
   }
 
   try {
@@ -157,7 +176,7 @@ serve(async (req) => {
     if (!admin_code) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: { ...CORS, 'Content-Type': 'application/json' },
       });
     }
 
@@ -176,7 +195,7 @@ serve(async (req) => {
     if (authErr || !isAdmin?.valid) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: { ...CORS, 'Content-Type': 'application/json' },
       });
     }
 
@@ -199,13 +218,13 @@ serve(async (req) => {
     const failed = results.filter(r => r.status === 'rejected').length;
 
     return new Response(JSON.stringify({ sent, failed }), {
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: { ...CORS, 'Content-Type': 'application/json' },
     });
 
   } catch (e) {
     return new Response(JSON.stringify({ error: String(e) }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: { ...CORS, 'Content-Type': 'application/json' },
     });
   }
 });

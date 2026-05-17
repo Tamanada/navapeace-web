@@ -8,6 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://static.cloudflareinsights.com; frame-ancestors 'none';"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet"/>
@@ -591,7 +592,8 @@ function esc(s) {
 }
 
 let cart          = lsGet('nava_shop_cart', []);
-const priceCache  = {}; // productId → display string, persists across filter changes
+const priceCache    = {}; // productId → display string, persists across filter changes
+const templateCache = {}; // productId → full raw Yoycol template data, shared across fetchBasePrice + openDetail
 let priceOverrides = {}; // productId → admin-set retail price (from admin_settings)
 
 async function loadPriceOverrides() {
@@ -730,12 +732,11 @@ async function startCheckout() {
   try {
     const stripeItems = cart.map(i => ({
       title:        i.title,
-      image:        i.image   || '',
-      skuCode:      i.skuCode || '',
+      image:        i.image     || '',
+      mappingId:    i.mappingId || '',
+      skuCode:      i.skuCode   || '',
       variantId:    i.variantId || '',
       qty:          i.qty,
-      retail_price: i.price,
-      wholesale:    i.wholesale || 0,
     }));
 
     const res = await fetch(`${PROXY_URL}?action=create_checkout_session`, {
@@ -928,9 +929,13 @@ async function fetchBasePrice(prod) {
     }
   }
   try {
-    const res  = await fetch(`${PROXY_URL}?action=template&productId=${prod.id}`, { headers: AUTH_HEADERS });
-    const data = await res.json();
-    const raw  = data?.data || {};
+    let raw = templateCache[prod.id];
+    if (!raw) {
+      const res  = await fetch(`${PROXY_URL}?action=template&productId=${prod.id}`, { headers: AUTH_HEADERS });
+      const data = await res.json();
+      raw = data?.data || {};
+      templateCache[prod.id] = raw;
+    }
     const rawVariants = raw?.variants || raw?.skuList || [];
     if (!rawVariants.length) return;
     const prices = rawVariants.map(v => normalizeVariant(v).salesPrice).filter(p => p > 0);
@@ -986,9 +991,13 @@ async function openDetail(productId) {
   document.getElementById('detail-overlay').classList.add('active');
 
   try {
-    const res  = await fetch(`${PROXY_URL}?action=template&productId=${productId}`, { headers: AUTH_HEADERS });
-    const data = await res.json();
-    const raw  = data?.data || {};
+    let raw = templateCache[productId];
+    if (!raw) {
+      const res  = await fetch(`${PROXY_URL}?action=template&productId=${productId}`, { headers: AUTH_HEADERS });
+      const data = await res.json();
+      raw = data?.data || {};
+      templateCache[productId] = raw;
+    }
     currentProd.spuCode      = raw?.product?.spuCode    || '';
     currentProd.designCode   = raw?.designCode          || '';
     currentProd.description  = raw?.product?.description || raw?.product?.productDesc || raw?.product?.desc || raw?.description || '';

@@ -5,12 +5,11 @@
   <script>
   (function(){
     var h = window.location.hash || '';
+    // Strict Telegram detection — localStorage alone is NOT enough
     var isTg = h.indexOf('tgWebAppData') !== -1 ||
                h.indexOf('tgWebAppVersion') !== -1 ||
                !!window.TelegramWebviewProxy ||
-               !!(window.Telegram && window.Telegram.WebApp) ||
-               !!localStorage.getItem('nava_peace_country') ||
-               (localStorage.getItem('nava_peace_uid') || '').indexOf('tg_') === 0;
+               !!(window.Telegram && window.Telegram.WebApp);
     if (!isTg) window.location.replace('https://t.me/NavaPeaceBot/app');
   })();
   </script>
@@ -893,7 +892,8 @@
         { onConflict: 'user_uid,badge_code' }
       );
       ownedSet.add(code);
-      ownedTiers.push(1);
+      var claimedTier = getTierByCode(code);
+      ownedTiers.push(claimedTier ? claimedTier.tier : 1);
       showToast('🕊  PEACE LOVER CLAIMED!', 'success');
       loadMarket();
     } catch(e) { showToast('Error claiming card', 'error'); }
@@ -1147,7 +1147,10 @@
   }
 
   // ── POLL BLOCKCHAIN CONFIRMATION ─────────────────────────────────────────
+  var _tonPollInterval = null; // module-level handle so we can cancel on page exit
+
   function pollTonConfirmation(purchaseId, walletAddr, tierCode, isBundle, priceUsdt) {
+    if (_tonPollInterval) { clearInterval(_tonPollInterval); _tonPollInterval = null; }
     var attempts = 0;
     var maxAttempts = 36; // 3 minutes (every 5s)
 
@@ -1175,6 +1178,7 @@
 
         if (data.confirmed) {
           clearInterval(interval);
+          _tonPollInterval = null;
           showToast('✅ Payment confirmed! NFT added to your collection.', 'success');
           setTimeout(loadMarket, 1200);
           return;
@@ -1183,10 +1187,17 @@
 
       if (attempts >= maxAttempts) {
         clearInterval(interval);
+        _tonPollInterval = null;
         showToast('⚠ Verification timeout — check back in a few minutes.', 'error');
       }
     }, 5000);
+    _tonPollInterval = interval;
   }
+
+  // Cancel poll if user navigates away
+  window.addEventListener('pagehide', function() {
+    if (_tonPollInterval) { clearInterval(_tonPollInterval); _tonPollInterval = null; }
+  });
 
   // ── TOAST ────────────────────────────────────────────────────────────────
   function showToast(msg, type) {

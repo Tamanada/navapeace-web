@@ -1104,7 +1104,7 @@
       </div>
 
       <div style="text-align:center;margin-top:8px;">
-        <a href="https://app.supabase.com" target="_blank" style="font-size:8px;letter-spacing:2px;color:var(--w60);text-decoration:underline;">OPEN SUPABASE DASHBOARD →</a>
+        <a href="https://app.supabase.com" target="_blank" rel="noopener noreferrer" style="font-size:8px;letter-spacing:2px;color:var(--w60);text-decoration:underline;">OPEN SUPABASE DASHBOARD →</a>
       </div>
     </div>
 
@@ -2045,7 +2045,7 @@ async function pushToFiltered() {
       filteredUsers.map(u=>fetch(`${SUPABASE_URL}/functions/v1/send-push`,{
         method:'POST',
         headers:{'Content-Type':'application/json','Authorization':`Bearer ${SUPABASE_ANON_KEY}`},
-        body:JSON.stringify({title,body,url,to_user_uid:u.uid}),
+        body:JSON.stringify({title,body,url,to_user_uid:u.uid,admin_code:_adminCode}),
       }))
     );
     const sent  =results.filter(r=>r.status==='fulfilled').length;
@@ -2565,7 +2565,7 @@ async function sendPushNotif() {
   result.textContent = '';
 
   try {
-    const payload = { title, body, url };
+    const payload = { title, body, url, admin_code: _adminCode };
     if (uid) payload.to_user_uid = uid;
 
     const res = await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
@@ -3119,7 +3119,7 @@ function _renderYoyOrders(list) {
     // Tracking: collect all tracking numbers from items
     const trackNos = [...new Set(items.flatMap(i => [i.trackingNumber, i.trackNo].filter(Boolean)))];
     const trackHtml = trackNos.length
-      ? trackNos.map(t => `<a class="yoy-track-link" href="https://t.17track.net/en#nums=${encodeURIComponent(t)}" target="_blank">${t}</a>`).join('<br>')
+      ? trackNos.map(t => `<a class="yoy-track-link" href="https://t.17track.net/en#nums=${encodeURIComponent(t)}" target="_blank" rel="noopener noreferrer">${t}</a>`).join('<br>')
       : '—';
     return `<tr>
       <td class="uid-cell" title="${escHtml(o.orderId??'')}">
@@ -3909,7 +3909,7 @@ async function tmgrSave() {
         </table>
       </div>
       <div class="yoy-dm-footer">
-        <a id="yoy-dm-yoycol-link" href="https://www.yoycol.com/personal_center/products" target="_blank" style="font-size:8px;letter-spacing:2px;color:var(--w40);text-decoration:underline;">MODIFIER SUR YOYCOL →</a>
+        <a id="yoy-dm-yoycol-link" href="https://www.yoycol.com/personal_center/products" target="_blank" rel="noopener noreferrer" style="font-size:8px;letter-spacing:2px;color:var(--w40);text-decoration:underline;">MODIFIER SUR YOYCOL →</a>
         <div style="display:flex;gap:10px;">
           <button class="yoy-dm-cancel" onclick="closeYoyDetail()">ANNULER</button>
           <button class="yoy-dm-save" id="yoy-dm-save-btn" onclick="yoyDetailSaveAll()">💾 SAUVEGARDER</button>
