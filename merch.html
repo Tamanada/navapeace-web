@@ -946,6 +946,18 @@ const DEFAULT_TABS = ['CLOTHING','SWIMWEAR','ACCESSORIES','PHONE CASES','HOME & 
 let merchTabs  = {};   // { 'CLOTHING': ['id1','id2'], ... } from admin
 let activeTab  = 'ALL';
 
+// Keyword fallback per tab — for products not yet manually assigned in admin.
+// Hybrid mode: admin IDs take priority; unassigned products fall through to keywords.
+const TAB_KEYWORDS = {
+  'CLOTHING':       'shirt dress shorts pants hoodie jacket',
+  'SWIMWEAR':       'swimsuit bikini swim',
+  'ACCESSORIES':    'bag cap tote gaiter hat',
+  'PHONE CASES':    'phone iphone samsung airbag case',
+  'HOME & DECOR':   'mug towel quilt bedding blanket duvet pillow cushion',
+  'FLAGS & PRINTS': 'flag banner poster print',
+  'LIFESTYLE':      'playing cards puzzle keychain sticker game',
+};
+
 async function loadProductOrder() {
   try {
     const res  = await fetch(`${PROXY_URL}?action=get_merch_order`, { headers: AUTH_H });
@@ -966,8 +978,25 @@ async function loadMerchTabs() {
 }
 
 function getTabNames() {
-  const keys = Object.keys(merchTabs);
-  return ['ALL', ...(keys.length ? keys : DEFAULT_TABS)];
+  // Merge admin tab names with default tabs so all categories always appear.
+  // A tab is shown only if at least 1 product (admin-assigned OR keyword-matched) exists.
+  const adminKeys  = Object.keys(merchTabs);
+  const allTabKeys = [...new Set([...(adminKeys.length ? adminKeys : []), ...DEFAULT_TABS])];
+  const allAssigned = new Set(Object.values(merchTabs).flat().map(String));
+
+  const visible = allTabKeys.filter(t => {
+    const ids = (merchTabs[t] || []).map(String);
+    const kw  = (TAB_KEYWORDS[t] || '').toLowerCase();
+    return allProducts.some(p => {
+      if (ids.includes(String(p.id))) return true;
+      // Also count unassigned products matching this tab's keywords
+      if (!allAssigned.has(String(p.id)) && kw) {
+        return kw.split(' ').some(k => k && p.title.toLowerCase().includes(k));
+      }
+      return false;
+    });
+  });
+  return ['ALL', ...visible];
 }
 
 function renderTabBar() {
@@ -991,13 +1020,27 @@ function selectTab(tab) {
 function filterByTab() {
   const grid = document.getElementById('products-grid');
   let list = allProducts;
-  if (activeTab !== 'ALL' && Object.keys(merchTabs).length) {
-    const ids = (merchTabs[activeTab] || []).map(String);
-    if (!ids.length) {
+
+  if (activeTab !== 'ALL') {
+    // Hybrid mode: admin-assigned IDs first, then keyword fallback for unassigned products.
+    // This ensures products not yet dragged to a tab in admin still appear if they match.
+    const adminIds   = (merchTabs[activeTab] || []).map(String);
+    const kw         = (TAB_KEYWORDS[activeTab] || '').toLowerCase();
+    const allAssigned = new Set(Object.values(merchTabs).flat().map(String));
+
+    list = allProducts.filter(p => {
+      const pid = String(p.id);
+      if (adminIds.includes(pid)) return true;
+      if (!allAssigned.has(pid) && kw) {
+        return kw.split(' ').some(k => k && p.title.toLowerCase().includes(k));
+      }
+      return false;
+    });
+
+    if (!list.length) {
       grid.innerHTML = '<div class="tab-empty">NO PRODUCTS IN THIS CATEGORY YET</div>';
       grid.style.display = 'grid'; return;
     }
-    list = allProducts.filter(p => ids.includes(String(p.id)));
   }
   renderGrid(sortedProducts(list));
 }
@@ -1152,10 +1195,11 @@ function starsForPrice(usd) {
 // Strategy: try product templates first (correct for Open API stores).
 // If empty, fall back to self_store products (for legacy manual stores).
 async function loadProducts() {
-  // Load tabs + order in parallel with products
-  Promise.all([loadMerchTabs(), loadProductOrder()]).then(() => {
-    if (allProducts.length) { renderTabBar(); filterByTab(); }
-  });
+  // loadProductOrder() sorts allProducts — it MUST run after allProducts is set.
+  // Running it concurrently causes a race: if it resolves before allProducts
+  // is populated, the sort is a no-op and products appear in random API order.
+  // Fix: load tabs concurrently (no dependency), then sort after products load.
+  await loadMerchTabs(); // tabs need no dependency on products — load concurrently
   try {
     let rawRecords = [];
     let source = 'template';
@@ -1185,6 +1229,10 @@ async function loadProducts() {
     }
 
     allProducts = rawRecords.map(p => normalizeProduct(p, source));
+
+    // Sort AFTER allProducts is populated — avoids the race condition
+    await loadProductOrder();
+
     renderTabBar();
     filterByTab();
   } catch (e) {
