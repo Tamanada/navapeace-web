@@ -210,12 +210,21 @@ serve(async (req) => {
       url:   url   || '/peace.html',
     });
 
-    const results = await Promise.allSettled(
-      (data || []).map(row => sendPushToEndpoint(row.subscription, payload, pubKeyBytes, privKeyBytes))
-    );
+    // H-7 fix: process in batches to avoid N simultaneous open connections
+    // which can exhaust Edge Function memory on large subscriber lists.
+    const BATCH_SIZE = 50;
+    const rows       = data || [];
+    let sent   = 0;
+    let failed = 0;
 
-    const sent   = results.filter(r => r.status === 'fulfilled').length;
-    const failed = results.filter(r => r.status === 'rejected').length;
+    for (let i = 0; i < rows.length; i += BATCH_SIZE) {
+      const batch   = rows.slice(i, i + BATCH_SIZE);
+      const results = await Promise.allSettled(
+        batch.map(row => sendPushToEndpoint(row.subscription, payload, pubKeyBytes, privKeyBytes))
+      );
+      sent   += results.filter(r => r.status === 'fulfilled').length;
+      failed += results.filter(r => r.status === 'rejected').length;
+    }
 
     return new Response(JSON.stringify({ sent, failed }), {
       headers: { ...CORS, 'Content-Type': 'application/json' },

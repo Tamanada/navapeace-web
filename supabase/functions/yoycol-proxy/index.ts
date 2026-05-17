@@ -310,10 +310,10 @@ Deno.serve(async (req) => {
       return json(tgData);
     }
 
-    // ── POST save user email (no auth needed beyond uid) ───────────
+    // ── POST save user email ────────────────────────────────────────
+    // H-8 fix: verify uid exists in user_telegram before writing,
+    // so an attacker cannot store emails under arbitrary/forged uids.
     if (action === 'save_user_email' && req.method === 'POST') {
-      const SUPA_URL    = Deno.env.get('SUPABASE_URL') ?? '';
-      const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
       if (!SUPA_URL || !SERVICE_KEY) return json({ error: 'Supabase not configured' }, 500);
 
       const { uid, email } = await req.json();
@@ -323,7 +323,22 @@ Deno.serve(async (req) => {
       const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRe.test(String(email))) return json({ error: 'invalid email format' }, 400);
 
-      // Store as key=user_email_<uid> in admin_settings (no schema change needed)
+      // Verify uid is a real registered user (prevents arbitrary key injection)
+      const uidCheck = await fetch(
+        `${SUPA_URL}/rest/v1/user_telegram?user_uid=eq.${encodeURIComponent(String(uid))}&select=user_uid&limit=1`,
+        {
+          headers: {
+            apikey:        SERVICE_KEY,
+            Authorization: `Bearer ${SERVICE_KEY}`,
+          },
+        },
+      );
+      const uidRows = await uidCheck.json() as { user_uid: string }[];
+      if (!Array.isArray(uidRows) || uidRows.length === 0) {
+        return json({ error: 'invalid uid' }, 400);
+      }
+
+      // Store as key=user_email_<uid> in admin_settings
       const upsertRes = await fetch(`${SUPA_URL}/rest/v1/admin_settings`, {
         method: 'POST',
         headers: {

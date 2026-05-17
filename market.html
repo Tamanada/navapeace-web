@@ -675,84 +675,63 @@
   }
 
   // ── REFERRAL AUTO-CLAIM ───────────────────────────────────────────────────
-  // 1% of each tier's supply is reserved for referral rewards
+  // Verification + atomic claim moved server-side (C-4 security fix).
+  // The Edge Function derives uid from Telegram initData (no localStorage uid trusted),
+  // reads the real ref_code from peace_votes (no localStorage ref_code trusted),
+  // and calls nava_claim_referral_rewards() — a SECURITY DEFINER DB function
+  // that checks quota atomically before inserting.
   var REFERRAL_THRESHOLDS = [
-    { code: 'PEACE_GARDENER',    tier: 2, refsNeeded: 100,   freeQuota: 80000  },
-    { code: 'PEACE_GUARDIAN',    tier: 3, refsNeeded: 250,   freeQuota: 48000  },
-    { code: 'PEACE_GUIDE',       tier: 4, refsNeeded: 500,   freeQuota: 32000  },
-    { code: 'PEACE_ILLUMINATOR', tier: 5, refsNeeded: 1000,  freeQuota: 16000  },
-    { code: 'PEACE_LEGEND',      tier: 6, refsNeeded: 2500,  freeQuota: 6400   },
-    { code: 'ANGEL_OF_PEACE',    tier: 7, refsNeeded: 5000,  freeQuota: 3200   },
-    { code: 'PEACE_POWER',       tier: 8, refsNeeded: 10000, freeQuota: 1600   },
+    { code: 'PEACE_GARDENER',    tier: 2, refsNeeded: 100   },
+    { code: 'PEACE_GUARDIAN',    tier: 3, refsNeeded: 250   },
+    { code: 'PEACE_GUIDE',       tier: 4, refsNeeded: 500   },
+    { code: 'PEACE_ILLUMINATOR', tier: 5, refsNeeded: 1000  },
+    { code: 'PEACE_LEGEND',      tier: 6, refsNeeded: 2500  },
+    { code: 'ANGEL_OF_PEACE',    tier: 7, refsNeeded: 5000  },
+    { code: 'PEACE_POWER',       tier: 8, refsNeeded: 10000 },
   ];
 
+  var REFERRAL_EF = SUPABASE_URL + '/functions/v1/referral-claim';
+
   async function checkReferralClaims() {
-    if (!uid || !sb) return;
+    // Requires Telegram identity — ref_code from localStorage is NOT trusted.
+    var tgWebApp = (typeof Telegram !== 'undefined' && Telegram.WebApp) ? Telegram.WebApp : null;
+    var initData = tgWebApp ? (tgWebApp.initData || '') : '';
+    if (!initData) return; // web-only browser: skip referral check
 
-    // Count active referrals (users who actually joined via this user's code)
-    var refCode = localStorage.getItem('nava_peace_ref_code');
-    if (!refCode) return;
-
-    var refCount = 0;
     try {
-      var res = await sb.from('referral_points')
-        .select('id', { count: 'exact', head: true })
-        .eq('referral_code', refCode);
-      refCount = res.count || 0;
-    } catch(e) { return; }
+      // Step 1: check what's eligible (read-only call)
+      var checkRes = await fetch(REFERRAL_EF, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'check', initData: initData }),
+      });
+      if (!checkRes.ok) return;
+      var checkData = await checkRes.json();
+      if (!checkData.eligible || checkData.eligible.length === 0) return;
 
-    if (refCount === 0) return;
+      // Step 2: claim — server verifies identity + atomically grants badges
+      var claimRes = await fetch(REFERRAL_EF, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'claim', initData: initData }),
+      });
+      if (!claimRes.ok) return;
+      var claimData = await claimRes.json();
+      var claimed = claimData.claimed || [];
+      var refCount = claimData.ref_count || 0;
 
-    // Check already claimed referral NFTs
-    var claimedCodes = new Set();
-    try {
-      var claimed = await sb.from('nft_referral_claims')
-        .select('tier_code')
-        .eq('user_uid', uid);
-      (claimed.data || []).forEach(function(r) { claimedCodes.add(r.tier_code); });
-    } catch(e) {}
+      if (claimed.length === 0) return;
 
-    // Find all newly unlocked tiers
-    var newClaims = REFERRAL_THRESHOLDS.filter(function(t) {
-      return refCount >= t.refsNeeded && !claimedCodes.has(t.code) && !ownedSet.has(t.code);
-    });
-
-    if (newClaims.length === 0) return;
-
-    // Claim each unlocked tier
-    for (var i = 0; i < newClaims.length; i++) {
-      var claim = newClaims[i];
-      try {
-        // Check quota not exhausted
-        var quotaRes = await sb.from('nft_referral_claims')
-          .select('id', { count: 'exact', head: true })
-          .eq('tier_code', claim.code);
-        var usedQuota = quotaRes.count || 0;
-        if (usedQuota >= claim.freeQuota) continue; // quota exhausted
-
-        // Record the claim
-        await sb.from('nft_referral_claims').insert({
-          user_uid:      uid,
-          tier_code:     claim.code,
-          ref_count:     refCount,
-          refs_needed:   claim.refsNeeded,
-          claimed_at:    new Date().toISOString()
-        });
-
-        // Grant the badge
-        await sb.from('user_badges').upsert(
-          { user_uid: uid, badge_code: claim.code },
-          { onConflict: 'user_uid,badge_code' }
-        );
-
-        ownedSet.add(claim.code);
-        ownedTiers.push(claim.tier);
-
-        // Celebrate!
-        showReferralCelebration(claim, refCount);
+      // Update local state
+      for (var i = 0; i < claimed.length; i++) {
+        var code  = claimed[i];
+        var tInfo = getTierByCode(code);
+        if (!tInfo) continue;
+        ownedSet.add(code);
+        ownedTiers.push(tInfo.tier);
+        showReferralCelebration({ code: code, tier: tInfo.tier }, refCount);
         await new Promise(function(r) { setTimeout(r, 2000); });
-      } catch(e) { console.warn('Referral claim error', e); }
-    }
+      }
 
     if (newClaims.length > 0) {
       renderStatusCard();
