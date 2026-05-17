@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>NAVA PEACE — Shop</title>
   <meta name="description" content="Official NAVA PEACE merchandise. Every purchase supports the Foundation's peace mission worldwide."/>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <meta http-equiv="Expires" content="0"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet"/>
@@ -798,7 +801,7 @@ let activeFilter = 'ALL';
 
 async function loadShopOrder() {
   try {
-    const res  = await fetch(`${PROXY_URL}?action=get_merch_order`, { headers: AUTH_HEADERS });
+    const res  = await fetch(`${PROXY_URL}?action=get_merch_order`, { headers: AUTH_HEADERS, cache: 'no-store' });
     const data = await res.json();
     if (!Array.isArray(data) || !data.length) return;
     const orderMap = {};
@@ -809,12 +812,12 @@ async function loadShopOrder() {
 
 async function loadShopTabs() {
   try {
-    const res  = await fetch(`${PROXY_URL}?action=get_merch_tabs`, { headers: AUTH_HEADERS });
+    const res  = await fetch(`${PROXY_URL}?action=get_merch_tabs`, { headers: AUTH_HEADERS, cache: 'no-store' });
     const data = await res.json();
     if (data && typeof data === 'object' && !data.error && Object.keys(data).length) {
       _shopTabs = data;
     }
-  } catch(_) {}
+  } catch(e) { console.error('[shop] loadShopTabs failed:', e); }
 }
 
 function buildFilters() {
