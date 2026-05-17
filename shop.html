@@ -270,6 +270,7 @@
       touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;
     }
     .chip.selected{background:rgba(109,213,245,0.15);border-color:rgba(109,213,245,0.6);color:var(--accent);}
+    .dim-chip{letter-spacing:0.5px;font-size:10px;padding:7px 14px;white-space:nowrap;}
 
     /* Description & Specs */
     .detail-info{margin:16px 0 20px;}
@@ -1000,11 +1001,35 @@ async function openDetail(productId) {
   }
 }
 
-// Remove clothing size codes when product has dimension-based sizes
+// Parse "30x40cm", "60x80", "12x16in" → { cmLabel, inLabel }
+function parseDimensions(sizeStr) {
+  const m = String(sizeStr).match(/^(\d+(?:\.\d+)?)\s*[x×*]\s*(\d+(?:\.\d+)?)\s*(cm|in|inch|")?/i);
+  if (!m) return null;
+  const a = parseFloat(m[1]), b = parseFloat(m[2]);
+  const unit = (m[3] || 'cm').toLowerCase().replace('inch','in').replace('"','in');
+  const fmt = n => String(parseFloat(n.toFixed(1))); // remove trailing .0
+  if (unit === 'in') {
+    return { cmLabel:`${Math.round(a*2.54)}×${Math.round(b*2.54)} cm`, inLabel:`${a}×${b} in` };
+  }
+  return { cmLabel:`${a}×${b} cm`, inLabel:`${fmt(a/2.54)}×${fmt(b/2.54)} in` };
+}
+
+// Format size for display — dimension sizes get dual-unit label
+function formatSizeLabel(size) {
+  const dim = parseDimensions(size);
+  return dim ? `${dim.cmLabel}  ·  ${dim.inLabel}` : size;
+}
+
+// Remove "one size" equivalents + clothing codes when dimensions present
 function filterVariantSizes(sizes) {
-  const CLOTHING_RE = /^(2?XS|XS|S|M|N|L|XM|XL|2XL|3XL|4XL|5XL|6XL|7XL|8XL|XXL|XXXL|ONE\s*SIZE)$/i;
-  const hasDims = sizes.some(s => /\d+\s*x\s*\d+/i.test(s) || /^\d+\s*cm/i.test(s));
-  return hasDims ? sizes.filter(s => !CLOTHING_RE.test(s.trim())) : sizes;
+  const ONE_SIZE_RE = /^(one[\s\-]?size|os|o\/s|unique|taille[\s\-]?unique|unica|tu|no[\s\-]?size|ns|standard|free[\s\-]?size|f\/s|fs)$/i;
+  const CLOTHING_RE = /^(2?XS|XS|S|M|N|L|XM|XL|2XL|3XL|4XL|5XL|6XL|7XL|8XL|XXL|XXXL)$/i;
+  // Strip "one size" values — not meaningful choices
+  const withoutOS = sizes.filter(s => !ONE_SIZE_RE.test(s.trim()));
+  if (!withoutOS.length) return []; // all were one-size → no selector
+  // Remove clothing codes when dimensional sizes are present
+  const hasDims = withoutOS.some(s => parseDimensions(s) !== null);
+  return hasDims ? withoutOS.filter(s => !CLOTHING_RE.test(s.trim())) : withoutOS;
 }
 
 function renderVariants(variants) {
@@ -1013,18 +1038,33 @@ function renderVariants(variants) {
 
   const rawSizes = [...new Set(available.map(v => v.size).filter(Boolean))];
   const sizes    = filterVariantSizes(rawSizes);
-  currentFiltered = available.filter(v => !v.size || sizes.includes(v.size));
-  const colors    = [...new Set(currentFiltered.map(v => v.color).filter(Boolean))];
+
+  // currentFiltered drives color list — use all available when sizes are empty (one-size product)
+  currentFiltered = sizes.length
+    ? available.filter(v => !v.size || sizes.includes(v.size))
+    : available;
+  const colors = [...new Set(currentFiltered.map(v => v.color).filter(Boolean))];
   let html = '';
 
   if (sizes.length > 1) {
+    // Multiple real sizes — show selector chips with formatted labels
     selectedSize = sizes[0];
     html += `<p class="variant-label">SIZE</p><div class="chips" id="size-chips">`;
     html += sizes.map((s, i) =>
-      `<div class="chip${i===0?' selected':''}" data-type="size" data-val="${esc(s)}">${esc(s)}</div>`
+      `<div class="chip${parseDimensions(s) ? ' dim-chip' : ''}${i===0?' selected':''}" data-type="size" data-val="${esc(s)}">${esc(formatSizeLabel(s))}</div>`
     ).join('');
     html += '</div>';
-  } else if (sizes.length === 1) { selectedSize = sizes[0]; }
+  } else if (sizes.length === 1) {
+    selectedSize = sizes[0];
+    // If it's a dimension, show as informational badge (no click)
+    const dim = parseDimensions(sizes[0]);
+    if (dim) {
+      html += `<p class="variant-label">DIMENSIONS</p><div class="chips"><div class="chip dim-chip selected" style="pointer-events:none">${esc(formatSizeLabel(sizes[0]))}</div></div>`;
+    }
+    // Clothing single-size: silently pre-select, show nothing
+  } else {
+    selectedSize = null; // one-size/no-size product — no selector
+  }
 
   if (colors.length > 1) {
     selectedColor = colors[0];
@@ -1107,9 +1147,18 @@ function renderDetailInfo(prod, variants) {
     .map(line => `<span>${esc(line)}</span>`)
     .join('<br>');
   let html = `<p class="detail-desc">${descHtml}</p>`;
+  // Use filtered sizes (removes ONE SIZE equivalents)
+  const filteredSizes = filterVariantSizes(sizes);
+  const allDims  = filteredSizes.length && filteredSizes.every(s => parseDimensions(s) !== null);
+  const sizeSpec = filteredSizes.length
+    ? (filteredSizes.length <= 4
+        ? filteredSizes.map(formatSizeLabel).join(' · ')
+        : `${filteredSizes.length} sizes`)
+    : null;
+
   const specs = [
     ['Print',  printLabel],
-    ...(sizes.length  ? [['Sizes',  sizes.length  <= 8 ? sizes.join(' · ')  : `${sizes.length} sizes`]] : []),
+    ...(sizeSpec ? [[allDims ? 'Dimensions' : 'Sizes', sizeSpec]] : []),
     ...(colors.length ? [['Colors', colors.length <= 6 ? colors.join(' · ') : `${colors.length} colors`]] : []),
     ...(prices.length ? [['Price',  (() => { const lo = retailPrice(Math.min(...prices)), hi = retailPrice(Math.max(...prices)); return lo === hi ? `$${lo.toFixed(2)}` : `$${lo.toFixed(2)} – $${hi.toFixed(2)}`; })()] ] : []),
     ...(prod.spuCode  ? [['Ref',    prod.spuCode]] : []),
