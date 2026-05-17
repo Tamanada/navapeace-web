@@ -273,7 +273,7 @@
 
     /* Description & Specs */
     .detail-info{margin:16px 0 20px;}
-    .detail-desc{font-size:11px;line-height:1.8;color:var(--w60);letter-spacing:0.5px;margin-bottom:14px;}
+    .detail-desc{font-size:11px;line-height:1.8;color:var(--w60);letter-spacing:0.5px;margin-bottom:14px;max-height:130px;overflow-y:auto;scrollbar-width:thin;}
     .detail-specs{border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px;}
     .spec-row{display:flex;align-items:baseline;gap:10px;padding:9px 14px;border-bottom:1px solid var(--border);font-size:10px;}
     .spec-row:last-child{border-bottom:none;}
@@ -988,8 +988,9 @@ async function openDetail(productId) {
     const res  = await fetch(`${PROXY_URL}?action=template&productId=${productId}`, { headers: AUTH_HEADERS });
     const data = await res.json();
     const raw  = data?.data || {};
-    currentProd.spuCode    = raw?.product?.spuCode    || '';
-    currentProd.designCode = raw?.designCode          || '';
+    currentProd.spuCode      = raw?.product?.spuCode    || '';
+    currentProd.designCode   = raw?.designCode          || '';
+    currentProd.description  = raw?.product?.description || raw?.product?.productDesc || raw?.product?.desc || raw?.description || '';
     const rawVariants = raw?.variants || raw?.skuList || [];
     currentVariants = rawVariants.map(normalizeVariant);
     renderVariants(currentVariants);
@@ -1097,7 +1098,15 @@ function renderDetailInfo(prod, variants) {
   let printLabel = 'Custom Print';
   for (const { kw, label } of PRINT_METHODS) if (titleLow.includes(kw)) { printLabel = label; break; }
 
-  let html = `<p class="detail-desc">${getDesc(prod.title)}</p>`;
+  // Use real Yoycol description if available, else keyword fallback
+  const descText = prod.description
+    ? prod.description.replace(/\n{2,}/g, '\n').trim()
+    : getDesc(prod.title);
+  const descHtml = descText
+    .split('\n')
+    .map(line => `<span>${esc(line)}</span>`)
+    .join('<br>');
+  let html = `<p class="detail-desc">${descHtml}</p>`;
   const specs = [
     ['Print',  printLabel],
     ...(sizes.length  ? [['Sizes',  sizes.length  <= 8 ? sizes.join(' · ')  : `${sizes.length} sizes`]] : []),
