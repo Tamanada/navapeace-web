@@ -801,6 +801,19 @@ async function loadProducts() {
 let _shopTabs    = {}; // { TAB: [id,...] } loaded from admin
 let activeFilter = 'ALL';
 
+// Keyword fallback per tab — used in hybrid mode when admin config exists
+// but a product hasn't been manually assigned to any tab yet.
+// Also used as pure fallback when no admin config is present.
+const TAB_KEYWORDS = {
+  'CLOTHING':       'shirt dress shorts pants hoodie jacket',
+  'SWIMWEAR':       'swimsuit bikini swim',
+  'ACCESSORIES':    'bag cap tote gaiter hat',
+  'PHONE CASES':    'phone iphone samsung airbag case',
+  'HOME & DECOR':   'mug towel quilt bedding blanket duvet pillow cushion',
+  'FLAGS & PRINTS': 'flag banner poster print',
+  'LIFESTYLE':      'playing cards puzzle keychain sticker game',
+};
+
 async function loadShopOrder() {
   try {
     const res  = await fetch(`${PROXY_URL}?action=get_merch_order`, { headers: AUTH_HEADERS, cache: 'no-store' });
@@ -825,29 +838,28 @@ async function loadShopTabs() {
 function buildFilters() {
   const el   = document.getElementById('filters');
   const tabs = Object.keys(_shopTabs);
-  if (tabs.length) {
-    // Admin config available — use tab names + ID-based filtering
-    el.innerHTML = ['ALL', ...tabs].map((t, i) =>
-      `<div class="filter-chip${i === 0 ? ' active' : ''}" data-tab="${esc(t)}" onclick="applyTabFilter(this,'${esc(t)}')">${esc(t)}</div>`
-    ).join('');
-  } else {
-    // Fallback: keyword-based (no admin config yet)
-    const KW = [
-      { label:'ALL', kw:'' },
-      { label:'CLOTHING',       kw:'shirt dress shorts' },
-      { label:'SWIMWEAR',       kw:'swimsuit bikini' },
-      { label:'ACCESSORIES',    kw:'bag cap tote gaiter' },
-      { label:'PHONE CASES',    kw:'phone iphone samsung airbag' },
-      { label:'HOME & DECOR',   kw:'mug towel quilt bedding' },
-      { label:'FLAGS & PRINTS', kw:'flag banner poster' },
-      { label:'LIFESTYLE',      kw:'playing cards puzzle keychain sticker' },
-    ];
-    el.innerHTML = KW.filter(f => !f.kw || allProducts.some(p =>
-      f.kw.split(' ').some(k => p.title.toLowerCase().includes(k))
-    )).map((f, i) =>
-      `<div class="filter-chip${i === 0 ? ' active' : ''}" data-tab="${f.label}" onclick="applyTabFilter(this,'${f.label}')" data-kw="${f.kw}">${f.label}</div>`
-    ).join('');
-  }
+
+  // Merge admin tab names with known default tabs (so chips always appear
+  // even if the admin hasn't configured anything for that tab yet).
+  const defaultTabs = Object.keys(TAB_KEYWORDS);
+  const allTabs     = tabs.length
+    ? [...new Set([...tabs, ...defaultTabs])]  // admin tabs first, then defaults
+    : defaultTabs;
+
+  // Only show a tab if at least one product would appear in it
+  // (either admin-assigned or keyword-matched for unassigned products)
+  const visibleTabs = allTabs.filter(t => {
+    const ids = (_shopTabs[t] || []).map(String);
+    const kw  = (TAB_KEYWORDS[t] || '').toLowerCase();
+    return allProducts.some(p => {
+      if (ids.includes(String(p.id))) return true;
+      return kw && kw.split(' ').some(k => k && p.title.toLowerCase().includes(k));
+    });
+  });
+
+  el.innerHTML = ['ALL', ...visibleTabs].map((t, i) =>
+    `<div class="filter-chip${i === 0 ? ' active' : ''}" data-tab="${esc(t)}" onclick="applyTabFilter(this,'${esc(t)}')">${esc(t)}</div>`
+  ).join('');
 }
 
 function applyTabFilter(el, tab) {
@@ -858,14 +870,27 @@ function applyTabFilter(el, tab) {
   let filtered;
   if (tab === 'ALL') {
     filtered = allProducts;
-  } else if (Object.keys(_shopTabs).length) {
-    // ID-based (admin config)
-    const ids = (_shopTabs[tab] || []).map(String);
-    filtered = allProducts.filter(p => ids.includes(String(p.id)));
   } else {
-    // Keyword fallback
-    const kw = el.dataset.kw || '';
-    filtered = kw ? allProducts.filter(p => kw.split(' ').some(k => p.title.toLowerCase().includes(k))) : allProducts;
+    // Hybrid mode:
+    //   1. Admin-assigned IDs (explicit assignments take priority)
+    //   2. + unassigned products that match this tab's keyword
+    // This ensures products not yet dragged to a tab still appear if they match.
+    const adminIds     = (_shopTabs[tab] || []).map(String);
+    const kw           = (TAB_KEYWORDS[tab] || '').toLowerCase();
+    // Set of all IDs assigned to ANY tab (to exclude from keyword fallback)
+    const allAssigned  = new Set(
+      Object.values(_shopTabs).flat().map(String)
+    );
+    filtered = allProducts.filter(p => {
+      const pid = String(p.id);
+      // Explicitly assigned to this tab → always include
+      if (adminIds.includes(pid)) return true;
+      // Unassigned + matches keyword → include as fallback
+      if (!allAssigned.has(pid) && kw) {
+        return kw.split(' ').some(k => k && p.title.toLowerCase().includes(k));
+      }
+      return false;
+    });
   }
   renderGrid(filtered);
   filtered.forEach(p => fetchBasePrice(p));
@@ -1267,8 +1292,12 @@ window.addEventListener('load', async () => {
   checkSuccess();
   updateCartBadge();
 
-  // Wait for tabs + order + products — all 3 must be ready before rendering
-  await Promise.all([loadShopTabs(), loadShopOrder(), loadProducts()]);
+  // loadShopOrder() sorts allProducts — it MUST run after loadProducts() sets the array.
+  // Running all 3 concurrently causes a race: if loadShopOrder() resolves before
+  // loadProducts() populates allProducts, the sort is a no-op and order is random.
+  // Fix: tabs can load concurrently with products, but order sorts last.
+  await Promise.all([loadShopTabs(), loadProducts()]);
+  await loadShopOrder(); // must be sequential — sorts the now-populated allProducts
 
   // Now all data is loaded — build filters with real tabs, render sorted grid
   buildFilters();
