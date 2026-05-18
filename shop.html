@@ -1298,7 +1298,7 @@ window.addEventListener('load', async () => {
 </script>
 
 <!-- PWA Install Banner -->
-<div id="pwa-install-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#0d2a47,#1a5c8a);border-top:1px solid rgba(58,172,223,0.4);padding:14px 20px;align-items:center;gap:12px;box-shadow:0 -4px 20px rgba(0,0,0,0.4);">
+<div id="pwa-install-banner" style="display:flex;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#0d2a47,#1a5c8a);border-top:1px solid rgba(58,172,223,0.4);padding:14px 20px;align-items:center;gap:12px;box-shadow:0 -4px 20px rgba(0,0,0,0.4);">
   <img src="icon-192.png" style="width:40px;height:40px;border-radius:10px;flex-shrink:0;" alt="NAVA PEACE"/>
   <div style="flex:1;min-width:0;">
     <div style="font-size:13px;font-weight:700;color:#fff;letter-spacing:1px;font-family:'Rajdhani',sans-serif;">NAVA PEACE</div>
@@ -1320,46 +1320,55 @@ window.addEventListener('load', async () => {
 
 <script>
 (function() {
-  // Already installed as PWA → hide install UI
+  var BANNER_KEY = 'nava_pwa_banner_dismissed';
   var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   var headerBtn = document.getElementById('pwa-header-btn');
+  var banner    = document.getElementById('pwa-install-banner');
+
+  // Hide all install UI if already installed as PWA
   if (isStandalone) {
     if (headerBtn) headerBtn.style.display = 'none';
+    if (banner)    banner.style.display    = 'none';
     return;
   }
+
+  // Hide banner if user already dismissed it this session
+  if (localStorage.getItem(BANNER_KEY) === '1') {
+    if (banner) banner.style.display = 'none';
+  }
+  // else: banner stays display:flex (set in HTML)
 
   // Service Worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function(){});
   }
 
-  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   var _deferredInstall = null;
 
-  // Button is visible by default in HTML — nothing to do here
-
-  // Capture Android install prompt when available
+  // Capture Android native install prompt if available
   window.addEventListener('beforeinstallprompt', function(e) {
     e.preventDefault();
     _deferredInstall = e;
   });
 
+  // Auto-hide all install UI once installed
   window.addEventListener('appinstalled', function() {
     if (headerBtn) headerBtn.style.display = 'none';
-    document.getElementById('pwa-install-banner').style.display = 'none';
+    if (banner)    banner.style.display    = 'none';
     document.getElementById('install-modal').style.display = 'none';
   });
 
-  // Main install handler — called by header button and bottom banner
+  // Main install handler — called by header button and bottom banner INSTALL button
   window.triggerPwaInstall = function() {
     if (_deferredInstall) {
-      // Android Chrome — native install prompt available
+      // Android Chrome — native install prompt
       _deferredInstall.prompt();
       _deferredInstall.userChoice.then(function(r) {
         if (r.outcome === 'accepted') _deferredInstall = null;
       });
     } else {
-      // iOS or Android without native prompt → show instructions modal
+      // iOS or any browser without native prompt → show instructions modal
       var body = document.getElementById('install-modal-body');
       if (body) {
         if (isIOS) {
@@ -1370,21 +1379,22 @@ window.addEventListener('load', async () => {
         } else {
           body.innerHTML =
             'In Chrome, tap the <strong style="color:#3AACDF;">⋮ menu</strong> (top right)<br>' +
-            'then select <strong style="color:#3AACDF;">"Add to Home Screen"</strong> or <strong style="color:#3AACDF;">"Install App"</strong>.<br>' +
-            '<br><em style="font-size:12px;color:rgba(255,255,255,0.4);">Tip: visit this page a second time if the option is not visible.</em>';
+            'then tap <strong style="color:#3AACDF;">"Add to Home Screen"</strong> or <strong style="color:#3AACDF;">"Install App"</strong>. 🕊';
         }
       }
       document.getElementById('install-modal').style.display = 'flex';
     }
   };
 
-  // Bottom banner buttons
+  // Bottom banner — INSTALL button
   var installBtn = document.getElementById('pwa-install-btn');
   if (installBtn) installBtn.addEventListener('click', window.triggerPwaInstall);
 
+  // Bottom banner — Dismiss (×) : remember for this session only
   var dismissBtn = document.getElementById('pwa-dismiss-btn');
   if (dismissBtn) dismissBtn.addEventListener('click', function() {
-    document.getElementById('pwa-install-banner').style.display = 'none';
+    if (banner) banner.style.display = 'none';
+    localStorage.setItem(BANNER_KEY, '1');
   });
 
   var iosBtn = document.getElementById('ios-hint-dismiss');
