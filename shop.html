@@ -9,6 +9,13 @@
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://static.cloudflareinsights.com; frame-ancestors 'none';"/>
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="apple-touch-icon" href="apple-touch-icon.png"/>
+  <link rel="manifest" href="manifest-shop.json"/>
+  <meta name="theme-color" content="#3AACDF"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="NAVA Shop"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet"/>
@@ -801,18 +808,6 @@ async function loadProducts() {
 let _shopTabs    = {}; // { TAB: [id,...] } loaded from admin
 let activeFilter = 'ALL';
 
-// Keyword fallback per tab — used in hybrid mode when admin config exists
-// but a product hasn't been manually assigned to any tab yet.
-// Also used as pure fallback when no admin config is present.
-const TAB_KEYWORDS = {
-  'CLOTHING':       'shirt dress shorts pants hoodie jacket',
-  'SWIMWEAR':       'swimsuit bikini swim',
-  'ACCESSORIES':    'bag cap tote gaiter hat',
-  'PHONE CASES':    'phone iphone samsung airbag case',
-  'HOME & DECOR':   'mug towel quilt bedding blanket duvet pillow cushion',
-  'FLAGS & PRINTS': 'flag banner poster print',
-  'LIFESTYLE':      'playing cards puzzle keychain sticker game',
-};
 
 async function loadShopOrder() {
   try {
@@ -837,25 +832,10 @@ async function loadShopTabs() {
 
 function buildFilters() {
   const el   = document.getElementById('filters');
-  const tabs = Object.keys(_shopTabs);
-
-  // Merge admin tab names with known default tabs (so chips always appear
-  // even if the admin hasn't configured anything for that tab yet).
-  const defaultTabs = Object.keys(TAB_KEYWORDS);
-  const allTabs     = tabs.length
-    ? [...new Set([...tabs, ...defaultTabs])]  // admin tabs first, then defaults
-    : defaultTabs;
-
-  // Only show a tab if at least one product would appear in it
-  // (either admin-assigned or keyword-matched for unassigned products)
-  const visibleTabs = allTabs.filter(t => {
-    const ids = (_shopTabs[t] || []).map(String);
-    const kw  = (TAB_KEYWORDS[t] || '').toLowerCase();
-    return allProducts.some(p => {
-      if (ids.includes(String(p.id))) return true;
-      return kw && kw.split(' ').some(k => k && p.title.toLowerCase().includes(k));
-    });
-  });
+  // Show only tabs that have at least 1 admin-assigned product — purely admin-driven.
+  const visibleTabs = Object.keys(_shopTabs).filter(t =>
+    (_shopTabs[t] || []).some(id => allProducts.find(p => String(p.id) === String(id)))
+  );
 
   el.innerHTML = ['ALL', ...visibleTabs].map((t, i) =>
     `<div class="filter-chip${i === 0 ? ' active' : ''}" data-tab="${esc(t)}" onclick="applyTabFilter(this,'${esc(t)}')">${esc(t)}</div>`
@@ -871,26 +851,9 @@ function applyTabFilter(el, tab) {
   if (tab === 'ALL') {
     filtered = allProducts;
   } else {
-    // Hybrid mode:
-    //   1. Admin-assigned IDs (explicit assignments take priority)
-    //   2. + unassigned products that match this tab's keyword
-    // This ensures products not yet dragged to a tab still appear if they match.
-    const adminIds     = (_shopTabs[tab] || []).map(String);
-    const kw           = (TAB_KEYWORDS[tab] || '').toLowerCase();
-    // Set of all IDs assigned to ANY tab (to exclude from keyword fallback)
-    const allAssigned  = new Set(
-      Object.values(_shopTabs).flat().map(String)
-    );
-    filtered = allProducts.filter(p => {
-      const pid = String(p.id);
-      // Explicitly assigned to this tab → always include
-      if (adminIds.includes(pid)) return true;
-      // Unassigned + matches keyword → include as fallback
-      if (!allAssigned.has(pid) && kw) {
-        return kw.split(' ').some(k => k && p.title.toLowerCase().includes(k));
-      }
-      return false;
-    });
+    // Admin-only: show exactly the products assigned to this tab in admin.
+    const adminIds = (_shopTabs[tab] || []).map(String);
+    filtered = allProducts.filter(p => adminIds.includes(String(p.id)));
   }
   renderGrid(filtered);
   filtered.forEach(p => fetchBasePrice(p));
@@ -1316,6 +1279,83 @@ window.addEventListener('load', async () => {
     el.addEventListener('click', e => { if (e.target === el) el.classList.remove('active'); });
   });
 });
+</script>
+
+<!-- PWA Install Banner -->
+<div id="pwa-install-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#0d2a47,#1a5c8a);border-top:1px solid rgba(58,172,223,0.4);padding:14px 20px;align-items:center;gap:12px;box-shadow:0 -4px 20px rgba(0,0,0,0.4);">
+  <img src="icon-192.png" style="width:40px;height:40px;border-radius:10px;flex-shrink:0;" alt="NAVA PEACE"/>
+  <div style="flex:1;min-width:0;">
+    <div style="font-size:13px;font-weight:700;color:#fff;letter-spacing:1px;font-family:'Rajdhani',sans-serif;">NAVA PEACE</div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px;font-family:'Rajdhani',sans-serif;">Add to your home screen</div>
+  </div>
+  <button id="pwa-install-btn" style="background:#3AACDF;border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:700;letter-spacing:1.5px;padding:9px 16px;cursor:pointer;flex-shrink:0;font-family:'Rajdhani',sans-serif;">INSTALL</button>
+  <button id="pwa-dismiss-btn" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:20px;cursor:pointer;line-height:1;padding:4px;flex-shrink:0;">×</button>
+</div>
+
+<!-- iOS hint (Safari only, shown once) -->
+<div id="ios-install-hint" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#0d2a47,#1a5c8a);border-top:1px solid rgba(58,172,223,0.4);padding:14px 20px;align-items:center;gap:12px;box-shadow:0 -4px 20px rgba(0,0,0,0.4);">
+  <span style="font-size:24px;flex-shrink:0;">🕊</span>
+  <div style="flex:1;font-family:'Rajdhani',sans-serif;">
+    <div style="font-size:13px;font-weight:700;color:#fff;letter-spacing:1px;">Add NAVA PEACE to your home screen</div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px;">Tap <strong style="color:#3AACDF;">Share ↑</strong> then <strong style="color:#3AACDF;">"Add to Home Screen"</strong></div>
+  </div>
+  <button id="ios-hint-dismiss" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:20px;cursor:pointer;line-height:1;padding:4px;flex-shrink:0;">×</button>
+</div>
+
+<script>
+(function() {
+  // Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function(){});
+  }
+
+  var _deferredInstall = null;
+  var dismissed = parseInt(localStorage.getItem('nava_pwa_shop_dismissed') || '0');
+
+  // Android Chrome install prompt
+  window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    _deferredInstall = e;
+    if (window.matchMedia('(display-mode: standalone)').matches) return;
+    if (Date.now() - dismissed < 7 * 24 * 3600 * 1000) return;
+    setTimeout(function() {
+      var b = document.getElementById('pwa-install-banner');
+      if (b) b.style.display = 'flex';
+    }, 3000);
+  });
+
+  document.getElementById('pwa-install-btn').addEventListener('click', function() {
+    if (_deferredInstall) {
+      _deferredInstall.prompt();
+      _deferredInstall.userChoice.then(function() { _deferredInstall = null; });
+    }
+    document.getElementById('pwa-install-banner').style.display = 'none';
+  });
+
+  document.getElementById('pwa-dismiss-btn').addEventListener('click', function() {
+    document.getElementById('pwa-install-banner').style.display = 'none';
+    localStorage.setItem('nava_pwa_shop_dismissed', Date.now());
+  });
+
+  window.addEventListener('appinstalled', function() {
+    document.getElementById('pwa-install-banner').style.display = 'none';
+  });
+
+  // iOS Safari hint (no beforeinstallprompt support)
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if (isIOS && !isStandalone && Date.now() - dismissed > 7 * 24 * 3600 * 1000) {
+    setTimeout(function() {
+      var h = document.getElementById('ios-install-hint');
+      if (h) h.style.display = 'flex';
+    }, 4000);
+  }
+
+  document.getElementById('ios-hint-dismiss').addEventListener('click', function() {
+    document.getElementById('ios-install-hint').style.display = 'none';
+    localStorage.setItem('nava_pwa_shop_dismissed', Date.now());
+  });
+})();
 </script>
 </body>
 </html>
