@@ -189,8 +189,8 @@
 
 <body>
 
-  <!-- PWA Install Banner (appears on web after 3s if installable) -->
-  <div id="pwa-install-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#0d2a47,#1a5c8a);border-top:1px solid rgba(58,172,223,0.4);padding:14px 20px;align-items:center;gap:12px;box-shadow:0 -4px 20px rgba(0,0,0,0.4);">
+  <!-- PWA Install Banner — visible by default, JS hides it only in standalone mode -->
+  <div id="pwa-install-banner" style="display:flex;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#0d2a47,#1a5c8a);border-top:1px solid rgba(58,172,223,0.4);padding:14px 20px;align-items:center;gap:12px;box-shadow:0 -4px 20px rgba(0,0,0,0.4);">
     <img src="icon-192.png" style="width:40px;height:40px;border-radius:10px;flex-shrink:0;" alt="NAVA PEACE"/>
     <div style="flex:1;min-width:0;">
       <div style="font-size:13px;font-weight:700;color:#fff;letter-spacing:1px;">NAVA PEACE</div>
@@ -662,35 +662,48 @@
   <!-- PWA install prompt + Service Worker registration -->
   <script>
   (function() {
+    var banner = document.getElementById('pwa-install-banner');
+
+    // Already installed as PWA or running in Telegram → hide banner
+    var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    var isTg = typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram;
+    if (isStandalone || isTg) {
+      if (banner) banner.style.display = 'none';
+      return;
+    }
+
     // Register service worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function(){});
     }
 
-    // Capture install prompt (Android Chrome)
+    // Capture Android native install prompt
     var _deferredInstall = null;
     window.addEventListener('beforeinstallprompt', function(e) {
       e.preventDefault();
       _deferredInstall = e;
-      // Show install banner after a short delay (only on web, not in TG)
-      if (typeof NAVA_TG !== 'undefined' && NAVA_TG.isTelegram) return;
-      setTimeout(function() {
-        var banner = document.getElementById('pwa-install-banner');
-        if (banner) banner.style.display = 'flex';
-      }, 3000);
     });
 
+    // Install button handler
     window._triggerPwaInstall = function() {
       if (_deferredInstall) {
+        // Android Chrome — native prompt
         _deferredInstall.prompt();
-        _deferredInstall.userChoice.then(function() { _deferredInstall = null; });
+        _deferredInstall.userChoice.then(function(r) {
+          if (r.outcome === 'accepted') { _deferredInstall = null; }
+        });
+        if (banner) banner.style.display = 'none';
+      } else {
+        // iOS Safari or Android without prompt — show instructions
+        var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        var msg = isIOS
+          ? 'Tap the Share ↑ button at the bottom of Safari, then "Add to Home Screen".'
+          : 'In Chrome, tap ⋮ (menu) → "Add to Home Screen" or "Install App".';
+        alert('📲 Install NAVA PEACE\n\n' + msg);
       }
-      var banner = document.getElementById('pwa-install-banner');
-      if (banner) banner.style.display = 'none';
     };
 
     window.addEventListener('appinstalled', function() {
-      var banner = document.getElementById('pwa-install-banner');
       if (banner) banner.style.display = 'none';
     });
   })();
