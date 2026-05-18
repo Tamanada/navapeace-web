@@ -4498,7 +4498,8 @@
 (function() {
   var POPUP_KEY = 'nava_pwa_popup_shown';
   var last = parseInt(localStorage.getItem(POPUP_KEY) || '0');
-  if (Date.now() - last < 30 * 24 * 3600 * 1000) return;
+  // TESTING MODE — cooldown disabled, remove after test ↓
+  // if (Date.now() - last < 30 * 24 * 3600 * 1000) return;
 
   var popup    = document.getElementById('pwa-popup');
   var stepAsk  = document.getElementById('pwa-step-ask');
