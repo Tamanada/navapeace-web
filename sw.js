@@ -1,7 +1,7 @@
 // ── NAVA PEACE · Service Worker ───────────────────────────────────────────────
 // Handles: Push notifications + Static asset caching (PWA offline support)
 
-const CACHE_VERSION = 'nava-peace-v4';
+const CACHE_VERSION = 'nava-peace-v5';
 const STATIC_ASSETS = [
   '/',
   '/peace.html',

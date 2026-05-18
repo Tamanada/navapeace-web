@@ -324,17 +324,20 @@ Deno.serve(async (req) => {
       if (!emailRe.test(String(email))) return json({ error: 'invalid email format' }, 400);
 
       // Verify uid is a real registered user (prevents arbitrary key injection)
-      const uidCheck = await fetch(
-        `${SUPA_URL}/rest/v1/user_telegram?user_uid=eq.${encodeURIComponent(String(uid))}&select=user_uid&limit=1`,
-        {
-          headers: {
-            apikey:        SERVICE_KEY,
-            Authorization: `Bearer ${SERVICE_KEY}`,
-          },
-        },
-      );
-      const uidRows = await uidCheck.json() as { user_uid: string }[];
-      if (!Array.isArray(uidRows) || uidRows.length === 0) {
+      // Checks user_telegram (tg_ UIDs) AND peace_votes (u_ web UIDs)
+      const sbH = { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` };
+      const uidEncoded = encodeURIComponent(String(uid));
+      const [tgRes, pvRes] = await Promise.all([
+        fetch(`${SUPA_URL}/rest/v1/user_telegram?user_uid=eq.${uidEncoded}&select=user_uid&limit=1`, { headers: sbH }),
+        fetch(`${SUPA_URL}/rest/v1/peace_votes?user_uid=eq.${uidEncoded}&select=user_uid&limit=1`, { headers: sbH }),
+      ]);
+      const [tgRows, pvRows] = await Promise.all([
+        tgRes.json() as Promise<{ user_uid: string }[]>,
+        pvRes.json() as Promise<{ user_uid: string }[]>,
+      ]);
+      const isRegistered = (Array.isArray(tgRows) && tgRows.length > 0)
+                        || (Array.isArray(pvRows)  && pvRows.length  > 0);
+      if (!isRegistered) {
         return json({ error: 'invalid uid' }, 400);
       }
 
