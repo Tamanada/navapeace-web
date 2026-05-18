@@ -400,13 +400,29 @@
     <div class="logo-mark">☮</div>
     <span class="logo-text">NAVA PEACE</span>
   </a>
-  <div class="header-right">
+  <div class="header-right" style="display:flex;align-items:center;gap:8px;">
+    <button id="pwa-header-btn" onclick="triggerPwaInstall()" title="Add to home screen" style="display:none;background:rgba(58,172,223,0.15);border:1px solid rgba(58,172,223,0.4);border-radius:8px;color:#3AACDF;font-size:11px;font-weight:700;letter-spacing:1px;padding:7px 12px;cursor:pointer;white-space:nowrap;">📲 INSTALL</button>
     <button class="cart-btn" onclick="openCart()">
       🛒 CART
       <span class="cart-badge" id="cart-badge">0</span>
     </button>
   </div>
 </header>
+
+<!-- Install instructions modal (iOS + fallback) -->
+<div id="install-modal" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.7);align-items:flex-end;justify-content:center;">
+  <div style="background:linear-gradient(160deg,#0d2a47,#1a5c8a);border-radius:20px 20px 0 0;padding:28px 24px 40px;width:100%;max-width:480px;border-top:1px solid rgba(58,172,223,0.4);">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+      <img src="icon-192.png" style="width:52px;height:52px;border-radius:12px;" alt="NAVA PEACE"/>
+      <div>
+        <div style="font-size:16px;font-weight:700;color:#fff;letter-spacing:1px;font-family:'Rajdhani',sans-serif;">NAVA PEACE</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.6);font-family:'Rajdhani',sans-serif;">Add to your home screen</div>
+      </div>
+      <button onclick="document.getElementById('install-modal').style.display='none'" style="margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.4);font-size:24px;cursor:pointer;line-height:1;">×</button>
+    </div>
+    <div id="install-modal-body" style="font-family:'Rajdhani',sans-serif;color:rgba(255,255,255,0.8);font-size:14px;line-height:1.8;"></div>
+  </div>
+</div>
 
 <!-- ── HERO ───────────────────────────────────────────────── -->
 <section class="hero">
@@ -1304,56 +1320,74 @@ window.addEventListener('load', async () => {
 
 <script>
 (function() {
+  // Already installed as PWA → hide everything
+  var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if (isStandalone) return;
+
   // Service Worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function(){});
   }
 
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   var _deferredInstall = null;
-  var dismissed = parseInt(localStorage.getItem('nava_pwa_shop_dismissed') || '0');
 
-  // Android Chrome install prompt
+  // Show header install button immediately (always visible, not dependent on browser event)
+  var headerBtn = document.getElementById('pwa-header-btn');
+  if (headerBtn) headerBtn.style.display = 'inline-block';
+
+  // Capture Android install prompt when available
   window.addEventListener('beforeinstallprompt', function(e) {
     e.preventDefault();
     _deferredInstall = e;
-    if (window.matchMedia('(display-mode: standalone)').matches) return;
-    if (Date.now() - dismissed < 7 * 24 * 3600 * 1000) return;
-    setTimeout(function() {
-      var b = document.getElementById('pwa-install-banner');
-      if (b) b.style.display = 'flex';
-    }, 3000);
-  });
-
-  document.getElementById('pwa-install-btn').addEventListener('click', function() {
-    if (_deferredInstall) {
-      _deferredInstall.prompt();
-      _deferredInstall.userChoice.then(function() { _deferredInstall = null; });
-    }
-    document.getElementById('pwa-install-banner').style.display = 'none';
-  });
-
-  document.getElementById('pwa-dismiss-btn').addEventListener('click', function() {
-    document.getElementById('pwa-install-banner').style.display = 'none';
-    localStorage.setItem('nava_pwa_shop_dismissed', Date.now());
   });
 
   window.addEventListener('appinstalled', function() {
+    if (headerBtn) headerBtn.style.display = 'none';
+    document.getElementById('pwa-install-banner').style.display = 'none';
+    document.getElementById('install-modal').style.display = 'none';
+  });
+
+  // Main install handler — called by header button and bottom banner
+  window.triggerPwaInstall = function() {
+    if (_deferredInstall) {
+      // Android Chrome — native install prompt available
+      _deferredInstall.prompt();
+      _deferredInstall.userChoice.then(function(r) {
+        if (r.outcome === 'accepted') _deferredInstall = null;
+      });
+    } else {
+      // iOS or Android without native prompt → show instructions modal
+      var body = document.getElementById('install-modal-body');
+      if (body) {
+        if (isIOS) {
+          body.innerHTML =
+            '1. Tap the <strong style="color:#3AACDF;">Share ↑</strong> button at the bottom of Safari<br>' +
+            '2. Scroll down and tap <strong style="color:#3AACDF;">"Add to Home Screen"</strong><br>' +
+            '3. Tap <strong style="color:#3AACDF;">Add</strong> — done! 🕊';
+        } else {
+          body.innerHTML =
+            'In Chrome, tap the <strong style="color:#3AACDF;">⋮ menu</strong> (top right)<br>' +
+            'then select <strong style="color:#3AACDF;">"Add to Home Screen"</strong> or <strong style="color:#3AACDF;">"Install App"</strong>.<br>' +
+            '<br><em style="font-size:12px;color:rgba(255,255,255,0.4);">Tip: visit this page a second time if the option is not visible.</em>';
+        }
+      }
+      document.getElementById('install-modal').style.display = 'flex';
+    }
+  };
+
+  // Bottom banner buttons
+  var installBtn = document.getElementById('pwa-install-btn');
+  if (installBtn) installBtn.addEventListener('click', window.triggerPwaInstall);
+
+  var dismissBtn = document.getElementById('pwa-dismiss-btn');
+  if (dismissBtn) dismissBtn.addEventListener('click', function() {
     document.getElementById('pwa-install-banner').style.display = 'none';
   });
 
-  // iOS Safari hint (no beforeinstallprompt support)
-  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-  if (isIOS && !isStandalone && Date.now() - dismissed > 7 * 24 * 3600 * 1000) {
-    setTimeout(function() {
-      var h = document.getElementById('ios-install-hint');
-      if (h) h.style.display = 'flex';
-    }, 4000);
-  }
-
-  document.getElementById('ios-hint-dismiss').addEventListener('click', function() {
+  var iosBtn = document.getElementById('ios-hint-dismiss');
+  if (iosBtn) iosBtn.addEventListener('click', function() {
     document.getElementById('ios-install-hint').style.display = 'none';
-    localStorage.setItem('nava_pwa_shop_dismissed', Date.now());
   });
 })();
 </script>
