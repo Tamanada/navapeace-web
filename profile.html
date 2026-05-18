@@ -4456,5 +4456,77 @@
   }
   </script>
 
+<!-- ── PWA / Home Screen Install Popup ─────────────────────────── -->
+<div id="pwa-popup" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.65);align-items:center;justify-content:center;padding:24px;">
+  <div style="background:linear-gradient(160deg,#0d2a47,#1a5c8a);border:1px solid rgba(58,172,223,0.35);border-radius:24px;padding:32px 28px;max-width:340px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.5);">
+    <div style="font-size:52px;margin-bottom:16px;">📲</div>
+    <div style="font-family:'Nasalization',sans-serif;font-size:16px;font-weight:700;color:#fff;letter-spacing:2px;margin-bottom:8px;">ADD TO HOME SCREEN</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;margin-bottom:28px;">Install NAVA PEACE on your home screen for quick daily access.</div>
+    <div style="display:flex;gap:12px;">
+      <button id="pwa-popup-no" style="flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;color:rgba(255,255,255,0.6);font-size:13px;font-weight:700;letter-spacing:1.5px;padding:14px;cursor:pointer;">NOT NOW</button>
+      <button id="pwa-popup-yes" style="flex:2;background:linear-gradient(135deg,#3AACDF,#1E8EC4);border:none;border-radius:12px;color:#fff;font-size:13px;font-weight:700;letter-spacing:1.5px;padding:14px;cursor:pointer;">YES, INSTALL ✓</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  // Only show once — respect user's "not now" for 30 days
+  var POPUP_KEY = 'nava_pwa_popup_shown';
+  var last = parseInt(localStorage.getItem(POPUP_KEY) || '0');
+  if (Date.now() - last < 30 * 24 * 3600 * 1000) return;
+
+  var popup = document.getElementById('pwa-popup');
+
+  function showPopup() {
+    popup.style.display = 'flex';
+  }
+
+  function hidePopup() {
+    popup.style.display = 'none';
+    localStorage.setItem(POPUP_KEY, Date.now());
+  }
+
+  // YES → try Telegram native addToHomeScreen (Bot API 8.0+), fallback to instructions
+  document.getElementById('pwa-popup-yes').addEventListener('click', function() {
+    hidePopup();
+    try {
+      if (window.Telegram && Telegram.WebApp && typeof Telegram.WebApp.addToHomeScreen === 'function') {
+        Telegram.WebApp.addToHomeScreen();
+      } else {
+        // Fallback: guide to browser install
+        alert('📲 Install NAVA PEACE\n\nOpen nava-peace.world in your browser, then tap the INSTALL button at the bottom of the screen.');
+      }
+    } catch(e) {
+      alert('📲 Install NAVA PEACE\n\nOpen nava-peace.world in your browser, then tap the INSTALL button at the bottom of the screen.');
+    }
+  });
+
+  // NO → hide and don't ask for 30 days
+  document.getElementById('pwa-popup-no').addEventListener('click', hidePopup);
+
+  // Close on backdrop click
+  popup.addEventListener('click', function(e) {
+    if (e.target === popup) hidePopup();
+  });
+
+  // Check if already added via Telegram API — only show if not yet added
+  try {
+    if (window.Telegram && Telegram.WebApp && typeof Telegram.WebApp.checkHomeScreenStatus === 'function') {
+      Telegram.WebApp.checkHomeScreenStatus(function(status) {
+        // status: 'unsupported' | 'unknown' | 'added' | 'missed'
+        if (status !== 'added') {
+          setTimeout(showPopup, 2000); // 2s delay after page load
+        }
+      });
+    } else {
+      setTimeout(showPopup, 2000);
+    }
+  } catch(e) {
+    setTimeout(showPopup, 2000);
+  }
+})();
+</script>
+
 </body>
 </html>
