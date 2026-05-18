@@ -4479,17 +4479,14 @@
       <button id="pwa-done-close" style="width:100%;background:linear-gradient(135deg,#3AACDF,#1E8EC4);border:none;border-radius:12px;color:#fff;font-size:13px;font-weight:700;letter-spacing:1.5px;padding:14px;cursor:pointer;">GREAT ✓</button>
     </div>
 
-    <!-- Step 2b: Fallback browser instructions -->
+    <!-- Step 2b: Telegram launched the prompt — check your home screen -->
     <div id="pwa-step-browser" style="display:none;">
-      <div style="font-size:52px;margin-bottom:16px;">🌐</div>
-      <div style="font-family:'Nasalization',sans-serif;font-size:14px;font-weight:700;color:#fff;letter-spacing:2px;margin-bottom:12px;">OPEN IN BROWSER</div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.8;margin-bottom:20px;text-align:left;">
-        1. Open the link below in Chrome or Safari<br>
-        2. Tap the <strong style="color:#3AACDF;">INSTALL</strong> button<br>
-        3. Done — icon on your home screen 🕊
+      <div style="font-size:52px;margin-bottom:16px;">🕊</div>
+      <div style="font-family:'Nasalization',sans-serif;font-size:14px;font-weight:700;color:#fff;letter-spacing:2px;margin-bottom:12px;">CHECK YOUR SCREEN</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.8;margin-bottom:24px;text-align:left;">
+        Telegram a lancé l'installation. Si l'icône n'apparaît pas, long-press sur le bot dans Telegram → <strong style="color:#3AACDF;">Add to Home Screen</strong>.
       </div>
-      <a href="https://nava-peace.app/shop" target="_blank" style="display:block;width:100%;box-sizing:border-box;background:linear-gradient(135deg,#3AACDF,#1E8EC4);border:none;border-radius:12px;color:#fff;font-size:13px;font-weight:700;letter-spacing:1.5px;padding:14px;cursor:pointer;text-decoration:none;text-align:center;margin-bottom:10px;">📲 OPEN SHOP &amp; INSTALL</a>
-      <button id="pwa-browser-close" style="width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;color:rgba(255,255,255,0.5);font-size:12px;font-weight:700;letter-spacing:1.5px;padding:12px;cursor:pointer;">NOT NOW</button>
+      <button id="pwa-browser-close" style="width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;color:rgba(255,255,255,0.5);font-size:12px;font-weight:700;letter-spacing:1.5px;padding:12px;cursor:pointer;">OK</button>
     </div>
 
   </div>
@@ -4499,8 +4496,7 @@
 (function() {
   var POPUP_KEY = 'nava_pwa_popup_shown';
   var last = parseInt(localStorage.getItem(POPUP_KEY) || '0');
-  // TESTING MODE — cooldown disabled, remove after test ↓
-  // if (Date.now() - last < 30 * 24 * 3600 * 1000) return;
+  if (Date.now() - last < 30 * 24 * 3600 * 1000) return;
 
   var popup    = document.getElementById('pwa-popup');
   var stepAsk  = document.getElementById('pwa-step-ask');
