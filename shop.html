@@ -401,7 +401,7 @@
     <span class="logo-text">NAVA PEACE</span>
   </a>
   <div class="header-right" style="display:flex;align-items:center;gap:8px;">
-    <button id="pwa-header-btn" onclick="triggerPwaInstall()" title="Add to home screen" style="display:none;background:rgba(58,172,223,0.15);border:1px solid rgba(58,172,223,0.4);border-radius:8px;color:#3AACDF;font-size:11px;font-weight:700;letter-spacing:1px;padding:7px 12px;cursor:pointer;white-space:nowrap;">📲 INSTALL</button>
+    <button id="pwa-header-btn" onclick="triggerPwaInstall()" title="Add to home screen" style="display:inline-block;background:rgba(58,172,223,0.15);border:1px solid rgba(58,172,223,0.4);border-radius:8px;color:#3AACDF;font-size:11px;font-weight:700;letter-spacing:1px;padding:7px 12px;cursor:pointer;white-space:nowrap;">📲 INSTALL</button>
     <button class="cart-btn" onclick="openCart()">
       🛒 CART
       <span class="cart-badge" id="cart-badge">0</span>
@@ -1320,9 +1320,13 @@ window.addEventListener('load', async () => {
 
 <script>
 (function() {
-  // Already installed as PWA → hide everything
+  // Already installed as PWA → hide install UI
   var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-  if (isStandalone) return;
+  var headerBtn = document.getElementById('pwa-header-btn');
+  if (isStandalone) {
+    if (headerBtn) headerBtn.style.display = 'none';
+    return;
+  }
 
   // Service Worker
   if ('serviceWorker' in navigator) {
@@ -1332,9 +1336,7 @@ window.addEventListener('load', async () => {
   var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   var _deferredInstall = null;
 
-  // Show header install button immediately (always visible, not dependent on browser event)
-  var headerBtn = document.getElementById('pwa-header-btn');
-  if (headerBtn) headerBtn.style.display = 'inline-block';
+  // Button is visible by default in HTML — nothing to do here
 
   // Capture Android install prompt when available
   window.addEventListener('beforeinstallprompt', function(e) {
