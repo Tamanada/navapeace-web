@@ -942,21 +942,8 @@ function sortedProducts(list) {
 }
 
 // ── Merch Tabs ─────────────────────────────────────────────
-const DEFAULT_TABS = ['CLOTHING','SWIMWEAR','ACCESSORIES','PHONE CASES','HOME & DECOR','FLAGS & PRINTS','LIFESTYLE'];
 let merchTabs  = {};   // { 'CLOTHING': ['id1','id2'], ... } from admin
 let activeTab  = 'ALL';
-
-// Keyword fallback per tab — for products not yet manually assigned in admin.
-// Hybrid mode: admin IDs take priority; unassigned products fall through to keywords.
-const TAB_KEYWORDS = {
-  'CLOTHING':       'shirt dress shorts pants hoodie jacket',
-  'SWIMWEAR':       'swimsuit bikini swim',
-  'ACCESSORIES':    'bag cap tote gaiter hat',
-  'PHONE CASES':    'phone iphone samsung airbag case',
-  'HOME & DECOR':   'mug towel quilt bedding blanket duvet pillow cushion',
-  'FLAGS & PRINTS': 'flag banner poster print',
-  'LIFESTYLE':      'playing cards puzzle keychain sticker game',
-};
 
 async function loadProductOrder() {
   try {
@@ -978,24 +965,10 @@ async function loadMerchTabs() {
 }
 
 function getTabNames() {
-  // Merge admin tab names with default tabs so all categories always appear.
-  // A tab is shown only if at least 1 product (admin-assigned OR keyword-matched) exists.
-  const adminKeys  = Object.keys(merchTabs);
-  const allTabKeys = [...new Set([...(adminKeys.length ? adminKeys : []), ...DEFAULT_TABS])];
-  const allAssigned = new Set(Object.values(merchTabs).flat().map(String));
-
-  const visible = allTabKeys.filter(t => {
-    const ids = (merchTabs[t] || []).map(String);
-    const kw  = (TAB_KEYWORDS[t] || '').toLowerCase();
-    return allProducts.some(p => {
-      if (ids.includes(String(p.id))) return true;
-      // Also count unassigned products matching this tab's keywords
-      if (!allAssigned.has(String(p.id)) && kw) {
-        return kw.split(' ').some(k => k && p.title.toLowerCase().includes(k));
-      }
-      return false;
-    });
-  });
+  // Show only tabs that have at least 1 admin-assigned product — purely admin-driven.
+  const visible = Object.keys(merchTabs).filter(t =>
+    (merchTabs[t] || []).some(id => allProducts.find(p => String(p.id) === String(id)))
+  );
   return ['ALL', ...visible];
 }
 
@@ -1022,20 +995,9 @@ function filterByTab() {
   let list = allProducts;
 
   if (activeTab !== 'ALL') {
-    // Hybrid mode: admin-assigned IDs first, then keyword fallback for unassigned products.
-    // This ensures products not yet dragged to a tab in admin still appear if they match.
-    const adminIds   = (merchTabs[activeTab] || []).map(String);
-    const kw         = (TAB_KEYWORDS[activeTab] || '').toLowerCase();
-    const allAssigned = new Set(Object.values(merchTabs).flat().map(String));
-
-    list = allProducts.filter(p => {
-      const pid = String(p.id);
-      if (adminIds.includes(pid)) return true;
-      if (!allAssigned.has(pid) && kw) {
-        return kw.split(' ').some(k => k && p.title.toLowerCase().includes(k));
-      }
-      return false;
-    });
+    // Admin-only: show exactly the products assigned to this tab in admin.
+    const adminIds = (merchTabs[activeTab] || []).map(String);
+    list = allProducts.filter(p => adminIds.includes(String(p.id)));
 
     if (!list.length) {
       grid.innerHTML = '<div class="tab-empty">NO PRODUCTS IN THIS CATEGORY YET</div>';

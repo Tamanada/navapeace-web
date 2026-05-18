@@ -4458,73 +4458,108 @@
 
 <!-- ── PWA / Home Screen Install Popup ─────────────────────────── -->
 <div id="pwa-popup" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.65);align-items:center;justify-content:center;padding:24px;">
-  <div style="background:linear-gradient(160deg,#0d2a47,#1a5c8a);border:1px solid rgba(58,172,223,0.35);border-radius:24px;padding:32px 28px;max-width:340px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.5);">
-    <div style="font-size:52px;margin-bottom:16px;">📲</div>
-    <div style="font-family:'Nasalization',sans-serif;font-size:16px;font-weight:700;color:#fff;letter-spacing:2px;margin-bottom:8px;">ADD TO HOME SCREEN</div>
-    <div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;margin-bottom:28px;">Install NAVA PEACE on your home screen for quick daily access.</div>
-    <div style="display:flex;gap:12px;">
-      <button id="pwa-popup-no" style="flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;color:rgba(255,255,255,0.6);font-size:13px;font-weight:700;letter-spacing:1.5px;padding:14px;cursor:pointer;">NOT NOW</button>
-      <button id="pwa-popup-yes" style="flex:2;background:linear-gradient(135deg,#3AACDF,#1E8EC4);border:none;border-radius:12px;color:#fff;font-size:13px;font-weight:700;letter-spacing:1.5px;padding:14px;cursor:pointer;">YES, INSTALL ✓</button>
+  <div id="pwa-popup-box" style="background:linear-gradient(160deg,#0d2a47,#1a5c8a);border:1px solid rgba(58,172,223,0.35);border-radius:24px;padding:32px 28px;max-width:340px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.5);">
+
+    <!-- Step 1: Ask -->
+    <div id="pwa-step-ask">
+      <div style="font-size:52px;margin-bottom:16px;">📲</div>
+      <div style="font-family:'Nasalization',sans-serif;font-size:16px;font-weight:700;color:#fff;letter-spacing:2px;margin-bottom:8px;">ADD TO HOME SCREEN</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;margin-bottom:28px;">Install NAVA PEACE on your home screen for quick daily access.</div>
+      <div style="display:flex;gap:12px;">
+        <button id="pwa-popup-no" style="flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;color:rgba(255,255,255,0.6);font-size:13px;font-weight:700;letter-spacing:1.5px;padding:14px;cursor:pointer;">NOT NOW</button>
+        <button id="pwa-popup-yes" style="flex:2;background:linear-gradient(135deg,#3AACDF,#1E8EC4);border:none;border-radius:12px;color:#fff;font-size:13px;font-weight:700;letter-spacing:1.5px;padding:14px;cursor:pointer;">YES, INSTALL ✓</button>
+      </div>
     </div>
+
+    <!-- Step 2a: Telegram added it -->
+    <div id="pwa-step-done" style="display:none;">
+      <div style="font-size:52px;margin-bottom:16px;">✅</div>
+      <div style="font-family:'Nasalization',sans-serif;font-size:15px;font-weight:700;color:#fff;letter-spacing:2px;margin-bottom:10px;">ADDED!</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;margin-bottom:24px;">NAVA PEACE is now on your home screen. See you tomorrow 🕊</div>
+      <button id="pwa-done-close" style="width:100%;background:linear-gradient(135deg,#3AACDF,#1E8EC4);border:none;border-radius:12px;color:#fff;font-size:13px;font-weight:700;letter-spacing:1.5px;padding:14px;cursor:pointer;">GREAT ✓</button>
+    </div>
+
+    <!-- Step 2b: Fallback browser instructions -->
+    <div id="pwa-step-browser" style="display:none;">
+      <div style="font-size:52px;margin-bottom:16px;">🌐</div>
+      <div style="font-family:'Nasalization',sans-serif;font-size:14px;font-weight:700;color:#fff;letter-spacing:2px;margin-bottom:12px;">OPEN IN BROWSER</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.8;margin-bottom:24px;text-align:left;">
+        1. Open <strong style="color:#3AACDF;">nava-peace.world</strong> in Chrome or Safari<br>
+        2. Tap the <strong style="color:#3AACDF;">INSTALL</strong> button at the bottom<br>
+        3. Done — icon on your home screen 🕊
+      </div>
+      <button id="pwa-browser-close" style="width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:12px;color:#fff;font-size:13px;font-weight:700;letter-spacing:1.5px;padding:14px;cursor:pointer;">OK, GOT IT</button>
+    </div>
+
   </div>
 </div>
 
 <script>
 (function() {
-  // Only show once — respect user's "not now" for 30 days
   var POPUP_KEY = 'nava_pwa_popup_shown';
   var last = parseInt(localStorage.getItem(POPUP_KEY) || '0');
   if (Date.now() - last < 30 * 24 * 3600 * 1000) return;
 
-  var popup = document.getElementById('pwa-popup');
+  var popup    = document.getElementById('pwa-popup');
+  var stepAsk  = document.getElementById('pwa-step-ask');
+  var stepDone = document.getElementById('pwa-step-done');
+  var stepBrow = document.getElementById('pwa-step-browser');
 
-  function showPopup() {
-    popup.style.display = 'flex';
-  }
+  function showPopup()  { popup.style.display = 'flex'; }
+  function closePopup() { popup.style.display = 'none'; localStorage.setItem(POPUP_KEY, Date.now()); }
+  function showStep(el) { [stepAsk, stepDone, stepBrow].forEach(function(s){ s.style.display = 'none'; }); el.style.display = 'block'; }
 
-  function hidePopup() {
-    popup.style.display = 'none';
-    localStorage.setItem(POPUP_KEY, Date.now());
-  }
+  function showBrowserFallback() { showStep(stepBrow); }
 
-  // YES → try Telegram native addToHomeScreen (Bot API 8.0+), fallback to instructions
+  // YES clicked
   document.getElementById('pwa-popup-yes').addEventListener('click', function() {
-    hidePopup();
-    try {
-      if (window.Telegram && Telegram.WebApp && typeof Telegram.WebApp.addToHomeScreen === 'function') {
+    var hasTgInstall = window.Telegram && Telegram.WebApp &&
+                       typeof Telegram.WebApp.addToHomeScreen === 'function';
+    var hasCheck     = window.Telegram && Telegram.WebApp &&
+                       typeof Telegram.WebApp.checkHomeScreenStatus === 'function';
+
+    if (hasTgInstall) {
+      try {
         Telegram.WebApp.addToHomeScreen();
-      } else {
-        // Fallback: guide to browser install
-        alert('📲 Install NAVA PEACE\n\nOpen nava-peace.world in your browser, then tap the INSTALL button at the bottom of the screen.');
-      }
-    } catch(e) {
-      alert('📲 Install NAVA PEACE\n\nOpen nava-peace.world in your browser, then tap the INSTALL button at the bottom of the screen.');
+        // Check after 1.5s if it was actually added
+        setTimeout(function() {
+          if (hasCheck) {
+            Telegram.WebApp.checkHomeScreenStatus(function(status) {
+              if (status === 'added') {
+                showStep(stepDone);
+              } else {
+                showBrowserFallback();
+              }
+            });
+          } else {
+            // Can't verify — assume it worked, show done
+            showStep(stepDone);
+          }
+        }, 1500);
+      } catch(e) { showBrowserFallback(); }
+    } else {
+      showBrowserFallback();
     }
   });
 
-  // NO → hide and don't ask for 30 days
-  document.getElementById('pwa-popup-no').addEventListener('click', hidePopup);
+  document.getElementById('pwa-popup-no').addEventListener('click', closePopup);
+  document.getElementById('pwa-done-close').addEventListener('click', closePopup);
+  document.getElementById('pwa-browser-close').addEventListener('click', closePopup);
+  popup.addEventListener('click', function(e) { if (e.target === popup) closePopup(); });
 
-  // Close on backdrop click
-  popup.addEventListener('click', function(e) {
-    if (e.target === popup) hidePopup();
-  });
-
-  // Check if already added via Telegram API — only show if not yet added
+  // Show popup only if not already added
   try {
     if (window.Telegram && Telegram.WebApp && typeof Telegram.WebApp.checkHomeScreenStatus === 'function') {
       Telegram.WebApp.checkHomeScreenStatus(function(status) {
-        // status: 'unsupported' | 'unknown' | 'added' | 'missed'
-        if (status !== 'added') {
-          setTimeout(showPopup, 2000); // 2s delay after page load
-        }
+        if (status !== 'added') setTimeout(showPopup, 2000);
       });
     } else {
       setTimeout(showPopup, 2000);
     }
-  } catch(e) {
-    setTimeout(showPopup, 2000);
-  }
+  } catch(e) { setTimeout(showPopup, 2000); }
+
+  // Reset cooldown so popup shows again for testing (remove after testing)
+  // localStorage.removeItem(POPUP_KEY);
 })();
 </script>
 

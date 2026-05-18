@@ -3754,21 +3754,66 @@ function tmgrRender() {
 }
 
 function tmgrMakeCard(p, fromTab) {
+  const id   = String(p.id);
   const card = document.createElement('div');
   card.className   = 'tmgr-card';
   card.draggable   = true;
-  card.dataset.id  = String(p.id);
+  card.dataset.id  = id;
   card.dataset.tab = fromTab;
-  card.innerHTML   = `
-    <img class="tmgr-thumb" src="${p.img || ''}" onerror="this.style.display='none'"/>
-    <span class="tmgr-name">${p.name || p.id}</span>
-    ${fromTab !== '__pool__' ? `<button class="tmgr-rm" title="Retirer" onclick="tmgrRemove('${String(p.id)}','${fromTab}')">✕</button>` : ''}
-  `;
+
+  const img = document.createElement('img');
+  img.className = 'tmgr-thumb';
+  img.src       = p.img || '';
+  img.onerror   = () => img.style.display = 'none';
+  img.title     = 'Voir détail / prix';
+  img.style.cursor = 'pointer';
+  img.onclick   = e => { e.stopPropagation(); openYoyDetail(id); };
+
+  const name = document.createElement('span');
+  name.className   = 'tmgr-name';
+  name.textContent = p.name || id;
+
+  card.appendChild(img);
+  card.appendChild(name);
+
+  if (fromTab !== '__pool__') {
+    const rm = document.createElement('button');
+    rm.className = 'tmgr-rm';
+    rm.title     = 'Retirer';
+    rm.textContent = '✕';
+    rm.onclick   = e => { e.stopPropagation(); tmgrRemove(id, fromTab); };
+    card.appendChild(rm);
+
+    // ── Within-column reorder ────────────────────────────────
+    card.ondragover = e => {
+      if (_tmgrDragFrom !== fromTab || _tmgrDragId === id) return;
+      e.preventDefault();
+      e.stopPropagation();
+      card.classList.add('yoy-drag-over');
+    };
+    card.ondragleave = () => card.classList.remove('yoy-drag-over');
+    card.ondrop = e => {
+      e.preventDefault();
+      e.stopPropagation();
+      card.classList.remove('yoy-drag-over');
+      if (!_tmgrDragId || _tmgrDragFrom !== fromTab || _tmgrDragId === id) return;
+      const cfg   = _tmgrConfig[fromTab] || [];
+      const fromI = cfg.findIndex(x => String(x) === _tmgrDragId);
+      const toI   = cfg.findIndex(x => String(x) === id);
+      if (fromI !== -1 && toI !== -1) {
+        cfg.splice(fromI, 1);
+        cfg.splice(toI, 0, _tmgrDragId);
+        _tmgrConfig[fromTab] = cfg;
+        tmgrRender();
+      }
+    };
+  }
+
   card.ondragstart = e => {
-    _tmgrDragId   = String(p.id);
+    _tmgrDragId   = id;
     _tmgrDragFrom = fromTab;
-    e.dataTransfer.setData('text/plain', _tmgrDragId);
-    card.classList.add('dragging');
+    e.dataTransfer.setData('text/plain', id);
+    setTimeout(() => card.classList.add('dragging'), 0);
   };
   card.ondragend = () => card.classList.remove('dragging');
   return card;
