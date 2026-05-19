@@ -20,12 +20,12 @@
       --accent:#1E8EC4;--accent2:#3AACDF;
       --gold:#c8860a;--gold2:#a06a00;
       --white:#ffffff;--w80:rgba(255,255,255,0.9);
-      --w60:rgba(255,255,255,0.85);--w40:rgba(255,255,255,0.7);--w20:rgba(255,255,255,0.35);
-      --border:rgba(255,255,255,0.28);
-      --card:rgba(255,255,255,0.22);
+      --w60:rgba(255,255,255,0.75);--w40:rgba(255,255,255,0.5);--w20:rgba(255,255,255,0.2);
+      --border:rgba(255,255,255,0.12);
+      --card:rgba(255,255,255,0.06);
       --font:'Rajdhani',sans-serif;
       --radius:16px;
-      --grad:radial-gradient(ellipse at 50% 30%,#6DD5F5 0%,#3AACDF 45%,#1E8EC4 100%);
+      --grad:linear-gradient(160deg,#04111f 0%,#071a30 35%,#0a2240 65%,#050d1a 100%);
     }
     *{box-sizing:border-box;margin:0;padding:0;}
     body{
@@ -39,10 +39,10 @@
     /* ── HEADER ─────────────────────────────────────────── */
     .site-header{
       position:sticky;top:0;z-index:100;
-      background:rgba(255,255,255,0.18);
-      backdrop-filter:blur(16px);
-      -webkit-backdrop-filter:blur(16px);
-      border-bottom:1px solid rgba(255,255,255,0.3);
+      background:rgba(4,17,31,0.75);
+      backdrop-filter:blur(20px);
+      -webkit-backdrop-filter:blur(20px);
+      border-bottom:1px solid rgba(58,172,223,0.15);
       display:flex;align-items:center;justify-content:space-between;
       padding:0 24px;height:64px;
     }
@@ -52,31 +52,29 @@
     }
     .logo-mark{
       width:36px;height:36px;border-radius:50%;
-      background:rgba(255,255,255,0.3);
-      border:1px solid rgba(255,255,255,0.5);
+      background:rgba(58,172,223,0.15);
+      border:1px solid rgba(58,172,223,0.4);
       display:flex;align-items:center;justify-content:center;
-      font-size:16px;font-weight:700;color:#fff;
+      font-size:16px;font-weight:700;color:#3AACDF;
     }
     .logo-text{
       font-size:16px;font-weight:700;letter-spacing:4px;color:var(--white);
-      text-shadow:0 1px 4px rgba(0,60,140,0.3);
     }
     .header-right{display:flex;align-items:center;gap:16px;}
     .cart-btn{
       position:relative;
-      background:rgba(255,255,255,0.28);
-      border:1px solid rgba(255,255,255,0.5);
+      background:rgba(58,172,223,0.1);
+      border:1px solid rgba(58,172,223,0.3);
       border-radius:10px;
-      padding:8px 16px;
+      padding:8px 18px;
       color:#fff;font-family:var(--font);
       font-size:12px;letter-spacing:2px;cursor:pointer;
       display:flex;align-items:center;gap:8px;
-      transition:background 0.2s;
-      text-shadow:0 1px 3px rgba(0,60,120,0.3);
+      transition:all 0.2s;
     }
-    .cart-btn:hover{background:rgba(255,255,255,0.38);}
+    .cart-btn:hover{background:rgba(58,172,223,0.2);border-color:rgba(58,172,223,0.5);}
     .cart-badge{
-      background:#fff;color:var(--navy);
+      background:#3AACDF;color:#fff;
       border-radius:50%;width:18px;height:18px;
       font-size:10px;font-weight:700;
       display:none;align-items:center;justify-content:center;
@@ -84,64 +82,72 @@
 
     /* ── HERO BANNER ─────────────────────────────────────── */
     .hero{
-      text-align:center;padding:60px 24px 48px;
+      position:relative;text-align:center;
+      padding:70px 24px 56px;
+      overflow:hidden;
+    }
+    .hero::before{
+      content:'☮';
+      position:absolute;top:50%;left:50%;
+      transform:translate(-50%,-50%);
+      font-size:420px;line-height:1;
+      color:rgba(58,172,223,0.04);
+      pointer-events:none;
+      user-select:none;
     }
     .hero-eyebrow{
-      font-size:10px;letter-spacing:5px;color:rgba(255,255,255,0.85);
-      margin-bottom:12px;text-transform:uppercase;
-      text-shadow:0 1px 4px rgba(0,60,140,0.3);
+      font-size:10px;letter-spacing:6px;color:rgba(58,172,223,0.8);
+      margin-bottom:20px;text-transform:uppercase;
     }
     .hero-title{
-      font-size:clamp(32px,6vw,56px);font-weight:700;
-      letter-spacing:6px;line-height:1.1;
+      font-size:clamp(36px,7vw,72px);font-weight:700;
+      letter-spacing:8px;line-height:1.05;
       color:#fff;
-      text-shadow:0 2px 12px rgba(0,60,140,0.3);
-      margin-bottom:16px;
+      margin-bottom:20px;
     }
     .hero-sub{
-      font-size:13px;color:rgba(255,255,255,0.85);letter-spacing:1px;
-      max-width:480px;margin:0 auto 20px;line-height:1.7;
-      text-shadow:0 1px 4px rgba(0,60,140,0.2);
+      font-size:13px;color:rgba(255,255,255,0.45);letter-spacing:1.5px;
+      max-width:400px;margin:0 auto 32px;line-height:1.8;
     }
     .hero-ship{
-      display:inline-block;
-      font-size:clamp(17px,4vw,22px);font-weight:700;
-      letter-spacing:1px;
-      color:#fff;
-      background:rgba(255,255,255,0.22);
-      border:2px solid rgba(255,255,255,0.55);
-      border-radius:50px;
-      padding:12px 28px;
-      margin-bottom:32px;
-      text-shadow:0 2px 8px rgba(0,60,140,0.3);
-      box-shadow:0 4px 20px rgba(0,60,120,0.2);
+      display:inline-flex;align-items:center;gap:10px;
+      font-size:13px;font-weight:600;letter-spacing:1.5px;
+      color:rgba(255,255,255,0.7);
+      background:rgba(58,172,223,0.08);
+      border:1px solid rgba(58,172,223,0.2);
+      border-radius:50px;padding:10px 24px;
+      margin-bottom:0;
     }
     .hero-mission{
       display:inline-flex;align-items:center;gap:8px;
-      background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.4);
+      background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
       border-radius:50px;padding:8px 20px;
-      font-size:11px;letter-spacing:2px;color:#fff;
+      font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.5);
     }
 
     /* ── FILTERS ─────────────────────────────────────────── */
     .filters{
       display:flex;align-items:center;gap:8px;
-      padding:0 24px 24px;overflow-x:auto;
+      padding:0 24px 28px;overflow-x:auto;
       scrollbar-width:none;
     }
     .filters::-webkit-scrollbar{display:none;}
     .filter-chip{
       flex-shrink:0;
-      padding:6px 16px;border-radius:50px;
-      background:rgba(255,255,255,0.2);
-      border:1px solid rgba(255,255,255,0.35);
-      font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.85);
-      cursor:pointer;transition:all 0.15s;white-space:nowrap;
+      padding:7px 18px;border-radius:50px;
+      background:transparent;
+      border:1px solid rgba(255,255,255,0.12);
+      font-size:10px;letter-spacing:2.5px;color:rgba(255,255,255,0.4);
+      cursor:pointer;transition:all 0.2s;white-space:nowrap;
+      font-family:var(--font);
+    }
+    .filter-chip:hover{
+      border-color:rgba(58,172,223,0.4);color:rgba(255,255,255,0.7);
     }
     .filter-chip.active{
-      background:rgba(255,255,255,0.38);
-      border-color:rgba(255,255,255,0.7);color:#fff;
-      font-weight:700;
+      background:rgba(58,172,223,0.15);
+      border-color:rgba(58,172,223,0.5);
+      color:#3AACDF;font-weight:700;
     }
 
     /* ── PRODUCT GRID ────────────────────────────────────── */
@@ -158,17 +164,17 @@
       .products-grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:24px;}
     }
     .product-card{
-      background:var(--card);
-      border:1px solid var(--border);
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
       border-radius:var(--radius);overflow:hidden;
-      cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;
+      cursor:pointer;transition:transform 0.25s,box-shadow 0.25s,border-color 0.25s;
       backdrop-filter:blur(10px);
       -webkit-backdrop-filter:blur(10px);
-      box-shadow:0 4px 16px rgba(0,60,120,0.12);
     }
     .product-card:hover{
-      transform:translateY(-4px);
-      box-shadow:0 12px 36px rgba(0,60,120,0.25);
+      transform:translateY(-6px);
+      box-shadow:0 20px 50px rgba(0,0,0,0.4);
+      border-color:rgba(58,172,223,0.25);
     }
     .product-img{
       width:100%;aspect-ratio:1;overflow:hidden;
@@ -406,7 +412,7 @@
 
 <!-- ── HERO ───────────────────────────────────────────────── -->
 <section class="hero">
-  <div class="hero-eyebrow">OFFICIAL MERCHANDISE &nbsp;·&nbsp; <span style="color:var(--gold);font-size:9px;">v16</span></div>
+  <div class="hero-eyebrow">OFFICIAL MERCHANDISE</div>
   <h1 class="hero-title">WEAR THE<br>MISSION</h1>
   <p class="hero-sub">Every item is printed on demand and ships worldwide.</p>
   <div class="hero-ship">✅ Shipping is included in the price</div>
