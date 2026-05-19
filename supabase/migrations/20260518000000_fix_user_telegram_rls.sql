@@ -23,9 +23,12 @@ ALTER TABLE public.user_telegram
   ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 
 -- ── B. Fix user_telegram RLS policies ────────────────────────────
-DROP POLICY IF EXISTS "user_telegram_select_own" ON public.user_telegram;
-DROP POLICY IF EXISTS "user_telegram_insert_own" ON public.user_telegram;
-DROP POLICY IF EXISTS "user_telegram_update_own" ON public.user_telegram;
+DROP POLICY IF EXISTS "user_telegram_select_own"   ON public.user_telegram;
+DROP POLICY IF EXISTS "user_telegram_insert_own"   ON public.user_telegram;
+DROP POLICY IF EXISTS "user_telegram_update_own"   ON public.user_telegram;
+DROP POLICY IF EXISTS "user_telegram_select_open"  ON public.user_telegram;
+DROP POLICY IF EXISTS "user_telegram_insert_tg"    ON public.user_telegram;
+DROP POLICY IF EXISTS "user_telegram_update_tg"    ON public.user_telegram;
 
 -- SELECT: open — telegram_id is not sensitive enough to hide,
 -- and bots/admin always use service_role (bypasses RLS).
