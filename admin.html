@@ -377,6 +377,14 @@
     .tmgr-thumb{width:32px;height:32px;border-radius:6px;object-fit:contain;background:rgba(255,255,255,0.1);flex-shrink:0;}
     .tmgr-name{font-size:8px;letter-spacing:0.5px;color:var(--w80);line-height:1.3;flex:1;}
     .tmgr-rm{background:none;border:none;color:rgba(255,80,80,0.6);cursor:pointer;font-size:13px;padding:0 2px;flex-shrink:0;}
+    .tmgr-toggle{background:none;border:none;cursor:pointer;font-size:13px;padding:0 2px;line-height:1;flex-shrink:0;transition:opacity 0.15s;}
+    .tmgr-card.hidden-prod{opacity:0.35;}
+    .vis-filter-bar{display:flex;gap:6px;margin-bottom:10px;}
+    .vis-filter-btn{padding:5px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:rgba(255,255,255,0.5);font-family:var(--font);font-size:8px;letter-spacing:2px;cursor:pointer;}
+    .vis-filter-btn.active{background:rgba(109,213,245,0.15);border-color:rgba(109,213,245,0.4);color:#6DD5F5;}
+    .yoy-dm-vis-btn{padding:9px 18px;border-radius:10px;border:1.5px solid;font-family:var(--font);font-size:9px;letter-spacing:2px;cursor:pointer;transition:background 0.2s;}
+    .yoy-dm-vis-btn.active{background:rgba(74,222,128,0.15);border-color:rgba(74,222,128,0.45);color:#4ade80;}
+    .yoy-dm-vis-btn.hidden{background:rgba(255,80,80,0.12);border-color:rgba(255,80,80,0.4);color:#f87171;}
     .tab-mgr-save{margin-top:14px;padding:12px 24px;background:linear-gradient(135deg,#1a7bbf,#3AACDF);border:none;border-radius:10px;color:#fff;font-family:var(--font);font-size:9px;letter-spacing:2px;cursor:pointer;}
     .tab-mgr-save:disabled{opacity:0.4;cursor:default;}
     .yoy-product-card{background:linear-gradient(135deg,rgba(5,20,50,0.88),rgba(8,32,68,0.82));border:1px solid rgba(109,213,245,0.25);border-radius:10px;padding:12px;cursor:pointer;transition:border-color 0.2s,transform 0.15s;}
@@ -1199,6 +1207,12 @@
           <p style="font-size:9px;letter-spacing:1.5px;color:var(--w40);margin-bottom:10px;">
             Glisse les produits dans leur onglet · Ceux sans onglet apparaissent dans ALL
           </p>
+          <!-- Visibility filter -->
+          <div class="vis-filter-bar">
+            <button class="vis-filter-btn active" onclick="setVisFilter('all',this)">ALL</button>
+            <button class="vis-filter-btn" onclick="setVisFilter('active',this)">🟢 ACTIVE</button>
+            <button class="vis-filter-btn" onclick="setVisFilter('hidden',this)">🔴 HIDDEN</button>
+          </div>
           <!-- Unassigned pool -->
           <p class="yoy-section-title" style="margin-bottom:6px;">📦 NON CLASSÉS</p>
           <div class="tab-mgr-pool" id="tmgr-pool"
@@ -3510,6 +3524,7 @@ async function openYoyDetail(productId) {
   ov.classList.add('open');
   document.getElementById('yoy-dm-title').textContent = p.name || productId;
   document.getElementById('yoy-dm-sub').textContent   = 'ID: ' + productId;
+  updateDmVisBtn(productId);
   const thumb = document.getElementById('yoy-dm-thumb');
   thumb.src = p.img || ''; thumb.style.display = p.img ? '' : 'none';
   document.getElementById('yoy-dm-yoycol-link').href =
@@ -3671,6 +3686,8 @@ let TMGR_TABS     = ['CLOTHING','SWIMWEAR','ACCESSORIES','PHONE CASES','HOME & D
 let _tmgrOpen     = false;
 let _tmgrLoaded   = false;
 let _tmgrConfig   = {}; // { TAB: [id, ...] }
+let _hiddenProducts = new Set(); // product IDs hidden from public shop
+let _visFilter = 'all'; // 'all' | 'active' | 'hidden'
 let _tmgrDragId   = null;
 let _tmgrDragFrom = null;
 
@@ -3699,6 +3716,60 @@ function tmgrDeleteTab(tab) {
   tmgrRender();
 }
 
+async function loadHiddenProducts() {
+  try {
+    const res  = await fetch(`${YOY_PROXY}?action=get_hidden_products`, { headers: YOY_AUTH });
+    const data = await res.json();
+    _hiddenProducts = new Set((Array.isArray(data) ? data : []).map(String));
+  } catch(_) { _hiddenProducts = new Set(); }
+}
+
+async function saveHiddenProducts() {
+  try {
+    await fetch(`${YOY_PROXY}?action=update_admin_setting`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...YOY_AUTH },
+      body: JSON.stringify({ adminCode: _adminCode, key: 'hidden_products', value: [..._hiddenProducts] })
+    });
+  } catch(e) { console.error('[admin] saveHiddenProducts failed:', e); }
+}
+
+async function toggleProductVisibility(id) {
+  const sid = String(id);
+  if (_hiddenProducts.has(sid)) {
+    _hiddenProducts.delete(sid);
+  } else {
+    _hiddenProducts.add(sid);
+  }
+  await saveHiddenProducts();
+  // Refresh card appearances
+  document.querySelectorAll(`.tmgr-card[data-id="${sid}"]`).forEach(card => {
+    card.classList.toggle('hidden-prod', _hiddenProducts.has(sid));
+    const btn = card.querySelector('.tmgr-toggle');
+    if (btn) btn.textContent = _hiddenProducts.has(sid) ? '🔴' : '🟢';
+  });
+  // Refresh detail panel toggle if open
+  const dmBtn = document.getElementById('yoy-dm-vis-btn');
+  if (dmBtn && _yoyDetailPid === sid) updateDmVisBtn(sid);
+  // Re-render if filter is active
+  if (_visFilter !== 'all') tmgrRender();
+}
+
+function setVisFilter(f, btn) {
+  _visFilter = f;
+  document.querySelectorAll('.vis-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  tmgrRender();
+}
+
+function updateDmVisBtn(pid) {
+  const btn = document.getElementById('yoy-dm-vis-btn');
+  if (!btn) return;
+  const isHidden = _hiddenProducts.has(String(pid));
+  btn.textContent = isHidden ? '🔴 HIDDEN — click to enable' : '🟢 VISIBLE — click to hide';
+  btn.className = 'yoy-dm-vis-btn ' + (isHidden ? 'hidden' : 'active');
+}
+
 async function tmgrLoad() {
   // Load current tab config from Supabase
   try {
@@ -3717,6 +3788,7 @@ async function tmgrLoad() {
     await _yoyLoadPriceOverrides();
     await _loadYoyProducts();
   }
+  await loadHiddenProducts();
   tmgrRender();
 }
 
@@ -3728,7 +3800,10 @@ function tmgrRender() {
   // Pool: unassigned products
   const pool  = document.getElementById('tmgr-pool');
   const empty = document.getElementById('tmgr-pool-empty');
-  const unassigned = [..._yoyProductMap.values()].filter(p => !idToTab[String(p.id)]);
+  const allUnassigned = [..._yoyProductMap.values()].filter(p => !idToTab[String(p.id)]);
+  const unassigned = _visFilter === 'all' ? allUnassigned
+    : _visFilter === 'hidden' ? allUnassigned.filter(p => _hiddenProducts.has(String(p.id)))
+    : allUnassigned.filter(p => !_hiddenProducts.has(String(p.id)));
   pool.innerHTML = '';
   pool.appendChild(empty);
   empty.style.display = unassigned.length ? 'none' : 'block';
@@ -3745,7 +3820,9 @@ function tmgrRender() {
     col.ondrop      = e => tmgrDrop(e, tab);
     col.ondragleave = e => tmgrDragLeave(e);
     const ids = (_tmgrConfig[tab] || []).map(String);
-    const products = ids.map(id => _yoyProductMap.get(id)).filter(Boolean);
+    let products = ids.map(id => _yoyProductMap.get(id)).filter(Boolean);
+    if (_visFilter === 'hidden') products = products.filter(p => _hiddenProducts.has(String(p.id)));
+    else if (_visFilter === 'active') products = products.filter(p => !_hiddenProducts.has(String(p.id)));
     col.innerHTML = `<div class="tab-col-head" style="display:flex;align-items:center;justify-content:space-between;">${tab}<button onclick="tmgrDeleteTab('${tab.replace(/'/g,"\\'")}')\" style="background:none;border:none;color:rgba(255,80,80,0.5);cursor:pointer;font-size:11px;padding:0;" title="Supprimer">🗑</button></div><div class="tab-col-items" id="tcol-${tab.replace(/\s/g,'_')}"></div>`;
     board.appendChild(col);
     const items = col.querySelector('.tab-col-items');
@@ -3775,6 +3852,15 @@ function tmgrMakeCard(p, fromTab) {
 
   card.appendChild(img);
   card.appendChild(name);
+
+  const isHidden = _hiddenProducts.has(id);
+  if (isHidden) card.classList.add('hidden-prod');
+  const toggle = document.createElement('button');
+  toggle.className = 'tmgr-toggle';
+  toggle.textContent = isHidden ? '🔴' : '🟢';
+  toggle.title = isHidden ? 'Hidden — click to show' : 'Visible — click to hide';
+  toggle.onclick = e => { e.stopPropagation(); toggleProductVisibility(id); };
+  card.appendChild(toggle);
 
   if (fromTab !== '__pool__') {
     const rm = document.createElement('button');
@@ -3994,7 +4080,8 @@ async function tmgrSave() {
       </div>
       <div class="yoy-dm-footer">
         <a id="yoy-dm-yoycol-link" href="https://www.yoycol.com/personal_center/products" target="_blank" rel="noopener noreferrer" style="font-size:8px;letter-spacing:2px;color:var(--w40);text-decoration:underline;">MODIFIER SUR YOYCOL →</a>
-        <div style="display:flex;gap:10px;">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <button class="yoy-dm-vis-btn active" id="yoy-dm-vis-btn" onclick="toggleProductVisibility(_yoyDetailPid)">🟢 VISIBLE — click to hide</button>
           <button class="yoy-dm-cancel" onclick="closeYoyDetail()">ANNULER</button>
           <button class="yoy-dm-save" id="yoy-dm-save-btn" onclick="yoyDetailSaveAll()">💾 SAUVEGARDER</button>
         </div>

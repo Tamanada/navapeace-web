@@ -572,6 +572,7 @@ function getDesc(title) {
 
 // ── State ──────────────────────────────────────────────────
 let allProducts    = [];
+let _hiddenProductIds = new Set(); // product IDs hidden by admin
 let currentProd    = null;
 let currentVariants = [];
 let currentFiltered = [];
@@ -831,7 +832,8 @@ function getTabProducts(tab) {
 
   // Merge (admin first), deduplicated
   const seen = new Set(adminProds.map(p => String(p.id)));
-  return [...adminProds, ...autoProds.filter(p => !seen.has(String(p.id)))];
+  return [...adminProds, ...autoProds.filter(p => !seen.has(String(p.id)))]
+    .filter(p => !_hiddenProductIds.has(String(p.id)));
 }
 
 
@@ -856,6 +858,14 @@ async function loadShopTabs() {
   } catch(e) { console.error('[shop] loadShopTabs failed:', e); }
 }
 
+async function loadHiddenProducts() {
+  try {
+    const res  = await fetch(`${PROXY_URL}?action=get_hidden_products`, { headers: AUTH_HEADERS });
+    const data = await res.json();
+    _hiddenProductIds = new Set((Array.isArray(data) ? data : []).map(String));
+  } catch(_) { _hiddenProductIds = new Set(); }
+}
+
 function buildFilters() {
   const el = document.getElementById('filters');
   // Show tabs that have at least 1 product (admin-assigned OR keyword-matched unassigned)
@@ -876,7 +886,7 @@ function applyTabFilter(el, tab) {
   el.classList.add('active');
   activeFilter = tab;
 
-  const filtered = tab === 'ALL' ? allProducts : getTabProducts(tab);
+  const filtered = tab === 'ALL' ? allProducts.filter(p => !_hiddenProductIds.has(String(p.id))) : getTabProducts(tab);
   renderGrid(filtered);
   filtered.forEach(p => fetchBasePrice(p));
 }
@@ -1281,13 +1291,14 @@ window.addEventListener('load', async () => {
   // Running all 3 concurrently causes a race: if loadShopOrder() resolves before
   // loadProducts() populates allProducts, the sort is a no-op and order is random.
   // Fix: tabs can load concurrently with products, but order sorts last.
-  await Promise.all([loadShopTabs(), loadProducts()]);
+  await Promise.all([loadShopTabs(), loadProducts(), loadHiddenProducts()]);
   await loadShopOrder(); // must be sequential — sorts the now-populated allProducts
 
   // Now all data is loaded — build filters with real tabs, render sorted grid
   buildFilters();
-  renderGrid(allProducts);
-  allProducts.forEach(p => fetchBasePrice(p));
+  const visibleProducts = allProducts.filter(p => !_hiddenProductIds.has(String(p.id)));
+  renderGrid(visibleProducts);
+  visibleProducts.forEach(p => fetchBasePrice(p));
 
   // Price overrides — background refresh after initial render
   loadPriceOverrides().then(() => {

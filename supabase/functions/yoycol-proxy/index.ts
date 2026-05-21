@@ -761,6 +761,22 @@ Deno.serve(async (req) => {
       return json({ email });
     }
 
+    // ── GET hidden products list (public) ────────────────
+    if (action === 'get_hidden_products' && req.method === 'GET') {
+      if (!SUPA_URL || !SERVICE_KEY) return json([]);
+      const r = await fetch(
+        `${SUPA_URL}/rest/v1/admin_settings?key=eq.hidden_products&select=value`,
+        { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } }
+      );
+      const rows = await r.json() as Array<Record<string, unknown>>;
+      const val  = rows?.[0]?.value;
+      if (!val) return json([]);
+      try {
+        const ids = typeof val === 'object' ? val : JSON.parse(val as string);
+        return json(Array.isArray(ids) ? ids : []);
+      } catch { return json([]); }
+    }
+
     // ── GET merch tab assignments (public) ────────────────
     if (action === 'get_merch_tabs' && req.method === 'GET') {
       if (!SUPA_URL || !SERVICE_KEY) return json({});
