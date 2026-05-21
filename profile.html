@@ -2245,8 +2245,25 @@
     if (cb) cb();
   }
 
-  // Init email card on load
+  // Init email card on load — restore from Supabase if localStorage was wiped
   renderEmailStatus();
+  (async function restoreEmail() {
+    if (localStorage.getItem('nava_peace_email')) return; // already present
+    var uid = localStorage.getItem('nava_peace_uid');
+    if (!uid) return;
+    try {
+      var edgeBase = (typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : '')
+        .replace('/rest/v1', '').replace(/\/$/, '');
+      var res = await fetch(edgeBase + '/functions/v1/yoycol-proxy?action=get_user_email&uid=' + encodeURIComponent(uid), {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
+      });
+      var data = await res.json();
+      if (data && data.email) {
+        localStorage.setItem('nava_peace_email', data.email);
+        renderEmailStatus();
+      }
+    } catch(e) { /* silent */ }
+  })();
 
   function toggleEdit() {
     const form = document.getElementById('edit-form');

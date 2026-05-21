@@ -144,6 +144,7 @@ const NAVA_TRANSLATIONS = {
     referrals_title:    'MY REFERRALS',
     referrals_see_btn:  'SEE REFERRALS',
     referrals_empty:    'No referrals yet.\nShare your link to grow\nthe peace movement!',
+    ref_code_hint:      'Share this code — anyone can enter it to join under your referral',
     press_hint:          'PRESS\nTO CHOOSE\nPEACE',
     next_action_in:      'NEXT ACTION IN',
     tap_to_see_map:      'TAP TO SEE\nTHE MAP',

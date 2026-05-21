@@ -746,6 +746,21 @@ Deno.serve(async (req) => {
       } catch { return json([]); }
     }
 
+    // ── GET user email (restore after localStorage wipe) ─────
+    if (action === 'get_user_email' && req.method === 'GET') {
+      if (!SUPA_URL || !SERVICE_KEY) return json({ email: '' });
+      const uid = url.searchParams.get('uid') ?? '';
+      if (!uid) return json({ email: '' });
+      const safeUid = String(uid).replace(/[^a-z0-9_\-]/gi, '_');
+      const r = await fetch(
+        `${SUPA_URL}/rest/v1/admin_settings?key=eq.user_email_${safeUid}&select=value`,
+        { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } }
+      );
+      const rows = await r.json() as Array<Record<string, unknown>>;
+      const email = (rows?.[0]?.value as string) || '';
+      return json({ email });
+    }
+
     // ── GET merch tab assignments (public) ────────────────
     if (action === 'get_merch_tabs' && req.method === 'GET') {
       if (!SUPA_URL || !SERVICE_KEY) return json({});
