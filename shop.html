@@ -795,9 +795,44 @@ async function loadProducts() {
   }
 }
 
-// ── Filters — driven by admin merch_tabs config ────────────
+// ── Filters — admin-driven + keyword fallback for unassigned ─
 let _shopTabs    = {}; // { TAB: [id,...] } loaded from admin
 let activeFilter = 'ALL';
+
+// Keyword fallback: only applied to products NOT assigned to any tab.
+// Admin drag-and-drop always wins — this only catches new/unassigned products.
+const TAB_KEYWORDS = {
+  'FLAGS & PRINTS':  ['flag', 'banner', 'pennant'],
+  'CLOTHING':        ['t-shirt', 'tee', 'dress', 'shorts', 'hoodie', 'sweatshirt', 'tank top'],
+  'SWIMWEAR':        ['bikini', 'swimsuit', 'swim', 'tankini', 'wetsuit'],
+  'PHONE CASES':     ['iphone', 'samsung', 'phone case', 'airbag case', 'phone cover'],
+  'ACCESSORIES':     ['peaked cap', 'cap', 'hat', 'bag', 'mug', 'tote', 'gaiter', 'towel', 'playing cards', 'chest bag', 'backpack', 'wallet'],
+  'HOME & DECOR':    ['quilt', 'bedding', 'pillow', 'cushion', 'poster', 'canvas', 'wall art'],
+  'LIFESTYLE':       ['journal', 'notebook', 'bottle', 'flask', 'keychain'],
+};
+
+// Returns products for a tab: admin-assigned first, then unassigned keyword matches.
+// A product already assigned to ANY tab will NOT appear via keyword in another tab.
+function getTabProducts(tab) {
+  const adminIds     = (_shopTabs[tab] || []).map(String);
+  const adminProds   = allProducts.filter(p => adminIds.includes(String(p.id)));
+
+  // Build set of all explicitly assigned IDs (across all tabs)
+  const assignedIds  = new Set(Object.values(_shopTabs).flat().map(String));
+
+  // Keyword auto-fill: unassigned products whose title matches this tab's keywords
+  const kws = (TAB_KEYWORDS[tab] || []).map(k => k.toLowerCase());
+  const autoProds = kws.length
+    ? allProducts.filter(p =>
+        !assignedIds.has(String(p.id)) &&
+        kws.some(k => p.title.toLowerCase().includes(k))
+      )
+    : [];
+
+  // Merge (admin first), deduplicated
+  const seen = new Set(adminProds.map(p => String(p.id)));
+  return [...adminProds, ...autoProds.filter(p => !seen.has(String(p.id)))];
+}
 
 
 async function loadShopOrder() {
@@ -822,13 +857,16 @@ async function loadShopTabs() {
 }
 
 function buildFilters() {
-  const el   = document.getElementById('filters');
-  // Show only tabs that have at least 1 admin-assigned product — purely admin-driven.
-  const visibleTabs = Object.keys(_shopTabs).filter(t =>
-    (_shopTabs[t] || []).some(id => allProducts.find(p => String(p.id) === String(id)))
+  const el = document.getElementById('filters');
+  // Show tabs that have at least 1 product (admin-assigned OR keyword-matched unassigned)
+  const visibleTabs = Object.keys(_shopTabs).filter(t => getTabProducts(t).length > 0);
+  // Also show keyword-only tabs (defined in TAB_KEYWORDS but not in _shopTabs)
+  const keywordOnlyTabs = Object.keys(TAB_KEYWORDS).filter(
+    t => !_shopTabs[t] && getTabProducts(t).length > 0
   );
+  const allTabs = [...new Set([...visibleTabs, ...keywordOnlyTabs])];
 
-  el.innerHTML = ['ALL', ...visibleTabs].map((t, i) =>
+  el.innerHTML = ['ALL', ...allTabs].map((t, i) =>
     `<div class="filter-chip${i === 0 ? ' active' : ''}" data-tab="${esc(t)}" onclick="applyTabFilter(this,'${esc(t)}')">${esc(t)}</div>`
   ).join('');
 }
@@ -838,14 +876,7 @@ function applyTabFilter(el, tab) {
   el.classList.add('active');
   activeFilter = tab;
 
-  let filtered;
-  if (tab === 'ALL') {
-    filtered = allProducts;
-  } else {
-    // Admin-only: show exactly the products assigned to this tab in admin.
-    const adminIds = (_shopTabs[tab] || []).map(String);
-    filtered = allProducts.filter(p => adminIds.includes(String(p.id)));
-  }
+  const filtered = tab === 'ALL' ? allProducts : getTabProducts(tab);
   renderGrid(filtered);
   filtered.forEach(p => fetchBasePrice(p));
 }
