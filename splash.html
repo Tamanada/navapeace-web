@@ -122,7 +122,7 @@
     .daily-msg {
       font-size: clamp(10px, 1.5vw, 16px);
       letter-spacing: clamp(1.5px, 0.35vw, 3.5px);
-      color: rgba(255,255,255,0.38);
+      color: rgba(255,255,255,0.72);
       text-transform: uppercase;
       text-align: center;
       max-width: 460px;
@@ -134,7 +134,7 @@
       display: block;
       font-size: clamp(8px, 0.85vw, 10px);
       letter-spacing: 4px;
-      color: rgba(255,255,255,0.18);
+      color: rgba(255,255,255,0.42);
       margin-bottom: 8px;
     }
 
@@ -405,29 +405,29 @@
 
           box.innerHTML =
             '<p style="font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:3px;' +
-            'color:rgba(255,255,255,.6);text-transform:uppercase;text-align:center;margin:0;">' + il.invited + '</p>' +
-            '<div style="background:rgba(255,255,255,0.10);border:1.5px solid rgba(255,255,255,0.45);' +
+            'color:rgba(255,255,255,.88);text-transform:uppercase;text-align:center;margin:0;">' + il.invited + '</p>' +
+            '<div style="background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.55);' +
             'border-radius:14px;padding:14px 28px;text-align:center;">' +
             '<div style="font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:3px;' +
-            'color:rgba(255,255,255,.45);margin-bottom:8px;text-transform:uppercase;">' + il.by + '</div>' +
+            'color:rgba(255,255,255,.7);margin-bottom:8px;text-transform:uppercase;">' + il.by + '</div>' +
             '<div style="font-family:Nasalization,Arial,sans-serif;font-size:22px;letter-spacing:6px;' +
             'color:#fff;text-shadow:0 0 20px rgba(255,255,255,0.5);">' + autoRef + '</div>' +
             '</div>' +
             '<button id="ref-btn" style="width:100%;padding:15px;border-radius:14px;cursor:pointer;' +
-            'background:linear-gradient(135deg,rgba(255,255,255,0.22),rgba(255,255,255,0.08));' +
-            'border:1.5px solid rgba(255,255,255,0.45);color:#fff;' +
+            'background:linear-gradient(135deg,rgba(255,255,255,0.28),rgba(255,255,255,0.12));' +
+            'border:1.5px solid rgba(255,255,255,0.55);color:#fff;' +
             'font-family:Nasalization,Arial,sans-serif;font-size:10px;letter-spacing:3px;">' + il.join + '</button>' +
             '<input id="ref-inp" type="hidden" value="' + autoRef + '">' +
-            '<button id="skip-btn" style="background:none;border:none;color:rgba(255,255,255,.32);' +
+            '<button id="skip-btn" style="background:none;border:none;color:rgba(255,255,255,.58);' +
             'font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:2px;' +
             'text-transform:uppercase;cursor:pointer;text-decoration:underline;">' + il.change + '</button>';
         } else {
           box.innerHTML =
             '<p style="font-family:Nasalization,Arial,sans-serif;font-size:10px;letter-spacing:3px;' +
-            'color:rgba(255,255,255,.65);text-transform:uppercase;text-align:center;margin:0">' + lbl.title + '</p>' +
+            'color:rgba(255,255,255,.92);text-transform:uppercase;text-align:center;margin:0">' + lbl.title + '</p>' +
             '<input id="ref-inp" type="text" maxlength="16" autocomplete="off" spellcheck="false"' +
             ' placeholder="' + lbl.ph + '"' +
-            ' style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.28);' +
+            ' style="width:100%;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.45);' +
             'border-radius:12px;color:#fff;font-family:Nasalization,Arial,sans-serif;font-size:12px;' +
             'letter-spacing:3px;padding:13px 16px;text-align:center;outline:none;text-transform:uppercase;box-sizing:border-box">' +
             '<p id="ref-err" style="font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:2px;' +
@@ -436,12 +436,12 @@
             'background:linear-gradient(135deg,#3AACDF,#1E6E9A);border:none;color:#fff;' +
             'font-family:Nasalization,Arial,sans-serif;font-size:10px;letter-spacing:3px">' + lbl.btn + '</button>' +
             '<p style="font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:1.5px;' +
-            'color:rgba(255,255,255,0.35);text-align:center;margin:4px 0 0 0;line-height:1.6;">' +
+            'color:rgba(255,255,255,0.68);text-align:center;margin:4px 0 0 0;line-height:1.6;">' +
             (lbl.hint || 'ASK YOUR FRIENDS IF THEY CAN INVITE YOU ;)') + '</p>' +
             '<a href="https://t.me/+89fB2Zrp4r5hODg9" target="_blank" rel="noopener noreferrer" ' +
             'style="display:block;margin-top:14px;padding:11px 16px;border-radius:12px;' +
-            'background:rgba(41,182,246,0.10);border:1px solid rgba(41,182,246,0.28);' +
-            'color:rgba(100,210,255,0.9);font-family:Nasalization,Arial,sans-serif;' +
+            'background:rgba(41,182,246,0.14);border:1px solid rgba(41,182,246,0.40);' +
+            'color:rgba(160,230,255,0.95);font-family:Nasalization,Arial,sans-serif;' +
             'font-size:9px;letter-spacing:2px;text-align:center;text-decoration:none;">' +
             '🕊️ ' + (lbl.community || 'JOIN OUR COMMUNITY → GET INVITED') + '</a>';
         }
@@ -630,14 +630,22 @@
                 });
             }).catch(function () { showForm(); });
 
-        } else if (_attempts < 6) {
+        } else if (_attempts < 15) {
           setTimeout(tryRestore, 300);
         } else {
+          // Final check — SDK may now be ready even if user detection failed
+          try {
+            var finalSP = window.Telegram && window.Telegram.WebApp &&
+                          window.Telegram.WebApp.initDataUnsafe &&
+                          window.Telegram.WebApp.initDataUnsafe.start_param;
+            if (finalSP) ls('nava_peace_referred_by', finalSP.toUpperCase());
+          } catch(e) {}
           showForm();
         }
       }
 
-      setTimeout(function () { showForm(); }, 2000);
+      // Safety net: show form if tryRestore hangs on a DB query (6s max)
+      setTimeout(function () { if (!_formShown) showForm(); }, 6000);
       setTimeout(tryRestore, 250);
     })();
 
