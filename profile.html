@@ -2251,12 +2251,17 @@
     if (localStorage.getItem('nava_peace_email')) return; // already present
     var uid = localStorage.getItem('nava_peace_uid');
     if (!uid) return;
+    var initDataRaw = (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) || '';
+    if (!initDataRaw) return; // can't authenticate without Telegram context
     try {
       var edgeBase = (typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : '')
         .replace('/rest/v1', '').replace(/\/$/, '');
-      var res = await fetch(edgeBase + '/functions/v1/yoycol-proxy?action=get_user_email&uid=' + encodeURIComponent(uid), {
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
-      });
+      var res = await fetch(
+        edgeBase + '/functions/v1/yoycol-proxy?action=get_user_email'
+        + '&uid=' + encodeURIComponent(uid)
+        + '&initData=' + encodeURIComponent(initDataRaw),
+        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
+      );
       var data = await res.json();
       if (data && data.email) {
         localStorage.setItem('nava_peace_email', data.email);

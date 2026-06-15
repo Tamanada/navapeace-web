@@ -125,6 +125,49 @@ async function yoyFetch(
   return res.json();
 }
 
+// ── Verify Telegram WebApp initData (prevents email enumeration) ─
+// Algorithm per Telegram docs: https://core.telegram.org/bots/webapps#validating-data-received-via-the-mini-app
+async function verifyTelegramInitData(
+  initData: string,
+  botToken: string
+): Promise<Record<string, string> | null> {
+  if (!initData || !botToken) return null;
+  const params = new URLSearchParams(initData);
+  const hash = params.get('hash');
+  if (!hash) return null;
+  params.delete('hash');
+
+  const sorted = [...params.entries()].sort(([a], [b]) => a.localeCompare(b));
+  const dataCheckString = sorted.map(([k, v]) => `${k}=${v}`).join('\n');
+
+  // secret_key = HMAC-SHA256(data=botToken, key="WebAppData")
+  const webAppDataKey = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode('WebAppData'),
+    { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  );
+  const secretKeyBuf = await crypto.subtle.sign(
+    'HMAC', webAppDataKey, new TextEncoder().encode(botToken)
+  );
+  const secretKey = await crypto.subtle.importKey(
+    'raw', secretKeyBuf, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  );
+  const hashBuf = await crypto.subtle.sign(
+    'HMAC', secretKey, new TextEncoder().encode(dataCheckString)
+  );
+  const computed = Array.from(new Uint8Array(hashBuf))
+    .map(b => b.toString(16).padStart(2, '0')).join('');
+
+  // Constant-time comparison
+  if (computed.length !== hash.length) return null;
+  let diff = 0;
+  for (let i = 0; i < computed.length; i++) diff |= computed.charCodeAt(i) ^ hash.charCodeAt(i);
+  if (diff !== 0) return null;
+
+  const result: Record<string, string> = {};
+  for (const [k, v] of sorted) result[k] = v;
+  return result;
+}
+
 // ── Alert admin via Telegram ─────────────────────────────────
 async function alertAdmin(botToken: string, message: string): Promise<void> {
   if (!botToken) return;
@@ -751,6 +794,18 @@ Deno.serve(async (req) => {
       if (!SUPA_URL || !SERVICE_KEY) return json({ email: '' });
       const uid = url.searchParams.get('uid') ?? '';
       if (!uid) return json({ email: '' });
+
+      // Require Telegram initData so only the owning user can retrieve their email
+      const BOT_TOKEN  = Deno.env.get('TELEGRAM_BOT_TOKEN') ?? '';
+      const initData   = url.searchParams.get('initData') ?? '';
+      if (BOT_TOKEN) {
+        const verified = await verifyTelegramInitData(initData, BOT_TOKEN);
+        if (!verified) return json({ error: 'initData verification failed' }, 403);
+        let tgId = '';
+        try { tgId = String(JSON.parse(verified.user ?? '{}').id ?? ''); } catch { /**/ }
+        if (!tgId || `tg_${tgId}` !== uid) return json({ error: 'uid mismatch' }, 403);
+      }
+
       const safeUid = String(uid).replace(/[^a-z0-9_\-]/gi, '_');
       const r = await fetch(
         `${SUPA_URL}/rest/v1/admin_settings?key=eq.user_email_${safeUid}&select=value`,
