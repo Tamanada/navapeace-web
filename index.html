@@ -25,7 +25,7 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="telegram.js"></script>
   <!-- Splash gate : redirige vers splash.html si pas vu depuis 10min (localStorage, compatible Android WebView) -->
-  <script>(function(){var t=parseInt(localStorage.getItem('nava_splash_shown')||'0');var uid=localStorage.getItem('nava_peace_uid');var cooldown=uid?86400000:600000;if(Date.now()-t>cooldown){var _r=new URLSearchParams(window.location.search).get('ref')||new URLSearchParams(window.location.search).get('startapp');if(_r&&_r.trim().length>=4){try{localStorage.setItem('nava_peace_referred_by',_r.trim().toUpperCase());}catch(e){}}window.location.replace('splash.html');}})();</script>
+  <script>(function(){var _p=new URLSearchParams(window.location.search);if(_p.get('join'))return;var t=parseInt(localStorage.getItem('nava_splash_shown')||'0');var uid=localStorage.getItem('nava_peace_uid');var cooldown=uid?86400000:600000;if(Date.now()-t>cooldown){var _r=_p.get('ref')||_p.get('startapp');if(_r&&_r.trim().length>=4){try{localStorage.setItem('nava_peace_referred_by',_r.trim().toUpperCase());}catch(e){}}window.location.replace('splash.html');}})();</script>
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://nava-peace.app/" />
