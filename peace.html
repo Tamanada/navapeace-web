@@ -713,6 +713,27 @@
     </div>
   </div>
 
+  <!-- ══ BROADCAST MESSAGE OVERLAY ══════════════════════════ -->
+  <div id="broadcast-overlay" style="display:none;position:fixed;inset:0;z-index:1100;
+       background:linear-gradient(160deg,#031029 0%,#062050 50%,#031029 100%);
+       flex-direction:column;align-items:center;justify-content:center;
+       padding:48px 28px;text-align:center;box-sizing:border-box;">
+    <img src="logo.png" style="width:68px;height:68px;filter:brightness(0) invert(1);
+         margin-bottom:24px;opacity:0.88;" />
+    <p id="bc-overlay-title" style="font-family:'Nasalization',Arial,sans-serif;font-size:17px;
+       letter-spacing:2.5px;color:#FFD740;margin-bottom:18px;
+       text-shadow:0 0 22px rgba(255,215,64,0.5);max-width:320px;line-height:1.4;"></p>
+    <p id="bc-overlay-body" style="font-size:15px;color:rgba(255,255,255,0.85);
+       line-height:1.75;max-width:300px;margin-bottom:36px;white-space:pre-line;"></p>
+    <button id="bc-overlay-cta" onclick="dismissBroadcast()"
+            style="font-family:'Nasalization',Arial,sans-serif;font-size:13px;letter-spacing:3px;
+                   padding:15px 36px;border-radius:40px;border:none;cursor:pointer;
+                   background:linear-gradient(135deg,#FFD740,#FF9800);color:#0a1628;font-weight:700;
+                   box-shadow:0 4px 24px rgba(255,200,60,0.35);">
+      GOT IT ✌
+    </button>
+  </div>
+
   <!-- INFO POPOVER -->
   <div class="info-pop-overlay" id="infoPop" onclick="if(event.target===this)closeInfoPop()">
     <div class="info-pop-box">
@@ -942,6 +963,33 @@
       }
 
       startCountdown();
+    }
+
+    // ── Broadcast message ────────────────────────────────────────────
+    async function checkBroadcast() {
+      if (!sb) return;
+      try {
+        const { data } = await sb.from('admin_settings')
+          .select('value').eq('key','broadcast_message').maybeSingle();
+        if (!data?.value) return;
+        const msg = typeof data.value === 'string' ? JSON.parse(data.value) : data.value;
+        if (!msg?.active) return;
+        if (localStorage.getItem('nava_bc_dismissed') === String(msg.id)) return;
+        // Show overlay
+        document.getElementById('bc-overlay-title').textContent = msg.title  || '';
+        document.getElementById('bc-overlay-body').textContent  = msg.body   || '';
+        document.getElementById('bc-overlay-cta').textContent   = msg.cta_text || 'GOT IT ✌';
+        const overlay = document.getElementById('broadcast-overlay');
+        overlay.dataset.msgId  = msg.id;
+        overlay.style.display  = 'flex';
+      } catch(e) { console.warn('broadcast check', e); }
+    }
+
+    function dismissBroadcast() {
+      const overlay = document.getElementById('broadcast-overlay');
+      if (!overlay) return;
+      try { localStorage.setItem('nava_bc_dismissed', overlay.dataset.msgId || ''); } catch(_) {}
+      overlay.style.display = 'none';
     }
 
     // ── NAVA Token Mining ─────────────────────────────────────────────
@@ -1807,6 +1855,7 @@
       document.getElementById('infoPop').classList.remove('open');
     }
 
+    checkBroadcast(); // ← message plein-écran admin si actif
     checkDone();
     syncStreakFromDB(); // ← recalcul streak/doves/refCode depuis DB
     checkNotifications();

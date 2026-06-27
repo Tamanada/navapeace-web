@@ -720,6 +720,7 @@
     <!-- Tabs -->
     <div class="tabs" style="margin-bottom:24px;">
       <button class="tab-btn active" onclick="showTab('overview',this)">📊 OVERVIEW</button>
+      <button class="tab-btn" onclick="showTab('launch',this);initLaunchTab()">🚀 LAUNCH</button>
       <button class="tab-btn" onclick="showTab('stats',this)">📈 STATS</button>
       <button class="tab-btn" onclick="showTab('users',this)">👥 USERS</button>
       <button class="tab-btn" onclick="showTab('messages',this)">💬 MESSAGES</button>
@@ -753,6 +754,131 @@
             <div class="activity-chart"><div class="activity-bars" id="bars-reg"></div></div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- ══ LAUNCH ════════════════════════════════════════ -->
+    <div id="tab-launch" class="tab-pane">
+      <div style="max-width:620px;margin:0 auto;display:flex;flex-direction:column;gap:20px;">
+
+        <!-- Season 1 Control -->
+        <div class="g-card">
+          <p style="font-size:10px;letter-spacing:3px;color:var(--w60);margin-bottom:18px;">🪙 SEASON 1 — TOKEN MINING CONTROL</p>
+
+          <!-- Status pill -->
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+            <span style="font-size:11px;letter-spacing:2px;color:var(--w60);">STATUS</span>
+            <span id="season-status-pill" style="font-size:10px;letter-spacing:2px;padding:4px 14px;border-radius:20px;
+                  background:rgba(100,100,100,0.2);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);">
+              LOADING…
+            </span>
+            <span id="season-start-display" style="font-size:10px;color:var(--w40);letter-spacing:1px;"></span>
+          </div>
+
+          <!-- Launch date picker (Bangkok = UTC+7) -->
+          <div style="margin-bottom:16px;">
+            <label style="font-size:10px;letter-spacing:2px;color:var(--w60);display:block;margin-bottom:8px;">
+              OFFICIAL LAUNCH DATE &amp; TIME (BANGKOK UTC+7)
+            </label>
+            <input type="datetime-local" id="launch-date-input"
+                   style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);
+                          border-radius:10px;color:#fff;font-size:14px;box-sizing:border-box;" />
+            <p style="font-size:10px;color:var(--w40);margin-top:6px;letter-spacing:1px;">
+              Enter time in Bangkok timezone (UTC+7). The countdown below will convert automatically.
+            </p>
+          </div>
+
+          <!-- Live countdown -->
+          <div id="launch-countdown-wrap" style="display:none;background:rgba(255,215,64,0.06);
+               border:1px solid rgba(255,215,64,0.2);border-radius:14px;padding:16px;
+               text-align:center;margin-bottom:18px;">
+            <p style="font-size:10px;letter-spacing:3px;color:rgba(255,215,64,0.6);margin-bottom:8px;">TIME UNTIL LAUNCH</p>
+            <p id="launch-countdown-val" style="font-family:'Nasalization',Arial,sans-serif;font-size:26px;
+               font-weight:700;color:#FFD740;letter-spacing:2px;text-shadow:0 0 20px rgba(255,215,64,0.4);">
+              — d — h — m — s
+            </p>
+          </div>
+
+          <!-- Action buttons -->
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="export-btn" onclick="saveLaunchDate()"
+                    style="background:rgba(58,172,223,0.15);color:#3aacdf;border-color:rgba(58,172,223,0.4);">
+              📅 SAVE DATE
+            </button>
+            <button class="export-btn" id="btn-activate-season" onclick="activateSeasonNow()"
+                    style="background:rgba(74,222,128,0.15);color:#4ade80;border-color:rgba(74,222,128,0.4);">
+              ✅ ACTIVATE NOW
+            </button>
+            <button class="export-btn" id="btn-pause-season" onclick="pauseSeasonNow()"
+                    style="background:rgba(251,113,133,0.15);color:#fb7185;border-color:rgba(251,113,133,0.4);">
+              ⏸ PAUSE
+            </button>
+          </div>
+          <p style="font-size:10px;color:var(--w40);margin-top:12px;letter-spacing:1px;line-height:1.6;">
+            <strong>ACTIVATE NOW</strong> starts token mining immediately (resets season_start to right now).<br/>
+            <strong>SAVE DATE</strong> stores the launch date for the countdown — does not activate yet.<br/>
+            <strong>PAUSE</strong> stops token mining (users can still vote but earn 0 NAVA).
+          </p>
+        </div>
+
+        <!-- Broadcast Message -->
+        <div class="g-card">
+          <p style="font-size:10px;letter-spacing:3px;color:var(--w60);margin-bottom:18px;">📣 BROADCAST MESSAGE TO USERS</p>
+          <p style="font-size:11px;color:var(--w60);line-height:1.6;margin-bottom:18px;">
+            This message appears in full-screen when users open the app, before they can press the button.
+            Ideal for launch announcements, maintenance notices, or special events.
+          </p>
+
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+            <label style="font-size:10px;letter-spacing:2px;color:var(--w60);">ACTIVE</label>
+            <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">
+              <input type="checkbox" id="broadcast-active" style="opacity:0;width:0;height:0;"
+                     onchange="document.getElementById('bc-active-lbl').textContent = this.checked ? 'ON — message will show to users' : 'OFF — message is hidden'" />
+              <span style="position:absolute;inset:0;background:rgba(255,255,255,0.1);border-radius:24px;transition:.3s;
+                           border:1px solid rgba(255,255,255,0.2);" id="bc-toggle-track"></span>
+            </label>
+            <span id="bc-active-lbl" style="font-size:10px;color:var(--w40);letter-spacing:1px;">OFF — message is hidden</span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div>
+              <label style="font-size:10px;letter-spacing:2px;color:var(--w60);display:block;margin-bottom:6px;">TITLE</label>
+              <input type="text" id="broadcast-title" maxlength="80"
+                     placeholder="🕊 NAVA PEACE LAUNCHES JULY 14!"
+                     style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);
+                            border-radius:10px;color:#fff;font-size:14px;box-sizing:border-box;" />
+            </div>
+            <div>
+              <label style="font-size:10px;letter-spacing:2px;color:var(--w60);display:block;margin-bottom:6px;">MESSAGE BODY</label>
+              <textarea id="broadcast-body" maxlength="500" rows="4"
+                        placeholder="The official countdown has started. Get ready to press the button for peace on July 14 at 2PM Bangkok time! 🌏✌"
+                        style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);
+                               border-radius:10px;color:#fff;font-size:14px;box-sizing:border-box;resize:vertical;"></textarea>
+            </div>
+            <div>
+              <label style="font-size:10px;letter-spacing:2px;color:var(--w60);display:block;margin-bottom:6px;">CTA BUTTON TEXT</label>
+              <input type="text" id="broadcast-cta" maxlength="40"
+                     placeholder="GOT IT ✌"
+                     style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);
+                            border-radius:10px;color:#fff;font-size:14px;box-sizing:border-box;" />
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;">
+            <button class="export-btn" onclick="saveBroadcast()"
+                    style="background:rgba(74,222,128,0.15);color:#4ade80;border-color:rgba(74,222,128,0.4);">
+              📣 SAVE &amp; BROADCAST
+            </button>
+            <button class="export-btn" onclick="previewBroadcast()"
+                    style="background:rgba(58,172,223,0.15);color:#3aacdf;border-color:rgba(58,172,223,0.4);">
+              👁 PREVIEW
+            </button>
+          </div>
+          <p style="font-size:10px;color:var(--w40);margin-top:10px;letter-spacing:1px;">
+            Each save generates a new message ID — every user will see it again even if they dismissed the previous version.
+          </p>
+        </div>
+
       </div>
     </div>
 
@@ -1255,6 +1381,210 @@ function showToast(msg, duration=2500) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), duration);
+}
+
+// ══════════════════════════════════════════════════════════════
+// LAUNCH TAB
+// ══════════════════════════════════════════════════════════════
+let _launchCountdownTimer = null;
+
+async function initLaunchTab() {
+  // Load season status from DB
+  try {
+    const { data } = await sb.from('nava_season_config').select('*').eq('season', 1).maybeSingle();
+    _renderSeasonStatus(data);
+  } catch(e) { console.warn('season load', e); }
+
+  // Load broadcast message config
+  try {
+    const { data } = await sb.from('admin_settings').select('value').eq('key','broadcast_message').maybeSingle();
+    if (data?.value) {
+      const msg = typeof data.value === 'string' ? JSON.parse(data.value) : data.value;
+      document.getElementById('broadcast-active').checked = !!msg.active;
+      document.getElementById('bc-active-lbl').textContent = msg.active ? 'ON — message will show to users' : 'OFF — message is hidden';
+      document.getElementById('broadcast-title').value  = msg.title  || '';
+      document.getElementById('broadcast-body').value   = msg.body   || '';
+      document.getElementById('broadcast-cta').value    = msg.cta_text || '';
+    }
+  } catch(e) { console.warn('broadcast load', e); }
+
+  // Load saved launch date
+  try {
+    const { data } = await sb.from('admin_settings').select('value').eq('key','launch_config').maybeSingle();
+    if (data?.value) {
+      const cfg = typeof data.value === 'string' ? JSON.parse(data.value) : data.value;
+      if (cfg.launch_date) {
+        // Convert UTC to local datetime-local format (Bangkok = UTC+7)
+        const bkk = new Date(new Date(cfg.launch_date).getTime());
+        const local = new Date(bkk.getTime() - bkk.getTimezoneOffset() * 60000);
+        document.getElementById('launch-date-input').value = local.toISOString().slice(0,16);
+        _startLaunchCountdown(cfg.launch_date);
+      }
+    }
+  } catch(e) { console.warn('launch cfg load', e); }
+}
+
+function _renderSeasonStatus(row) {
+  const pill = document.getElementById('season-status-pill');
+  const startEl = document.getElementById('season-start-display');
+  if (!pill) return;
+  if (!row) {
+    pill.textContent = 'NOT CONFIGURED';
+    pill.style.background = 'rgba(251,113,133,0.15)';
+    pill.style.borderColor = 'rgba(251,113,133,0.4)';
+    pill.style.color = '#fb7185';
+    return;
+  }
+  if (row.active) {
+    pill.textContent = '● ACTIVE';
+    pill.style.background = 'rgba(74,222,128,0.15)';
+    pill.style.borderColor = 'rgba(74,222,128,0.4)';
+    pill.style.color = '#4ade80';
+    const d = new Date(row.season_start);
+    if (startEl) startEl.textContent = 'since ' + d.toLocaleString('en-GB', { timeZone: 'Asia/Bangkok', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) + ' BKK';
+  } else {
+    pill.textContent = '⏸ PAUSED';
+    pill.style.background = 'rgba(251,200,50,0.15)';
+    pill.style.borderColor = 'rgba(251,200,50,0.3)';
+    pill.style.color = '#fbc832';
+    if (startEl) startEl.textContent = '';
+  }
+}
+
+function _startLaunchCountdown(isoDate) {
+  if (_launchCountdownTimer) clearInterval(_launchCountdownTimer);
+  const target = new Date(isoDate).getTime();
+  const wrap = document.getElementById('launch-countdown-wrap');
+  const val  = document.getElementById('launch-countdown-val');
+  if (!wrap || !val) return;
+  wrap.style.display = 'block';
+  function tick() {
+    const diff = target - Date.now();
+    if (diff <= 0) {
+      val.textContent = '🚀 LAUNCH TIME!';
+      clearInterval(_launchCountdownTimer);
+      return;
+    }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000)  / 60000);
+    const s = Math.floor((diff % 60000)    / 1000);
+    val.textContent = `${d}d  ${String(h).padStart(2,'0')}h  ${String(m).padStart(2,'0')}m  ${String(s).padStart(2,'0')}s`;
+  }
+  tick();
+  _launchCountdownTimer = setInterval(tick, 1000);
+}
+
+async function saveLaunchDate() {
+  const input = document.getElementById('launch-date-input').value;
+  if (!input) { showToast('⚠️ Please select a date/time first', 3000); return; }
+  // Input is in local time — treat it as Bangkok (UTC+7): subtract 7h to get UTC
+  const bkkOffset = 7 * 60 * 60 * 1000;
+  const localMs = new Date(input).getTime();
+  const utcMs   = localMs - bkkOffset - (new Date().getTimezoneOffset() * 60000) * 0; // user enters BKK directly
+  // Simple: store as-is with a BKK label, convert on display
+  const launchUtc = new Date(new Date(input).getTime() - 7 * 3600000).toISOString();
+  const cfg = { launch_date: launchUtc, timezone: 'Asia/Bangkok' };
+
+  try {
+    const edgeUrl = SUPABASE_URL + '/functions/v1/yoycol-proxy?action=update_admin_setting';
+    const res = await fetch(edgeUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+      body: JSON.stringify({ adminCode: _adminCode, key: 'launch_config', value: JSON.stringify(cfg) }),
+    });
+    const result = await res.json();
+    if (!res.ok || result.error) throw new Error(result.error || 'HTTP ' + res.status);
+    showToast('✓ LAUNCH DATE SAVED', 3000);
+    _startLaunchCountdown(launchUtc);
+  } catch(e) { showToast('✗ ERROR: ' + e.message, 4000); }
+}
+
+async function activateSeasonNow() {
+  if (!confirm('Activate Season 1 NOW? This resets season_start to the current time and starts token mining.')) return;
+  const btn = document.getElementById('btn-activate-season');
+  btn.disabled = true; btn.textContent = '···';
+  try {
+    const edgeUrl = SUPABASE_URL + '/functions/v1/yoycol-proxy?action=toggle_season';
+    const res = await fetch(edgeUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+      body: JSON.stringify({ adminCode: _adminCode, active: true }),
+    });
+    const result = await res.json();
+    if (!res.ok || result.error) throw new Error(result.error || 'HTTP ' + res.status);
+    showToast('🚀 SEASON 1 ACTIVATED — MINING IS LIVE!', 4000);
+    _renderSeasonStatus(result.row);
+  } catch(e) { showToast('✗ ERROR: ' + e.message, 4000); }
+  finally { btn.disabled = false; btn.textContent = '✅ ACTIVATE NOW'; }
+}
+
+async function pauseSeasonNow() {
+  if (!confirm('PAUSE Season 1? Users will keep their tokens but earn 0 NAVA until reactivated.')) return;
+  const btn = document.getElementById('btn-pause-season');
+  btn.disabled = true; btn.textContent = '···';
+  try {
+    const edgeUrl = SUPABASE_URL + '/functions/v1/yoycol-proxy?action=toggle_season';
+    const res = await fetch(edgeUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+      body: JSON.stringify({ adminCode: _adminCode, active: false }),
+    });
+    const result = await res.json();
+    if (!res.ok || result.error) throw new Error(result.error || 'HTTP ' + res.status);
+    showToast('⏸ SEASON 1 PAUSED', 3000);
+    _renderSeasonStatus(result.row);
+  } catch(e) { showToast('✗ ERROR: ' + e.message, 4000); }
+  finally { btn.disabled = false; btn.textContent = '⏸ PAUSE'; }
+}
+
+async function saveBroadcast() {
+  const active   = document.getElementById('broadcast-active').checked;
+  const title    = document.getElementById('broadcast-title').value.trim();
+  const body     = document.getElementById('broadcast-body').value.trim();
+  const cta_text = document.getElementById('broadcast-cta').value.trim() || 'GOT IT ✌';
+  if (active && !title && !body) { showToast('⚠️ Add a title or message before broadcasting', 3000); return; }
+  // New ID on every save so ALL users see it again
+  const id = 'bc_' + Date.now();
+  const msg = { id, active, title, body, cta_text };
+  try {
+    const edgeUrl = SUPABASE_URL + '/functions/v1/yoycol-proxy?action=update_admin_setting';
+    const res = await fetch(edgeUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+      body: JSON.stringify({ adminCode: _adminCode, key: 'broadcast_message', value: JSON.stringify(msg) }),
+    });
+    const result = await res.json();
+    if (!res.ok || result.error) throw new Error(result.error || 'HTTP ' + res.status);
+    showToast(active ? '📣 MESSAGE BROADCASTED — all users will see it on next open' : '✓ MESSAGE SAVED (inactive)', 4000);
+  } catch(e) { showToast('✗ ERROR: ' + e.message, 4000); }
+}
+
+function previewBroadcast() {
+  const title    = document.getElementById('broadcast-title').value || 'PREVIEW TITLE';
+  const body     = document.getElementById('broadcast-body').value  || 'Your message will appear here.';
+  const cta_text = document.getElementById('broadcast-cta').value   || 'GOT IT ✌';
+  // Open preview in a new tab using a data URL
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Broadcast Preview</title>
+<style>*{margin:0;padding:0;box-sizing:border-box;}
+body{background:linear-gradient(160deg,#031029 0%,#062050 50%,#031029 100%);min-height:100vh;
+     display:flex;flex-direction:column;align-items:center;justify-content:center;
+     padding:40px 28px;text-align:center;font-family:Arial,sans-serif;color:#fff;}
+h1{font-size:18px;letter-spacing:2px;color:#FFD740;margin-bottom:16px;text-shadow:0 0 20px rgba(255,215,64,.5);}
+p{font-size:15px;line-height:1.7;max-width:320px;margin:0 auto 32px;color:rgba(255,255,255,.85);}
+button{font-size:13px;letter-spacing:3px;padding:14px 32px;border-radius:40px;border:none;cursor:pointer;
+       background:linear-gradient(135deg,#FFD740,#FF9800);color:#0a1628;font-weight:700;}
+.tag{font-size:11px;letter-spacing:4px;color:rgba(255,255,255,.3);margin-top:24px;}
+</style></head><body>
+<h1>${title.replace(/</g,'&lt;')}</h1>
+<p>${body.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</p>
+<button>${cta_text.replace(/</g,'&lt;')}</button>
+<p class="tag">ADMIN PREVIEW — NOT LIVE</p>
+</body></html>`;
+  const blob = new Blob([html], { type: 'text/html' });
+  const url  = URL.createObjectURL(blob);
+  window.open(url, '_blank');
 }
 
 // ── AUTH ─────────────────────────────────────────────────

@@ -456,6 +456,44 @@ Deno.serve(async (req) => {
       return json({ success: true });
     }
 
+    // ── POST toggle Season 1 (activate / pause) ────────────────────
+    if (action === 'toggle_season' && req.method === 'POST') {
+      if (!SUPA_URL || !SERVICE_KEY) return json({ error: 'Supabase not configured' }, 500);
+
+      const { adminCode, active, season_start } = await req.json();
+      if (!adminCode || typeof active !== 'boolean') {
+        return json({ error: 'adminCode and active (boolean) required' }, 400);
+      }
+
+      const verifyRes2 = await fetch(`${SUPA_URL}/rest/v1/rpc/nava_check_admin`, {
+        method:  'POST',
+        headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ input_code: adminCode }),
+      });
+      const verifyData2 = await verifyRes2.json();
+      if (!verifyData2?.valid) return json({ error: 'Invalid admin code' }, 403);
+
+      const patch: Record<string, unknown> = { active };
+      if (active) patch.season_start = season_start ?? new Date().toISOString();
+
+      const patchRes = await fetch(`${SUPA_URL}/rest/v1/nava_season_config?season=eq.1`, {
+        method:  'PATCH',
+        headers: {
+          apikey: SERVICE_KEY,
+          Authorization: `Bearer ${SERVICE_KEY}`,
+          'Content-Type': 'application/json',
+          Prefer: 'return=representation',
+        },
+        body: JSON.stringify(patch),
+      });
+      if (!patchRes.ok) {
+        const err = await patchRes.text();
+        return json({ error: `DB write failed: ${err}` }, 500);
+      }
+      const row = await patchRes.json();
+      return json({ success: true, row: row[0] ?? null });
+    }
+
     // ── POST create Stripe Checkout Session (web shop) ─────
     if (action === 'create_checkout_session' && req.method === 'POST') {
       if (!STRIPE_KEY) return json({ error: 'STRIPE_SECRET_KEY not configured' }, 500);
