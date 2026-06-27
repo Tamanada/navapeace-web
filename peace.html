@@ -865,6 +865,30 @@
       startCountdown();
     }
 
+    // ── Résolution de code parrainage (gère confusion O/0) ──────────
+    async function _resolveRefCode(sb, code) {
+      if (!code || code.length < 6) return null;
+      const { data } = await sb.from('peace_votes').select('referral_code')
+        .eq('referral_code', code).limit(1).maybeSingle();
+      if (data) return code;
+      // Essaie toutes les combinaisons O↔0 sur les positions ambiguës
+      const pos = [];
+      for (let i = 0; i < code.length; i++) {
+        if (code[i] === '0' || code[i] === 'O') pos.push(i);
+      }
+      for (let mask = 1; mask < (1 << pos.length); mask++) {
+        const c = code.split('');
+        for (let j = 0; j < pos.length; j++) {
+          if (mask & (1 << j)) c[pos[j]] = c[pos[j]] === '0' ? 'O' : '0';
+        }
+        const variant = c.join('');
+        const { data: d } = await sb.from('peace_votes').select('referral_code')
+          .eq('referral_code', variant).limit(1).maybeSingle();
+        if (d) return variant;
+      }
+      return null; // code inconnu même après toutes les variantes
+    }
+
     // ── Clic sur le bouton ──────────────────────────────────────────
     let _voting = false; // guard contre double-submit
     async function choosePeace() {
@@ -925,16 +949,21 @@
         } catch(e) { console.warn('Vote insert error', e); }
 
         // Récompenser le parrain si applicable (seulement si vote réel)
-        // P0 fix: check existence first to prevent duplicate inserts
+        // Résolution fuzzy O/0 : essaie toutes les combinaisons O↔0 si code inconnu
         if (referredBy && !alreadyVotedToday) {
           try {
-            const { data: _existRef } = await sb.from('referral_points')
-              .select('id').eq('referral_code', referredBy).eq('user_uid', uid).maybeSingle();
-            if (!_existRef) {
-              const { error: _refErr } = await sb.from('referral_points')
-                .insert({ referral_code: referredBy, user_uid: uid });
-              // 23505 = unique violation (race condition) → already rewarded, safe to ignore
-              if (_refErr && _refErr.code !== '23505') console.warn('Referral point error', _refErr);
+            const resolved = await _resolveRefCode(sb, referredBy);
+            if (resolved) {
+              if (resolved !== referredBy) {
+                try { localStorage.setItem('nava_peace_referred_by', resolved); } catch(_) {}
+              }
+              const { data: _existRef } = await sb.from('referral_points')
+                .select('id').eq('referral_code', resolved).eq('user_uid', uid).maybeSingle();
+              if (!_existRef) {
+                const { error: _refErr } = await sb.from('referral_points')
+                  .insert({ referral_code: resolved, user_uid: uid });
+                if (_refErr && _refErr.code !== '23505') console.warn('Referral point error', _refErr);
+              }
             }
           } catch(e) { console.warn('Referral point error', e); }
         }

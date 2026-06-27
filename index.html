@@ -25,7 +25,7 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="telegram.js"></script>
   <!-- Splash gate : redirige vers splash.html si pas vu depuis 10min (localStorage, compatible Android WebView) -->
-  <script>(function(){var _p=new URLSearchParams(window.location.search);if(_p.get('join'))return;var t=parseInt(localStorage.getItem('nava_splash_shown')||'0');var uid=localStorage.getItem('nava_peace_uid');var cooldown=uid?86400000:600000;if(Date.now()-t>cooldown){var _r=_p.get('ref')||_p.get('startapp');if(_r&&_r.trim().length>=4){try{localStorage.setItem('nava_peace_referred_by',_r.trim().toUpperCase());}catch(e){}}window.location.replace('splash.html');}})();</script>
+  <script>(function(){var _p=new URLSearchParams(window.location.search);if(_p.get('join'))return;var t=parseInt(localStorage.getItem('nava_splash_shown')||'0');var uid=localStorage.getItem('nava_peace_uid');var cooldown=uid?86400000:600000;if(Date.now()-t>cooldown){var _r=_p.get('ref')||_p.get('startapp');if(_r&&_r.trim().length>=6){try{localStorage.setItem('nava_peace_referred_by',_r.trim().toUpperCase());}catch(e){}}window.location.replace('splash.html');}})();</script>
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://nava-peace.app/" />
@@ -658,7 +658,7 @@
     // ── Capture referral code from URL (?ref=XXXX) ─────────────────
     (function() {
       const ref = new URLSearchParams(window.location.search).get('ref');
-      if (ref && ref.length <= 20) {
+      if (ref && ref.length >= 6 && ref.length <= 20) {
         localStorage.setItem('nava_peace_referred_by', ref.toUpperCase());
       }
     })();
@@ -711,7 +711,9 @@
 
     // ── Stable referral code (generated once, recovered from Supabase via UID) ──
     function genRefCode() {
-      return Math.random().toString(36).slice(2, 10).toUpperCase();
+      const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'; // no 0,O,1,I — unambiguous
+      const arr = crypto.getRandomValues(new Uint8Array(8));
+      return Array.from(arr, b => chars[b % chars.length]).join('');
     }
     if (!localStorage.getItem('nava_peace_ref_code')) {
       localStorage.setItem('nava_peace_ref_code', genRefCode());
