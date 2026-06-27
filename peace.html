@@ -493,6 +493,74 @@
       background: rgba(255,255,255,0.25);
       align-self: center;
     }
+
+    /* ── NAVA TOKEN BALANCE BAR ── */
+    #nava-balance-bar {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 0 auto 20px;
+      padding: 10px 20px;
+      background: rgba(255,200,60,0.10);
+      border: 1px solid rgba(255,200,60,0.28);
+      border-radius: 40px;
+      width: fit-content;
+      max-width: calc(100vw - 48px);
+      cursor: default;
+    }
+    .nava-bal-num {
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: #FFD740;
+      letter-spacing: 1px;
+      text-shadow: 0 0 14px rgba(255,215,64,0.45);
+    }
+    .nava-bal-lbl {
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: rgba(255,200,60,0.65);
+      font-family: 'Nasalization', Arial, sans-serif;
+    }
+    .nava-phase-pill {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: rgba(255,200,60,0.5);
+      background: rgba(255,200,60,0.08);
+      border: 1px solid rgba(255,200,60,0.18);
+      border-radius: 20px;
+      padding: 2px 8px;
+      font-family: 'Nasalization', Arial, sans-serif;
+    }
+
+    /* ── NAVA REWARD TOAST ── */
+    #nava-toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.5);
+      z-index: 900;
+      pointer-events: none;
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #FFD740;
+      text-shadow: 0 0 40px rgba(255,215,64,0.9), 0 2px 14px rgba(0,0,0,0.5);
+      opacity: 0;
+      letter-spacing: 2px;
+      white-space: nowrap;
+    }
+    .nava-toast-show {
+      animation: navaRewardPop 2.8s ease forwards !important;
+    }
+    @keyframes navaRewardPop {
+      0%   { opacity: 0;   transform: translate(-50%, -50%) scale(0.5); }
+      15%  { opacity: 1;   transform: translate(-50%, -50%) scale(1.1); }
+      30%  { opacity: 1;   transform: translate(-50%, -58%) scale(1.0); }
+      70%  { opacity: 1;   transform: translate(-50%, -68%) scale(1.0); }
+      100% { opacity: 0;   transform: translate(-50%, -82%) scale(0.9); }
+    }
   </style>
 </head>
 <body>
@@ -562,6 +630,17 @@
     <button id="share-progress-btn" onclick="openShareOverlay()" style="display:none;"></button>
 
   </div>
+
+  <!-- NAVA TOKEN BALANCE BAR -->
+  <div id="nava-balance-bar">
+    <span style="font-size:16px;">🪙</span>
+    <span class="nava-bal-num" id="nava-balance-num">0.0000</span>
+    <span class="nava-bal-lbl">NAVA</span>
+    <span class="nava-phase-pill" id="nava-phase-pill">PHASE 1</span>
+  </div>
+
+  <!-- NAVA REWARD TOAST -->
+  <div id="nava-toast"></div>
 
   <!-- ══ INSPIRATION CARD OVERLAY ════════════════════════ -->
   <div id="inspo-overlay" onclick="closeInspo()" style="display:none;position:fixed;inset:0;z-index:600;
@@ -865,6 +944,51 @@
       startCountdown();
     }
 
+    // ── NAVA Token Mining ─────────────────────────────────────────────
+    function _showNavaBalance(bal, phase) {
+      const bar = document.getElementById('nava-balance-bar');
+      if (!bar) return;
+      document.getElementById('nava-balance-num').textContent =
+        (parseFloat(bal) || 0).toFixed(4);
+      const pill = document.getElementById('nava-phase-pill');
+      if (pill) pill.textContent = 'PHASE ' + (phase || 1);
+      bar.style.display = 'flex';
+    }
+
+    function _showNavaToast(reward) {
+      const toast = document.getElementById('nava-toast');
+      if (!toast) return;
+      const r = parseFloat(reward) || 0;
+      if (r <= 0) return;
+      toast.textContent = '+' + r.toFixed(4) + ' NAVA';
+      toast.classList.remove('nava-toast-show');
+      void toast.offsetWidth; // force reflow pour restart l'animation
+      toast.classList.add('nava-toast-show');
+    }
+
+    async function claimNavaToken() {
+      try {
+        const initData = (typeof Telegram !== 'undefined' && Telegram.WebApp?.initData)
+          ? Telegram.WebApp.initData : '';
+        const res = await fetch(SUPABASE_URL + '/functions/v1/daily-claim', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json',
+                     'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+          body: JSON.stringify({ initData })
+        });
+        if (!res.ok) return;
+        const d = await res.json();
+        if (d.new_balance !== undefined) {
+          localStorage.setItem('nava_balance', d.new_balance);
+          localStorage.setItem('nava_phase',   d.phase || 1);
+          _showNavaBalance(d.new_balance, d.phase);
+        }
+        if (d.success && d.total_reward > 0) {
+          _showNavaToast(d.total_reward);
+        }
+      } catch(e) { console.warn('daily-claim', e); }
+    }
+
     // ── Résolution de code parrainage (gère confusion O/0) ──────────
     async function _resolveRefCode(sb, code) {
       if (!code || code.length < 6) return null;
@@ -992,6 +1116,9 @@
 
       // Si déjà voté aujourd'hui (ex: autre appareil) → countdown direct sans thank you
       setDone(!alreadyVotedToday);
+
+      // NAVA mining — fire-and-forget, ne bloque pas l'UX
+      if (!alreadyVotedToday) claimNavaToken();
 
       // Refresh compteur global pour voir le +1 en live
       if (!alreadyVotedToday) setTimeout(loadCounters, 800);
@@ -1688,6 +1815,24 @@
     awardWelcomeDove(); // P1 · welcome dove — first open only
     loadCounters();
     setInterval(loadCounters, 60000); // refresh chaque minute
+
+    // ── Init NAVA balance ─────────────────────────────────────────────
+    (function initNavaBalance() {
+      const _b = localStorage.getItem('nava_balance');
+      const _p = localStorage.getItem('nava_phase');
+      if (_b && parseFloat(_b) > 0) _showNavaBalance(_b, _p);
+      // Refresh depuis DB en background
+      const uid = localStorage.getItem('nava_peace_uid');
+      if (uid && sb) {
+        sb.from('nava_token_balances').select('balance').eq('user_uid', uid).maybeSingle()
+          .then(({ data }) => {
+            if (data && parseFloat(data.balance) > 0) {
+              localStorage.setItem('nava_balance', data.balance);
+              _showNavaBalance(data.balance, localStorage.getItem('nava_phase') || 1);
+            }
+          }).catch(() => {});
+      }
+    })();
 
     // ── BOOM SLOGAN ROTATION ────────────────────────────────────────────
     (function rotateBoomSlogan() {
