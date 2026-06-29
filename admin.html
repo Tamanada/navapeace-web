@@ -1508,20 +1508,36 @@ async function saveLaunchDate() {
 }
 
 async function activateSeasonNow() {
-  if (!confirm('Activate Season 1 NOW? This resets season_start to the current time and starts token mining.')) return;
+  if (!confirm('🚀 ACTIVER LA SEASON 1 ?\n\nCela va :\n① Démarrer le mining de tokens NAVA\n② Doubler le solde NAVA de tous les early adopters (opération unique)\n\nCette action ne peut pas être annulée.')) return;
   const btn = document.getElementById('btn-activate-season');
   btn.disabled = true; btn.textContent = '···';
   try {
-    const edgeUrl = SUPABASE_URL + '/functions/v1/yoycol-proxy?action=toggle_season';
-    const res = await fetch(edgeUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+    const h = { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY };
+
+    // ① Activate Season 1
+    const res = await fetch(SUPABASE_URL + '/functions/v1/yoycol-proxy?action=toggle_season', {
+      method: 'POST', headers: h,
       body: JSON.stringify({ adminCode: _adminCode, active: true }),
     });
     const result = await res.json();
     if (!res.ok || result.error) throw new Error(result.error || 'HTTP ' + res.status);
-    showToast('🚀 SEASON 1 ACTIVATED — MINING IS LIVE!', 4000);
     _renderSeasonStatus(result.row);
+
+    // ② Genesis double — runs once, idempotent
+    const dRes = await fetch(SUPABASE_URL + '/functions/v1/yoycol-proxy?action=genesis_double', {
+      method: 'POST', headers: h,
+      body: JSON.stringify({ adminCode: _adminCode }),
+    });
+    const dResult = await dRes.json();
+    if (!dRes.ok || dResult.error) {
+      showToast('⚠ Season activée mais doublement échoué : ' + (dResult.error || 'erreur'), 5000);
+      return;
+    }
+    if (dResult.already_done) {
+      showToast('🚀 SEASON 1 ACTIVÉE — Mining live ! (doublement déjà effectué)', 5000);
+    } else {
+      showToast('🚀 SEASON 1 ACTIVÉE — ' + dResult.doubled + ' early adopters doublés ! 🕊×2', 5000);
+    }
   } catch(e) { showToast('✗ ERROR: ' + e.message, 4000); }
   finally { btn.disabled = false; btn.textContent = '✅ ACTIVATE NOW'; }
 }

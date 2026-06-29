@@ -494,6 +494,50 @@ Deno.serve(async (req) => {
       return json({ success: true, row: row[0] ?? null });
     }
 
+    // ── POST genesis_double — double all early-adopter NAVA balances (once) ──
+    if (action === 'genesis_double' && req.method === 'POST') {
+      if (!SUPA_URL || !SERVICE_KEY) return json({ error: 'Supabase not configured' }, 500);
+
+      const { adminCode } = await req.json();
+      if (!adminCode) return json({ error: 'adminCode required' }, 400);
+
+      const sbH = { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, 'Content-Type': 'application/json' };
+
+      // Verify admin code
+      const vRes = await fetch(`${SUPA_URL}/rest/v1/rpc/nava_check_admin`, {
+        method: 'POST', headers: sbH,
+        body: JSON.stringify({ input_code: adminCode }),
+      });
+      const vData = await vRes.json();
+      if (!vData?.valid) return json({ error: 'Invalid admin code' }, 403);
+
+      // Idempotency — refuse to double twice
+      const flagRes  = await fetch(`${SUPA_URL}/rest/v1/admin_settings?key=eq.genesis_double_done&select=value`, { headers: sbH });
+      const flagRows = await flagRes.json() as Array<{ value: unknown }>;
+      if (flagRows?.[0]?.value === true || String(flagRows?.[0]?.value) === 'true') {
+        return json({ success: true, already_done: true, doubled: 0 });
+      }
+
+      // Call SECURITY DEFINER function — runs as postgres, never exposed to client
+      const rpcRes = await fetch(`${SUPA_URL}/rest/v1/rpc/nava_genesis_double`, {
+        method: 'POST', headers: sbH, body: JSON.stringify({}),
+      });
+      if (!rpcRes.ok) {
+        const err = await rpcRes.text();
+        return json({ error: `Genesis double failed: ${err}` }, 500);
+      }
+      const doubled = await rpcRes.json() as number;
+
+      // Record flag so it can never run again
+      await fetch(`${SUPA_URL}/rest/v1/admin_settings`, {
+        method: 'POST',
+        headers: { ...sbH, Prefer: 'resolution=merge-duplicates' },
+        body: JSON.stringify({ key: 'genesis_double_done', value: true, updated_at: new Date().toISOString() }),
+      });
+
+      return json({ success: true, already_done: false, doubled });
+    }
+
     // ── POST create Stripe Checkout Session (web shop) ─────
     if (action === 'create_checkout_session' && req.method === 'POST') {
       if (!STRIPE_KEY) return json({ error: 'STRIPE_SECRET_KEY not configured' }, 500);
