@@ -1468,7 +1468,7 @@
       ctx.font='bold 140px Nasalization,Arial,sans-serif';
       ctx.fillText(data.totalDoves.toLocaleString(),W/2,y+140);
       ctx.globalAlpha=0.6;ctx.font='30px Nasalization,Arial,sans-serif';
-      ctx.fillText('PEACE ACTIONS',W/2,y+185);ctx.globalAlpha=1;
+      ctx.fillText('🕊 DOVE',W/2,y+185);ctx.globalAlpha=1;
       y+=220;
       _line(ctx,pad,y,W-pad); y+=36;
 
@@ -1877,6 +1877,8 @@
           .then(({ data }) => {
             if (data && parseFloat(data.balance) > 0) {
               localStorage.setItem('nava_balance', data.balance);
+              // Synchronise le compteur de doves (daily tap + streak + discover + referral)
+              localStorage.setItem('nava_peace_days', Math.floor(parseFloat(data.balance)));
               _showNavaBalance(data.balance, localStorage.getItem('nava_phase') || 1);
             }
           }).catch(() => {});
