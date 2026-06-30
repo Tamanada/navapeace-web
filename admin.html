@@ -2970,8 +2970,10 @@ async function sendPushNotif() {
     const data = await res.json();
     if (data.error) throw new Error(data.error);
     result.style.color = 'rgba(58,172,223,0.9)';
-    result.textContent = `✓ SENT: ${data.sent}  ·  FAILED: ${data.failed}`;
-    showToast(`🔔 Push sent to ${data.sent} user(s)`);
+    const tgInfo   = `TG ${data.tg_sent ?? 0}✓${data.tg_failed > 0 ? ' '+data.tg_failed+'✗' : ''}`;
+    const webInfo  = `WEB ${data.push_sent ?? 0}✓${data.push_failed > 0 ? ' '+data.push_failed+'✗' : ''}`;
+    result.textContent = `✓ ${tgInfo} · ${webInfo}`;
+    showToast(`🔔 TG: ${data.tg_sent ?? 0} · Web Push: ${data.push_sent ?? 0}`);
   } catch(e) {
     result.style.color = '#ff6b6b';
     result.textContent = '✗ ' + e.message;
