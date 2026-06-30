@@ -733,10 +733,9 @@
         await new Promise(function(r) { setTimeout(r, 2000); });
       }
 
-    if (newClaims.length > 0) {
       renderStatusCard();
       renderCards();
-    }
+    } catch(e) {}
   }
 
   function showReferralCelebration(claim, refCount) {
