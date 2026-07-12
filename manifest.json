@@ -52,6 +52,18 @@
       "short_name": "Vote",
       "url": "/peace.html",
       "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "My Wallet",
+      "short_name": "Wallet",
+      "url": "/wallet.html",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "NFT Market",
+      "short_name": "Market",
+      "url": "/market.html",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

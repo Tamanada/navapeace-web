@@ -14,7 +14,7 @@
   })();
   </script>
   <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.tonapi.io https://*.ton.org https://cdn.jsdelivr.net https://static.cloudflareinsights.com; frame-ancestors 'none';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://static.cloudflareinsights.com; frame-ancestors 'none';" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NAVA PEACE – Peace Cards</title>
   <link rel="icon" type="image/png" href="favicon.png" />
@@ -26,8 +26,6 @@
   <script src="supabase_config.js"></script>
   <script src="block_check.js"></script>
   <script src="lang.js?v=8"></script>
-  <!-- TonConnect UI -->
-  <script src="https://unpkg.com/@tonconnect/ui@2.0.5/dist/tonconnect-ui.min.js"></script>
   <style>
     @font-face {
       font-family: 'Nasalization';
@@ -65,22 +63,29 @@
     .header h1 { font-size: 26px; letter-spacing: 6px; padding-left: 6px; text-align: center; color: #fff; }
     .header .tagline { font-size: 11px; letter-spacing: 4px; color: rgba(100,210,255,0.8); text-transform: uppercase; }
 
-    /* ── TONCONNECT BUTTON (official UI) ── */
-    #ton-connect-btn {
+    /* ── SOLANA WALLET BUTTON ── */
+    #sol-wallet-btn {
       position: absolute;
       top: 16px; right: 14px;
       z-index: 10;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(100,210,255,0.3);
+      border-radius: 20px;
+      color: #64D2FF;
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 8px;
+      letter-spacing: 1.5px;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
     }
-    /* Override TonConnect button styles to fit the dark theme */
-    #ton-connect-btn button,
-    #ton-connect-btn [data-tc-button] {
-      font-family: 'Nasalization', Arial, sans-serif !important;
-      font-size: 8px !important;
-      letter-spacing: 1.5px !important;
-      border-radius: 20px !important;
-      height: 32px !important;
-      padding: 0 12px !important;
+    #sol-wallet-btn.connected {
+      border-color: rgba(100,255,160,0.4);
+      color: #64FFAA;
+      background: rgba(100,255,160,0.08);
     }
+    #sol-wallet-btn:active { opacity: 0.8; }
 
     /* ── STATUS CARD ── */
     #status-card {
@@ -433,8 +438,8 @@
     <img src="logo.png" alt="NAVA PEACE" />
     <h1>NAVA PEACE</h1>
     <p class="tagline">PEACE CARDS</p>
-    <!-- TonConnect renders its button here -->
-    <div id="ton-connect-btn"></div>
+    <!-- Solana wallet connect -->
+    <button id="sol-wallet-btn" onclick="toggleSolanaWallet()">🔌 CONNECT</button>
   </div>
 
   <!-- STATUS CARD -->
@@ -499,16 +504,16 @@
       <div class="modal-items" id="modal-items"></div>
       <div class="modal-price-row">
         <span class="modal-price-label">TOTAL PRICE</span>
-        <span><span class="modal-price-value" id="modal-price">0</span><span class="modal-price-currency">USDT</span></span>
+        <span><span class="modal-price-value" id="modal-price">0</span><span class="modal-price-currency" id="modal-price-currency"></span></span>
       </div>
       <div class="modal-coming-soon" id="modal-note">
         🚀 SMART CONTRACT DEPLOYING — NFT PAYMENT GATEWAY LAUNCHING SOON<br>
         <span style="color:rgba(255,255,255,0.4);">Place your order now to be first in queue.</span>
       </div>
-      <button class="btn-pay" id="btn-pay" onclick="confirmPurchase()">💎 PAY WITH TON WALLET</button>
+      <button class="btn-pay" id="btn-pay" onclick="confirmPurchase()">💎 PAY WITH SOL</button>
       <button class="btn-pay stars" id="btn-pay-stars" onclick="payWithStars()">⭐ PAY WITH STARS</button>
       <button class="btn-cancel" onclick="closeModal()">CANCEL</button>
-      <p class="modal-wallet-note">TON Wallet · USDT on TON blockchain &nbsp;|&nbsp; Telegram ⭐ Stars<br>Smart contract deploying — orders registered now</p>
+      <p class="modal-wallet-note">Solana Wallet (Phantom · Backpack) &nbsp;|&nbsp; Telegram ⭐ Stars<br>Smart contract deploying — launches after TGE</p>
     </div>
   </div>
 
@@ -519,41 +524,41 @@
   <nav class="bottom-nav">
     <a href="peace.html" class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="12" y1="3" x2="12" y2="21" stroke="currentColor" stroke-width="1.8"/><line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg><span data-i18n="nav_peace">PEACE</span></a>
     <a href="map.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg><span data-i18n="nav_map">MAP</span></a>
-    <a href="stats.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/></svg><span data-i18n="nav_stats">STATS</span></a>
     <a href="market.html" class="nav-item active"><svg viewBox="0 0 24 24"><path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm0 10c-1.66 0-3-1.34-3-3h2c0 .55.45 1 1 1s1-.45 1-1h2c0 1.66-1.34 3-3 3z"/></svg><span data-i18n="nav_market">MARKET</span></a>
-    <a href="profile.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg><span data-i18n="nav_profile">PROFILE</span></a>
+    <a href="wallet.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg><span>WALLET</span></a>
+    <a href="stats.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/></svg><span data-i18n="nav_stats">STATS</span></a>
+    <a href="profile.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg><span>ME</span></a>
     <a href="about.html" class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="12" y1="11" x2="12" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="7.5" r="1.2" fill="currentColor"/></svg><span data-i18n="nav_about">ABOUT</span></a>
   </nav>
 
   <script>
-  // ── TREASURY — SET BEFORE LAUNCH ─────────────────────────────────────────
-  // Your NAVA PEACE treasury TON wallet address (Tonkeeper / MyTonWallet)
-  // Set this to your actual address when you create the wallet.
-  var TREASURY_ADDR = 'UQDT1xCk6tcgKy0Ci1785J_QGTlwbBI3lr21jGgQghMi7ds-';
+  // ── SOLANA TREASURY — SET BEFORE TGE ─────────────────────────────────────
+  // NAVA PEACE treasury Solana address (Devnet — update to Mainnet at TGE)
+  var TREASURY_SOL_ADDR = null; // set before launch
 
   // ── STARS PRICES ⭐ — UPDATE BEFORE LAUNCH ────────────────────────────────
   // Formula: Stars = (net_price_usd / 0.013) × 1.43  (covers iOS 30% + Telegram fee)
   // At launch, replace 0 values with confirmed amounts.
   var STARS_PRICES = {
-    PEACE_GARDENER:    { single: 550,   bundle: 550   },
-    PEACE_GUARDIAN:    { single: 1650,  bundle: 2450  },
-    PEACE_GUIDE:       { single: 3300,  bundle: 6200  },
-    PEACE_ILLUMINATOR: { single: 5500,  bundle: 11700 },
-    PEACE_LEGEND:      { single: 8800,  bundle: 20700 },
-    ANGEL_OF_PEACE:    { single: 13200, bundle: 34500 },
-    PEACE_POWER:       { single: 22000, bundle: 58000 },
+    PEACE_GARDENER:    { single: 1100,  bundle: 1100  },
+    PEACE_GUARDIAN:    { single: 2200,  bundle: 2640  },
+    PEACE_GUIDE:       { single: 3300,  bundle: 4950  },
+    PEACE_ILLUMINATOR: { single: 4400,  bundle: 7480  },
+    PEACE_LEGEND:      { single: 5500,  bundle: 10340 },
+    ANGEL_OF_PEACE:    { single: 11000, bundle: 23100 },
+    PEACE_POWER:       { single: 22000, bundle: 46200 },
   };
 
   // ── CONSTANTS ────────────────────────────────────────────────────────────
   var TIERS = [
-    { code:'PEACE_LOVER',       tier:1, name:'PEACE LOVER',       icon:'🕊',  color:'#64D2FF', price:0,   bundle:null, multiplier:1,  supplyType:'unlimited', maxSupply:0        },
-    { code:'PEACE_GARDENER',    tier:2, name:'PEACE GARDENER',    icon:'🌱',  color:'#64FFAA', price:5,   bundle:5,   multiplier:2,  supplyType:'dynamic',   maxSupply:8000000  },
-    { code:'PEACE_GUARDIAN',    tier:3, name:'PEACE GUARDIAN',    icon:'🛡️', color:'#3AACDF', price:15,  bundle:18,  multiplier:3,  supplyType:'dynamic',   maxSupply:4800000  },
-    { code:'PEACE_GUIDE',       tier:4, name:'PEACE GUIDE',       icon:'🌟',  color:'#7B9FFF', price:30,  bundle:45,  multiplier:4,  supplyType:'dynamic',   maxSupply:3200000  },
-    { code:'PEACE_ILLUMINATOR', tier:5, name:'PEACE ILLUMINATOR', icon:'✨',  color:'#BF7FFF', price:50,  bundle:85,  multiplier:5,  supplyType:'dynamic',   maxSupply:1600000  },
-    { code:'PEACE_LEGEND',      tier:6, name:'PEACE LEGEND',      icon:'👑',  color:'#FFD040', price:80,  bundle:150, multiplier:6,  supplyType:'dynamic',   maxSupply:640000   },
-    { code:'ANGEL_OF_PEACE',    tier:7, name:'ANGEL OF PEACE',    icon:'😇',  color:'#FF8FB0', price:120, bundle:250, multiplier:8,  supplyType:'locked',    maxSupply:320000   },
-    { code:'PEACE_POWER',       tier:8, name:'PEACE POWER',       icon:'⚡',  color:'#FF6B6B', price:200, bundle:420, multiplier:10, supplyType:'locked',    maxSupply:160000   },
+    { code:'PEACE_LOVER',       tier:1, name:'PEACE LOVER',       icon:'🕊',  color:'#64D2FF', price:0,   bundle:null, multiplier:1,  supplyType:'unlimited', maxSupply:0         },
+    { code:'PEACE_GARDENER',    tier:2, name:'PEACE GARDENER',    icon:'🌱',  color:'#64FFAA', price:10,  bundle:10,  multiplier:2,  supplyType:'dynamic',   maxSupply:16000000  },
+    { code:'PEACE_GUARDIAN',    tier:3, name:'PEACE GUARDIAN',    icon:'🛡️', color:'#3AACDF', price:20,  bundle:24,  multiplier:3,  supplyType:'dynamic',   maxSupply:8000000   },
+    { code:'PEACE_GUIDE',       tier:4, name:'PEACE GUIDE',       icon:'🌟',  color:'#7B9FFF', price:30,  bundle:45,  multiplier:4,  supplyType:'dynamic',   maxSupply:4000000   },
+    { code:'PEACE_ILLUMINATOR', tier:5, name:'PEACE ILLUMINATOR', icon:'✨',  color:'#BF7FFF', price:40,  bundle:68,  multiplier:5,  supplyType:'dynamic',   maxSupply:2000000   },
+    { code:'PEACE_LEGEND',      tier:6, name:'PEACE LEGEND',      icon:'👑',  color:'#FFD040', price:50,  bundle:94,  multiplier:6,  supplyType:'dynamic',   maxSupply:1000000   },
+    { code:'ANGEL_OF_PEACE',    tier:7, name:'ANGEL OF PEACE',    icon:'😇',  color:'#FF8FB0', price:100, bundle:210, multiplier:8,  supplyType:'locked',    maxSupply:500000    },
+    { code:'PEACE_POWER',       tier:8, name:'PEACE POWER',       icon:'⚡',  color:'#FF6B6B', price:200, bundle:420, multiplier:10, supplyType:'locked',    maxSupply:250000    },
   ];
 
   // Bundle contents: buying bundle for tier N gives tiers 2 through N
@@ -571,41 +576,71 @@
     ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
   var uid = localStorage.getItem('nava_peace_uid');
 
-  // ── TONCONNECT ────────────────────────────────────────────────────────────
-  var tonConnect = null;
-  var walletAddress = null;
+  // ── SOLANA WALLET ─────────────────────────────────────────────────────────
+  var solanaWallet = null; // { name, publicKey }
 
-  function initTonConnect() {
+  function getSolanaProvider() {
+    if (window.phantom && window.phantom.solana && window.phantom.solana.isPhantom)
+      return { wallet: window.phantom.solana, name: 'Phantom' };
+    if (window.solana && window.solana.isPhantom)
+      return { wallet: window.solana, name: 'Phantom' };
+    if (window.backpack)
+      return { wallet: window.backpack, name: 'Backpack' };
+    return null;
+  }
+
+  async function connectSolanaWallet() {
+    var provider = getSolanaProvider();
+    if (!provider) {
+      showToast('Install Phantom or Backpack wallet', 'error');
+      return null;
+    }
     try {
-      if (typeof TON_CONNECT_UI === 'undefined') {
-        console.warn('TonConnect SDK not loaded');
-        return;
-      }
-      tonConnect = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: 'https://nava-peace.app/tonconnect-manifest.json',
-        buttonRootId: 'ton-connect-btn',
-        // Telegram Mini App return URL — required for Telegram Wallet to redirect back
-        actionsConfiguration: {
-          twaReturnUrl: 'https://t.me/NavaPeaceBot/app'
-        },
-        uiPreferences: {
-          theme: TON_CONNECT_UI.THEME.DARK
-        }
-      });
-      tonConnect.onStatusChange(function(wallet) {
-        walletAddress = wallet ? wallet.account.address : null;
-        if (walletAddress) {
-          showToast('💎 WALLET CONNECTED', 'success');
-        }
-      });
-      // Restore previous connection if any
-      tonConnect.connectionRestored.then(function(restored) {
-        if (restored) {
-          walletAddress = tonConnect.wallet ? tonConnect.wallet.account.address : null;
-        }
-      }).catch(function(){});
+      var resp = await provider.wallet.connect();
+      solanaWallet = { name: provider.name, publicKey: resp.publicKey.toBase58() };
+      updateWalletBtn();
+      showToast('🟣 ' + provider.name + ' CONNECTED', 'success');
+      return solanaWallet;
     } catch(e) {
-      console.warn('TonConnect init error', e);
+      showToast('Connection cancelled', 'info');
+      return null;
+    }
+  }
+
+  function updateWalletBtn() {
+    var btn = document.getElementById('sol-wallet-btn');
+    if (!btn) return;
+    if (solanaWallet) {
+      var addr = solanaWallet.publicKey;
+      btn.textContent = '🟣 ' + addr.slice(0,4) + '..' + addr.slice(-4);
+      btn.classList.add('connected');
+    } else {
+      btn.textContent = '🔌 CONNECT';
+      btn.classList.remove('connected');
+    }
+  }
+
+  async function toggleSolanaWallet() {
+    if (solanaWallet) {
+      // Disconnect
+      var provider = getSolanaProvider();
+      if (provider && provider.wallet.disconnect) {
+        try { await provider.wallet.disconnect(); } catch(e) {}
+      }
+      solanaWallet = null;
+      updateWalletBtn();
+      showToast('Wallet disconnected', 'info');
+    } else {
+      await connectSolanaWallet();
+    }
+  }
+
+  function initSolanaWallet() {
+    // Try to restore session if already connected
+    var provider = getSolanaProvider();
+    if (provider && provider.wallet.isConnected && provider.wallet.publicKey) {
+      solanaWallet = { name: provider.name, publicKey: provider.wallet.publicKey.toBase58() };
+      updateWalletBtn();
     }
   }
 
@@ -785,6 +820,13 @@
     }, 8000);
   }
 
+  // ── STARS LABEL HELPER ───────────────────────────────────────────────────
+  function starsLabel(code, isBundle) {
+    var sp = STARS_PRICES[code];
+    if (!sp) return 'TBD';
+    return (isBundle ? sp.bundle : sp.single).toLocaleString() + ' ⭐';
+  }
+
   // ── RENDER CARDS ─────────────────────────────────────────────────────────
   function renderCards() {
     var list = document.getElementById('cards-list');
@@ -813,21 +855,21 @@
         ? '<div class="card-locked-msg">🔒 REQUIRES ' + prevTier.name + ' FIRST</div>'
         : '';
 
-      // Buttons
+      // Stars prices for buttons
+      var sp = STARS_PRICES[t.code];
+      var singleLbl = sp ? sp.single.toLocaleString() + ' ⭐' : 'TBD';
+      var bundleLbl = sp ? sp.bundle.toLocaleString() + ' ⭐' : 'TBD';
+
+      // Buttons — any tier above current is purchasable
       var btnsHtml = '';
       if (isOwned) {
         btnsHtml = '<div class="btn-owned">✓ YOURS</div>';
       } else if (isFree) {
         btnsHtml = '<button class="btn-claim" onclick="claimFree(\'' + t.code + '\')">CLAIM FREE</button>';
-      } else if (isNextBuy) {
+      } else {
         btnsHtml = '<div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;">'
-          + '<button class="btn-buy" onclick="openBuy(\'' + t.code + '\',false)">BUY — TBD</button>'
-          + (t.bundle ? '<button class="btn-bundle" onclick="openBuy(\'' + t.code + '\',true)">BUNDLE — TBD</button>' : '')
-          + '</div>';
-      } else if (isLocked) {
-        btnsHtml = '<div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;">'
-          + '<div class="btn-locked">🔒 LOCKED</div>'
-          + (t.bundle ? '<button class="btn-bundle" onclick="openBuy(\'' + t.code + '\',true)">BUNDLE — TBD</button>' : '')
+          + '<button class="btn-buy" onclick="openBuy(\'' + t.code + '\',false)">' + singleLbl + '</button>'
+          + (t.bundle ? '<button class="btn-bundle" onclick="openBuy(\'' + t.code + '\',true)">BUNDLE ' + bundleLbl + '</button>' : '')
           + '</div>';
       }
 
@@ -837,7 +879,6 @@
       // Card classes
       var cls = 'peace-card';
       if (isNextBuy) cls += ' next-buy';
-      if (isLocked)  cls += ' locked-card';
 
       return '<div class="' + cls + '">'
         + '<div class="card-accent" style="background:linear-gradient(90deg,' + color + '55,transparent);"></div>'
@@ -850,10 +891,9 @@
         +     '<div class="card-name">' + t.name + '</div>'
         +     '<div class="card-meta">'
         +       '<span class="card-mult" style="color:' + color + ';border-color:' + color + '44;background:' + color + '18;">×' + t.multiplier + '</span>'
-        +       (isFree ? '<span class="card-free-badge">FREE</span>' : '<span class="card-price" style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:1px;color:rgba(255,255,255,0.5);">TBD</span>')
+        +       (isFree ? '<span class="card-free-badge">FREE</span>' : (sp ? '<span class="card-price" style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:1px;color:#fbbf24;">⭐ ' + sp.single.toLocaleString() + '</span>' : '<span class="card-price" style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:1px;color:rgba(255,255,255,0.5);">TBD</span>'))
         +     '</div>'
         +     supplyHtml
-        +     lockedMsg
         +   '</div>'
         +   '<div class="card-btns">' + btnsHtml + '</div>'
         + '</div>'
@@ -899,9 +939,12 @@
     document.getElementById('cp-name').style.color = color;
 
     // Key stats: multiplier + price
+    var cpSp = STARS_PRICES[code];
     var priceDisplay = t.price === 0
       ? '<span style="color:#64FFAA;font-size:22px;">FREE</span>'
-      : '<span style="color:rgba(255,255,255,0.6);font-size:16px;letter-spacing:2px;">TBD</span>';
+      : cpSp
+        ? '<span style="color:#fff;font-size:17px;">⭐ ' + cpSp.single.toLocaleString() + '</span>'
+        : '<span style="color:rgba(255,255,255,0.6);font-size:16px;letter-spacing:2px;">TBD</span>';
     document.getElementById('cp-stats').innerHTML =
       '<div class="cp-stat">'
       +   '<div class="cp-stat-val" style="color:' + color + '">×' + t.multiplier + '</div>'
@@ -936,13 +979,14 @@
       'PEACE_GUIDE':       'You light the way for others. A ×4 multiplier means your voice carries four times further.',
       'PEACE_ILLUMINATOR': 'You bring light where there is darkness. With ×5 power, your peace actions illuminate the world.',
       'PEACE_LEGEND':      'Your dedication is legendary. ×6 multiplier — your name will be part of the history of peace.',
-      'ANGEL_OF_PEACE':    'One of only 320,000 in existence. ×8 multiplier. You are a guardian angel of this movement.',
-      'PEACE_POWER':       'The rarest card — only 160,000 ever. ×10 multiplier. Maximum impact, maximum legacy.'
+      'ANGEL_OF_PEACE':    'One of only 500,000 in existence. ×8 multiplier. You are a guardian angel of this movement.',
+      'PEACE_POWER':       'The rarest card — only 250,000 ever. ×10 multiplier. Maximum impact, maximum legacy.'
     };
     document.getElementById('cp-desc').textContent = descs[code] || '';
 
     // Actions
     var actHtml = '';
+    var actSp = STARS_PRICES[code];
     if (isOwned) {
       actHtml = '<div style="display:flex;align-items:center;justify-content:center;gap:8px;'
         + 'background:rgba(100,255,160,0.08);border:1px solid rgba(100,255,160,0.25);'
@@ -951,19 +995,16 @@
     } else if (t.price === 0) {
       actHtml = '<button class="btn-claim" style="width:100%;padding:15px;font-size:13px;letter-spacing:2px;" onclick="closeCardPopup();claimFree(\'' + code + '\')">Claim for Free</button>';
     } else {
-      if (isNext) {
-        actHtml += '<button class="btn-buy" style="width:100%;padding:15px;font-size:13px;letter-spacing:1px;" onclick="closeCardPopup();openBuy(\'' + code + '\',false)">Buy — TBD</button>';
-      }
+      var actSingleLbl = actSp ? '⭐ ' + actSp.single.toLocaleString() + ' — BUY NOW' : 'Buy — TBD';
+      actHtml += '<button class="btn-buy" style="width:100%;padding:15px;font-size:13px;letter-spacing:1px;" onclick="closeCardPopup();openBuy(\'' + code + '\',false)">' + actSingleLbl + '</button>';
       if (t.bundle) {
         var bundleItems = getBundleTiers(t.tier);
-        actHtml += '<button class="btn-bundle" style="width:100%;padding:14px;font-size:12px;letter-spacing:1px;" onclick="closeCardPopup();openBuy(\'' + code + '\',true)">'
-          + 'Bundle — TBD — Get all ' + bundleItems.length + ' cards up to this tier</button>';
+        var actBundleLbl = actSp ? '⭐ ' + actSp.bundle.toLocaleString() + ' — BUNDLE (' + bundleItems.length + ' CARDS)' : 'Bundle — TBD — ' + bundleItems.length + ' cards';
+        actHtml += '<button class="btn-bundle" style="width:100%;padding:14px;font-size:12px;letter-spacing:1px;" onclick="closeCardPopup();openBuy(\'' + code + '\',true)">' + actBundleLbl + '</button>';
       }
       if (!isNext) {
-        var prev = TIERS[t.tier - 2];
-        actHtml += '<div style="font-family:Arial,sans-serif;font-size:12px;color:rgba(255,160,100,0.8);'
-          + 'text-align:center;padding:10px;background:rgba(255,120,50,0.07);border-radius:10px;">'
-          + '🔒 Requires <strong>' + (prev ? prev.name : 'previous tier') + '</strong> first — or buy a Bundle to skip ahead.</div>';
+        actHtml += '<div style="font-family:Arial,sans-serif;font-size:11px;color:rgba(255,255,255,0.35);'
+          + 'text-align:center;padding:8px;">Bundle gives all cards from PEACE GARDENER up to this tier</div>';
       }
     }
     document.getElementById('cp-actions').innerHTML = actHtml;
@@ -997,7 +1038,15 @@
     // Populate modal
     document.getElementById('modal-title').textContent   = tier.name;
     document.getElementById('modal-subtitle').textContent = subtitle;
-    document.getElementById('modal-price').textContent   = 'TBD';
+    var sp = STARS_PRICES[code];
+    var dispStars = sp ? (isBundle ? sp.bundle : sp.single) : 0;
+    if (dispStars) {
+      document.getElementById('modal-price').textContent = dispStars.toLocaleString();
+      document.getElementById('modal-price-currency').textContent = '⭐';
+    } else {
+      document.getElementById('modal-price').textContent = 'TBD';
+      document.getElementById('modal-price-currency').textContent = '';
+    }
     document.getElementById('modal-img').src  = 'cards/' + code + '.png';
     document.getElementById('modal-img').alt  = tier.name;
 
@@ -1032,7 +1081,7 @@
     _currentPurchase = null;
   }
 
-  // ── CONFIRM PURCHASE (TON / USDT) ────────────────────────────────────────
+  // ── CONFIRM PURCHASE (SOL) ───────────────────────────────────────────────
   async function confirmPurchase() {
     if (!_currentPurchase) return;
     var p = _currentPurchase;
@@ -1042,140 +1091,38 @@
     btn.textContent = '⏳ CONNECTING...';
 
     try {
-      // Step 1: Connect wallet if needed
-      if (!tonConnect || !tonConnect.wallet) {
-        if (tonConnect) {
-          await tonConnect.openModal();
-          await new Promise(function(resolve, reject) {
-            var tries = 0;
-            var check = setInterval(function() {
-              tries++;
-              if (tonConnect.wallet) { clearInterval(check); resolve(); }
-              if (tries > 60)        { clearInterval(check); reject(new Error('timeout')); }
-            }, 500);
-          });
-        } else {
-          throw new Error('TonConnect not available');
-        }
+      // Step 1: Connect Solana wallet if needed
+      if (!solanaWallet) {
+        var connected = await connectSolanaWallet();
+        if (!connected) { btn.disabled = false; btn.textContent = '💎 PAY WITH SOL'; return; }
       }
 
-      var walletAddr = tonConnect.wallet.account.address;
-      btn.textContent = '⏳ SENDING...';
+      btn.textContent = '⏳ REGISTERING...';
 
-      // Step 2: Create purchase record, get its ID
-      var purchaseId = null;
+      // Step 2: Record order intent in DB
       if (uid && sb) {
-        var { data: rec } = await sb.from('nft_pending_purchases').insert({
-          user_uid:    uid,
-          tier_code:   p.tier.code,
-          is_bundle:   p.isBundle,
-          price_usdt:  p.price,
-          wallet_addr: walletAddr,
-          status:      'pending',
-          payment_method: 'ton_usdt',
-          created_at:  new Date().toISOString()
-        }).select('id').maybeSingle().catch(function(){ return { data: null }; });
-        purchaseId = rec && rec.id;
+        await sb.from('nft_pending_purchases').insert({
+          user_uid:       uid,
+          tier_code:      p.tier.code,
+          is_bundle:      p.isBundle,
+          wallet_addr:    solanaWallet.publicKey,
+          status:         'pending',
+          payment_method: 'sol_pending',
+        }).catch(function(){});
       }
 
-      // Step 3: Send USDT via TonConnect
-      // Treasury address must be set before launch.
-      // Amount in nano-USDT (6 decimals), e.g. $5 = 5_000_000
-      if (TREASURY_ADDR === 'YOUR_TREASURY_TON_ADDRESS') {
-        // Pre-launch: register order without actual tx
-        document.getElementById('modal').classList.remove('open');
-        showToast('🕊 Order registered — payment gateway launching soon!', 'success');
-        _currentPurchase = null;
-        return;
-      }
-
-      var nanoUsdt = p.price * 1_000_000;
-      await tonConnect.sendTransaction({
-        validUntil: Math.floor(Date.now() / 1000) + 600,
-        messages: [{
-          address: TREASURY_ADDR,
-          amount:  '50000000', // 0.05 TON for gas
-          // USDT jetton transfer will be added when smart contract deploys
-          // For now, records intent and treasury receives TON as placeholder
-        }]
-      });
-
-      // Step 4: Auto-verify on blockchain
-      btn.textContent = '⏳ CONFIRMING...';
+      // Pre-TGE: smart contract not yet deployed — register order only
       document.getElementById('modal').classList.remove('open');
-      showToast('🔍 Verifying on blockchain...', 'info');
-
-      if (purchaseId) {
-        pollTonConfirmation(purchaseId, walletAddr, p.tier.code, p.isBundle, p.price);
-      }
+      showToast('🕊 Order registered — SOL payment gateway launches after TGE!', 'success');
       _currentPurchase = null;
 
     } catch(e) {
-      if (e && e.message && e.message.includes('timeout')) {
-        showToast('Wallet not connected', 'error');
-      } else if (e && String(e).includes('cancel')) {
-        showToast('Transaction cancelled', 'info');
-      } else {
-        showToast('Transaction failed', 'error');
-      }
+      showToast('Error — please try again', 'error');
     } finally {
       btn.disabled = false;
-      btn.textContent = '💎 PAY WITH TON WALLET';
+      btn.textContent = '💎 PAY WITH SOL';
     }
   }
-
-  // ── POLL BLOCKCHAIN CONFIRMATION ─────────────────────────────────────────
-  var _tonPollInterval = null; // module-level handle so we can cancel on page exit
-
-  function pollTonConfirmation(purchaseId, walletAddr, tierCode, isBundle, priceUsdt) {
-    if (_tonPollInterval) { clearInterval(_tonPollInterval); _tonPollInterval = null; }
-    var attempts = 0;
-    var maxAttempts = 36; // 3 minutes (every 5s)
-
-    var interval = setInterval(async function() {
-      attempts++;
-      try {
-        var res = await fetch(SUPABASE_URL + '/functions/v1/verify-ton-payment', {
-          method: 'POST',
-          headers: {
-            'Content-Type':  'application/json',
-            'apikey':        SUPABASE_ANON_KEY,
-            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
-          },
-          body: JSON.stringify({
-            purchase_id:   purchaseId,
-            user_uid:      uid,
-            tier_code:     tierCode,
-            is_bundle:     isBundle,
-            wallet_addr:   walletAddr,
-            expected_usdt: priceUsdt,
-            treasury_addr: TREASURY_ADDR
-          })
-        });
-        var data = await res.json();
-
-        if (data.confirmed) {
-          clearInterval(interval);
-          _tonPollInterval = null;
-          showToast('✅ Payment confirmed! NFT added to your collection.', 'success');
-          setTimeout(loadMarket, 1200);
-          return;
-        }
-      } catch(e) { /* retry */ }
-
-      if (attempts >= maxAttempts) {
-        clearInterval(interval);
-        _tonPollInterval = null;
-        showToast('⚠ Verification timeout — check back in a few minutes.', 'error');
-      }
-    }, 5000);
-    _tonPollInterval = interval;
-  }
-
-  // Cancel poll if user navigates away
-  window.addEventListener('pagehide', function() {
-    if (_tonPollInterval) { clearInterval(_tonPollInterval); _tonPollInterval = null; }
-  });
 
   // ── TOAST ────────────────────────────────────────────────────────────────
   function showToast(msg, type) {
@@ -1209,10 +1156,6 @@
 
     try {
       // Get invoice link from edge function
-      // Map NFT tier code → Stars donation tier (cafe=50⭐ / dove=200⭐ / arch=500⭐)
-      var starsMap = { 50:'cafe', 200:'dove', 500:'arch' };
-      var donationTier = starsMap[starsAmt] || 'cafe';
-
       var res = await fetch(SUPABASE_URL + '/functions/v1/create-stars-invoice', {
         method: 'POST',
         headers: {
@@ -1221,11 +1164,14 @@
           'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
         },
         body: JSON.stringify({
-          tier:        donationTier,
-          initData:    tgWebApp.initData || '',
-          user_uid:    uid,
-          tg_user_id:  tgWebApp.initDataUnsafe && tgWebApp.initDataUnsafe.user
-                         ? tgWebApp.initDataUnsafe.user.id : null,
+          tier:       'nft_purchase',
+          nft_tier:   p.tier.code,
+          nft_amount: starsAmt,
+          is_bundle:  p.isBundle,
+          initData:   tgWebApp.initData || '',
+          user_uid:   uid,
+          tg_user_id: tgWebApp.initDataUnsafe && tgWebApp.initDataUnsafe.user
+                        ? tgWebApp.initDataUnsafe.user.id : null,
         })
       });
       var data = await res.json();
@@ -1274,7 +1220,7 @@
 
   // ── INIT ─────────────────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', function() {
-    initTonConnect();
+    initSolanaWallet();
     loadMarket();
     try { NAVA_DISCOVERY.check('market', sb); } catch(e) {}
   });
