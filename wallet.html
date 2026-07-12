@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en" data-module="module_wallet">
+<head>
+  <!-- Telegram-only guard -->
+  <script>
+  (function(){
+    var h = window.location.hash || '';
+    var isTg = h.indexOf('tgWebAppData') !== -1 ||
+               h.indexOf('tgWebAppVersion') !== -1 ||
+               !!window.TelegramWebviewProxy ||
+               !!(window.Telegram && window.Telegram.WebApp);
+    if (!isTg) window.location.replace('https://t.me/NavaPeaceBot/app');
+  })();
+  </script>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://static.cloudflareinsights.com; frame-ancestors 'none';" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NAVA PEACE – Wallet</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#050F1A" />
+  <script src="module_gate.js?v=6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="supabase_config.js"></script>
+  <script src="block_check.js"></script>
+  <script src="lang.js?v=8"></script>
+  <style>
+    @font-face {
+      font-family: 'Nasalization';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('nasalization.woff') format('woff');
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Nasalization', Arial, sans-serif; }
+
+    body {
+      background: radial-gradient(ellipse at 50% 0%, #0F3A5A 0%, #050F1A 60%);
+      min-height: 100dvh;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 0 80px;
+      overflow-x: hidden;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      text-align: center;
+      padding: 20px 20px 12px;
+      gap: 4px;
+    }
+    .header img { width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 3px 14px rgba(255,255,255,0.3)); }
+    .header h1 { font-size: 26px; letter-spacing: 6px; padding-left: 6px; color: #fff; }
+    .header .tagline { font-size: 11px; letter-spacing: 4px; color: rgba(100,210,255,0.8); text-transform: uppercase; }
+
+    /* ── SECTION HEADER ── */
+    .section-hdr {
+      width: calc(100% - 32px);
+      max-width: 480px;
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.45);
+      text-transform: uppercase;
+      margin: 16px 0 8px;
+      padding-left: 2px;
+    }
+
+    /* ── CARD ── */
+    .card {
+      width: calc(100% - 32px);
+      max-width: 480px;
+      background: linear-gradient(135deg, rgba(100,210,255,0.08), rgba(30,80,140,0.12));
+      border: 1px solid rgba(100,210,255,0.2);
+      border-radius: 16px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+    }
+    .card.gold-border  { border-color: rgba(255,210,80,0.3);   background: linear-gradient(135deg, rgba(255,210,80,0.06), rgba(180,140,0,0.06)); }
+    .card.green-border { border-color: rgba(100,255,160,0.3); background: linear-gradient(135deg, rgba(100,255,160,0.06), rgba(20,80,50,0.06)); }
+    .card.dim-border   { border-color: rgba(255,255,255,0.07); background: rgba(255,255,255,0.03); }
+
+    /* ── BALANCE BAR ── */
+    .balance-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .balance-label { font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,0.4); }
+    .balance-value { font-size: 22px; letter-spacing: 1px; color: #64D2FF; }
+
+    /* ── ADDRESS ── */
+    .addr-box {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      color: rgba(255,255,255,0.7);
+      word-break: break-all;
+      margin-bottom: 10px;
+      letter-spacing: 0.5px;
+      line-height: 1.5;
+    }
+
+    /* ── BUTTONS ── */
+    .btn-primary {
+      width: 100%; padding: 13px;
+      border: none; border-radius: 12px;
+      background: linear-gradient(135deg, #3AACDF, #1E6E9A);
+      color: #fff;
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 11px; letter-spacing: 2px;
+      cursor: pointer; transition: opacity 0.2s, transform 0.1s;
+      margin-top: 4px;
+    }
+    .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
+    .btn-primary:disabled { opacity: 0.45; cursor: default; }
+    .btn-primary.green { background: linear-gradient(135deg, #32CC80, #1E8050); color: #fff; }
+    .btn-primary.gold  { background: linear-gradient(135deg, #C4920A, #8B6508); }
+    .btn-secondary {
+      width: 100%; padding: 11px;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.7);
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 10px; letter-spacing: 1.5px;
+      cursor: pointer; transition: opacity 0.2s;
+      margin-top: 8px;
+    }
+    .btn-secondary:active { opacity: 0.7; }
+
+    /* ── PROGRESS BAR ── */
+    .progress-wrap {
+      height: 5px; border-radius: 3px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden; margin-top: 4px;
+    }
+    .progress-fill {
+      height: 100%; border-radius: 3px;
+      background: linear-gradient(90deg, #64D2FF, #3AACDF);
+      transition: width 0.6s ease;
+    }
+
+    /* ── INFO ROW ── */
+    .info-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 12px;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-row .lbl { color: rgba(255,255,255,0.45); letter-spacing: 0.5px; }
+    .info-row .val { color: #fff; font-weight: 600; letter-spacing: 0.5px; }
+
+    /* ── BADGE ROW ── */
+    .badge-chip {
+      display: inline-block;
+      background: rgba(100,210,255,0.12);
+      border: 1px solid rgba(100,210,255,0.3);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 9px; letter-spacing: 1.5px; color: #64D2FF;
+      margin: 3px 3px 0 0;
+    }
+
+    /* ── WALLET PROVIDERS ── */
+    .wallet-providers { display: flex; gap: 10px; margin-top: 10px; }
+    .wallet-provider-btn {
+      flex: 1; padding: 12px 8px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      color: #fff;
+      font-family: 'Nasalization', Arial, sans-serif;
+      font-size: 9px; letter-spacing: 1.5px;
+      cursor: pointer; transition: border-color 0.2s, background 0.2s;
+      text-align: center;
+    }
+    .wallet-provider-btn:hover { border-color: rgba(100,210,255,0.35); background: rgba(100,210,255,0.07); }
+    .wallet-provider-btn .wp-icon { font-size: 22px; display: block; margin-bottom: 5px; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; top: 24px; left: 50%; transform: translateX(-50%);
+      z-index: 99999; background: rgba(20,80,140,0.97); border: 1px solid rgba(100,210,255,0.35);
+      border-radius: 50px; padding: 10px 24px;
+      font-size: 9px; letter-spacing: 2px; color: #fff; white-space: nowrap;
+      box-shadow: 0 4px 24px rgba(58,172,223,0.3);
+      opacity: 0; transition: opacity 0.3s, top 0.3s;
+    }
+    .toast.show { opacity: 1; }
+    .toast.success { background: rgba(20,100,60,0.97); border-color: rgba(100,255,160,0.35); }
+    .toast.error   { background: rgba(120,20,20,0.97);  border-color: rgba(255,100,100,0.35); }
+
+    /* ── BOTTOM NAV ── */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 62px;
+      background: rgba(5,15,26,0.97); backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,0.07);
+      display: flex; align-items: center; justify-content: space-around; z-index: 100;
+    }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; color: rgba(255,255,255,0.35); text-decoration: none; font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; transition: color 0.2s; }
+    .nav-item.active { color: #64D2FF; }
+    .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <img src="logo.png" alt="NAVA PEACE" />
+    <h1>NAVA PEACE</h1>
+    <p class="tagline">WALLET</p>
+  </div>
+
+  <!-- NAVA BALANCE -->
+  <div class="section-hdr">NAVA POINTS</div>
+  <div class="card" id="balance-card">
+    <div class="balance-row">
+      <span class="balance-label">TOTAL POINTS</span>
+      <span class="balance-value" id="nava-balance">—</span>
+    </div>
+    <div class="info-row">
+      <span class="lbl">NFT TIER</span>
+      <span class="val" id="nft-tier">—</span>
+    </div>
+    <div class="info-row">
+      <span class="lbl">MULTIPLIER</span>
+      <span class="val" id="nft-mult">—</span>
+    </div>
+    <div class="info-row">
+      <span class="lbl">GAME DAY</span>
+      <span class="val" id="game-day">—</span>
+    </div>
+  </div>
+
+  <!-- TGE COUNTDOWN -->
+  <div class="card gold-border">
+    <div style="font-size:11px;letter-spacing:2px;color:rgba(255,210,80,0.9);margin-bottom:6px;">⏳ TGE — DAY 180</div>
+    <div style="font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.55);line-height:1.6;margin-bottom:10px;">
+      Tes Points NAVA seront convertis en tokens NAVA on-chain (1:1) au Jour 180.
+      Total Supply = Points communauté × 5. Elastic — jamais de pre-mint.
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:4px;">
+      <span>Jour <span id="tge-day-now">0</span></span><span>Jour 180</span>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-fill" id="tge-progress" style="width:0%;background:linear-gradient(90deg,#FFD040,#64D2FF);"></div>
+    </div>
+  </div>
+
+  <!-- ── TGE CLAIM SECTION ── -->
+  <div class="section-hdr">ENREGISTREMENT TGE</div>
+
+  <!-- State A: already registered -->
+  <div class="card green-border" id="tge-claimed-card" style="display:none;">
+    <div style="font-size:10px;letter-spacing:2px;color:#64FFAA;margin-bottom:10px;">✓ CLAIM ENREGISTRÉE</div>
+    <div class="info-row">
+      <span class="lbl">MONTANT</span>
+      <span class="val" id="claim-amount-text">—</span>
+    </div>
+    <div class="info-row">
+      <span class="lbl">WALLET</span>
+      <span class="val" id="claim-wallet-text" style="font-size:10px;font-family:'Courier New',monospace;letter-spacing:0;">—</span>
+    </div>
+    <div class="info-row">
+      <span class="lbl">TYPE</span>
+      <span class="val" id="claim-type-text">—</span>
+    </div>
+    <div style="font-family:Arial,sans-serif;font-size:11px;color:rgba(255,255,255,0.35);margin-top:10px;line-height:1.6;text-align:center;">
+      Le mint on-chain sera exécuté au Jour 180 par la Foundation.<br>Ta position est sécurisée. 🕊
+    </div>
+  </div>
+
+  <!-- State B: wallet linked, can register -->
+  <div class="card gold-border" id="tge-claimable-card" style="display:none;">
+    <div style="font-size:11px;letter-spacing:2px;color:rgba(255,210,80,0.9);margin-bottom:10px;">🚀 PRÉ-ENREGISTREMENT TGE</div>
+    <div class="info-row">
+      <span class="lbl">TES POINTS</span>
+      <span class="val" id="claim-preview-amount">—</span>
+    </div>
+    <div class="info-row">
+      <span class="lbl">DESTINATION</span>
+      <span class="val" id="claim-preview-wallet" style="font-size:10px;font-family:'Courier New',monospace;letter-spacing:0;">—</span>
+    </div>
+    <div style="font-family:Arial,sans-serif;font-size:11px;color:rgba(255,255,255,0.4);margin:10px 0;line-height:1.6;">
+      Verrouille ton adresse de réception maintenant.<br>
+      Mint batch 1:1 (Points → NAVA on-chain) au Jour 180.
+    </div>
+    <button class="btn-primary gold" id="btn-claim-tge" onclick="claimTGE()">🚀 ENREGISTRER MA CLAIM TGE</button>
+  </div>
+
+  <!-- State C: no wallet yet -->
+  <div class="card dim-border" id="tge-no-wallet-card" style="display:none;">
+    <div style="font-family:Arial,sans-serif;font-size:12px;color:rgba(255,200,80,0.8);line-height:1.5;margin-bottom:12px;">
+      ⚠️ Lie ton wallet Solana avant le TGE pour recevoir tes NAVA on-chain.
+    </div>
+    <button class="btn-secondary" onclick="document.getElementById('custodial-section').scrollIntoView({behavior:'smooth'})">
+      ↑ CRÉER / LIER UN WALLET
+    </button>
+  </div>
+
+  <!-- CUSTODIAL WALLET (Telegram) -->
+  <div class="section-hdr">WALLET CUSTODIAL</div>
+  <div class="card" id="custodial-section">
+    <div style="font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:12px;line-height:1.5;">
+      Ton wallet Solana géré par NAVA PEACE Foundation.<br>
+      Ta clé privée n'est <strong style="color:#fff;">jamais stockée</strong> — dérivée à la demande via HMAC-SHA256.
+    </div>
+    <!-- State: no wallet -->
+    <div id="custodial-empty" style="display:block;text-align:center;">
+      <div style="font-size:36px;margin-bottom:12px;">💼</div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Pas encore de wallet</div>
+      <div style="font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:16px;">
+        Crée ton wallet Solana pour recevoir tes NAVA au TGE.
+      </div>
+      <button class="btn-primary green" id="btn-create-wallet" onclick="createCustodialWallet()">
+        CRÉER MON WALLET
+      </button>
+    </div>
+    <!-- State: wallet exists -->
+    <div id="custodial-addr" style="display:none;">
+      <div style="font-size:10px;letter-spacing:2px;color:rgba(100,255,160,0.8);margin-bottom:6px;">✓ ACTIF — SOLANA DEVNET</div>
+      <div class="addr-box" id="custodial-addr-text">—</div>
+      <button class="btn-primary" id="btn-copy-addr" onclick="copyAddr()">COPIER L'ADRESSE</button>
+    </div>
+  </div>
+
+  <!-- SELF-CUSTODY (Phantom / Backpack) -->
+  <div class="section-hdr">SELF-CUSTODY — MIGRATION TGE</div>
+  <div class="card dim-border">
+    <div style="font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:12px;line-height:1.6;">
+      Connecte ton propre wallet pour recevoir tes NAVA directement au TGE.
+      Ton wallet sera lié à ton compte — tu peux le changer avant le Jour 180.
+    </div>
+
+    <!-- Not connected -->
+    <div id="sc-empty">
+      <div class="wallet-providers">
+        <button class="wallet-provider-btn" onclick="connectProvider('phantom')">
+          <span class="wp-icon">👻</span>
+          PHANTOM
+        </button>
+        <button class="wallet-provider-btn" onclick="connectProvider('backpack')">
+          <span class="wp-icon">🎒</span>
+          BACKPACK
+        </button>
+      </div>
+    </div>
+
+    <!-- Connected -->
+    <div id="sc-connected" style="display:none;">
+      <div style="font-size:10px;letter-spacing:2px;color:rgba(100,255,160,0.8);margin-bottom:6px;">✓ <span id="sc-wallet-name">PHANTOM</span> CONNECTÉ</div>
+      <div class="addr-box" id="sc-addr-text">—</div>
+      <button class="btn-secondary" onclick="disconnectSelfCustody()">DÉCONNECTER</button>
+      <button class="btn-primary" id="btn-link-wallet" onclick="linkWallet()">LIER CE WALLET AU TGE</button>
+    </div>
+
+    <!-- Linked -->
+    <div id="sc-linked" style="display:none;">
+      <div style="font-size:10px;letter-spacing:2px;color:rgba(255,210,80,0.9);margin-bottom:6px;">🔗 WALLET LIÉ POUR LE TGE</div>
+      <div class="addr-box" id="sc-linked-addr">—</div>
+      <div style="font-family:Arial,sans-serif;font-size:11px;color:rgba(255,255,255,0.4);margin-top:8px;line-height:1.5;">
+        Modifiable jusqu'au Jour 180. Lors du TGE, tes NAVA seront mintés directement à cette adresse.
+      </div>
+      <button class="btn-secondary" onclick="unlinkWallet()">CHANGER DE WALLET</button>
+    </div>
+  </div>
+
+  <!-- NFT COLLECTION BADGE -->
+  <div class="section-hdr">COLLECTION NFT</div>
+  <div class="card dim-border">
+    <div style="font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:10px;">
+      Tes NFT Accélérateurs (cNFT Solana via Metaplex Bubblegum).
+    </div>
+    <div id="nft-badges">
+      <span style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;">Chargement...</span>
+    </div>
+  </div>
+
+  <!-- EMISSION INFO -->
+  <div class="card dim-border" style="margin-top:4px;">
+    <div style="font-size:10px;letter-spacing:1px;color:rgba(255,255,255,0.25);line-height:1.7;font-family:Arial,sans-serif;">
+      🔐 Wallet custodial géré par NAVA PEACE Foundation — clé privée jamais stockée.<br>
+      🔗 Self-custody : lier ton propre wallet Solana pour la migration TGE.<br>
+      🚀 NAVA on-chain : Devnet actif, Mainnet au Jour 180.
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="peace.html" class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="12" y1="3" x2="12" y2="21" stroke="currentColor" stroke-width="1.8"/><line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg><span data-i18n="nav_peace">PEACE</span></a>
+    <a href="map.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg><span data-i18n="nav_map">MAP</span></a>
+    <a href="market.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm0 10c-1.66 0-3-1.34-3-3h2c0 .55.45 1 1 1s1-.45 1-1h2c0 1.66-1.34 3-3 3z"/></svg><span data-i18n="nav_market">MARKET</span></a>
+    <a href="wallet.html" class="nav-item active"><svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg><span>WALLET</span></a>
+    <a href="stats.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/></svg><span data-i18n="nav_stats">STATS</span></a>
+    <a href="profile.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg><span>ME</span></a>
+    <a href="about.html" class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="12" y1="11" x2="12" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="7.5" r="1.2" fill="currentColor"/></svg><span data-i18n="nav_about">ABOUT</span></a>
+  </nav>
+
+  <script>
+  // ── INIT ──────────────────────────────────────────────────────────────────
+  var sb  = (typeof supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined')
+              ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+  var uid = localStorage.getItem('nava_peace_uid');
+
+  var selfCustodyWallet = null; // { name, publicKey } — connected but not yet linked
+  var linkedWallet = localStorage.getItem('nava_tge_wallet') || null;
+
+  // ── TOAST ─────────────────────────────────────────────────────────────────
+  function showToast(msg, type) {
+    var el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className   = 'toast show' + (type ? ' ' + type : '');
+    clearTimeout(el._t);
+    el._t = setTimeout(function() { el.className = 'toast'; }, 3000);
+  }
+
+  // ── LOAD STATE ────────────────────────────────────────────────────────────
+  async function loadWalletPage() {
+    // Load NAVA balance + tier from Supabase
+    if (uid && sb) {
+      var [balRes, tierRes, badgeRes] = await Promise.all([
+        sb.from('nava_token_balances').select('balance').eq('user_uid', uid).maybeSingle()
+          .catch(function(){ return {}; }),
+        sb.from('nava_daily_claims').select('*', { count: 'exact', head: true }).eq('user_uid', uid)
+          .catch(function(){ return {}; }),
+        sb.from('user_badges').select('badge_code').eq('user_uid', uid)
+          .catch(function(){ return {}; }),
+      ]);
+
+      // Balance
+      var bal = balRes && balRes.data ? parseFloat(balRes.data.balance || 0) : 0;
+      document.getElementById('nava-balance').textContent = bal.toLocaleString(undefined, { maximumFractionDigits: 4 });
+
+      // Game stats — number of daily claims = days mined
+      var day = (tierRes && tierRes.count) ? tierRes.count : 0;
+      document.getElementById('game-day').textContent = day + ' / 180';
+      document.getElementById('tge-day-now').textContent = day;
+      document.getElementById('tge-progress').style.width = Math.min(100, (day / 180) * 100) + '%';
+
+      // NFT badges
+      var badges = badgeRes && badgeRes.data ? badgeRes.data.map(function(b) { return b.badge_code; }) : [];
+      if (!badges.includes('PEACE_LOVER')) badges.unshift('PEACE_LOVER');
+
+      var TIER_LABELS = {
+        'PEACE_LOVER': { label: 'PEACE LOVER', mult: 1 },
+        'PEACE_GARDENER': { label: 'PEACE GARDENER', mult: 2 },
+        'PEACE_GUARDIAN': { label: 'PEACE GUARDIAN', mult: 3 },
+        'PEACE_GUIDE': { label: 'PEACE GUIDE', mult: 4 },
+        'PEACE_ILLUMINATOR': { label: 'PEACE ILLUMINATOR', mult: 5 },
+        'PEACE_LEGEND': { label: 'PEACE LEGEND', mult: 6 },
+        'ANGEL_OF_PEACE': { label: 'ANGEL OF PEACE', mult: 8 },
+        'PEACE_POWER': { label: 'PEACE POWER', mult: 10 },
+      };
+
+      // Highest tier = best multiplier
+      var highestMult = 1;
+      var highestLabel = 'PEACE LOVER';
+      badges.forEach(function(code) {
+        if (TIER_LABELS[code] && TIER_LABELS[code].mult > highestMult) {
+          highestMult  = TIER_LABELS[code].mult;
+          highestLabel = TIER_LABELS[code].label;
+        }
+      });
+      document.getElementById('nft-tier').textContent = highestLabel;
+      document.getElementById('nft-mult').textContent = '×' + highestMult;
+
+      var badgeHtml = badges.map(function(code) {
+        var info = TIER_LABELS[code];
+        return '<span class="badge-chip">' + (info ? info.label : code) + '</span>';
+      }).join('');
+      document.getElementById('nft-badges').innerHTML = badgeHtml;
+
+      // Load custodial wallet (returns address so TGE section can use it)
+      var custodialAddr = await loadCustodialWallet();
+
+      // TGE claim section: prefer self-custody, fallback to custodial
+      var tgeWallet = linkedWallet || custodialAddr || null;
+      loadTGEClaimSection(bal, tgeWallet);
+    } else {
+      document.getElementById('nava-balance').textContent = '—';
+      document.getElementById('nft-tier').textContent = '—';
+      loadTGEClaimSection(0, null);
+    }
+
+    // Restore linked wallet — localStorage first, then DB reconciliation
+    if (linkedWallet) {
+      showLinkedState(linkedWallet);
+    } else if (uid && sb) {
+      // Check DB in case the user linked on another device
+      sb.from('user_tge_wallets')
+        .select('sol_address')
+        .eq('user_uid', uid)
+        .maybeSingle()
+        .then(function(res) {
+          if (res && res.data && res.data.sol_address) {
+            linkedWallet = res.data.sol_address;
+            localStorage.setItem('nava_tge_wallet', linkedWallet);
+            showLinkedState(linkedWallet);
+          }
+        })
+        .catch(function() {});
+    }
+  }
+
+  // ── CUSTODIAL WALLET ──────────────────────────────────────────────────────
+  async function loadCustodialWallet() {
+    if (!uid || !sb) return null;
+    try {
+      var { data } = await sb.from('user_wallets')
+        .select('public_key')
+        .eq('user_uid', uid)
+        .maybeSingle();
+      if (data && data.public_key) {
+        showCustodialAddr(data.public_key);
+        return data.public_key;
+      } else {
+        document.getElementById('custodial-empty').style.display = 'block';
+      }
+    } catch(e) {
+      document.getElementById('custodial-empty').style.display = 'block';
+    }
+    return null;
+  }
+
+  function showCustodialAddr(addr) {
+    document.getElementById('custodial-empty').style.display = 'none';
+    document.getElementById('custodial-addr').style.display = 'block';
+    document.getElementById('custodial-addr-text').textContent = addr;
+  }
+
+  async function createCustodialWallet() {
+    var btn = document.getElementById('btn-create-wallet');
+    btn.disabled = true;
+    btn.textContent = '⏳ CRÉATION...';
+    try {
+      var { data, error } = await sb.functions.invoke('create-custodial-wallet');
+      if (error) throw error;
+      showCustodialAddr(data.public_key);
+      showToast('✓ Wallet Solana créé!', 'success');
+    } catch(e) {
+      showToast('Erreur de création — réessaie', 'error');
+      btn.disabled = false;
+      btn.textContent = 'CRÉER MON WALLET';
+    }
+  }
+
+  async function copyAddr() {
+    var addr = document.getElementById('custodial-addr-text').textContent;
+    try {
+      await navigator.clipboard.writeText(addr);
+      var btn = document.getElementById('btn-copy-addr');
+      btn.textContent = '✓ COPIÉ !';
+      setTimeout(function() { btn.textContent = 'COPIER L\'ADRESSE'; }, 1500);
+    } catch(e) {
+      showToast('Copier : ' + addr.slice(0, 12) + '...', 'info');
+    }
+  }
+
+  // ── SELF-CUSTODY (Phantom / Backpack) ─────────────────────────────────────
+  function getSolanaProvider(name) {
+    if (name === 'phantom') {
+      if (window.phantom && window.phantom.solana && window.phantom.solana.isPhantom)
+        return { wallet: window.phantom.solana, name: 'Phantom' };
+      if (window.solana && window.solana.isPhantom)
+        return { wallet: window.solana, name: 'Phantom' };
+      return null;
+    }
+    if (name === 'backpack') {
+      if (window.backpack) return { wallet: window.backpack, name: 'Backpack' };
+      return null;
+    }
+    // Auto-detect
+    if (window.phantom && window.phantom.solana && window.phantom.solana.isPhantom)
+      return { wallet: window.phantom.solana, name: 'Phantom' };
+    if (window.solana && window.solana.isPhantom)
+      return { wallet: window.solana, name: 'Phantom' };
+    if (window.backpack)
+      return { wallet: window.backpack, name: 'Backpack' };
+    return null;
+  }
+
+  async function connectProvider(name) {
+    var provider = getSolanaProvider(name);
+    if (!provider) {
+      var url = name === 'phantom' ? 'https://phantom.app/' : 'https://backpack.app/';
+      showToast('Install ' + (name === 'phantom' ? 'Phantom' : 'Backpack') + ' wallet', 'error');
+      return;
+    }
+    try {
+      var resp = await provider.wallet.connect();
+      selfCustodyWallet = { name: provider.name, publicKey: resp.publicKey.toBase58() };
+      showConnectedState(selfCustodyWallet);
+      showToast('🟣 ' + provider.name + ' connecté!', 'success');
+    } catch(e) {
+      showToast('Connection annulée', 'info');
+    }
+  }
+
+  function showConnectedState(w) {
+    document.getElementById('sc-empty').style.display = 'none';
+    document.getElementById('sc-linked').style.display = 'none';
+    document.getElementById('sc-connected').style.display = 'block';
+    document.getElementById('sc-wallet-name').textContent = w.name.toUpperCase();
+    document.getElementById('sc-addr-text').textContent = w.publicKey;
+  }
+
+  async function disconnectSelfCustody() {
+    var provider = getSolanaProvider(null);
+    if (provider && provider.wallet.disconnect) {
+      try { await provider.wallet.disconnect(); } catch(e) {}
+    }
+    selfCustodyWallet = null;
+    document.getElementById('sc-connected').style.display = 'none';
+    document.getElementById('sc-empty').style.display = 'block';
+    showToast('Wallet déconnecté', 'info');
+  }
+
+  async function linkWallet() {
+    if (!selfCustodyWallet) return;
+    var btn = document.getElementById('btn-link-wallet');
+    btn.disabled = true;
+    btn.textContent = '⏳ LIAISON...';
+
+    try {
+      // Save linked wallet to Supabase
+      if (uid && sb) {
+        await sb.from('user_tge_wallets')
+          .upsert({ user_uid: uid, sol_address: selfCustodyWallet.publicKey, wallet_type: selfCustodyWallet.name.toLowerCase() },
+                  { onConflict: 'user_uid' })
+          .catch(function(){});
+      }
+      // Also save locally
+      localStorage.setItem('nava_tge_wallet', selfCustodyWallet.publicKey);
+      linkedWallet = selfCustodyWallet.publicKey;
+      showLinkedState(selfCustodyWallet.publicKey);
+      showToast('🔗 Wallet lié pour le TGE!', 'success');
+    } catch(e) {
+      showToast('Erreur de liaison', 'error');
+      btn.disabled = false;
+      btn.textContent = 'LIER CE WALLET AU TGE';
+    }
+  }
+
+  function showLinkedState(addr) {
+    document.getElementById('sc-empty').style.display = 'none';
+    document.getElementById('sc-connected').style.display = 'none';
+    document.getElementById('sc-linked').style.display = 'block';
+    document.getElementById('sc-linked-addr').textContent = addr;
+  }
+
+  function unlinkWallet() {
+    localStorage.removeItem('nava_tge_wallet');
+    linkedWallet = null;
+    selfCustodyWallet = null;
+    document.getElementById('sc-linked').style.display = 'none';
+    document.getElementById('sc-empty').style.display = 'block';
+    // Also remove from Supabase
+    if (uid && sb) {
+      sb.from('user_tge_wallets').delete().eq('user_uid', uid).catch(function(){});
+    }
+    showToast('Wallet retiré — tu peux en lier un autre', 'info');
+  }
+
+  // ── TGE CLAIM ─────────────────────────────────────────────────────────────
+  function showTGEClaimedState(claim) {
+    var amt   = parseFloat(claim.amount || 0).toLocaleString(undefined, { maximumFractionDigits: 4 });
+    var addr  = claim.wallet_address || '—';
+    var short = addr.length > 12 ? addr.slice(0,6) + '...' + addr.slice(-4) : addr;
+    var type  = (claim.wallet_type || 'custodial').toUpperCase();
+    document.getElementById('claim-amount-text').textContent = amt + ' NAVA';
+    document.getElementById('claim-wallet-text').textContent = short;
+    document.getElementById('claim-type-text').textContent   = type;
+    document.getElementById('tge-claimed-card').style.display   = 'block';
+    document.getElementById('tge-claimable-card').style.display = 'none';
+    document.getElementById('tge-no-wallet-card').style.display = 'none';
+  }
+
+  function loadTGEClaimSection(bal, walletAddr) {
+    // localStorage is source of truth — avoids RLS-blocked DB read
+    var cached = localStorage.getItem('nava_tge_claim');
+    if (cached) {
+      try { showTGEClaimedState(JSON.parse(cached)); return; } catch(e) {}
+    }
+    if (walletAddr) {
+      var short = walletAddr.length > 12 ? walletAddr.slice(0,6) + '...' + walletAddr.slice(-4) : walletAddr;
+      document.getElementById('claim-preview-amount').textContent = parseFloat(bal).toLocaleString(undefined, { maximumFractionDigits: 4 }) + ' NAVA';
+      document.getElementById('claim-preview-wallet').textContent = short;
+      document.getElementById('tge-claimed-card').style.display   = 'none';
+      document.getElementById('tge-claimable-card').style.display = 'block';
+      document.getElementById('tge-no-wallet-card').style.display = 'none';
+    } else {
+      document.getElementById('tge-claimed-card').style.display   = 'none';
+      document.getElementById('tge-claimable-card').style.display = 'none';
+      document.getElementById('tge-no-wallet-card').style.display = 'block';
+    }
+  }
+
+  async function claimTGE() {
+    var tgWebApp = window.Telegram && window.Telegram.WebApp;
+    var initData = tgWebApp ? (tgWebApp.initData || '') : '';
+    var btn = document.getElementById('btn-claim-tge');
+    btn.disabled = true;
+    btn.textContent = '⏳ ENREGISTREMENT...';
+    try {
+      var body = initData ? { initData: initData } : { dev_uid: uid };
+      var res  = await fetch(SUPABASE_URL + '/functions/v1/tge-claim', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+        body: JSON.stringify(body),
+      });
+      var data = await res.json();
+      // 409 = already registered — display existing claim
+      if (res.status === 409 && data.claim) {
+        localStorage.setItem('nava_tge_claim', JSON.stringify(data.claim));
+        showTGEClaimedState(data.claim);
+        showToast('Claim déjà enregistrée ✓', 'success');
+        return;
+      }
+      if (!res.ok || data.error) throw new Error(data.error || 'Claim failed');
+      localStorage.setItem('nava_tge_claim', JSON.stringify(data.claim));
+      showTGEClaimedState(data.claim);
+      showToast('✓ Claim TGE enregistrée — wallet sécurisé!', 'success');
+    } catch(e) {
+      showToast(e.message || 'Erreur — réessaie', 'error');
+      btn.disabled = false;
+      btn.textContent = '🚀 ENREGISTRER MA CLAIM TGE';
+    }
+  }
+
+  // ── BOOT ──────────────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', function() {
+    loadWalletPage();
+    try { NAVA_DISCOVERY.check('wallet', sb); } catch(e) {}
+  });
+  </script>
+</body>
+</html>

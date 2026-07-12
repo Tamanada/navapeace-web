@@ -135,7 +135,7 @@ serve(async (req: Request) => {
     }
 
     const body = await req.json();
-    const { tier, initData } = body;
+    const { tier, initData, nft_tier, nft_amount, is_bundle } = body;
 
     // ── Validate Telegram initData HMAC ──────────────────────
     // Required to ensure requests come from real Telegram WebApp users.
@@ -159,12 +159,33 @@ serve(async (req: Request) => {
     }
 
     // ── Validate tier ─────────────────────────────────────────
-    const t = TIERS[tier as string];
-    if (!t) {
-      return new Response(JSON.stringify({ error: "Invalid tier" }), {
-        status: 400,
-        headers: { ...CORS, "Content-Type": "application/json" },
-      });
+    let t: Tier;
+    if ((tier as string) === "nft_purchase") {
+      // NFT purchase: custom amount passed directly from the client
+      if (!nft_tier || typeof nft_amount !== "number" || nft_amount < 1 || nft_amount > 100000) {
+        return new Response(JSON.stringify({ error: "Invalid NFT tier or amount" }), {
+          status: 400,
+          headers: { ...CORS, "Content-Type": "application/json" },
+        });
+      }
+      const nftName = String(nft_tier).replace(/_/g, " ");
+      // Payload encoded as JSON so the telegram-webhook can parse tc + b.
+      // Max 128 bytes: {"tc":"PEACE_POWER","b":false} = 28 chars — safe.
+      const nftPayload = JSON.stringify({ tc: String(nft_tier), b: !!is_bundle });
+      t = {
+        title:       `🕊 ${nftName}`,
+        description: `NAVA PEACE NFT — ${nftName}. Secure your place in the peace movement.`,
+        payload:     nftPayload,
+        amount:      Math.round(nft_amount),
+      };
+    } else {
+      t = TIERS[tier as string];
+      if (!t) {
+        return new Response(JSON.stringify({ error: "Invalid tier" }), {
+          status: 400,
+          headers: { ...CORS, "Content-Type": "application/json" },
+        });
+      }
     }
 
     // ── Create invoice link via Telegram Bot API ──────────────
