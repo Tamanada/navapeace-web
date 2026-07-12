@@ -81,7 +81,7 @@ async function verifyTelegramInitData(initData: string, botToken: string): Promi
     // Check auth_date is not older than 1 hour
     const authDate = parseInt(params.get("auth_date") ?? "0", 10);
     const age = Math.floor(Date.now() / 1000) - authDate;
-    if (age > 3600) return false; // initData expired
+    if (age > 86400) return false; // 24h window (generous for mini-app sessions)
 
     return true;
   } catch {
