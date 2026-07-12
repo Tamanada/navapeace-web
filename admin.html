@@ -887,6 +887,33 @@
           </p>
         </div>
 
+        <!-- Telegram Webhook Registration -->
+        <div class="g-card" style="padding:28px;">
+          <p style="font-size:12px;letter-spacing:2px;color:var(--w80);margin-bottom:6px;font-weight:600;">🤖 TELEGRAM BOT WEBHOOK</p>
+          <p style="font-size:9px;color:var(--w60);margin-bottom:18px;line-height:1.6;letter-spacing:1px;">
+            Enregistre le webhook Telegram pour recevoir les paiements Stars côté serveur (badge garanti même si l'app se ferme pendant le paiement).
+            Prérequis : secret <code style="background:rgba(255,255,255,0.1);padding:1px 6px;border-radius:4px;">TELEGRAM_WEBHOOK_SECRET</code> configuré dans Supabase.
+          </p>
+          <div style="background:rgba(255,255,255,0.05);border:1px solid var(--glass-border);border-radius:10px;padding:12px 16px;margin-bottom:16px;word-break:break-all;">
+            <span style="font-size:8px;letter-spacing:2px;color:var(--w40);">WEBHOOK URL</span><br>
+            <span style="font-size:10px;color:#6DD5F5;letter-spacing:0.5px;" id="webhook-url-display">https://qvbxcxehhenpifhclhvs.supabase.co/functions/v1/telegram-bot-webhook</span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <input type="password" id="webhook-secret-input"
+                   placeholder="TELEGRAM_WEBHOOK_SECRET…"
+                   style="flex:1;min-width:200px;padding:10px 14px;background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.3);border-radius:10px;color:#fff;font-family:var(--font);font-size:10px;letter-spacing:2px;" />
+            <button class="export-btn" onclick="registerTelegramWebhook()"
+                    style="background:rgba(100,255,170,0.15);color:#64FFAA;border-color:rgba(100,255,170,0.4);">
+              🔗 REGISTER WEBHOOK
+            </button>
+            <button class="export-btn" onclick="checkTelegramWebhook()"
+                    style="background:rgba(58,172,223,0.15);color:#3aacdf;border-color:rgba(58,172,223,0.4);">
+              📡 CHECK STATUS
+            </button>
+          </div>
+          <p id="webhook-status" style="margin-top:12px;font-size:9px;letter-spacing:2px;min-height:14px;"></p>
+        </div>
+
       </div>
     </div>
 
@@ -4375,7 +4402,50 @@ function tmgrRemove(id, tab) {
   tmgrRender();
 }
 
-async // ══ MINING TAB ════════════════════════════════════════════════════════════════
+async // ══ TELEGRAM WEBHOOK ══════════════════════════════════════════════════════════
+const TG_WEBHOOK_BASE = 'https://qvbxcxehhenpifhclhvs.supabase.co/functions/v1/telegram-bot-webhook';
+
+async function registerTelegramWebhook() {
+  const secret = document.getElementById('webhook-secret-input').value.trim();
+  const st     = document.getElementById('webhook-status');
+  if (!secret) { st.textContent = '✗ Enter the TELEGRAM_WEBHOOK_SECRET first'; st.style.color = 'var(--danger)'; return; }
+  st.textContent = '⏳ Registering…'; st.style.color = 'var(--w60)';
+  try {
+    const res  = await fetch(`${TG_WEBHOOK_BASE}?register=1&secret=${encodeURIComponent(secret)}`);
+    const data = await res.json();
+    if (data.ok && data.result?.ok) {
+      st.textContent = '✓ Webhook registered: ' + (data.webhook_url || '');
+      st.style.color = 'var(--success)';
+    } else {
+      st.textContent = '✗ ' + (data.result?.description || data.error || 'Failed');
+      st.style.color = 'var(--danger)';
+    }
+  } catch(e) {
+    st.textContent = '✗ Network error: ' + e.message;
+    st.style.color = 'var(--danger)';
+  }
+}
+
+async function checkTelegramWebhook() {
+  const secret = document.getElementById('webhook-secret-input').value.trim();
+  const st     = document.getElementById('webhook-status');
+  if (!secret) { st.textContent = '✗ Enter the secret to check status'; st.style.color = 'var(--danger)'; return; }
+  st.textContent = '⏳ Checking…'; st.style.color = 'var(--w60)';
+  try {
+    const res  = await fetch(`${TG_WEBHOOK_BASE}?register=1&secret=${encodeURIComponent(secret)}&check=1`);
+    const data = await res.json();
+    if (res.status === 403) { st.textContent = '✗ Wrong secret'; st.style.color = 'var(--danger)'; return; }
+    // getWebhookInfo via a dedicated GET without re-registering
+    const infoRes  = await fetch(`https://api.telegram.org/bot__HIDDEN__/getWebhookInfo`);
+    // We can't call Telegram directly (bot token hidden server-side) — show current EF URL instead
+    st.textContent = '📡 Webhook URL: ' + TG_WEBHOOK_BASE + ' — verify in Telegram BotFather or Supabase logs';
+    st.style.color = 'var(--w80)';
+  } catch(e) {
+    st.textContent = '✗ ' + e.message; st.style.color = 'var(--danger)';
+  }
+}
+
+// ══ MINING TAB ════════════════════════════════════════════════════════════════
 let _miningLoaded = false;
 
 async function loadMiningTab() {
