@@ -325,6 +325,45 @@
       padding: 8px 0;
     }
 
+    /* ── NAVA MINING ── */
+    .nv-season-track {
+      height: 8px; background: rgba(255,255,255,0.12); border-radius: 4px;
+      overflow: hidden; margin: 8px 0 6px;
+    }
+    .nv-season-bar {
+      height: 100%;
+      background: linear-gradient(90deg,#3AACDF,#64D2FF);
+      border-radius: 4px; transition: width 1.2s ease; width: 0%;
+    }
+    .nv-season-days {
+      display: flex; justify-content: space-between;
+      font-size: 10px; letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.7); margin-bottom: 12px;
+    }
+    .nv-stats-4 {
+      display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 10px;
+    }
+    .nv-stat-sm {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      background: rgba(100,210,255,0.08); border: 1px solid rgba(100,210,255,0.2);
+      border-radius: 12px; padding: 10px 4px;
+    }
+    .nv-stat-sm .nv-val {
+      font-size: 15px; color: #64D2FF; line-height: 1; text-align: center;
+    }
+    .nv-stat-sm .nv-lbl {
+      font-size: 8px; letter-spacing: 1px; text-transform: uppercase;
+      color: rgba(255,255,255,0.65); text-align: center;
+    }
+    .nv-my-box {
+      background: rgba(100,210,255,0.06); border: 1px solid rgba(100,210,255,0.2);
+      border-radius: 14px; padding: 10px 12px;
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 4px;
+    }
+    .nv-my-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .nv-my-item .nv-val { font-size: 18px; color: #fff; line-height: 1; text-align: center; }
+    .nv-my-item .nv-lbl { font-size: 8px; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,0.65); text-align: center; }
+
     /* ── BOTTOM NAV ── */
     .bottom-nav {
       position: fixed;
@@ -421,6 +460,58 @@
     </div>
   </div>
 
+  <!-- NAVA MINING SEASON 1 -->
+  <div class="card">
+    <p class="section-title">⚡ NAVA MINING — SEASON 1</p>
+    <div class="nv-season-track">
+      <div class="nv-season-bar" id="nv-season-bar"></div>
+    </div>
+    <div class="nv-season-days">
+      <span>DAY <span id="nv-day">?</span> / 180</span>
+      <span><span id="nv-phase">PHASE ?/6</span> · <span id="nv-days-left">?</span> DAYS LEFT</span>
+    </div>
+    <div class="nv-stats-4">
+      <div class="nv-stat-sm">
+        <span class="nv-val" id="nv-total">–</span>
+        <span class="nv-lbl">NAVA<br>MINED</span>
+      </div>
+      <div class="nv-stat-sm">
+        <span class="nv-val" id="nv-miners">–</span>
+        <span class="nv-lbl">MINERS</span>
+      </div>
+      <div class="nv-stat-sm">
+        <span class="nv-val">÷<span id="nv-halving-div">?</span></span>
+        <span class="nv-lbl">HALVING<br>FACTOR</span>
+      </div>
+      <div class="nv-stat-sm">
+        <span class="nv-val" id="nv-rate">–</span>
+        <span class="nv-lbl">BASE/<br>DAY</span>
+      </div>
+    </div>
+    <div class="nv-my-box" id="nv-my-stats" style="display:none">
+      <div class="nv-my-item">
+        <span class="nv-val" id="nv-my-bal">–</span>
+        <span class="nv-lbl">MY NAVA</span>
+      </div>
+      <div class="nv-my-item">
+        <span class="nv-val" id="nv-my-rank">–</span>
+        <span class="nv-lbl">MY RANK</span>
+      </div>
+      <div class="nv-my-item">
+        <span class="nv-val" id="nv-my-mult" style="font-size:13px">–</span>
+        <span class="nv-lbl">MY NFT</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVA TOP MINERS -->
+  <div class="card">
+    <p class="section-title">🏆 TOP NAVA MINERS</p>
+    <div id="nv-leaderboard">
+      <p class="no-data">LOADING...</p>
+    </div>
+  </div>
+
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
     <a href="peace.html" class="nav-item">
@@ -431,21 +522,21 @@
       <svg viewBox="0 0 24 24"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
       <span data-i18n="nav_map">MAP</span>
     </a>
-    <a href="stats.html" class="nav-item active">
-      <svg viewBox="0 0 24 24"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/></svg>
-      <span data-i18n="nav_stats">STATS</span>
-    </a>
-    <a href="merch.html" class="nav-item">
-      <svg viewBox="0 0 24 24"><path d="M18 6h-2c0-2.21-1.79-4-4-4S8 3.79 8 6H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-6-2c1.1 0 2 .9 2 2h-4c0-1.1.9-2 2-2zm6 14H6V8h12v12z"/></svg>
-      <span>MERCH</span>
-    </a>
     <a href="market.html" class="nav-item">
       <svg viewBox="0 0 24 24"><path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm0 10c-1.66 0-3-1.34-3-3h2c0 .55.45 1 1 1s1-.45 1-1h2c0 1.66-1.34 3-3 3z"/></svg>
       <span data-i18n="nav_market">MARKET</span>
     </a>
+    <a href="wallet.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+      <span>WALLET</span>
+    </a>
+    <a href="stats.html" class="nav-item active">
+      <svg viewBox="0 0 24 24"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/></svg>
+      <span data-i18n="nav_stats">STATS</span>
+    </a>
     <a href="profile.html" class="nav-item">
       <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
-      <span data-i18n="nav_profile">PROFILE</span>
+      <span>ME</span>
     </a>
     <a href="about.html" class="nav-item">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="12" y1="11" x2="12" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="7.5" r="1.2" fill="currentColor"/></svg>
@@ -695,11 +786,106 @@
       return code.split('').map(c => String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65)).join('');
     }
 
+    // ── NAVA MINING SEASON 1 ──
+    async function loadNavaStats() {
+      if (!sb) return;
+      try {
+        const { data: seasons } = await sb.from('nava_season_config').select('*').eq('active', true).limit(1);
+        const season = seasons?.[0];
+        if (!season) {
+          document.getElementById('nv-leaderboard').innerHTML = '<p class="no-data">SEASON NOT ACTIVE</p>';
+          return;
+        }
+
+        const startDate    = new Date(season.season_start);
+        const now          = new Date();
+        const daysElapsed  = Math.max(0, Math.floor((now - startDate) / 86400000));
+        const daysLeft     = Math.max(0, season.season_days - daysElapsed);
+        const phaseIdx     = Math.min(Math.floor(daysElapsed / 30), 5); // 0–5
+        const halvingDiv   = Math.pow(2, phaseIdx);                      // 1,2,4,8,16,32
+        const baseRate     = season.base_reward / halvingDiv;
+
+        document.getElementById('nv-day').textContent       = daysElapsed;
+        document.getElementById('nv-days-left').textContent = daysLeft;
+        document.getElementById('nv-phase').textContent     = 'PHASE ' + (phaseIdx + 1) + '/6';
+        document.getElementById('nv-halving-div').textContent = halvingDiv;
+        document.getElementById('nv-rate').textContent      = baseRate >= 0.1
+          ? baseRate.toFixed(2) : baseRate.toFixed(4);
+        document.getElementById('nv-season-bar').style.width =
+          Math.min(daysElapsed / season.season_days * 100, 100) + '%';
+
+        // All balances (public leaderboard policy)
+        const { data: balances } = await sb
+          .from('nava_token_balances')
+          .select('user_uid, balance')
+          .order('balance', { ascending: false });
+
+        if (!balances || !balances.length) {
+          document.getElementById('nv-leaderboard').innerHTML = '<p class="no-data">NO MINERS YET</p>';
+          document.getElementById('nv-total').textContent   = '0';
+          document.getElementById('nv-miners').textContent  = '0';
+          return;
+        }
+
+        const totalNAVA = balances.reduce((s, b) => s + parseFloat(b.balance), 0);
+        document.getElementById('nv-total').textContent  = totalNAVA >= 1000
+          ? (totalNAVA / 1000).toFixed(1) + 'K' : totalNAVA.toFixed(1);
+        document.getElementById('nv-miners').textContent = balances.length.toLocaleString();
+
+        // My personal stats
+        const myUid = localStorage.getItem('nava_peace_uid') || '';
+        const myIdx = myUid ? balances.findIndex(b => b.user_uid === myUid) : -1;
+        if (myIdx >= 0) {
+          const myBal = parseFloat(balances[myIdx].balance);
+          document.getElementById('nv-my-bal').textContent  = myBal.toFixed(2);
+          document.getElementById('nv-my-rank').textContent = '#' + (myIdx + 1);
+
+          const TIER_ORDER = ['PEACE_POWER','ANGEL_OF_PEACE','PEACE_LEGEND',
+            'PEACE_ILLUMINATOR','PEACE_GUIDE','PEACE_GUARDIAN','PEACE_GARDENER'];
+          const MULT_MAP   = {PEACE_POWER:10,ANGEL_OF_PEACE:8,PEACE_LEGEND:6,
+            PEACE_ILLUMINATOR:5,PEACE_GUIDE:4,PEACE_GUARDIAN:3,PEACE_GARDENER:2};
+          const { data: badges } = await sb.from('user_badges')
+            .select('badge_code').eq('user_uid', myUid);
+          const owned = new Set((badges || []).map(b => b.badge_code));
+          const topTier = TIER_ORDER.find(t => owned.has(t));
+          document.getElementById('nv-my-mult').textContent = topTier
+            ? '×' + MULT_MAP[topTier] + ' ' + topTier.replace('PEACE_','').replace(/_/g,' ')
+            : '×1 FREE';
+          document.getElementById('nv-my-stats').style.display = 'grid';
+        }
+
+        // Top 10 leaderboard
+        const top10     = balances.slice(0, 10);
+        const top10Uids = top10.map(b => b.user_uid);
+        const { data: msgs } = await sb.from('peace_messages')
+          .select('user_uid, pseudo').in('user_uid', top10Uids);
+        const pseudoMap = {};
+        (msgs || []).forEach(m => { if (m.user_uid) pseudoMap[m.user_uid] = m.pseudo; });
+
+        const MEDALS = ['🥇','🥈','🥉'];
+        document.getElementById('nv-leaderboard').innerHTML = top10.map((b, i) => {
+          const bal      = parseFloat(b.balance);
+          const isMe     = b.user_uid === myUid;
+          const pseudo   = pseudoMap[b.user_uid] || '🕊 MINER';
+          const rowClass = i < 3 ? 'lb-top' + (i + 1) : '';
+          const medal    = MEDALS[i] || `<span style="font-size:11px;color:rgba(255,255,255,0.5)">${i+1}</span>`;
+          const display  = bal >= 1000 ? (bal / 1000).toFixed(2) + 'K' : bal.toFixed(2);
+          return `<div class="lb-row ${rowClass}">
+            <span class="lb-medal">${medal}</span>
+            <span class="lb-pseudo">${pseudo.toUpperCase()}</span>
+            ${isMe ? '<span class="lb-you">YOU</span>' : ''}
+            <span class="lb-doves" style="color:#64D2FF;">⚡${display}</span>
+          </div>`;
+        }).join('');
+      } catch(e) { console.warn('NAVA stats error', e); }
+    }
+
     // ── INIT ──
     loadOverview();
     loadTopCountries();
     loadLeaderboard();
     loadDemographics();
+    loadNavaStats();
 
     if (typeof applyLang === 'function') applyLang(detectLang());
 
