@@ -721,6 +721,7 @@
     <div class="tabs" style="margin-bottom:24px;">
       <button class="tab-btn active" onclick="showTab('overview',this)">📊 OVERVIEW</button>
       <button class="tab-btn" onclick="showTab('launch',this);initLaunchTab()">🚀 LAUNCH</button>
+      <button class="tab-btn" onclick="showTab('mining',this);loadMiningTab()">🪙 MINING</button>
       <button class="tab-btn" onclick="showTab('stats',this)">📈 STATS</button>
       <button class="tab-btn" onclick="showTab('users',this)">👥 USERS</button>
       <button class="tab-btn" onclick="showTab('messages',this)">💬 MESSAGES</button>
@@ -886,6 +887,86 @@
           </p>
         </div>
 
+      </div>
+    </div>
+
+    <!-- ══ MINING ════════════════════════════════════════ -->
+    <div id="tab-mining" class="tab-pane">
+      <div class="spinner" id="mn-spin"><div class="spin"></div></div>
+      <div id="mn-content" style="display:none;">
+
+        <!-- KPI row -->
+        <div class="charts-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px;">
+          <div class="g-card" style="padding:22px 24px;display:flex;flex-direction:column;gap:8px;">
+            <span class="stat-label">🪙 TOTAL NAVA MINED</span>
+            <span class="stat-value" id="mn-total" style="font-size:26px;">—</span>
+            <span class="stat-sub">all seasons combined</span>
+          </div>
+          <div class="g-card" style="padding:22px 24px;display:flex;flex-direction:column;gap:8px;">
+            <span class="stat-label">📅 MINERS TODAY</span>
+            <span class="stat-value" id="mn-today" style="font-size:26px;">—</span>
+            <span class="stat-sub">daily claims (UTC)</span>
+          </div>
+          <div class="g-card" style="padding:22px 24px;display:flex;flex-direction:column;gap:8px;">
+            <span class="stat-label">⛏ UNIQUE MINERS</span>
+            <span class="stat-value" id="mn-unique" style="font-size:26px;">—</span>
+            <span class="stat-sub">ever claimed</span>
+          </div>
+          <div class="g-card" style="padding:22px 24px;display:flex;flex-direction:column;gap:8px;">
+            <span class="stat-label">📡 CURRENT PHASE</span>
+            <span class="stat-value" id="mn-phase" style="font-size:26px;">—</span>
+            <span class="stat-sub" id="mn-phase-sub">base reward ×</span>
+          </div>
+        </div>
+
+        <!-- Wallet stats -->
+        <div class="charts-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;">
+          <div class="g-card" style="padding:22px 24px;display:flex;flex-direction:column;gap:8px;">
+            <span class="stat-label">🔐 CUSTODIAL WALLETS</span>
+            <span class="stat-value" id="mn-custodial" style="font-size:26px;">—</span>
+            <span class="stat-sub">auto-created</span>
+          </div>
+          <div class="g-card" style="padding:22px 24px;display:flex;flex-direction:column;gap:8px;">
+            <span class="stat-label">👜 SELF-CUSTODY</span>
+            <span class="stat-value" id="mn-selfcust" style="font-size:26px;">—</span>
+            <span class="stat-sub">Phantom / Backpack</span>
+          </div>
+          <div class="g-card" style="padding:22px 24px;display:flex;flex-direction:column;gap:8px;">
+            <span class="stat-label">🚀 TGE CLAIMS</span>
+            <span class="stat-value" id="mn-tge" style="font-size:26px;">—</span>
+            <span class="stat-sub" id="mn-tge-sub">queued — total NAVA</span>
+          </div>
+        </div>
+
+        <!-- NFT badge distribution + Top miners -->
+        <div class="charts-grid" style="grid-template-columns:1fr 2fr;margin-bottom:20px;">
+          <div class="g-card" style="padding:20px;">
+            <p class="chart-title" style="margin-bottom:14px;">🕊 NFT BADGE DISTRIBUTION</p>
+            <div id="mn-badges-list"></div>
+          </div>
+          <div class="g-card" style="padding:20px;">
+            <p class="chart-title" style="margin-bottom:14px;">🏆 TOP 20 MINERS</p>
+            <div style="overflow-x:auto;">
+              <table style="width:100%;border-collapse:collapse;font-size:10px;">
+                <thead>
+                  <tr>
+                    <th style="font-size:8px;letter-spacing:2px;color:var(--w40);padding:8px 10px;border-bottom:1px solid var(--glass-border);text-align:left;">#</th>
+                    <th style="font-size:8px;letter-spacing:2px;color:var(--w40);padding:8px 10px;border-bottom:1px solid var(--glass-border);text-align:left;">UID</th>
+                    <th style="font-size:8px;letter-spacing:2px;color:var(--w40);padding:8px 10px;border-bottom:1px solid var(--glass-border);text-align:right;">BALANCE</th>
+                    <th style="font-size:8px;letter-spacing:2px;color:var(--w40);padding:8px 10px;border-bottom:1px solid var(--glass-border);text-align:center;">NFT</th>
+                  </tr>
+                </thead>
+                <tbody id="mn-top-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align:right;">
+          <button class="export-btn" onclick="loadMiningTab()" style="background:rgba(58,172,223,0.15);color:#3aacdf;border-color:rgba(58,172,223,0.4);">
+            ↺ REFRESH
+          </button>
+        </div>
       </div>
     </div>
 
@@ -4292,6 +4373,131 @@ function tmgrDrop(e, tab) {
 function tmgrRemove(id, tab) {
   _tmgrConfig[tab] = (_tmgrConfig[tab] || []).filter(x => String(x) !== String(id));
   tmgrRender();
+}
+
+async // ══ MINING TAB ════════════════════════════════════════════════════════════════
+let _miningLoaded = false;
+
+async function loadMiningTab() {
+  _miningLoaded = false;
+  document.getElementById('mn-spin').style.display  = 'flex';
+  document.getElementById('mn-content').style.display = 'none';
+
+  try {
+    const today = new Date().toISOString().slice(0,10);
+
+    // Run all queries in parallel
+    const [
+      totalRes, todayRes, uniqueRes, seasonRes,
+      custRes, selfRes, tgeRes,
+      badgesRes, topRes
+    ] = await Promise.all([
+      sb.from('nava_token_balances').select('balance'),
+      sb.from('nava_daily_claims').select('user_uid', { count: 'exact', head: true }).eq('claim_date', today),
+      sb.from('nava_daily_claims').select('user_uid', { count: 'exact', head: true }),
+      sb.from('nava_season_config').select('season_start,base_reward,active').eq('active', true).maybeSingle(),
+      sb.from('user_wallets').select('user_uid', { count: 'exact', head: true }),
+      sb.from('user_tge_wallets').select('user_uid', { count: 'exact', head: true }).eq('wallet_type', 'self_custody'),
+      sb.from('tge_claims').select('amount').eq('status', 'queued'),
+      sb.from('user_badges').select('badge_code').not('badge_code', 'is', null),
+      sb.from('nava_token_balances').select('user_uid,balance').order('balance', { ascending: false }).limit(20),
+    ]);
+
+    // Total NAVA mined
+    const totalNava = (totalRes.data || []).reduce((s, r) => s + parseFloat(r.balance || 0), 0);
+    document.getElementById('mn-total').textContent = totalNava >= 1000
+      ? (totalNava / 1000).toFixed(1) + 'K' : totalNava.toFixed(1);
+
+    // Miners today
+    document.getElementById('mn-today').textContent = todayRes.count ?? '—';
+
+    // Unique miners (approximate: count distinct rows in nava_daily_claims)
+    // Supabase count on non-unique = total rows; we use nava_token_balances count instead
+    const uniqueMiners = (totalRes.data || []).length;
+    document.getElementById('mn-unique').textContent = uniqueMiners;
+
+    // Current phase
+    const season = seasonRes.data;
+    if (season) {
+      const start   = new Date(season.season_start);
+      const elapsed = Math.max(0, Math.floor((Date.now() - start.getTime()) / 86400000));
+      const phase   = Math.min(Math.floor(elapsed / 30), 5) + 1;
+      const base    = parseFloat(season.base_reward) / Math.pow(2, phase - 1);
+      document.getElementById('mn-phase').textContent = 'P' + phase;
+      document.getElementById('mn-phase-sub').textContent = base.toFixed(4) + ' NAVA/day base';
+    }
+
+    // Wallet stats
+    document.getElementById('mn-custodial').textContent = custRes.count ?? '—';
+    document.getElementById('mn-selfcust').textContent  = selfRes.count ?? '—';
+    const tgeClaims  = tgeRes.data || [];
+    const tgeTotal   = tgeClaims.reduce((s, r) => s + parseFloat(r.amount || 0), 0);
+    document.getElementById('mn-tge').textContent = tgeClaims.length;
+    document.getElementById('mn-tge-sub').textContent = 'queued · ' + tgeTotal.toFixed(0) + ' NAVA total';
+
+    // NFT badge distribution
+    const BADGE_LABELS = {
+      PEACE_POWER: '×10 PEACE POWER', ANGEL_OF_PEACE: '×8 ANGEL OF PEACE',
+      PEACE_LEGEND: '×6 PEACE LEGEND', PEACE_ILLUMINATOR: '×5 PEACE ILLUMINATOR',
+      PEACE_GUIDE: '×4 PEACE GUIDE', PEACE_GUARDIAN: '×3 PEACE GUARDIAN',
+      PEACE_GARDENER: '×2 PEACE GARDENER', PEACE_LOVER: '×1 PEACE LOVER',
+    };
+    const badgeCounts = {};
+    (badgesRes.data || []).forEach(r => {
+      badgeCounts[r.badge_code] = (badgeCounts[r.badge_code] || 0) + 1;
+    });
+    const badgeOrder = ['PEACE_POWER','ANGEL_OF_PEACE','PEACE_LEGEND','PEACE_ILLUMINATOR','PEACE_GUIDE','PEACE_GUARDIAN','PEACE_GARDENER','PEACE_LOVER'];
+    const badgesEl = document.getElementById('mn-badges-list');
+    badgesEl.innerHTML = '';
+    const totalBadges = Object.values(badgeCounts).reduce((a, b) => a + b, 0);
+    badgeOrder.forEach(code => {
+      const cnt = badgeCounts[code] || 0;
+      if (!cnt) return;
+      const pct = totalBadges ? Math.round(cnt / totalBadges * 100) : 0;
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:10px;';
+      row.innerHTML = `
+        <span style="font-size:8px;letter-spacing:1.5px;color:var(--w60);flex:0 0 160px;white-space:nowrap;">${BADGE_LABELS[code] || code}</span>
+        <div style="flex:1;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;">
+          <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,#64FFAA,#3AACDF);border-radius:3px;"></div>
+        </div>
+        <span style="font-size:9px;color:var(--w80);flex:0 0 28px;text-align:right;">${cnt}</span>`;
+      badgesEl.appendChild(row);
+    });
+    if (!totalBadges) {
+      badgesEl.innerHTML = '<p style="font-size:9px;color:var(--w40);letter-spacing:2px;">NO BADGES YET</p>';
+    }
+
+    // Top 20 miners table
+    const tbody = document.getElementById('mn-top-tbody');
+    tbody.innerHTML = '';
+    (topRes.data || []).forEach((r, i) => {
+      const uid   = r.user_uid || '';
+      const bal   = parseFloat(r.balance || 0);
+      const short = uid.length > 20 ? uid.slice(0, 10) + '…' + uid.slice(-6) : uid;
+      const nft   = badgeOrder.find(c => badgeCounts[c] && (badgesRes.data||[]).some(b => b.badge_code === c && false)) || '';
+      const tr = document.createElement('tr');
+      tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+      tr.innerHTML = `
+        <td style="padding:7px 10px;color:var(--w40);">${i+1}</td>
+        <td style="padding:7px 10px;font-size:9px;color:var(--w80);" title="${uid}">${short}</td>
+        <td style="padding:7px 10px;text-align:right;color:#6DD5F5;">${bal.toFixed(2)}</td>
+        <td style="padding:7px 10px;text-align:center;color:var(--w40);">—</td>`;
+      tbody.appendChild(tr);
+    });
+    if (!(topRes.data || []).length) {
+      tbody.innerHTML = '<tr><td colspan="4" style="padding:14px;text-align:center;color:var(--w40);font-size:9px;letter-spacing:2px;">NO DATA YET</td></tr>';
+    }
+
+    document.getElementById('mn-spin').style.display  = 'none';
+    document.getElementById('mn-content').style.display = 'block';
+    _miningLoaded = true;
+  } catch(e) {
+    console.error('Mining tab error:', e);
+    document.getElementById('mn-spin').style.display = 'none';
+    document.getElementById('mn-content').innerHTML = `<p style="color:var(--danger);font-size:9px;letter-spacing:2px;">ERREUR: ${e.message}</p>`;
+    document.getElementById('mn-content').style.display = 'block';
+  }
 }
 
 async function tmgrSave() {
