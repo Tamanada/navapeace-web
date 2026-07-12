@@ -548,7 +548,10 @@
     btn.disabled = true;
     btn.textContent = '⏳ CRÉATION...';
     try {
-      var { data, error } = await sb.functions.invoke('create-custodial-wallet');
+      var tgWebApp = window.Telegram && window.Telegram.WebApp;
+      var initData = tgWebApp ? (tgWebApp.initData || '') : '';
+      var body = initData ? { initData: initData } : { dev_uid: uid };
+      var { data, error } = await sb.functions.invoke('create-custodial-wallet', { body: body });
       if (error) throw error;
       showCustodialAddr(data.public_key);
       showToast('✓ Wallet Solana créé!', 'success');
