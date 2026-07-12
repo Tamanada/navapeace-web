@@ -534,6 +534,23 @@
       font-family: 'Nasalization', Arial, sans-serif;
     }
 
+    /* ── NFT MULTIPLIER PILL ── */
+    .nava-mult-pill {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      color: #64FFAA;
+      background: rgba(100,255,160,0.10);
+      border: 1px solid rgba(100,255,160,0.28);
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-family: 'Nasalization', Arial, sans-serif;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .nava-mult-pill:active { background: rgba(100,255,160,0.22); }
+
     /* ── NAVA REWARD TOAST ── */
     #nava-toast {
       position: fixed;
@@ -637,6 +654,7 @@
     <span class="nava-bal-num" id="nava-balance-num">0.0000</span>
     <span class="nava-bal-lbl">NAVA</span>
     <span class="nava-phase-pill" id="nava-phase-pill">PHASE 1</span>
+    <a href="market.html" class="nava-mult-pill" id="nava-mult-pill" style="display:none;">×2 NFT</a>
   </div>
 
   <!-- NAVA REWARD TOAST -->
@@ -1928,6 +1946,26 @@
             }
           }).catch(() => {});
       }
+    })();
+
+    // ── NFT multiplier pill ───────────────────────────────────────────
+    (function loadNftMultiplier() {
+      const uid = localStorage.getItem('nava_peace_uid');
+      if (!uid || !sb) return;
+      const MULT = {
+        PEACE_POWER: 10, ANGEL_OF_PEACE: 8, PEACE_LEGEND: 6,
+        PEACE_ILLUMINATOR: 5, PEACE_GUIDE: 4, PEACE_GUARDIAN: 3, PEACE_GARDENER: 2,
+      };
+      sb.from('user_badges').select('badge_code').eq('user_uid', uid)
+        .then(function(res) {
+          var data = res.data;
+          if (!data || !data.length) return;
+          var best = 1;
+          data.forEach(function(r) { if ((MULT[r.badge_code] || 1) > best) best = MULT[r.badge_code]; });
+          if (best <= 1) return;
+          var pill = document.getElementById('nava-mult-pill');
+          if (pill) { pill.textContent = '×' + best + ' NFT'; pill.style.display = 'inline-block'; }
+        }).catch(function() {});
     })();
 
     // ── BOOM SLOGAN ROTATION ────────────────────────────────────────────
