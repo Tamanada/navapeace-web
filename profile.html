@@ -1582,6 +1582,20 @@
           SEASON 1 · 180 DAYS
         </div>
       </div>
+
+      <!-- NFT + Wallet quick stats (populated by loadNavaBalance) -->
+      <div id="nava-extras" style="display:none;flex-direction:column;gap:7px;padding:0 4px 8px;">
+        <div style="height:1px;background:rgba(255,200,60,0.12);margin:2px 0 4px;"></div>
+        <div id="nava-nft-row" style="display:none;flex-direction:row;justify-content:space-between;align-items:center;">
+          <span style="font-size:10px;letter-spacing:2px;color:rgba(255,200,60,0.45);font-family:'Nasalization',Arial,sans-serif;">MY NFT</span>
+          <span id="nava-nft-display" style="font-size:11px;font-weight:700;color:#FFD740;font-family:'Nasalization',Arial,sans-serif;"></span>
+        </div>
+        <div id="nava-wallet-row" style="display:none;flex-direction:row;justify-content:space-between;align-items:center;gap:8px;">
+          <span style="font-size:10px;letter-spacing:2px;color:rgba(255,200,60,0.45);font-family:'Nasalization',Arial,sans-serif;white-space:nowrap;">WALLET</span>
+          <span id="nava-wallet-display" style="font-size:11px;color:rgba(255,255,255,0.65);font-family:monospace;text-align:right;"></span>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -2863,10 +2877,13 @@
     if (!uid) return;
     try {
       const sbN = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      const [{ data: bal }, { count: claimCount }, { data: season }] = await Promise.all([
+      const [{ data: bal }, { count: claimCount }, { data: season }, { data: badges }, { data: custWallet }, { data: tgeWallet }] = await Promise.all([
         sbN.from('nava_token_balances').select('balance').eq('user_uid', uid).maybeSingle(),
         sbN.from('nava_daily_claims').select('id', { count: 'exact', head: true }).eq('user_uid', uid),
-        sbN.from('nava_season_config').select('season, season_start').eq('active', true).maybeSingle()
+        sbN.from('nava_season_config').select('season, season_start').eq('active', true).maybeSingle(),
+        sbN.from('user_badges').select('badge_code').eq('user_uid', uid),
+        sbN.from('user_wallets').select('public_key').eq('user_uid', uid).maybeSingle(),
+        sbN.from('user_tge_wallets').select('sol_address, wallet_type').eq('user_uid', uid).maybeSingle(),
       ]);
 
       if (bal && parseFloat(bal.balance) >= 0) {
@@ -2881,6 +2898,41 @@
         if (phaseEl) phaseEl.textContent = phase;
         localStorage.setItem('nava_phase', phase);
         if (badge) badge.style.display = 'block';
+      }
+
+      // ── NFT tier + wallet rows ──────────────────────────────────────────────
+      const TIER_ORDER = ['PEACE_POWER','ANGEL_OF_PEACE','PEACE_LEGEND','PEACE_ILLUMINATOR','PEACE_GUIDE','PEACE_GUARDIAN','PEACE_GARDENER','PEACE_LOVER'];
+      const TIER_MULT  = {PEACE_POWER:10,ANGEL_OF_PEACE:8,PEACE_LEGEND:6,PEACE_ILLUMINATOR:5,PEACE_GUIDE:4,PEACE_GUARDIAN:3,PEACE_GARDENER:2,PEACE_LOVER:1};
+      const TIER_LABEL = {PEACE_POWER:'PEACE POWER',ANGEL_OF_PEACE:'ANGEL OF PEACE',PEACE_LEGEND:'LEGEND',PEACE_ILLUMINATOR:'ILLUMINATOR',PEACE_GUIDE:'GUIDE',PEACE_GUARDIAN:'GUARDIAN',PEACE_GARDENER:'GARDENER',PEACE_LOVER:'PEACE LOVER'};
+      const extrasEl   = document.getElementById('nava-extras');
+
+      if (badges && badges.length > 0) {
+        const owned   = badges.map(b => b.badge_code);
+        const highest = TIER_ORDER.find(t => owned.includes(t));
+        if (highest) {
+          const nftRow = document.getElementById('nava-nft-row');
+          const nftDsp = document.getElementById('nava-nft-display');
+          if (nftRow && nftDsp) {
+            nftDsp.textContent = `🕊 ${TIER_LABEL[highest]} · ×${TIER_MULT[highest]}`;
+            nftRow.style.display = 'flex';
+            if (extrasEl) extrasEl.style.display = 'flex';
+          }
+        }
+      }
+
+      const walletAddr  = tgeWallet?.sol_address ?? custWallet?.public_key ?? null;
+      const walletEmoji = tgeWallet
+        ? (tgeWallet.wallet_type === 'backpack' ? '🎒' : '💜')
+        : (custWallet ? '🤖' : null);
+      if (walletAddr && walletEmoji) {
+        const walletRow = document.getElementById('nava-wallet-row');
+        const walletDsp = document.getElementById('nava-wallet-display');
+        if (walletRow && walletDsp) {
+          const trunc = walletAddr.slice(0, 4) + '…' + walletAddr.slice(-4);
+          walletDsp.textContent = `${walletEmoji} ${trunc}`;
+          walletRow.style.display = 'flex';
+          if (extrasEl) extrasEl.style.display = 'flex';
+        }
       }
     } catch(e) { console.warn('NAVA balance load', e); }
   }
