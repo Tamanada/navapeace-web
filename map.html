@@ -206,8 +206,6 @@
       .counter-sep { display: none; }
       .counter-item { min-width: 0; width: 100%; }
       .counter-item .num { font-size: 34px; }
-      #cnt-timer { font-size: 18px !important; letter-spacing: 1px !important; }
-      #cnt-days  { font-size: 28px !important; letter-spacing: 1px !important; }
       .counter-item .lbl { font-size: 14px; letter-spacing: 1.5px; }
       /* DAYS — pleine largeur, centré, séparateur */
       #cnt-launch-item {
@@ -514,19 +512,6 @@
       font-weight: 400;
     }
 
-    .launch-inline {
-      font-size: 14px;
-      letter-spacing: 2.5px;
-      color: rgba(255,255,255,0.6);
-      text-transform: uppercase;
-      margin-top: 8px;
-      white-space: nowrap;
-    }
-    .launch-inline span {
-      color: #fff;
-      font-size: 18px;
-      font-weight: 700;
-    }
 
     /* Share overlay */
     #share-overlay.open { display: block !important; }
@@ -623,10 +608,6 @@
     </a>
     <p class="tagline" data-i18n="tagline">TODAY HUMANITY CHOOSE PEACE</p>
     <div id="lang-switcher" class="in-header"></div>
-    <!-- DAYS inline under tagline -->
-    <p class="launch-inline">
-      <span id="cnt-days">0</span> DAYS &nbsp;·&nbsp; <span id="cnt-timer">00:00:00</span> SINCE LAUNCH
-    </p>
   </div>
 
   <!-- COUNTER -->
@@ -878,23 +859,6 @@
     {country:"Morocco",user_count:61,lat:31.8,lng:-7.1},
     {country:"Portugal",user_count:57,lat:39.4,lng:-8.2},
   ];
-
-  // ── Chronomètre depuis le lancement ─────────────────────────────
-  function initTimer() {
-    const LAUNCH = new Date('2026-03-06T00:00:00Z');
-    function tick() {
-      const diff = Math.max(0, Date.now() - LAUNCH.getTime());
-      const days = Math.floor(diff / 86400000);
-      const h    = Math.floor((diff % 86400000) / 3600000).toString().padStart(2,'0');
-      const m    = Math.floor((diff % 3600000)  / 60000).toString().padStart(2,'0');
-      const s    = Math.floor((diff % 60000)    / 1000).toString().padStart(2,'0');
-      document.getElementById('cnt-days').textContent  = days;
-      document.getElementById('cnt-timer').textContent = `${h}:${m}:${s}`;
-    }
-    tick();
-    if (window._mapTickInterval) clearInterval(window._mapTickInterval);
-    window._mapTickInterval = setInterval(tick, 1000);
-  }
 
   // ── Rafraîchissement du compteur "Actions today" toutes les 60 s ──
   async function refreshTodayCount() {
@@ -1197,7 +1161,6 @@
     }
   })();
 
-  initTimer();
   initMap();
   if (typeof applyLang === 'function') applyLang(detectLang());
 
@@ -1409,7 +1372,6 @@
       countries: document.getElementById('cnt-countries')?.textContent || '—',
       doves:     document.getElementById('cnt-doves')?.textContent     || '—',
       today:     document.getElementById('cnt-today')?.textContent     || '—',
-      days:      document.getElementById('cnt-days')?.textContent      || '0',
     };
   }
 
@@ -1515,13 +1477,7 @@
     ctx.globalAlpha=0.7; ctx.font='30px Nasalization,Arial,sans-serif';
     ctx.fillText('TODAY HUMANITY CHOOSES PEACE', W/2, y); ctx.globalAlpha=1; y+=44;
 
-    // ── Days since launch ──
     const c = getCounters();
-    ctx.fillStyle='#fff'; ctx.textAlign='center';
-    ctx.font='bold 42px Nasalization,Arial,sans-serif';
-    ctx.fillText(c.days + '  DAYS SINCE LAUNCH', W/2, y+42);
-    ctx.globalAlpha=1;
-    y += 76;
 
     // ── Separator ──
     line(ctx,pad,y,W-pad); y+=26;
