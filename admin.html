@@ -4434,14 +4434,16 @@ async function checkTelegramWebhook() {
   if (!secret) { st.textContent = '✗ Enter the secret to check status'; st.style.color = 'var(--danger)'; return; }
   st.textContent = '⏳ Checking…'; st.style.color = 'var(--w60)';
   try {
-    const res  = await fetch(`${TG_WEBHOOK_BASE}?register=1&secret=${encodeURIComponent(secret)}&check=1`);
-    const data = await res.json();
+    const res  = await fetch(`${TG_WEBHOOK_BASE}?getinfo=1&secret=${encodeURIComponent(secret)}`);
     if (res.status === 403) { st.textContent = '✗ Wrong secret'; st.style.color = 'var(--danger)'; return; }
-    // getWebhookInfo via a dedicated GET without re-registering
-    const infoRes  = await fetch(`https://api.telegram.org/bot__HIDDEN__/getWebhookInfo`);
-    // We can't call Telegram directly (bot token hidden server-side) — show current EF URL instead
-    st.textContent = '📡 Webhook URL: ' + TG_WEBHOOK_BASE + ' — verify in Telegram BotFather or Supabase logs';
-    st.style.color = 'var(--w80)';
+    const data = await res.json();
+    const info = data.info?.result;
+    if (!info) { st.textContent = '✗ No response from Telegram'; st.style.color = 'var(--danger)'; return; }
+    const url         = info.url || '(none)';
+    const pending     = info.pending_update_count ?? 0;
+    const lastErr     = info.last_error_message ? ` · ⚠ ${info.last_error_message}` : '';
+    st.textContent = `📡 ${url} · pending: ${pending}${lastErr}`;
+    st.style.color = info.url ? 'var(--success)' : 'var(--danger)';
   } catch(e) {
     st.textContent = '✗ ' + e.message; st.style.color = 'var(--danger)';
   }
@@ -4471,7 +4473,7 @@ async function loadMiningTab() {
       sb.from('user_wallets').select('user_uid', { count: 'exact', head: true }),
       sb.from('user_tge_wallets').select('user_uid', { count: 'exact', head: true }).eq('wallet_type', 'self_custody'),
       sb.from('tge_claims').select('amount').eq('status', 'queued'),
-      sb.from('user_badges').select('badge_code').not('badge_code', 'is', null),
+      sb.from('user_badges').select('user_uid,badge_code').not('badge_code', 'is', null),
       sb.from('nava_token_balances').select('user_uid,balance').order('balance', { ascending: false }).limit(20),
     ]);
 
@@ -4540,21 +4542,33 @@ async function loadMiningTab() {
       badgesEl.innerHTML = '<p style="font-size:9px;color:var(--w40);letter-spacing:2px;">NO BADGES YET</p>';
     }
 
+    // Build per-user highest badge map
+    const BADGE_MULT = {PEACE_POWER:10,ANGEL_OF_PEACE:8,PEACE_LEGEND:6,PEACE_ILLUMINATOR:5,PEACE_GUIDE:4,PEACE_GUARDIAN:3,PEACE_GARDENER:2,PEACE_LOVER:1};
+    const userBadge = {};
+    (badgesRes.data || []).forEach(b => {
+      const prev = userBadge[b.user_uid];
+      if (!prev || (BADGE_MULT[b.badge_code] || 0) > (BADGE_MULT[prev] || 0)) {
+        userBadge[b.user_uid] = b.badge_code;
+      }
+    });
+
     // Top 20 miners table
     const tbody = document.getElementById('mn-top-tbody');
     tbody.innerHTML = '';
     (topRes.data || []).forEach((r, i) => {
-      const uid   = r.user_uid || '';
-      const bal   = parseFloat(r.balance || 0);
-      const short = uid.length > 20 ? uid.slice(0, 10) + '…' + uid.slice(-6) : uid;
-      const nft   = badgeOrder.find(c => badgeCounts[c] && (badgesRes.data||[]).some(b => b.badge_code === c && false)) || '';
+      const uid    = r.user_uid || '';
+      const bal    = parseFloat(r.balance || 0);
+      const short  = uid.length > 20 ? uid.slice(0, 10) + '…' + uid.slice(-6) : uid;
+      const badge  = userBadge[uid];
+      const nftTxt = badge ? `×${BADGE_MULT[badge]}` : '—';
+      const nftCol = badge ? '#FFD740' : 'var(--w40)';
       const tr = document.createElement('tr');
       tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
       tr.innerHTML = `
         <td style="padding:7px 10px;color:var(--w40);">${i+1}</td>
         <td style="padding:7px 10px;font-size:9px;color:var(--w80);" title="${uid}">${short}</td>
         <td style="padding:7px 10px;text-align:right;color:#6DD5F5;">${bal.toFixed(2)}</td>
-        <td style="padding:7px 10px;text-align:center;color:var(--w40);">—</td>`;
+        <td style="padding:7px 10px;text-align:center;color:${nftCol};font-weight:700;">${nftTxt}</td>`;
       tbody.appendChild(tr);
     });
     if (!(topRes.data || []).length) {

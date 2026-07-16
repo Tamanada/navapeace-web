@@ -160,7 +160,6 @@ async function handlePayment(update: Record<string, unknown>): Promise<void> {
 
 // ── Self-registration endpoint ─────────────────────────────────────────────
 // GET ?register=1&secret=<WEBHOOK_SECRET>
-// Calls Telegram's setWebhook API to register this function as the bot webhook.
 async function handleRegister(url: URL): Promise<Response> {
   const secret = url.searchParams.get('secret') ?? '';
   if (!secret || secret !== WEBHOOK_SECRET) {
@@ -176,13 +175,29 @@ async function handleRegister(url: URL): Promise<Response> {
   return json({ ok: true, result, webhook_url: webhookUrl });
 }
 
+// ── Webhook info endpoint ───────────────────────────────────────────────────
+// GET ?getinfo=1&secret=<WEBHOOK_SECRET>
+// Calls Telegram's getWebhookInfo server-side (bot token never reaches client).
+async function handleGetInfo(url: URL): Promise<Response> {
+  const secret = url.searchParams.get('secret') ?? '';
+  if (!secret || secret !== WEBHOOK_SECRET) {
+    return json({ error: 'Invalid secret' }, 403);
+  }
+  const res    = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getWebhookInfo`);
+  const result = await res.json() as Record<string, unknown>;
+  return json({ ok: true, info: result });
+}
+
 // ── Main handler ────────────────────────────────────────────────────────────
 Deno.serve(async (req: Request) => {
   const url = new URL(req.url);
 
-  // ── Registration endpoint (GET) ───────────────────────────────────────────
   if (req.method === 'GET' && url.searchParams.get('register') === '1') {
     return handleRegister(url);
+  }
+
+  if (req.method === 'GET' && url.searchParams.get('getinfo') === '1') {
+    return handleGetInfo(url);
   }
 
   // ── Telegram webhook POST ─────────────────────────────────────────────────
