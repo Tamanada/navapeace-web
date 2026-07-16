@@ -11,6 +11,18 @@
   var muted = localStorage.getItem(KEY) === '1';
   audio.muted = muted;
 
+  // Restore playback position from previous page to minimize the gap
+  var savedPos = parseFloat(sessionStorage.getItem('nava_audio_pos') || '0');
+  if (savedPos > 0) {
+    audio.currentTime = savedPos;
+    sessionStorage.removeItem('nava_audio_pos');
+  }
+
+  // Save position just before leaving so the next page can resume
+  window.addEventListener('beforeunload', function () {
+    sessionStorage.setItem('nava_audio_pos', String(audio.currentTime));
+  });
+
   // ── Floating button ────────────────────────────────────────────────────────
   var btn = document.createElement('button');
   btn.id  = 'nava-sound-btn';
