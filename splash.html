@@ -405,6 +405,15 @@
             window.Telegram.WebApp.setHeaderColor('#071828');
             window.Telegram.WebApp.setBackgroundColor('#071828');
           } catch(e) {}
+          // Capture start_param BEFORE the returning-user early return.
+          // Without this fix, existing users who click a referral link never
+          // get referred_by set because tryRestore() is not called for them.
+          try {
+            var _sp = window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.start_param;
+            if (_sp && _sp.length >= 6 && !ls('nava_peace_referred_by')) {
+              ls('nava_peace_referred_by', _sp.toUpperCase());
+            }
+          } catch(e) {}
         }
       } catch(e) {}
 
