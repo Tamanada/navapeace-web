@@ -60,7 +60,7 @@
 
     body {
       font-family: 'Nasalization', Arial, sans-serif;
-      background: radial-gradient(ellipse at 50% 30%, #6DD5F5 0%, #3AACDF 45%, #1E8EC4 100%);
+      background: radial-gradient(ellipse at 50% 35%, #7AD8F8 0%, #48BAEC 20%, #2EA6D8 45%, #1890BF 68%, #0E7BAA 100%);
       min-height: 100dvh;
       display: flex;
       flex-direction: column;
@@ -98,13 +98,13 @@
     .card {
       width: 100%;
       max-width: 500px;
-      background: rgba(247,247,241,0.13);
-      border: 1.5px solid rgba(255,255,255,0.4);
+      background: rgba(58, 172, 223, 0.18);
+      border: 1.5px solid rgba(255,255,255,0.35);
       border-radius: 28px;
       padding: 10px 24px 8px;
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
-      box-shadow: 0 8px 40px rgba(20,80,130,0.2);
+      box-shadow: 0 8px 40px rgba(10,60,110,0.2);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -203,7 +203,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: none;
+      box-shadow:
+        0 0 50px 18px rgba(90, 198, 238, 0.45),
+        0 0 100px 40px rgba(58, 172, 223, 0.28),
+        0 0 160px 70px rgba(30, 140, 196, 0.15);
       transition: transform 0.15s, box-shadow 0.3s;
       outline: none;
       overflow: hidden;

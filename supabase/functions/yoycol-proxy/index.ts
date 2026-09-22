@@ -226,6 +226,20 @@ Deno.serve(async (req) => {
       return json(data);
     }
 
+    // ── GET catalog (all YOYCOL products, not just self-store) ─
+    if (action === 'catalog' && req.method === 'GET') {
+      const page     = url.searchParams.get('page')     ?? '1';
+      const size     = url.searchParams.get('size')     ?? '20';
+      const category = url.searchParams.get('category') ?? '';
+      const params: Record<string, string> = { page, size };
+      if (category) params.category = category;
+      const data = await yoyFetch('GET',
+        '/api/2025/open/v4/products',
+        params
+      );
+      return json(data);
+    }
+
     // ── GET product variants ────────────────────────────────
     if (action === 'variants' && req.method === 'GET') {
       const mappingId = url.searchParams.get('mappingId') ?? '';
