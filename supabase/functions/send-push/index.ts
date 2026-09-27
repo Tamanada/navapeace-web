@@ -215,8 +215,16 @@ serve(async (req) => {
   const BOT_TOKEN  = Deno.env.get('TELEGRAM_BOT_TOKEN') ?? '';
   const notifTitle = title  || 'NAVA PEACE 🕊';
   const notifBody  = msgBody || 'Time to choose peace today';
-  const appUrl     = `https://nava-peace.app${(url || '/peace.html')}`;
-  const msgText    = `<b>${notifTitle}</b>\n${notifBody}`;
+
+  // M-2: validate path — must start with / and contain only safe chars
+  const safePath = /^\/[a-zA-Z0-9._\/-]*$/.test(url ?? '') ? url! : '/peace.html';
+  const appUrl   = `https://nava-peace.app${safePath}`;
+
+  // H-3: escape HTML entities so admins cannot inject <a> phishing links
+  function escHtml(s: string): string {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  const msgText = `<b>${escHtml(notifTitle)}</b>\n${escHtml(notifBody)}`;
 
   const stats = {
     tg_sent: 0, tg_failed: 0, tg_blocked: 0,

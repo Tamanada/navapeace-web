@@ -167,12 +167,7 @@ async function checkEligibility(uid: string): Promise<Record<string, unknown>> {
   const refCode = pvRows?.[0]?.referral_code;
   if (!refCode) return { ref_count: 0, eligible: [], claimed: [] };
 
-  // Count referrals
-  const cntRes = await dbQuery(
-    `referral_points?referral_code=eq.${encodeURIComponent(refCode)}&select=id`,
-    'GET',
-  );
-  // HEAD count — use content-range header
+  // Count referrals via HEAD (Content-Range header)
   const cntFull = await fetch(
     `${SUPA_URL}/rest/v1/referral_points?referral_code=eq.${encodeURIComponent(refCode)}&select=id`,
     {

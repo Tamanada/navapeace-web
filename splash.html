@@ -396,7 +396,7 @@
                     h.indexOf('tgWebAppVersion') !== -1;
         var isPwa = window.matchMedia('(display-mode: standalone)').matches || !!navigator.standalone;
         if (!hasTg && !isPwa) {
-          var _rp = ''; try { var _rqs = new URLSearchParams(window.location.search); var _rr = _rqs.get('ref') || _rqs.get('startapp'); if (_rr && _rr.length >= 4) _rp = '?startapp=' + _rr.trim().toUpperCase(); } catch(e) {}
+          var _rp = ''; try { var _rqs = new URLSearchParams(window.location.search); var _rr = _rqs.get('ref') || _rqs.get('startapp'); if (_rr && _rr.length >= 4) _rp = '?startapp=' + encodeURIComponent(_rr.trim().toUpperCase()); } catch(e) {}
           window.location.replace('https://t.me/NavaPeaceBot/app' + _rp);
         }
       }, 3000);
