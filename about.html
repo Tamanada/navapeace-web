@@ -17,6 +17,8 @@
   <meta charset="UTF-8" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.amcharts.com https://telegram.org https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://static.cloudflareinsights.com; frame-ancestors 'none';" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="theme.css?v=1" /><!-- nv-theme-hook -->
+  <script src="theme.js?v=1"></script><!-- nv-theme-hook -->
   <title>NAVA PEACE – About the Movement</title>
   <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
@@ -38,7 +40,7 @@
   <meta name="twitter:image" content="https://nava-peace.app/og-image.png" />
   <style>
     @font-face {
-      font-family: 'Nasalization';
+      font-family: var(--nv-font,'Nasalization');
       font-style: normal;
       font-weight: 400;
       font-display: swap;
@@ -49,18 +51,18 @@
   <style>
     *, *::before, *::after {
       box-sizing: border-box; margin: 0; padding: 0;
-      font-family: 'Nasalization', Arial, sans-serif;
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
     }
 
     body {
-      font-family: 'Nasalization', Arial, sans-serif;
-      background: radial-gradient(ellipse at 50% 30%, #6DD5F5 0%, #3AACDF 45%, #1E8EC4 100%);
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
+      background: radial-gradient(ellipse at 50% 30%, var(--nv-g-bl,#6DD5F5) 0%, var(--nv-g-bm,#3AACDF) 45%, var(--nv-g-bd,#1E8EC4) 100%);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: 20px 16px 110px;
-      color: #fff;
+      color: var(--nv-t-w,#fff);
     }
 
     /* ── HEADER ── */
@@ -76,23 +78,23 @@
     .header img {
       width: 60px; height: 60px;
       object-fit: contain;
-      filter: drop-shadow(0 3px 10px rgba(255,255,255,0.4));
+      filter: drop-shadow(0 3px 10px rgba(var(--nv-s-w-rgb,255,255,255),0.4));
       margin-bottom: 6px;
     }
 
     .header h1 {
       font-size: 28px;
       font-weight: 400;
-      letter-spacing: 7px;
+      letter-spacing: calc(7px * var(--nv-ls,1));
       padding-left: 7px;
       text-align: center;
-      text-shadow: 0 1px 16px rgba(255,255,255,0.4);
+      text-shadow: 0 1px 16px rgba(var(--nv-s-w-rgb,255,255,255),0.4);
     }
 
     .header .tagline {
       font-size: 13px;
-      letter-spacing: 3px;
-      color: #F0EDE4;
+      letter-spacing: calc(3px * var(--nv-ls,1));
+      color: var(--nv-t-w,#F0EDE4);
       opacity: 0.75;
       margin-top: 5px;
     }
@@ -101,21 +103,21 @@
     .card {
       width: 100%;
       max-width: 600px;
-      background: rgba(247,247,241,0.12);
-      border: 1.5px solid rgba(255,255,255,0.35);
-      border-radius: 24px;
+      background: rgba(var(--nv-b-w-rgb,247,247,241),0.12);
+      border: 1.5px solid rgba(var(--nv-l-w-rgb,255,255,255),0.35);
+      border-radius: calc(24px * var(--nv-r,1));
       padding: 28px 28px 24px;
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
-      box-shadow: 0 8px 40px rgba(20,80,130,0.2);
+      box-shadow: 0 8px 40px rgba(var(--nv-s-bd-rgb,20,80,130),0.2);
       margin-bottom: 18px;
     }
 
     .section-label {
       font-size: 14px;
-      letter-spacing: 4px;
+      letter-spacing: calc(4px * var(--nv-ls,1));
       text-transform: uppercase;
-      color: rgba(255,255,255,0.65);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.65);
       margin-bottom: 14px;
       text-align: center;
     }
@@ -124,29 +126,29 @@
     .mission-text {
       font-size: 14px;
       font-weight: 600;
-      letter-spacing: 0.6px;
+      letter-spacing: calc(0.6px * var(--nv-ls,1));
       line-height: 1.85;
-      color: rgba(255,255,255,0.96);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.96);
       text-transform: uppercase;
       text-align: justify;
     }
 
     .mission-text strong {
-      color: #fff;
+      color: var(--nv-t-w,#fff);
       font-weight: 700;
       display: block;
       text-align: center;
       font-size: 26px;
-      letter-spacing: 4px;
+      letter-spacing: calc(4px * var(--nv-ls,1));
       margin-top: 20px;
       margin-bottom: 4px;
-      text-shadow: 0 0 24px rgba(255,255,255,0.3);
+      text-shadow: 0 0 24px rgba(var(--nv-s-w-rgb,255,255,255),0.3);
     }
 
     .mission-divider {
       width: 40px;
       height: 1px;
-      background: rgba(255,255,255,0.3);
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.3);
       margin: 18px auto;
     }
 
@@ -166,14 +168,14 @@
     .step-num {
       width: 40px;
       height: 40px;
-      border-radius: 14px;
-      background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: calc(14px * var(--nv-r,1));
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.15);
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.3);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 18px;
-      color: #fff;
+      color: var(--nv-t-w,#fff);
       flex-shrink: 0;
     }
 
@@ -185,18 +187,18 @@
     .step-title {
       font-size: 13px;
       font-weight: 700;
-      letter-spacing: 3px;
+      letter-spacing: calc(3px * var(--nv-ls,1));
       text-transform: uppercase;
-      color: #fff;
+      color: var(--nv-t-w,#fff);
       margin-bottom: 5px;
     }
 
     .step-desc {
       font-size: 13px;
       font-weight: 500;
-      letter-spacing: 1px;
+      letter-spacing: calc(1px * var(--nv-ls,1));
       line-height: 1.8;
-      color: rgba(255,255,255,0.92);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.92);
       text-transform: uppercase;
     }
 
@@ -211,25 +213,25 @@
 
     .dove-emoji {
       font-size: 52px;
-      filter: drop-shadow(0 0 18px rgba(255,255,255,0.5));
+      filter: drop-shadow(0 0 18px rgba(var(--nv-s-w-rgb,255,255,255),0.5));
       line-height: 1;
       margin-bottom: 4px;
     }
 
     .dove-title {
       font-size: 22px;
-      letter-spacing: 5px;
+      letter-spacing: calc(5px * var(--nv-ls,1));
       text-transform: uppercase;
-      color: #fff;
-      text-shadow: 0 0 20px rgba(255,255,255,0.4);
+      color: var(--nv-t-w,#fff);
+      text-shadow: 0 0 20px rgba(var(--nv-s-w-rgb,255,255,255),0.4);
     }
 
     .dove-desc {
       font-size: 13px;
       font-weight: 500;
-      letter-spacing: 1px;
+      letter-spacing: calc(1px * var(--nv-ls,1));
       line-height: 2;
-      color: rgba(255,255,255,0.95);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.95);
       text-transform: uppercase;
       max-width: 340px;
     }
@@ -241,7 +243,7 @@
       align-items: center;
       margin-top: 14px;
       width: 100%;
-      border-top: 1px solid rgba(255,255,255,0.15);
+      border-top: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.15);
       padding-top: 18px;
     }
 
@@ -255,14 +257,14 @@
 
     .dove-col .val {
       font-size: 28px;
-      color: #fff;
-      text-shadow: 0 0 14px rgba(255,255,255,0.4);
+      color: var(--nv-t-w,#fff);
+      text-shadow: 0 0 14px rgba(var(--nv-s-w-rgb,255,255,255),0.4);
     }
 
     .dove-col .lbl {
       font-size: 14px;
-      letter-spacing: 1.5px;
-      color: rgba(255,255,255,0.7);
+      letter-spacing: calc(1.5px * var(--nv-ls,1));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.7);
       text-transform: uppercase;
       text-align: center;
       line-height: 1.5;
@@ -271,14 +273,14 @@
     .dove-sep {
       width: 1px;
       height: 50px;
-      background: rgba(255,255,255,0.18);
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.18);
       margin: 0 8px;
       flex-shrink: 0;
     }
 
     .dove-plus {
       font-size: 22px;
-      color: rgba(255,255,255,0.65);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.65);
       margin: 0 2px;
     }
 
@@ -298,9 +300,9 @@
     .principle-icon {
       width: 50px;
       height: 50px;
-      border-radius: 16px;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.28);
+      border-radius: calc(16px * var(--nv-r,1));
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.12);
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.28);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       display: flex;
@@ -312,7 +314,7 @@
     .principle-icon svg {
       width: 24px;
       height: 24px;
-      fill: rgba(255,255,255,0.9);
+      fill: rgba(var(--nv-t-w-rgb,255,255,255),0.9);
     }
 
     .principle-body {}
@@ -320,8 +322,8 @@
     .principle-name {
       font-size: 13px;
       font-weight: 700;
-      letter-spacing: 3px;
-      color: #fff;
+      letter-spacing: calc(3px * var(--nv-ls,1));
+      color: var(--nv-t-w,#fff);
       text-transform: uppercase;
       margin-bottom: 4px;
     }
@@ -329,8 +331,8 @@
     .principle-text {
       font-size: 14px;
       font-weight: 500;
-      letter-spacing: 0.8px;
-      color: rgba(255,255,255,0.92);
+      letter-spacing: calc(0.8px * var(--nv-ls,1));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.92);
       text-transform: uppercase;
       line-height: 1.7;
     }
@@ -344,9 +346,9 @@
       width: 38px;
       height: 38px;
       border-radius: 50%;
-      background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.3);
-      color: rgba(255,255,255,0.85);
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.15);
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.3);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.85);
       font-size: 20px;
       line-height: 1;
       display: flex;
@@ -357,7 +359,7 @@
       -webkit-backdrop-filter: blur(10px);
       transition: background 0.2s;
     }
-    #skip-about:hover { background: rgba(255,255,255,0.28); }
+    #skip-about:hover { background: rgba(var(--nv-b-w-rgb,255,255,255),0.28); }
 
     /* ── CTA ── */
     .cta-btn {
@@ -366,18 +368,18 @@
       max-width: 600px;
       padding: 18px;
       border: none;
-      border-radius: 18px;
-      background: linear-gradient(135deg, rgba(255,255,255,0.92) 0%, #E7E1D4 100%);
-      color: #1A6E96;
-      font-family: 'Nasalization', Arial, sans-serif;
+      border-radius: calc(18px * var(--nv-r,1));
+      background: linear-gradient(135deg, rgba(var(--nv-b-w-rgb,255,255,255),0.92) 0%, var(--nv-b-w,#E7E1D4) 100%);
+      color: var(--nv-t-bd,#1A6E96);
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
       font-size: 15px;
       font-weight: 400;
-      letter-spacing: 3px;
+      letter-spacing: calc(3px * var(--nv-ls,1));
       text-transform: uppercase;
       text-align: center;
       text-decoration: none;
       cursor: pointer;
-      box-shadow: 0 6px 28px rgba(255,255,255,0.2);
+      box-shadow: 0 6px 28px rgba(var(--nv-s-w-rgb,255,255,255),0.2);
       transition: opacity 0.2s, transform 0.15s;
       margin-bottom: 18px;
     }
@@ -392,10 +394,10 @@
       display: flex;
       justify-content: space-around;
       align-items: center;
-      background: rgba(20, 90, 140, 0.82);
+      background: rgba(var(--nv-b-bd-rgb,20, 90, 140), 0.82);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border-top: 1px solid rgba(255,255,255,0.2);
+      border-top: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.2);
       padding: 10px 0 24px;
       z-index: 200;
     }
@@ -406,14 +408,14 @@
       align-items: center;
       gap: 4px;
       text-decoration: none;
-      color: rgba(255,255,255,0.45);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.45);
       font-size: 13px;
-      letter-spacing: 2px;
+      letter-spacing: calc(2px * var(--nv-ls,1));
       text-transform: uppercase;
       transition: color 0.2s;
     }
 
-    .nav-item.active { color: #fff; }
+    .nav-item.active { color: var(--nv-t-w,#fff); }
     .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
   </style>
 </head>
@@ -577,38 +579,38 @@
   <!-- Website link -->
   <a href="https://www.nava-peace.world" target="_blank" rel="noopener noreferrer"
      style="display:flex;align-items:center;justify-content:center;gap:10px;
-            background:rgba(255,255,255,0.18);border:2px solid rgba(255,255,255,0.6);
-            border-radius:16px;padding:16px;margin:0 16px 16px;
-            text-decoration:none;color:#fff;
-            font-family:'Nasalization',Arial,sans-serif;font-size:14px;letter-spacing:2.5px;
+            background:rgba(var(--nv-b-w-rgb,255,255,255),0.18);border:2px solid rgba(var(--nv-l-w-rgb,255,255,255),0.6);
+            border-radius:calc(16px * var(--nv-r,1));padding:16px;margin:0 16px 16px;
+            text-decoration:none;color:var(--nv-t-w,#fff);
+            font-family:var(--nv-font,'Nasalization',Arial,sans-serif);font-size:14px;letter-spacing:calc(2.5px * var(--nv-ls,1));
             box-shadow:0 4px 20px rgba(0,0,0,0.2);
             backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);"
      onclick="if(typeof NAVA_TG!=='undefined'&&NAVA_TG.isTelegram){event.preventDefault();Telegram.WebApp.openLink('https://www.nava-peace.world');}">
-    <img src="logo.png" style="width:24px;height:24px;filter:brightness(0) invert(1);flex-shrink:0;">
+    <img src="logo.png" style="width:24px;height:24px;filter:brightness(0) invert(var(--nv-inv,1));flex-shrink:0;">
     <span style="white-space:nowrap;">WWW.NAVA&#8209;PEACE.WORLD</span>
     <svg viewBox="0 0 24 24" width="15" height="15" fill="rgba(255,255,255,0.8)"><path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
   </a>
 
   <!-- NAVA PEACE ARCH -->
-  <div class="card" style="background:linear-gradient(160deg,rgba(10,45,80,0.9),rgba(5,15,30,0.95));border:1px solid rgba(109,213,245,0.25);">
-    <p data-i18n="about_goal_label" style="font-family:'Nasalization',Arial,sans-serif;font-size:14px;letter-spacing:4px;color:rgba(255,255,255,0.6);text-align:center;margin:0 0 8px;text-transform:uppercase;">NAVA PEACE GOAL</p>
-    <p data-i18n="about_create_label" style="font-family:'Nasalization',Arial,sans-serif;font-size:16px;letter-spacing:3px;color:rgba(255,255,255,0.5);text-align:center;margin:0 0 10px;text-transform:uppercase;">CREATE</p>
-    <p data-i18n-html="about_foundation_heading" style="font-family:'Nasalization',Arial,sans-serif;font-size:26px;letter-spacing:3px;color:#6DD5F5;text-align:center;margin:0 0 12px;line-height:1.25;text-shadow:0 0 24px rgba(109,213,245,0.4);">THE NAVA PEACE<br>FOUNDATION</p>
-    <p data-i18n-html="about_foundation_sub" style="font-family:'Nasalization',Arial,sans-serif;font-size:14px;letter-spacing:2px;color:rgba(255,255,255,0.65);text-align:center;margin:0 0 6px;">THE FIRST FOUNDATION BUILT BY<br>THE WORLD POPULATION — IN SOLIDARITY</p>
+  <div class="card" style="background:linear-gradient(160deg,rgba(var(--nv-b-nv-rgb,10,45,80),0.9),rgba(var(--nv-b-nv-rgb,5,15,30),0.95));border:1px solid rgba(var(--nv-l-bl-rgb,109,213,245),0.25);">
+    <p data-i18n="about_goal_label" style="font-family:var(--nv-font,'Nasalization',Arial,sans-serif);font-size:14px;letter-spacing:calc(4px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.6);text-align:center;margin:0 0 8px;text-transform:uppercase;">NAVA PEACE GOAL</p>
+    <p data-i18n="about_create_label" style="font-family:var(--nv-font,'Nasalization',Arial,sans-serif);font-size:16px;letter-spacing:calc(3px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.5);text-align:center;margin:0 0 10px;text-transform:uppercase;">CREATE</p>
+    <p data-i18n-html="about_foundation_heading" style="font-family:var(--nv-font,'Nasalization',Arial,sans-serif);font-size:26px;letter-spacing:calc(3px * var(--nv-ls,1));color:var(--nv-t-bl,#6DD5F5);text-align:center;margin:0 0 12px;line-height:1.25;text-shadow:0 0 24px rgba(var(--nv-s-bl-rgb,109,213,245),0.4);">THE NAVA PEACE<br>FOUNDATION</p>
+    <p data-i18n-html="about_foundation_sub" style="font-family:var(--nv-font,'Nasalization',Arial,sans-serif);font-size:14px;letter-spacing:calc(2px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.65);text-align:center;margin:0 0 6px;">THE FIRST FOUNDATION BUILT BY<br>THE WORLD POPULATION — IN SOLIDARITY</p>
 
-    <p data-i18n="about_every_tap" style="font-size:16px;letter-spacing:0.5px;color:#fff;line-height:1.8;text-align:center;margin:0 0 20px;font-weight:700;">
+    <p data-i18n="about_every_tap" style="font-size:16px;letter-spacing:calc(0.5px * var(--nv-ls,1));color:var(--nv-t-w,#fff);line-height:1.8;text-align:center;margin:0 0 20px;font-weight:700;">
       EVERY TAP FUNDS SOMETHING REAL.
     </p>
 
     <!-- NAVA PEACE ARCH title -->
     <div style="text-align:center;margin-bottom:18px;">
-      <div style="display:inline-block;background:rgba(109,213,245,0.1);border:1.5px solid rgba(109,213,245,0.4);border-radius:14px;padding:14px 22px;">
-        <p style="font-family:'Nasalization',Arial,sans-serif;font-size:20px;letter-spacing:3px;color:#6DD5F5;margin:0 0 4px;">⚓ NAVA PEACE ARCH</p>
-        <p style="font-size:13px;letter-spacing:1.5px;color:rgba(255,255,255,0.45);margin:0;">A SHIP. A PLATFORM. A CITY OF LIFE.</p>
+      <div style="display:inline-block;background:rgba(var(--nv-b-bl-rgb,109,213,245),0.1);border:1.5px solid rgba(var(--nv-l-bl-rgb,109,213,245),0.4);border-radius:calc(14px * var(--nv-r,1));padding:14px 22px;">
+        <p style="font-family:var(--nv-font,'Nasalization',Arial,sans-serif);font-size:20px;letter-spacing:calc(3px * var(--nv-ls,1));color:var(--nv-t-bl,#6DD5F5);margin:0 0 4px;">⚓ NAVA PEACE ARCH</p>
+        <p style="font-size:13px;letter-spacing:calc(1.5px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.45);margin:0;">A SHIP. A PLATFORM. A CITY OF LIFE.</p>
       </div>
     </div>
 
-    <p style="font-size:14px;letter-spacing:0.5px;color:rgba(255,255,255,0.7);line-height:1.8;margin:0 0 20px;text-align:center;">
+    <p style="font-size:14px;letter-spacing:calc(0.5px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.7);line-height:1.8;margin:0 0 20px;text-align:center;">
       We will invest in a vessel and transform it into a fully autonomous,
       multidisciplinary floating platform — powered by hydrogen,
       deployed wherever the world needs it most.
@@ -617,47 +619,47 @@
     <!-- Grid of features -->
     <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
 
-      <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:14px 14px;border-left:3px solid #6DD5F5;">
-        <p style="font-family:'Nasalization',Arial,sans-serif;font-size:13px;letter-spacing:2px;color:#6DD5F5;margin:0 0 5px;">🏥 HOSPITAL</p>
-        <p style="font-size:14px;color:rgba(255,255,255,0.65);line-height:1.6;margin:0;">At least 50 beds. Full medical care on board, deployed anywhere.</p>
+      <div style="background:rgba(var(--nv-b-w-rgb,255,255,255),0.05);border-radius:calc(12px * var(--nv-r,1));padding:14px 14px;border-left:3px solid var(--nv-l-bl,#6DD5F5);">
+        <p style="font-family:var(--nv-font,'Nasalization',Arial,sans-serif);font-size:13px;letter-spacing:calc(2px * var(--nv-ls,1));color:var(--nv-t-bl,#6DD5F5);margin:0 0 5px;">🏥 HOSPITAL</p>
+        <p style="font-size:14px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.65);line-height:1.6;margin:0;">At least 50 beds. Full medical care on board, deployed anywhere.</p>
       </div>
 
-      <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:14px 14px;border-left:3px solid #64FFAA;">
-        <p style="font-family:'Nasalization',Arial,sans-serif;font-size:13px;letter-spacing:2px;color:#64FFAA;margin:0 0 5px;">🦾 3D PROSTHETICS LAB</p>
-        <p style="font-size:14px;color:rgba(255,255,255,0.65);line-height:1.6;margin:0;">On-board fabrication of custom prosthetics. <em>Let's make them run again.</em></p>
+      <div style="background:rgba(var(--nv-b-w-rgb,255,255,255),0.05);border-radius:calc(12px * var(--nv-r,1));padding:14px 14px;border-left:3px solid var(--nv-l-gr,#64FFAA);">
+        <p style="font-family:var(--nv-font,'Nasalization',Arial,sans-serif);font-size:13px;letter-spacing:calc(2px * var(--nv-ls,1));color:var(--nv-t-gr,#64FFAA);margin:0 0 5px;">🦾 3D PROSTHETICS LAB</p>
+        <p style="font-size:14px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.65);line-height:1.6;margin:0;">On-board fabrication of custom prosthetics. <em>Let's make them run again.</em></p>
       </div>
 
-      <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:14px 14px;border-left:3px solid #FFD740;">
-        <p style="font-family:'Nasalization',Arial,sans-serif;font-size:13px;letter-spacing:2px;color:#FFD740;margin:0 0 5px;">🏗 RECONSTRUCTION TEAM HQ</p>
-        <p style="font-size:14px;color:rgba(255,255,255,0.65);line-height:1.6;margin:0;">Earthbag houses: fast, strong, cheap, beautiful. Every home includes a garden, a water system — aerial capture, wells, filtration — and a small poultry yard.</p>
+      <div style="background:rgba(var(--nv-b-w-rgb,255,255,255),0.05);border-radius:calc(12px * var(--nv-r,1));padding:14px 14px;border-left:3px solid var(--nv-l-gd,#FFD740);">
+        <p style="font-family:var(--nv-font,'Nasalization',Arial,sans-serif);font-size:13px;letter-spacing:calc(2px * var(--nv-ls,1));color:var(--nv-t-gd,#FFD740);margin:0 0 5px;">🏗 RECONSTRUCTION TEAM HQ</p>
+        <p style="font-size:14px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.65);line-height:1.6;margin:0;">Earthbag houses: fast, strong, cheap, beautiful. Every home includes a garden, a water system — aerial capture, wells, filtration — and a small poultry yard.</p>
       </div>
 
-      <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:14px 14px;border-left:3px solid #FF6B6B;">
-        <p style="font-family:'Nasalization',Arial,sans-serif;font-size:13px;letter-spacing:2px;color:#FF6B6B;margin:0 0 5px;">🏨 LOVETEL</p>
-        <p style="font-size:14px;color:rgba(255,255,255,0.65);line-height:1.6;margin:0;">A free hotel on board for the families of those healing. Because no one should wait alone.</p>
+      <div style="background:rgba(var(--nv-b-w-rgb,255,255,255),0.05);border-radius:calc(12px * var(--nv-r,1));padding:14px 14px;border-left:3px solid var(--nv-l-rd,#FF6B6B);">
+        <p style="font-family:var(--nv-font,'Nasalization',Arial,sans-serif);font-size:13px;letter-spacing:calc(2px * var(--nv-ls,1));color:var(--nv-t-rd,#FF6B6B);margin:0 0 5px;">🏨 LOVETEL</p>
+        <p style="font-size:14px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.65);line-height:1.6;margin:0;">A free hotel on board for the families of those healing. Because no one should wait alone.</p>
       </div>
 
-      <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:14px 14px;border-left:3px solid #B39DDB;">
-        <p style="font-family:'Nasalization',Arial,sans-serif;font-size:13px;letter-spacing:2px;color:#B39DDB;margin:0 0 5px;">🌾 FLOATING FARM + KITCHEN</p>
-        <p style="font-size:14px;color:rgba(255,255,255,0.65);line-height:1.6;margin:0;">The ship is an Alpha chicken farm and crop center. The kitchen feeds everyone on board — volunteers, patients, families — with food grown right here, at sea.</p>
+      <div style="background:rgba(var(--nv-b-w-rgb,255,255,255),0.05);border-radius:calc(12px * var(--nv-r,1));padding:14px 14px;border-left:3px solid #B39DDB;">
+        <p style="font-family:var(--nv-font,'Nasalization',Arial,sans-serif);font-size:13px;letter-spacing:calc(2px * var(--nv-ls,1));color:#B39DDB;margin:0 0 5px;">🌾 FLOATING FARM + KITCHEN</p>
+        <p style="font-size:14px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.65);line-height:1.6;margin:0;">The ship is an Alpha chicken farm and crop center. The kitchen feeds everyone on board — volunteers, patients, families — with food grown right here, at sea.</p>
       </div>
 
-      <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:14px 14px;border-left:3px solid #4FC3F7;">
-        <p style="font-family:'Nasalization',Arial,sans-serif;font-size:13px;letter-spacing:2px;color:#4FC3F7;margin:0 0 5px;">🤝 VOLUNTEER QUARTERS</p>
-        <p style="font-size:14px;color:rgba(255,255,255,0.65);line-height:1.6;margin:0;">Accommodation for the people who make it all happen. The heart of the crew.</p>
+      <div style="background:rgba(var(--nv-b-w-rgb,255,255,255),0.05);border-radius:calc(12px * var(--nv-r,1));padding:14px 14px;border-left:3px solid var(--nv-l-bl,#4FC3F7);">
+        <p style="font-family:var(--nv-font,'Nasalization',Arial,sans-serif);font-size:13px;letter-spacing:calc(2px * var(--nv-ls,1));color:var(--nv-t-bl,#4FC3F7);margin:0 0 5px;">🤝 VOLUNTEER QUARTERS</p>
+        <p style="font-size:14px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.65);line-height:1.6;margin:0;">Accommodation for the people who make it all happen. The heart of the crew.</p>
       </div>
 
-      <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:14px 14px;border-left:3px solid #80CBC4;">
-        <p style="font-family:'Nasalization',Arial,sans-serif;font-size:13px;letter-spacing:2px;color:#80CBC4;margin:0 0 5px;">⚡ HYDROGEN POWERED</p>
-        <p style="font-size:14px;color:rgba(255,255,255,0.65);line-height:1.6;margin:0;">No dependency. No waste. A self-sustaining ark.</p>
+      <div style="background:rgba(var(--nv-b-w-rgb,255,255,255),0.05);border-radius:calc(12px * var(--nv-r,1));padding:14px 14px;border-left:3px solid var(--nv-l-bl,#80CBC4);">
+        <p style="font-family:var(--nv-font,'Nasalization',Arial,sans-serif);font-size:13px;letter-spacing:calc(2px * var(--nv-ls,1));color:var(--nv-t-bl,#80CBC4);margin:0 0 5px;">⚡ HYDROGEN POWERED</p>
+        <p style="font-size:14px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.65);line-height:1.6;margin:0;">No dependency. No waste. A self-sustaining ark.</p>
       </div>
 
     </div>
 
     <!-- Slogan -->
-    <div style="text-align:center;border-top:1px solid rgba(255,255,255,0.1);padding-top:16px;">
-      <p style="font-family:'Nasalization',Arial,sans-serif;font-size:14px;letter-spacing:3px;color:rgba(255,255,255,0.5);margin:0 0 6px;">SAIL IN. REBUILD. MOVE ON. REPEAT.</p>
-      <p style="font-size:13px;letter-spacing:0.5px;color:#fff;font-weight:bold;margin:0;">This is what peace looks like in action.</p>
+    <div style="text-align:center;border-top:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.1);padding-top:16px;">
+      <p style="font-family:var(--nv-font,'Nasalization',Arial,sans-serif);font-size:14px;letter-spacing:calc(3px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.5);margin:0 0 6px;">SAIL IN. REBUILD. MOVE ON. REPEAT.</p>
+      <p style="font-size:13px;letter-spacing:calc(0.5px * var(--nv-ls,1));color:var(--nv-t-w,#fff);font-weight:bold;margin:0;">This is what peace looks like in action.</p>
     </div>
   </div>
 
@@ -669,10 +671,10 @@
       Each card multiplies your daily dove impact and grants access to the Foundation Board.
     </p>
     <div style="display:flex;gap:10px;">
-      <a href="merch.html" style="flex:1;display:block;text-align:center;background:linear-gradient(135deg,rgba(58,172,223,0.2),rgba(30,80,140,0.25));border:1px solid rgba(100,210,255,0.35);border-radius:12px;padding:13px 8px;color:#64D2FF;font-size:13px;letter-spacing:2px;text-decoration:none;">
+      <a href="merch.html" style="flex:1;display:block;text-align:center;background:linear-gradient(135deg,rgba(var(--nv-b-bm-rgb,58,172,223),0.2),rgba(var(--nv-b-bd-rgb,30,80,140),0.25));border:1px solid rgba(var(--nv-l-bl-rgb,100,210,255),0.35);border-radius:calc(12px * var(--nv-r,1));padding:13px 8px;color:var(--nv-t-bl,#64D2FF);font-size:13px;letter-spacing:calc(2px * var(--nv-ls,1));text-decoration:none;">
         VIEW IN APP →
       </a>
-      <a href="https://www.nava-peace.world" target="_blank" rel="noopener noreferrer" style="flex:1;display:block;text-align:center;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:13px 8px;color:rgba(255,255,255,0.6);font-size:13px;letter-spacing:2px;text-decoration:none;" onclick="if(typeof Telegram!=='undefined'&&Telegram.WebApp&&Telegram.WebApp.openLink){event.preventDefault();Telegram.WebApp.openLink('https://www.nava-peace.world');}">
+      <a href="https://www.nava-peace.world" target="_blank" rel="noopener noreferrer" style="flex:1;display:block;text-align:center;background:rgba(var(--nv-b-w-rgb,255,255,255),0.07);border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.2);border-radius:calc(12px * var(--nv-r,1));padding:13px 8px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.6);font-size:13px;letter-spacing:calc(2px * var(--nv-ls,1));text-decoration:none;" onclick="if(typeof Telegram!=='undefined'&&Telegram.WebApp&&Telegram.WebApp.openLink){event.preventDefault();Telegram.WebApp.openLink('https://www.nava-peace.world');}">
         FULL DETAILS ↗
       </a>
     </div>

@@ -1,0 +1,237 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   NAVA PEACE · THEMES
+   Sky (default) · Sanctuary · Field
+
+   How it works
+   Every page wraps its hardcoded style values in custom properties whose
+   fallback is the original Sky value:   color: var(--nv-t-w,#fff)
+   Sky therefore needs NOTHING from this file: with no data-theme attribute
+   (or if this file fails to load) every page renders exactly as before.
+   The other themes only assign the --nv-* tokens below.
+
+   Token names:  --nv-<context>-<family>[-rgb | 2]
+     context  t = text   b = fill   g = page ground (radial gradients)
+              l = line / border     s = shadow / glow     on = text on a fill
+     family   w white  bl light blue  bm mid blue  bd dark blue  nv navy
+              gd gold  gr green  rd red
+     -rgb     "r,g,b" triplet used inside rgba(…, alpha)
+     2        later stops of a linear gradient
+   Scalars:   --nv-font  --nv-r (radius factor)  --nv-ls (letter-spacing factor)
+              --nv-inv (0 or 1: invert() of white-ified icons)
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ───────────────────────────── SANCTUARY · dark + gold ───────────────────── */
+html[data-theme="sanctuary"] {
+  color-scheme: dark;
+  background: #111116 !important;
+
+  --nv-font: 'Raleway', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --nv-font-display: 'Cinzel', Georgia, 'Times New Roman', serif;
+  --nv-r: 0.3;
+  --nv-ls: 0.6;
+  --nv-inv: 1;
+
+  /* text */
+  --nv-t-w: #F0EDE6;        --nv-t-w-rgb: 240,237,230;
+  --nv-t-bl: #C9A84C;       --nv-t-bl-rgb: 201,168,76;
+  --nv-t-bm: #C9A84C;       --nv-t-bm-rgb: 201,168,76;
+  --nv-t-bd: #111116;       --nv-t-nv: #111116;
+  --nv-t-gd: #E8CC7A;       --nv-t-gd-rgb: 232,204,122;
+  --nv-t-gr: #7FC8A0;       --nv-t-gr-rgb: 127,200,160;
+  --nv-t-rd: #E58B7B;       --nv-t-rd-rgb: 229,139,123;
+
+  /* fills */
+  --nv-b-w: #F0EDE6;        --nv-b-w2: #E4E0D6;      --nv-b-w-rgb: 240,237,230;
+  --nv-b-bl: #C9A84C;       --nv-b-bl2: #B8963E;     --nv-b-bl-rgb: 201,168,76;
+  --nv-b-bm: #C9A84C;       --nv-b-bm2: #B8963E;     --nv-b-bm-rgb: 150,140,120;
+  --nv-b-bd: #1A1A21;       --nv-b-bd2: #1F1F27;     --nv-b-bd-rgb: 17,17,22;
+  --nv-b-nv: #16161C;       --nv-b-nv2: #1A1A21;     --nv-b-nv-rgb: 12,12,16;
+  --nv-b-gd: #C9A84C;       --nv-b-gd2: #B8963E;     --nv-b-gd-rgb: 201,168,76;
+  --nv-b-gr: #2F6B4C;       --nv-b-gr2: #275A40;     --nv-b-gr-rgb: 127,200,160;
+  --nv-b-rd: #8E3B30;       --nv-b-rd-rgb: 229,139,123;
+
+  /* text sitting on a fill */
+  --nv-on-bl: #111116;  --nv-on-bm: #111116;  --nv-on-gd: #111116;
+  --nv-on-bd: #F0EDE6;  --nv-on-nv: #F0EDE6;  --nv-on-gr: #F0EDE6;  --nv-on-rd: #F0EDE6;
+
+  /* page ground */
+  --nv-g-bl: #111116;  --nv-g-bm: #111116;  --nv-g-bd: #111116;  --nv-g-nv: #111116;
+
+  /* lines */
+  --nv-l-w: #C9A84C;        --nv-l-w-rgb: 201,168,76;
+  --nv-l-bl: #C9A84C;       --nv-l-bl-rgb: 201,168,76;
+  --nv-l-bm: #C9A84C;       --nv-l-bm-rgb: 201,168,76;
+  --nv-l-gd: #E8CC7A;       --nv-l-gd-rgb: 232,204,122;
+  --nv-l-gr: #7FC8A0;       --nv-l-gr-rgb: 127,200,160;
+  --nv-l-rd: #E58B7B;       --nv-l-rd-rgb: 229,139,123;
+
+  /* shadows and glows */
+  --nv-s-w-rgb: 17,17,22;
+  --nv-s-bl-rgb: 201,168,76;  --nv-s-bm-rgb: 201,168,76;  --nv-s-gd-rgb: 201,168,76;
+  --nv-s-bd-rgb: 0,0,0;       --nv-s-nv-rgb: 0,0,0;
+
+  /* pages that already ship their own variables (merch, shop, policy) */
+  --card: rgba(240,237,230,0.08);
+  --border: rgba(201,168,76,0.3);
+  --accent: #C9A84C;
+  --gold: #E8CC7A;
+  --white: #F0EDE6;
+  --w80: rgba(240,237,230,0.85);
+  --w60: rgba(240,237,230,0.8);
+  --w40: rgba(240,237,230,0.65);
+  --font: var(--nv-font);
+  --grad: #111116;
+  --bg-grad: #111116;
+  --glass-bg: rgba(240,237,230,0.07);
+  --glass-border: rgba(201,168,76,0.3);
+  --header-bg: rgba(17,17,22,0.92);
+  --radius: 6px;
+  --shadow: none;
+}
+
+/* ───────────────────────────── FIELD · cream + forest green ──────────────── */
+html[data-theme="field"] {
+  color-scheme: light;
+  background: #F6F1E7 !important;
+
+  --nv-font: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --nv-font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --nv-r: 0.6;
+  --nv-ls: 0.4;
+  --nv-inv: 0;
+
+  /* text */
+  --nv-t-w: #1C2B16;        --nv-t-w-rgb: 28,43,22;
+  --nv-t-bl: #3B6327;       --nv-t-bl-rgb: 59,99,39;
+  --nv-t-bm: #3B6327;       --nv-t-bm-rgb: 59,99,39;
+  --nv-t-bd: #F6F1E7;       --nv-t-nv: #1C2B16;
+  --nv-t-gd: #8A5A00;       --nv-t-gd-rgb: 138,90,0;
+  --nv-t-gr: #2F6B3A;       --nv-t-gr-rgb: 47,107,58;
+  --nv-t-rd: #A2382B;       --nv-t-rd-rgb: 162,56,43;
+
+  /* fills */
+  --nv-b-w: #2B4B1E;        --nv-b-w2: #24401A;      --nv-b-w-rgb: 43,75,30;
+  --nv-b-bl: #3B6327;       --nv-b-bl2: #2B4B1E;     --nv-b-bl-rgb: 43,75,30;
+  --nv-b-bm: #2B4B1E;       --nv-b-bm2: #24401A;     --nv-b-bm-rgb: 43,75,30;
+  --nv-b-bd: #FFFDF8;       --nv-b-bd2: #F6F1E7;     --nv-b-bd-rgb: 246,241,231;
+  --nv-b-nv: #FFFDF8;       --nv-b-nv2: #F6F1E7;     --nv-b-nv-rgb: 255,253,248;
+  --nv-b-gd: #D9A93A;       --nv-b-gd2: #C9962B;     --nv-b-gd-rgb: 201,150,43;
+  --nv-b-gr: #2F6B3A;       --nv-b-gr2: #275A30;     --nv-b-gr-rgb: 47,107,58;
+  --nv-b-rd: #A2382B;       --nv-b-rd-rgb: 162,56,43;
+
+  /* text sitting on a fill */
+  --nv-on-bl: #F6F1E7;  --nv-on-bm: #F6F1E7;  --nv-on-gr: #F6F1E7;  --nv-on-rd: #F6F1E7;
+  --nv-on-bd: #1C2B16;  --nv-on-nv: #1C2B16;  --nv-on-gd: #1C2B16;
+
+  /* page ground */
+  --nv-g-bl: #F6F1E7;  --nv-g-bm: #F6F1E7;  --nv-g-bd: #F6F1E7;  --nv-g-nv: #F6F1E7;
+
+  /* lines */
+  --nv-l-w: #2B4B1E;        --nv-l-w-rgb: 43,75,30;
+  --nv-l-bl: #2B4B1E;       --nv-l-bl-rgb: 43,75,30;
+  --nv-l-bm: #2B4B1E;       --nv-l-bm-rgb: 43,75,30;
+  --nv-l-gd: #8A5A00;       --nv-l-gd-rgb: 138,90,0;
+  --nv-l-gr: #2F6B3A;       --nv-l-gr-rgb: 47,107,58;
+  --nv-l-rd: #A2382B;       --nv-l-rd-rgb: 162,56,43;
+
+  /* shadows and glows */
+  --nv-s-w-rgb: 246,241,231;
+  --nv-s-bl-rgb: 246,241,231;  --nv-s-bm-rgb: 246,241,231;  --nv-s-gd-rgb: 201,150,43;
+  --nv-s-bd-rgb: 28,43,22;     --nv-s-nv-rgb: 28,43,22;
+
+  /* pages that already ship their own variables (merch, shop, policy) */
+  --card: rgba(43,75,30,0.07);
+  --border: rgba(43,75,30,0.28);
+  --accent: #2B4B1E;
+  --gold: #8A5A00;
+  --white: #1C2B16;
+  --w80: rgba(28,43,22,0.88);
+  --w60: rgba(28,43,22,0.85);
+  --w40: rgba(28,43,22,0.7);
+  --font: var(--nv-font);
+  --grad: #F6F1E7;
+  --bg-grad: #F6F1E7;
+  --glass-bg: rgba(43,75,30,0.06);
+  --glass-border: rgba(43,75,30,0.28);
+  --header-bg: rgba(246,241,231,0.94);
+  --radius: 12px;
+  --shadow: none;
+}
+
+/* ───────────────────────────── display typeface ──────────────────────────── */
+html[data-theme] h1,
+html[data-theme] h2,
+html[data-theme] h3,
+html[data-theme] h4,
+html[data-theme] [class*="title"],
+html[data-theme] [class*="slogan"],
+html[data-theme] [class*="-num"],
+html[data-theme] .msg-want {
+  --nv-font: var(--nv-font-display);
+}
+html[data-theme="sanctuary"] button,
+html[data-theme="sanctuary"] .nav-item {
+  --nv-font: var(--nv-font-display);
+}
+
+/* The QR code needs a light quiet zone to stay scannable in every theme */
+html[data-theme] .qr-wrap > div { background: #fff !important; }
+
+/* ───────────────────────────── theme picker (profile) ────────────────────── */
+.nv-theme-list { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+.nv-theme-opt {
+  display: flex; align-items: center; gap: 14px;
+  min-height: 64px; box-sizing: border-box; padding: 10px 14px;
+  border-radius: calc(16px * var(--nv-r,1));
+  background: rgba(var(--nv-b-w-rgb,255,255,255),0.1);
+  border: 1.5px solid rgba(var(--nv-l-w-rgb,255,255,255),0.28);
+  cursor: pointer; text-align: start;
+}
+.nv-theme-opt.nv-on { border-color: rgba(var(--nv-l-w-rgb,255,255,255),0.95); }
+.nv-theme-swatch {
+  width: 44px; height: 44px; border-radius: 8px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.35);
+}
+.nv-theme-swatch::after { content: ''; width: 16px; height: 16px; border-radius: 50%; }
+.nv-theme-swatch.nv-sky { background: radial-gradient(ellipse at 50% 30%, #6DD5F5 0%, #3AACDF 45%, #1E8EC4 100%); }
+.nv-theme-swatch.nv-sky::after { background: #fff; }
+.nv-theme-swatch.nv-sanctuary { background: #111116; }
+.nv-theme-swatch.nv-sanctuary::after { background: #C9A84C; }
+.nv-theme-swatch.nv-field { background: #F6F1E7; }
+.nv-theme-swatch.nv-field::after { background: #2B4B1E; }
+.nv-theme-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.nv-theme-name {
+  font-size: 15px; letter-spacing: calc(2px * var(--nv-ls,1)); text-transform: uppercase;
+  color: var(--nv-t-w,#fff);
+}
+.nv-theme-desc {
+  font-size: 12px; letter-spacing: calc(1px * var(--nv-ls,1)); line-height: 1.4;
+  color: rgba(var(--nv-t-w-rgb,255,255,255),0.8);
+}
+.nv-theme-opt input { width: 20px; height: 20px; margin: 0; flex-shrink: 0; accent-color: #1A6E96; }
+html[data-theme="sanctuary"] .nv-theme-opt input { accent-color: #C9A84C; }
+html[data-theme="field"] .nv-theme-opt input { accent-color: #2B4B1E; }
+
+/* ───────────────────────────── per-theme fixes for brand images ──────────── */
+/* The vote button image (dove-btn.png) has a sky-blue disc baked in: the other
+   themes use the transparent logo on the theme's own surface instead. */
+html[data-theme] .peace-btn .btn-logo { content: url('logo.png'); transform: scale(1.02); }
+html[data-theme="field"] .peace-btn {
+  background: #2B4B1E;
+  /* text inside the green disc reads in cream */
+  --nv-t-w: #F6F1E7;
+  --nv-t-w-rgb: 246,241,231;
+}
+
+/* Field: the cream dove needs a dark seat to stay visible on a cream ground */
+html[data-theme="field"] .header img[src="logo.png"],
+html[data-theme="field"] #wb-logo,
+html[data-theme="field"] #fd-logo,
+html[data-theme="field"] .logo-wrap .logo-img {
+  background: #2B4B1E;
+  border-radius: 50%;
+  box-sizing: border-box;
+  padding: 4px;
+  filter: none;
+}

@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://telegram.org https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co; frame-ancestors 'none';" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="theme.css?v=1" /><!-- nv-theme-hook -->
+  <script src="theme.js?v=1"></script><!-- nv-theme-hook -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
@@ -24,7 +26,7 @@
 
   <style>
     @font-face {
-      font-family: 'Nasalization';
+      font-family: var(--nv-font,'Nasalization');
       font-style: normal; font-weight: 400; font-display: swap;
       src: url('nasalization.woff') format('woff');
     }
@@ -33,10 +35,10 @@
     html, body { height: 100%; width: 100%; overscroll-behavior: none; }
 
     body {
-      font-family: 'Nasalization', Arial, sans-serif;
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
       /* Start invisible — eliminates any white flash */
       opacity: 0;
-      background: radial-gradient(ellipse at 50% 20%, #6DD5F5 0%, #3AACDF 45%, #1E8EC4 100%);
+      background: radial-gradient(ellipse at 50% 20%, var(--nv-g-bl,#6DD5F5) 0%, var(--nv-g-bm,#3AACDF) 45%, var(--nv-g-bd,#1E8EC4) 100%);
       animation: bodyReveal 0.35s ease 0.05s both;
     }
 
@@ -50,7 +52,7 @@
       width: 70vw; height: 70vw;
       max-width: 420px; max-height: 420px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(109,213,245,0.14) 0%, transparent 68%);
+      background: radial-gradient(circle, rgba(var(--nv-s-bl-rgb,109,213,245),0.14) 0%, transparent 68%);
       pointer-events: none;
       z-index: 1;
       animation: orbReveal 2s ease 0.6s both, orbPulse 7s ease-in-out 2.6s infinite;
@@ -78,7 +80,7 @@
     .logo-img {
       width: min(190px, 23vh); height: min(190px, 23vh);
       object-fit: contain;
-      filter: drop-shadow(0 6px 28px rgba(255,255,255,0.25));
+      filter: drop-shadow(0 6px 28px rgba(var(--nv-s-w-rgb,255,255,255),0.25));
     }
     .logo-img.glowing {
       animation: logoGlow 6s ease-in-out infinite;
@@ -87,8 +89,8 @@
     /* ── BRAND ── */
     .brand {
       font-size: clamp(20px, 5vw, 36px);
-      letter-spacing: clamp(10px, 2.8vw, 24px);
-      color: rgba(255,255,255,0.85);
+      letter-spacing: clamp(calc(10px * var(--nv-ls,1)), 2.8vw, calc(24px * var(--nv-ls,1)));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.85);
       text-transform: uppercase;
       margin-bottom: 14px;
       animation: brandIn 1s cubic-bezier(0.22, 1, 0.36, 1) 0.75s both;
@@ -97,12 +99,12 @@
     /* ── HERO ── */
     .hero {
       font-size: clamp(38px, min(9.5vw, 8vh), 110px);
-      letter-spacing: clamp(3px, min(0.9vw, 0.6vh), 13px);
-      color: #fff;
+      letter-spacing: clamp(calc(3px * var(--nv-ls,1)), min(0.9vw, 0.6vh), calc(13px * var(--nv-ls,1)));
+      color: var(--nv-t-w,#fff);
       text-transform: uppercase;
       text-align: center;
       line-height: 1;
-      text-shadow: 0 0 70px rgba(255,255,255,0.28), 0 2px 35px rgba(109,213,245,0.18);
+      text-shadow: 0 0 70px rgba(var(--nv-s-w-rgb,255,255,255),0.28), 0 2px 35px rgba(var(--nv-s-bl-rgb,109,213,245),0.18);
       animation: heroIn 0.85s cubic-bezier(0.22, 1, 0.36, 1) 1.1s both;
       user-select: none;
     }
@@ -113,7 +115,7 @@
     /* ── DIVIDER ── */
     .divider {
       width: clamp(48px, 7vw, 110px); height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+      background: linear-gradient(90deg, transparent, rgba(var(--nv-b-w-rgb,255,255,255),0.35), transparent);
       margin: 18px auto 12px;
       animation: fadeUp 0.7s ease 1.5s both;
     }
@@ -121,8 +123,8 @@
     /* ── DAILY MSG ── */
     .daily-msg {
       font-size: clamp(10px, 1.5vw, 16px);
-      letter-spacing: clamp(1.5px, 0.35vw, 3.5px);
-      color: rgba(255,255,255,0.72);
+      letter-spacing: clamp(calc(1.5px * var(--nv-ls,1)), 0.35vw, calc(3.5px * var(--nv-ls,1)));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.72);
       text-transform: uppercase;
       text-align: center;
       max-width: 460px;
@@ -133,8 +135,8 @@
     .daily-msg-date {
       display: block;
       font-size: clamp(8px, 0.85vw, 10px);
-      letter-spacing: 4px;
-      color: rgba(255,255,255,0.42);
+      letter-spacing: calc(4px * var(--nv-ls,1));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.42);
       margin-bottom: 8px;
     }
 
@@ -142,9 +144,9 @@
     .ticker-wrap {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
       height: 60px;
-      background: rgba(4,16,36,0.78);
+      background: rgba(var(--nv-b-nv-rgb,4,16,36),0.78);
       backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      border-top: 1px solid rgba(255,255,255,0.08);
+      border-top: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.08);
       display: flex;
       align-items: center; overflow: hidden;
       animation: fadeUp 0.6s ease 0.25s both;
@@ -159,11 +161,11 @@
       display: inline-flex; align-items: center;
       padding: 0 26px;
       font-size: clamp(10px, 1.5vw, 16px);
-      letter-spacing: clamp(2px, 0.4vw, 5px);
-      color: rgba(255,255,255,0.62);
+      letter-spacing: clamp(calc(2px * var(--nv-ls,1)), 0.4vw, calc(5px * var(--nv-ls,1)));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.62);
       text-transform: uppercase; white-space: nowrap; flex-shrink: 0;
     }
-    .ticker-sep { width: 1px; height: 16px; background: rgba(255,255,255,0.14); flex-shrink: 0; }
+    .ticker-sep { width: 1px; height: 16px; background: rgba(var(--nv-b-w-rgb,255,255,255),0.14); flex-shrink: 0; }
 
     /* ── KEYFRAMES ── */
     @keyframes bodyReveal  { from { opacity: 0; } to { opacity: 1; } }
@@ -171,15 +173,15 @@
     @keyframes orbPulse    { 0%,100% { opacity:.55; transform:translateX(-50%) scale(1); } 50% { opacity:1; transform:translateX(-50%) scale(1.14); } }
     @keyframes logoIn      { from { opacity:0; transform:scale(0.76) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
     @keyframes logoFloat   { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-10px); } }
-    @keyframes logoGlow    { 0%,100% { filter:drop-shadow(0 6px 28px rgba(255,255,255,.28)) drop-shadow(0 0 45px rgba(109,213,245,.18)); } 50% { filter:drop-shadow(0 10px 50px rgba(255,255,255,.5)) drop-shadow(0 0 90px rgba(109,213,245,.38)); } }
-    @keyframes brandIn     { from { opacity:0; letter-spacing:3px; transform:translateY(8px); } to { opacity:1; letter-spacing:clamp(9px,2.2vw,20px); transform:translateY(0); } }
+    @keyframes logoGlow    { 0%,100% { filter:drop-shadow(0 6px 28px rgba(var(--nv-s-w-rgb,255,255,255),.28)) drop-shadow(0 0 45px rgba(var(--nv-s-bl-rgb,109,213,245),.18)); } 50% { filter:drop-shadow(0 10px 50px rgba(var(--nv-s-w-rgb,255,255,255),.5)) drop-shadow(0 0 90px rgba(var(--nv-s-bl-rgb,109,213,245),.38)); } }
+    @keyframes brandIn     { from { opacity:0; letter-spacing:calc(3px * var(--nv-ls,1)); transform:translateY(8px); } to { opacity:1; letter-spacing:clamp(calc(9px * var(--nv-ls,1)),2.2vw,calc(20px * var(--nv-ls,1))); transform:translateY(0); } }
     @keyframes heroIn      { from { opacity:0; transform:translateY(14px); filter:blur(3px); } to { opacity:1; transform:translateY(0); filter:blur(0); } }
     @keyframes fadeUp      { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
     @keyframes ticker      { from { transform:translateX(0); } to { transform:translateX(-50%); } }
 
     /* ── MOBILE ── */
     @media (max-width: 600px) {
-      .brand { letter-spacing: 8px; font-size: 22px; }
+      .brand { letter-spacing: calc(8px * var(--nv-ls,1)); font-size: 22px; }
       .stage { padding-bottom: 62px; }
       .ticker-wrap { height: 50px; }
       .ticker-item { padding: 0 14px; font-size: clamp(9px, 3.2vw, 13px); }
@@ -364,17 +366,17 @@
           'display:flex;flex-direction:column;align-items:center;gap:16px;' +
           'width:100%;max-width:280px;padding:0 20px;animation:fadeUp 0.5s ease both;';
         box.innerHTML =
-          '<p style="font-family:Nasalization,Arial,sans-serif;font-size:9px;letter-spacing:3px;' +
-          'color:rgba(255,255,255,.88);text-transform:uppercase;text-align:center;margin:0;">' +
+          '<p style="font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:9px;letter-spacing:calc(3px * var(--nv-ls,1));' +
+          'color:rgba(var(--nv-t-w-rgb,255,255,255),.88);text-transform:uppercase;text-align:center;margin:0;">' +
           'NAVA PEACE IS A TELEGRAM APP</p>' +
           '<a href="https://t.me/NavaPeaceBot/app" ' +
-          'style="display:block;width:100%;padding:15px;border-radius:14px;text-align:center;text-decoration:none;' +
-          'background:linear-gradient(135deg,rgba(255,255,255,0.28),rgba(255,255,255,0.12));' +
-          'border:1.5px solid rgba(255,255,255,0.55);color:#fff;' +
-          'font-family:Nasalization,Arial,sans-serif;font-size:10px;letter-spacing:3px;">' +
+          'style="display:block;width:100%;padding:15px;border-radius:calc(14px * var(--nv-r,1));text-align:center;text-decoration:none;' +
+          'background:linear-gradient(135deg,rgba(var(--nv-b-w-rgb,255,255,255),0.28),rgba(var(--nv-b-w-rgb,255,255,255),0.12));' +
+          'border:1.5px solid rgba(var(--nv-l-w-rgb,255,255,255),0.55);color:var(--nv-t-w,#fff);' +
+          'font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:10px;letter-spacing:calc(3px * var(--nv-ls,1));">' +
           '🕊️ OPEN IN TELEGRAM</a>' +
-          '<p style="font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:2px;' +
-          'color:rgba(255,255,255,.55);text-align:center;line-height:1.7;margin:0;">' +
+          '<p style="font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:8px;letter-spacing:calc(2px * var(--nv-ls,1));' +
+          'color:rgba(var(--nv-t-w-rgb,255,255,255),.55);text-align:center;line-height:1.7;margin:0;">' +
           'Download Telegram if you don\'t have it yet</p>';
         var s = document.getElementById('main-stage');
         if (s) s.appendChild(box);
@@ -406,8 +408,8 @@
           window.Telegram.WebApp.ready();
           window.Telegram.WebApp.expand();
           try {
-            window.Telegram.WebApp.setHeaderColor('#071828');
-            window.Telegram.WebApp.setBackgroundColor('#071828');
+            window.Telegram.WebApp.setHeaderColor((window.NAVA_THEME && window.NAVA_THEME.chrome('#071828')) || '#071828'); // nv-theme-hook
+            window.Telegram.WebApp.setBackgroundColor((window.NAVA_THEME && window.NAVA_THEME.chrome('#071828')) || '#071828'); // nv-theme-hook
           } catch(e) {}
           // Capture start_param BEFORE the returning-user early return.
           // Without this fix, existing users who click a referral link never

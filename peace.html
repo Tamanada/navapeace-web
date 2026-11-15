@@ -17,6 +17,8 @@
   <meta charset="UTF-8" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.amcharts.com https://telegram.org https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://static.cloudflareinsights.com; frame-ancestors 'none';" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="theme.css?v=1" /><!-- nv-theme-hook -->
+  <script src="theme.js?v=1"></script><!-- nv-theme-hook -->
   <title>NAVA PEACE – Choose Peace</title>
   <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
@@ -40,7 +42,7 @@
   <meta name="twitter:image" content="https://nava-peace.app/og-image.png" />
   <style>
     @font-face {
-      font-family: 'Nasalization';
+      font-family: var(--nv-font,'Nasalization');
       font-style: normal;
       font-weight: 400;
       font-display: swap;
@@ -56,18 +58,18 @@
   <style>
     *, *::before, *::after {
       box-sizing: border-box; margin: 0; padding: 0;
-      font-family: 'Nasalization', Arial, sans-serif;
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
     }
 
     body {
-      font-family: 'Nasalization', Arial, sans-serif;
-      background: radial-gradient(ellipse at 50% 35%, #7AD8F8 0%, #48BAEC 20%, #2EA6D8 45%, #1890BF 68%, #0E7BAA 100%);
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
+      background: radial-gradient(ellipse at 50% 35%, var(--nv-g-bl,#7AD8F8) 0%, var(--nv-g-bm,#48BAEC) 20%, var(--nv-g-bm,#2EA6D8) 45%, var(--nv-g-bd,#1890BF) 68%, var(--nv-g-bd,#0E7BAA) 100%);
       min-height: 100dvh;
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: 6px 20px 80px;
-      color: #fff;
+      color: var(--nv-t-w,#fff);
       overflow-y: auto;
     }
 
@@ -83,29 +85,29 @@
     .header img {
       width: 60px; height: 60px;
       object-fit: contain;
-      filter: drop-shadow(0 3px 14px rgba(255,255,255,0.45));
+      filter: drop-shadow(0 3px 14px rgba(var(--nv-s-w-rgb,255,255,255),0.45));
       margin-bottom: 6px;
     }
 
     .header h1 {
       font-size: 28px;
-      letter-spacing: 7px;
+      letter-spacing: calc(7px * var(--nv-ls,1));
       padding-left: 7px;
       text-align: center;
-      text-shadow: 0 1px 16px rgba(255,255,255,0.4);
+      text-shadow: 0 1px 16px rgba(var(--nv-s-w-rgb,255,255,255),0.4);
     }
 
     /* ── MAIN CARD ── */
     .card {
       width: 100%;
       max-width: 500px;
-      background: rgba(58, 172, 223, 0.18);
-      border: 1.5px solid rgba(255,255,255,0.35);
-      border-radius: 28px;
+      background: rgba(var(--nv-b-bm-rgb,58, 172, 223), 0.18);
+      border: 1.5px solid rgba(var(--nv-l-w-rgb,255,255,255),0.35);
+      border-radius: calc(28px * var(--nv-r,1));
       padding: 10px 24px 8px;
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
-      box-shadow: 0 8px 40px rgba(10,60,110,0.2);
+      box-shadow: 0 8px 40px rgba(var(--nv-s-bd-rgb,10,60,110),0.2);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -123,10 +125,10 @@
     .boom-slogan .line1,
     .boom-slogan .line3 {
       display: block;
-      font-family: 'Nasalization', Arial, sans-serif;
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
       font-size: 14px;
-      letter-spacing: 6px;
-      color: rgba(255,255,255,0.7);
+      letter-spacing: calc(6px * var(--nv-ls,1));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.7);
       text-transform: uppercase;
     }
     .boom-slogan .line3 {
@@ -137,13 +139,13 @@
     }
     .boom-slogan .line2 {
       display: block;
-      font-family: 'Nasalization', Arial, sans-serif;
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
       font-size: 34px;
-      letter-spacing: 10px;
-      color: #fff;
+      letter-spacing: calc(10px * var(--nv-ls,1));
+      color: var(--nv-t-w,#fff);
       text-transform: uppercase;
       font-weight: 700;
-      text-shadow: 0 0 30px rgba(255,255,255,0.4), 0 0 60px rgba(58,172,223,0.3);
+      text-shadow: 0 0 30px rgba(var(--nv-s-w-rgb,255,255,255),0.4), 0 0 60px rgba(var(--nv-s-bm-rgb,58,172,223),0.3);
       margin: 2px 0;
     }
     @keyframes sloganFadeIn {
@@ -164,28 +166,28 @@
 
     .msg-today {
       font-size: 13px;
-      letter-spacing: 4px;
-      color: rgba(240,237,228,0.55);
+      letter-spacing: calc(4px * var(--nv-ls,1));
+      color: rgba(var(--nv-t-w-rgb,240,237,228),0.55);
     }
 
     .msg-for {
       font-size: 16px;
-      letter-spacing: 3px;
-      color: rgba(255,255,255,0.75);
+      letter-spacing: calc(3px * var(--nv-ls,1));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.75);
     }
 
     .msg-want {
       font-size: 28px;
-      letter-spacing: 5px;
-      color: #FFFFFF;
-      text-shadow: 0 1px 20px rgba(255,255,255,0.5);
+      letter-spacing: calc(5px * var(--nv-ls,1));
+      color: var(--nv-t-w,#FFFFFF);
+      text-shadow: 0 1px 20px rgba(var(--nv-s-w-rgb,255,255,255),0.5);
       line-height: 1.2;
     }
 
     .msg-world {
       font-size: 16px;
-      letter-spacing: 3px;
-      color: rgba(255,255,255,0.75);
+      letter-spacing: calc(3px * var(--nv-ls,1));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.75);
     }
 
     /* ── PEACE BUTTON ── */
@@ -196,8 +198,8 @@
       border-radius: 50%;
       border: none;
       background: transparent;
-      color: rgba(255,255,255,0.85);
-      font-family: 'Nasalization', Arial, sans-serif;
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.85);
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
       font-size: 52px;
       letter-spacing: 0;
       cursor: pointer;
@@ -205,9 +207,9 @@
       align-items: center;
       justify-content: center;
       box-shadow:
-        0 0 50px 18px rgba(90, 198, 238, 0.45),
-        0 0 100px 40px rgba(58, 172, 223, 0.28),
-        0 0 160px 70px rgba(30, 140, 196, 0.15);
+        0 0 50px 18px rgba(var(--nv-s-bl-rgb,90, 198, 238), 0.45),
+        0 0 100px 40px rgba(var(--nv-s-bm-rgb,58, 172, 223), 0.28),
+        0 0 160px 70px rgba(var(--nv-s-bd-rgb,30, 140, 196), 0.15);
       transition: transform 0.15s, box-shadow 0.3s;
       outline: none;
       overflow: hidden;
@@ -229,10 +231,10 @@
       position: absolute;
       font-size: 17px;
       font-weight: 700;
-      font-family: 'Nasalization', Arial, sans-serif;
-      letter-spacing: 2px;
-      color: #ffffff;
-      text-shadow: 0 1px 8px rgba(0,40,100,0.9), 0 0 16px rgba(0,0,0,0.5);
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
+      letter-spacing: calc(2px * var(--nv-ls,1));
+      color: var(--nv-t-w,#ffffff);
+      text-shadow: 0 1px 8px rgba(var(--nv-s-nv-rgb,0,40,100),0.9), 0 0 16px rgba(0,0,0,0.5);
       text-align: center;
       line-height: 1.8;
       text-transform: uppercase;
@@ -265,10 +267,10 @@
       position: fixed;
       top: 0; left: 0; right: 0;
       z-index: 400;
-      background: linear-gradient(135deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.12) 100%);
+      background: linear-gradient(135deg, rgba(var(--nv-b-w-rgb,255,255,255),0.22) 0%, rgba(var(--nv-b-w-rgb,255,255,255),0.12) 100%);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border-bottom: 1px solid rgba(255,255,255,0.3);
+      border-bottom: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.3);
       padding: 14px 52px 14px 20px;
       display: flex;
       align-items: center;
@@ -279,11 +281,11 @@
       from { transform: translateY(-100%); opacity: 0; }
       to   { transform: translateY(0);     opacity: 1; }
     }
-    #notif-banner .notif-icon { font-size: 22px; flex-shrink: 0; filter: brightness(0) invert(1); }
+    #notif-banner .notif-icon { font-size: 22px; flex-shrink: 0; filter: brightness(0) invert(var(--nv-inv,1)); }
     #notif-banner .notif-text {
       font-size: 14px;
-      letter-spacing: 1.5px;
-      color: #fff;
+      letter-spacing: calc(1.5px * var(--nv-ls,1));
+      color: var(--nv-t-w,#fff);
       text-transform: uppercase;
       line-height: 1.6;
       flex: 1;
@@ -292,7 +294,7 @@
       position: absolute;
       top: 10px; right: 14px;
       background: none; border: none;
-      color: rgba(255,255,255,0.7);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.7);
       font-size: 20px; cursor: pointer;
       line-height: 1;
     }
@@ -300,7 +302,7 @@
     /* DONE state */
     .peace-btn:disabled {
       background: transparent;
-      color: rgba(255,255,255,0.7);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.7);
       cursor: default;
     }
 
@@ -343,31 +345,31 @@
     /* Phase 1 — THANK YOU / PEACE LOVER */
     .btn-thank-wrap { animation: zoomInSlow 3s cubic-bezier(0.22,1,0.36,1) forwards; }
     .btn-inner-line1 {
-      font-size: 14px; letter-spacing: 2px; text-transform: uppercase;
-      font-family: 'Nasalization', Arial, sans-serif;
-      color: #ffffff; font-weight: 700; line-height: 1.5;
-      text-shadow: 0 1px 6px rgba(0,40,100,0.8);
+      font-size: 14px; letter-spacing: calc(2px * var(--nv-ls,1)); text-transform: uppercase;
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
+      color: var(--nv-t-w,#ffffff); font-weight: 700; line-height: 1.5;
+      text-shadow: 0 1px 6px rgba(var(--nv-s-nv-rgb,0,40,100),0.8);
     }
     .btn-inner-line2 {
-      font-size: 14px; letter-spacing: 2px; text-transform: uppercase;
-      font-family: 'Nasalization', Arial, sans-serif;
-      color: rgba(255,255,255,0.85); font-weight: 700; line-height: 1.5;
-      text-shadow: 0 1px 6px rgba(0,40,100,0.8);
+      font-size: 14px; letter-spacing: calc(2px * var(--nv-ls,1)); text-transform: uppercase;
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.85); font-weight: 700; line-height: 1.5;
+      text-shadow: 0 1px 6px rgba(var(--nv-s-nv-rgb,0,40,100),0.8);
     }
 
     /* Phase 2 — NEXT ACTION IN + timer */
     .btn-next-wrap { animation: zoomInSlow 3s cubic-bezier(0.22,1,0.36,1) forwards; }
     .btn-next-label {
-      font-size: 13px; letter-spacing: 2px; text-transform: uppercase;
-      font-family: 'Nasalization', Arial, sans-serif;
-      color: rgba(255,255,255,0.85);
-      text-shadow: 0 1px 4px rgba(0,40,100,0.8);
+      font-size: 13px; letter-spacing: calc(2px * var(--nv-ls,1)); text-transform: uppercase;
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.85);
+      text-shadow: 0 1px 4px rgba(var(--nv-s-nv-rgb,0,40,100),0.8);
     }
     .btn-next-timer {
-      font-size: 26px; letter-spacing: 3px;
-      font-family: 'Nasalization', Arial, sans-serif;
-      color: #ffffff; font-weight: 700; margin-top: 2px;
-      text-shadow: 0 1px 6px rgba(0,40,100,0.8);
+      font-size: 26px; letter-spacing: calc(3px * var(--nv-ls,1));
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
+      color: var(--nv-t-w,#ffffff); font-weight: 700; margin-top: 2px;
+      text-shadow: 0 1px 6px rgba(var(--nv-s-nv-rgb,0,40,100),0.8);
     }
 
 
@@ -381,52 +383,52 @@
     }
     .info-pop-overlay.open { display: flex; }
     .info-pop-box {
-      background: linear-gradient(135deg, #0D4F6B, #1A6E96);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 20px;
+      background: linear-gradient(135deg, var(--nv-b-bd,#0D4F6B), var(--nv-b-bd2,#1A6E96));
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.2);
+      border-radius: calc(20px * var(--nv-r,1));
       padding: 28px 24px;
       max-width: 320px;
       width: 90%;
       text-align: center;
-      color: #fff;
+      color: var(--nv-on-bd,#fff);
       box-shadow: 0 12px 40px rgba(0,0,0,0.4);
     }
     .info-pop-box h3 {
-      font-family: 'Nasalization', Arial, sans-serif;
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
       font-size: 16px;
-      letter-spacing: 3px;
+      letter-spacing: calc(3px * var(--nv-ls,1));
       margin-bottom: 16px;
     }
     .info-pop-box .formula {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 12px;
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.08);
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.15);
+      border-radius: calc(12px * var(--nv-r,1));
       padding: 14px;
       margin: 12px 0;
       font-size: 13px;
       line-height: 1.8;
     }
     .info-pop-box .formula .val {
-      color: #3AACDF;
+      color: var(--nv-t-bm,#3AACDF);
       font-weight: 700;
       font-size: 15px;
     }
     .info-pop-box p {
       font-size: 14px;
-      color: rgba(255,255,255,0.6);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.6);
       line-height: 1.5;
       margin-top: 10px;
     }
     .info-pop-close {
       margin-top: 16px;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.25);
-      color: #fff;
-      border-radius: 20px;
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.12);
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.25);
+      color: var(--nv-t-w,#fff);
+      border-radius: calc(20px * var(--nv-r,1));
       padding: 8px 24px;
-      font-family: 'Nasalization', Arial, sans-serif;
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
       font-size: 14px;
-      letter-spacing: 2px;
+      letter-spacing: calc(2px * var(--nv-ls,1));
       cursor: pointer;
     }
 
@@ -437,10 +439,10 @@
       display: flex;
       justify-content: space-around;
       align-items: center;
-      background: rgba(20, 90, 140, 0.82);
+      background: rgba(var(--nv-b-bd-rgb,20, 90, 140), 0.82);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border-top: 1px solid rgba(255,255,255,0.2);
+      border-top: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.2);
       padding: 8px 0 18px;
       z-index: 200;
     }
@@ -451,14 +453,14 @@
       align-items: center;
       gap: 4px;
       text-decoration: none;
-      color: rgba(255,255,255,0.45);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.45);
       font-size: 13px;
-      letter-spacing: 2px;
+      letter-spacing: calc(2px * var(--nv-ls,1));
       text-transform: uppercase;
       transition: color 0.2s;
     }
 
-    .nav-item.active { color: #fff; }
+    .nav-item.active { color: var(--nv-t-w,#fff); }
     .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
 
     /* ── COUNTERS ── */
@@ -476,25 +478,25 @@
       cursor: pointer;
     }
     .cnt-num {
-      font-family: 'Nasalization', Arial, sans-serif;
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
       font-size: 28px;
-      letter-spacing: 2px;
-      color: #fff;
-      text-shadow: 0 0 20px rgba(255,255,255,0.5);
+      letter-spacing: calc(2px * var(--nv-ls,1));
+      color: var(--nv-t-w,#fff);
+      text-shadow: 0 0 20px rgba(var(--nv-s-w-rgb,255,255,255),0.5);
       transition: opacity 0.3s;
     }
     .cnt-num.loading { opacity: 0.4; }
     .cnt-lbl {
-      font-family: 'Nasalization', Arial, sans-serif;
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
       font-size: 10px;
-      letter-spacing: 2px;
+      letter-spacing: calc(2px * var(--nv-ls,1));
       text-transform: uppercase;
-      color: rgba(240,237,228,0.7);
+      color: rgba(var(--nv-t-w-rgb,240,237,228),0.7);
     }
     .cnt-sep {
       width: 1px;
       height: 40px;
-      background: rgba(255,255,255,0.25);
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.25);
       align-self: center;
     }
 
@@ -506,54 +508,54 @@
       gap: 10px;
       margin: 0 auto 20px;
       padding: 10px 20px;
-      background: rgba(255,200,60,0.10);
-      border: 1px solid rgba(255,200,60,0.28);
-      border-radius: 40px;
+      background: rgba(var(--nv-b-gd-rgb,255,200,60),0.10);
+      border: 1px solid rgba(var(--nv-l-gd-rgb,255,200,60),0.28);
+      border-radius: calc(40px * var(--nv-r,1));
       width: fit-content;
       max-width: calc(100vw - 48px);
       cursor: default;
     }
     .nava-bal-num {
-      font-family: 'Nasalization', Arial, sans-serif;
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
       font-size: 17px;
       font-weight: 700;
-      color: #FFD740;
-      letter-spacing: 1px;
-      text-shadow: 0 0 14px rgba(255,215,64,0.45);
+      color: var(--nv-t-gd,#FFD740);
+      letter-spacing: calc(1px * var(--nv-ls,1));
+      text-shadow: 0 0 14px rgba(var(--nv-s-gd-rgb,255,215,64),0.45);
     }
     .nava-bal-lbl {
       font-size: 11px;
-      letter-spacing: 3px;
-      color: rgba(255,200,60,0.65);
-      font-family: 'Nasalization', Arial, sans-serif;
+      letter-spacing: calc(3px * var(--nv-ls,1));
+      color: rgba(var(--nv-t-gd-rgb,255,200,60),0.65);
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
     }
     .nava-phase-pill {
       font-size: 10px;
-      letter-spacing: 2px;
-      color: rgba(255,200,60,0.5);
-      background: rgba(255,200,60,0.08);
-      border: 1px solid rgba(255,200,60,0.18);
-      border-radius: 20px;
+      letter-spacing: calc(2px * var(--nv-ls,1));
+      color: rgba(var(--nv-t-gd-rgb,255,200,60),0.5);
+      background: rgba(var(--nv-b-gd-rgb,255,200,60),0.08);
+      border: 1px solid rgba(var(--nv-l-gd-rgb,255,200,60),0.18);
+      border-radius: calc(20px * var(--nv-r,1));
       padding: 2px 8px;
-      font-family: 'Nasalization', Arial, sans-serif;
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
     }
 
     /* ── NFT MULTIPLIER PILL ── */
     .nava-mult-pill {
       font-size: 10px;
-      letter-spacing: 1.5px;
-      color: #64FFAA;
-      background: rgba(100,255,160,0.10);
-      border: 1px solid rgba(100,255,160,0.28);
-      border-radius: 20px;
+      letter-spacing: calc(1.5px * var(--nv-ls,1));
+      color: var(--nv-t-gr,#64FFAA);
+      background: rgba(var(--nv-b-gr-rgb,100,255,160),0.10);
+      border: 1px solid rgba(var(--nv-l-gr-rgb,100,255,160),0.28);
+      border-radius: calc(20px * var(--nv-r,1));
       padding: 2px 10px;
-      font-family: 'Nasalization', Arial, sans-serif;
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
       cursor: pointer;
       text-decoration: none;
       transition: background 0.2s;
       white-space: nowrap;
     }
-    .nava-mult-pill:active { background: rgba(100,255,160,0.22); }
+    .nava-mult-pill:active { background: rgba(var(--nv-b-gr-rgb,100,255,160),0.22); }
 
     /* ── NAVA REWARD TOAST ── */
     #nava-toast {
@@ -563,13 +565,13 @@
       transform: translate(-50%, -50%) scale(0.5);
       z-index: 900;
       pointer-events: none;
-      font-family: 'Nasalization', Arial, sans-serif;
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
       font-size: 28px;
       font-weight: 700;
-      color: #FFD740;
-      text-shadow: 0 0 40px rgba(255,215,64,0.9), 0 2px 14px rgba(0,0,0,0.5);
+      color: var(--nv-t-gd,#FFD740);
+      text-shadow: 0 0 40px rgba(var(--nv-s-gd-rgb,255,215,64),0.9), 0 2px 14px rgba(0,0,0,0.5);
       opacity: 0;
-      letter-spacing: 2px;
+      letter-spacing: calc(2px * var(--nv-ls,1));
       white-space: nowrap;
     }
     .nava-toast-show {
@@ -666,69 +668,69 @@
 
   <!-- ══ INSPIRATION CARD OVERLAY ════════════════════════ -->
   <div id="inspo-overlay" onclick="closeInspo()" style="display:none;position:fixed;inset:0;z-index:600;
-       background:radial-gradient(ellipse at 50% 20%,#6DD5F5 0%,#3AACDF 45%,#1E8EC4 100%);
+       background:radial-gradient(ellipse at 50% 20%,var(--nv-g-bl,#6DD5F5) 0%,var(--nv-g-bm,#3AACDF) 45%,var(--nv-g-bd,#1E8EC4) 100%);
        flex-direction:column;align-items:center;justify-content:center;
        padding:40px 28px;text-align:center;box-sizing:border-box;">
-    <img src="logo.png" style="width:60px;height:60px;filter:brightness(0) invert(1);margin-bottom:20px;opacity:0.85;" />
-    <p style="font-size:14px;letter-spacing:5px;color:rgba(255,255,255,0.55);margin-bottom:22px;font-family:Nasalization,Arial,sans-serif;">INSPIRATION OF THE DAY</p>
-    <p id="inspo-quote" style="font-family:Georgia,serif;font-size:17px;font-style:italic;color:#fff;
+    <img src="logo.png" style="width:60px;height:60px;filter:brightness(0) invert(var(--nv-inv,1));margin-bottom:20px;opacity:0.85;" />
+    <p style="font-size:14px;letter-spacing:calc(5px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.55);margin-bottom:22px;font-family:var(--nv-font,Nasalization,Arial,sans-serif);">INSPIRATION OF THE DAY</p>
+    <p id="inspo-quote" style="font-family:Georgia,serif;font-size:17px;font-style:italic;color:var(--nv-t-w,#fff);
        line-height:1.75;margin-bottom:14px;max-width:300px;
        text-shadow:0 2px 16px rgba(0,0,0,0.15);">"…"</p>
-    <p id="inspo-author" style="font-size:13px;letter-spacing:3px;color:rgba(255,255,255,0.6);
-       margin-bottom:30px;font-family:Nasalization,Arial,sans-serif;">—</p>
-    <div style="width:180px;height:2px;background:rgba(255,255,255,0.2);border-radius:2px;overflow:hidden;margin-bottom:24px;">
-      <div id="inspo-bar" style="height:100%;background:rgba(255,255,255,0.75);width:100%;border-radius:2px;"></div>
+    <p id="inspo-author" style="font-size:13px;letter-spacing:calc(3px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.6);
+       margin-bottom:30px;font-family:var(--nv-font,Nasalization,Arial,sans-serif);">—</p>
+    <div style="width:180px;height:2px;background:rgba(var(--nv-b-w-rgb,255,255,255),0.2);border-radius:calc(2px * var(--nv-r,1));overflow:hidden;margin-bottom:24px;">
+      <div id="inspo-bar" style="height:100%;background:rgba(var(--nv-b-w-rgb,255,255,255),0.75);width:100%;border-radius:calc(2px * var(--nv-r,1));"></div>
     </div>
     <!-- SHARE BUTTON — disabled -->
-    <p style="font-size:14px;letter-spacing:3px;color:rgba(255,255,255,0.3);font-family:Nasalization,Arial,sans-serif;">TAP ANYWHERE TO CONTINUE</p>
+    <p style="font-size:14px;letter-spacing:calc(3px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.3);font-family:var(--nv-font,Nasalization,Arial,sans-serif);">TAP ANYWHERE TO CONTINUE</p>
   </div>
 
   <!-- ══ SHARE PROGRESS CARD OVERLAY ════════════════════════ -->
   <div id="share-overlay" style="display:none;position:fixed;inset:0;z-index:600;
-       background:rgba(8,30,65,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+       background:rgba(var(--nv-b-nv-rgb,8,30,65),0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
        overflow-y:auto;overflow-x:hidden;">
     <button onclick="closeShareOverlay()" style="position:fixed;top:18px;right:18px;z-index:601;
-         width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.25);
-         background:rgba(255,255,255,0.08);color:#fff;font-size:16px;cursor:pointer;
+         width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(var(--nv-l-w-rgb,255,255,255),0.25);
+         background:rgba(var(--nv-b-w-rgb,255,255,255),0.08);color:var(--nv-t-w,#fff);font-size:16px;cursor:pointer;
          display:flex;align-items:center;justify-content:center;">&#10005;</button>
     <div style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:center;
          gap:36px;padding:50px 24px 40px;min-height:100vh;">
       <!-- Story preview frame -->
       <div style="display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;">
-        <p style="font-size:14px;letter-spacing:3.5px;color:rgba(255,255,255,0.4);margin:0;text-transform:uppercase;">Preview</p>
-        <div style="aspect-ratio:9/16;height:min(60vh,480px);border-radius:18px;overflow:hidden;
-             box-shadow:0 8px 40px rgba(0,0,0,0.35);border:2px solid rgba(255,255,255,0.08);">
+        <p style="font-size:14px;letter-spacing:calc(3.5px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.4);margin:0;text-transform:uppercase;">Preview</p>
+        <div style="aspect-ratio:9/16;height:min(60vh,480px);border-radius:calc(18px * var(--nv-r,1));overflow:hidden;
+             box-shadow:0 8px 40px rgba(0,0,0,0.35);border:2px solid rgba(var(--nv-l-w-rgb,255,255,255),0.08);">
           <canvas id="share-canvas" width="1080" height="1920" style="width:100%;height:100%;display:block;"></canvas>
         </div>
-        <p style="font-size:14px;letter-spacing:2px;color:rgba(255,255,255,0.3);margin:0;text-transform:uppercase;">Instagram Story &middot; 9:16</p>
+        <p style="font-size:14px;letter-spacing:calc(2px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.3);margin:0;text-transform:uppercase;">Instagram Story &middot; 9:16</p>
       </div>
       <!-- Share buttons panel -->
       <div style="display:flex;flex-direction:column;gap:12px;width:260px;padding-top:28px;">
         <div style="text-align:center;margin-bottom:4px;">
-          <p style="font-size:14px;letter-spacing:3px;color:rgba(255,255,255,0.45);margin:0 0 4px;">SHARE</p>
-          <p style="font-family:Nasalization,Arial,sans-serif;font-size:14px;letter-spacing:3.5px;color:#fff;margin:0;font-weight:300;">MY PROGRESS</p>
+          <p style="font-size:14px;letter-spacing:calc(3px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.45);margin:0 0 4px;">SHARE</p>
+          <p style="font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:14px;letter-spacing:calc(3.5px * var(--nv-ls,1));color:var(--nv-t-w,#fff);margin:0;font-weight:300;">MY PROGRESS</p>
         </div>
-        <button onclick="shareProgressIG()" style="width:100%;padding:14px 18px;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);border:none;border-radius:14px;color:#fff;font-family:Nasalization,Arial,sans-serif;font-size:13px;letter-spacing:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+        <button onclick="shareProgressIG()" style="width:100%;padding:14px 18px;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);border:none;border-radius:calc(14px * var(--nv-r,1));color:var(--nv-on-gd,#fff);font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:13px;letter-spacing:calc(3px * var(--nv-ls,1));cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="none" stroke="white" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="white" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.5"/></svg>
           SHARE ON INSTAGRAM
         </button>
-        <button onclick="shareProgressX()" style="width:100%;padding:14px 18px;background:#14171a;border:1.5px solid rgba(255,255,255,0.12);border-radius:14px;color:#fff;font-family:Nasalization,Arial,sans-serif;font-size:13px;letter-spacing:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+        <button onclick="shareProgressX()" style="width:100%;padding:14px 18px;background:#14171a;border:1.5px solid rgba(var(--nv-l-w-rgb,255,255,255),0.12);border-radius:calc(14px * var(--nv-r,1));color:var(--nv-t-w,#fff);font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:13px;letter-spacing:calc(3px * var(--nv-ls,1));cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
           POST ON X
         </button>
-        <button onclick="shareProgressFB()" style="width:100%;padding:14px 18px;background:#1877f2;border:none;border-radius:14px;color:#fff;font-family:Nasalization,Arial,sans-serif;font-size:13px;letter-spacing:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+        <button onclick="shareProgressFB()" style="width:100%;padding:14px 18px;background:var(--nv-b-bm,#1877f2);border:none;border-radius:calc(14px * var(--nv-r,1));color:var(--nv-on-bm,#fff);font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:13px;letter-spacing:calc(3px * var(--nv-ls,1));cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
           SHARE ON FACEBOOK
         </button>
-        <button onclick="shareProgressWA()" style="width:100%;padding:14px 18px;background:#25D366;border:none;border-radius:14px;color:#fff;font-family:Nasalization,Arial,sans-serif;font-size:13px;letter-spacing:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+        <button onclick="shareProgressWA()" style="width:100%;padding:14px 18px;background:var(--nv-b-gr,#25D366);border:none;border-radius:calc(14px * var(--nv-r,1));color:var(--nv-on-gr,#fff);font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:13px;letter-spacing:calc(3px * var(--nv-ls,1));cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
           SHARE ON WHATSAPP
         </button>
-        <button onclick="shareProgressTG()" style="width:100%;padding:14px 18px;background:#229ED9;border:none;border-radius:14px;color:#fff;font-family:Nasalization,Arial,sans-serif;font-size:13px;letter-spacing:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+        <button onclick="shareProgressTG()" style="width:100%;padding:14px 18px;background:var(--nv-b-bm,#229ED9);border:none;border-radius:calc(14px * var(--nv-r,1));color:var(--nv-on-bm,#fff);font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:13px;letter-spacing:calc(3px * var(--nv-ls,1));cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
           SHARE ON TELEGRAM
         </button>
-        <button onclick="downloadProgress()" style="width:100%;padding:12px 18px;background:transparent;border:1.5px solid rgba(255,255,255,0.18);border-radius:14px;color:rgba(255,255,255,0.6);font-family:Nasalization,Arial,sans-serif;font-size:13px;letter-spacing:3px;cursor:pointer;">
+        <button onclick="downloadProgress()" style="width:100%;padding:12px 18px;background:transparent;border:1.5px solid rgba(var(--nv-l-w-rgb,255,255,255),0.18);border-radius:calc(14px * var(--nv-r,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.6);font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:13px;letter-spacing:calc(3px * var(--nv-ls,1));cursor:pointer;">
           &darr; DOWNLOAD IMAGE
         </button>
       </div>
@@ -737,21 +739,21 @@
 
   <!-- ══ BROADCAST MESSAGE OVERLAY ══════════════════════════ -->
   <div id="broadcast-overlay" style="display:none;position:fixed;inset:0;z-index:1100;
-       background:linear-gradient(160deg,#031029 0%,#062050 50%,#031029 100%);
+       background:linear-gradient(160deg,var(--nv-b-nv,#031029) 0%,var(--nv-b-nv2,#062050) 50%,var(--nv-b-nv2,#031029) 100%);
        flex-direction:column;align-items:center;justify-content:center;
        padding:48px 28px;text-align:center;box-sizing:border-box;">
-    <img src="logo.png" style="width:68px;height:68px;filter:brightness(0) invert(1);
+    <img src="logo.png" style="width:68px;height:68px;filter:brightness(0) invert(var(--nv-inv,1));
          margin-bottom:24px;opacity:0.88;" />
-    <p id="bc-overlay-title" style="font-family:'Nasalization',Arial,sans-serif;font-size:17px;
-       letter-spacing:2.5px;color:#FFD740;margin-bottom:18px;
-       text-shadow:0 0 22px rgba(255,215,64,0.5);max-width:320px;line-height:1.4;"></p>
-    <p id="bc-overlay-body" style="font-size:15px;color:rgba(255,255,255,0.85);
+    <p id="bc-overlay-title" style="font-family:var(--nv-font,'Nasalization',Arial,sans-serif);font-size:17px;
+       letter-spacing:calc(2.5px * var(--nv-ls,1));color:var(--nv-t-gd,#FFD740);margin-bottom:18px;
+       text-shadow:0 0 22px rgba(var(--nv-s-gd-rgb,255,215,64),0.5);max-width:320px;line-height:1.4;"></p>
+    <p id="bc-overlay-body" style="font-size:15px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.85);
        line-height:1.75;max-width:300px;margin-bottom:36px;white-space:pre-line;"></p>
     <button id="bc-overlay-cta" onclick="dismissBroadcast()"
-            style="font-family:'Nasalization',Arial,sans-serif;font-size:13px;letter-spacing:3px;
-                   padding:15px 36px;border-radius:40px;border:none;cursor:pointer;
-                   background:linear-gradient(135deg,#FFD740,#FF9800);color:#0a1628;font-weight:700;
-                   box-shadow:0 4px 24px rgba(255,200,60,0.35);">
+            style="font-family:var(--nv-font,'Nasalization',Arial,sans-serif);font-size:13px;letter-spacing:calc(3px * var(--nv-ls,1));
+                   padding:15px 36px;border-radius:calc(40px * var(--nv-r,1));border:none;cursor:pointer;
+                   background:linear-gradient(135deg,var(--nv-b-gd,#FFD740),var(--nv-b-gd2,#FF9800));color:var(--nv-t-nv,#0a1628);font-weight:700;
+                   box-shadow:0 4px 24px rgba(var(--nv-s-gd-rgb,255,200,60),0.35);">
       GOT IT ✌
     </button>
   </div>
@@ -772,51 +774,51 @@
     <!-- Lien site -->
     <a href="https://www.nava-peace.world" target="_blank" rel="noopener noreferrer"
        style="display:flex;align-items:center;justify-content:center;gap:10px;
-              background:rgba(255,255,255,0.22);border:2px solid rgba(255,255,255,0.75);
-              border-radius:14px;padding:16px;margin-bottom:16px;
-              text-decoration:none;color:#fff;
-              font-family:'Nasalization',Arial,sans-serif;font-size:15px;letter-spacing:2.5px;
-              font-weight:700;text-shadow:0 1px 8px rgba(0,40,100,0.4);
+              background:rgba(var(--nv-b-w-rgb,255,255,255),0.22);border:2px solid rgba(var(--nv-l-w-rgb,255,255,255),0.75);
+              border-radius:calc(14px * var(--nv-r,1));padding:16px;margin-bottom:16px;
+              text-decoration:none;color:var(--nv-t-w,#fff);
+              font-family:var(--nv-font,'Nasalization',Arial,sans-serif);font-size:15px;letter-spacing:calc(2.5px * var(--nv-ls,1));
+              font-weight:700;text-shadow:0 1px 8px rgba(var(--nv-s-nv-rgb,0,40,100),0.4);
               backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);"
        onclick="if(typeof NAVA_TG!=='undefined'&&NAVA_TG.isTelegram){event.preventDefault();Telegram.WebApp.openLink('https://www.nava-peace.world');}">
-      <img src="logo.png" style="width:20px;height:20px;filter:brightness(0) invert(1);flex-shrink:0;">
+      <img src="logo.png" style="width:20px;height:20px;filter:brightness(0) invert(var(--nv-inv,1));flex-shrink:0;">
       <span style="white-space:nowrap;">WWW.NAVA&#8209;PEACE.WORLD</span>
       <svg viewBox="0 0 24 24" width="14" height="14" fill="rgba(255,255,255,0.7)"><path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
     </a>
 
     <!-- Pourquoi NAVA PEACE -->
-    <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);
-                border-radius:18px;padding:20px 18px;">
-      <p data-i18n="peace_behind_tap" style="font-family:'Nasalization',Arial,sans-serif;font-size:18px;letter-spacing:3px;
-                color:#fff;margin:0 0 10px;text-align:center;text-shadow:0 0 20px rgba(255,255,255,0.3);">
+    <div style="background:rgba(var(--nv-b-w-rgb,255,255,255),0.07);border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.15);
+                border-radius:calc(18px * var(--nv-r,1));padding:20px 18px;">
+      <p data-i18n="peace_behind_tap" style="font-family:var(--nv-font,'Nasalization',Arial,sans-serif);font-size:18px;letter-spacing:calc(3px * var(--nv-ls,1));
+                color:var(--nv-t-w,#fff);margin:0 0 10px;text-align:center;text-shadow:0 0 20px rgba(var(--nv-s-w-rgb,255,255,255),0.3);">
         BEHIND THE TAP GAME
       </p>
-      <p data-i18n-html="peace_every_tap_builds" style="font-family:'Nasalization',Arial,sans-serif;font-size:16px;letter-spacing:2px;
-                color:#fff;margin:0 0 14px;text-align:center;line-height:1.4;">
+      <p data-i18n-html="peace_every_tap_builds" style="font-family:var(--nv-font,'Nasalization',Arial,sans-serif);font-size:16px;letter-spacing:calc(2px * var(--nv-ls,1));
+                color:var(--nv-t-w,#fff);margin:0 0 14px;text-align:center;line-height:1.4;">
         EVERY TAP<br>BUILDS THIS
       </p>
-      <p data-i18n-html="peace_taps_funding" style="font-size:14px;letter-spacing:0.5px;color:rgba(255,255,255,0.75);
+      <p data-i18n-html="peace_taps_funding" style="font-size:14px;letter-spacing:calc(0.5px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.75);
                 line-height:1.8;margin:0 0 14px;text-align:center;">
-        Your taps are funding the <strong style="color:#6DD5F5;">NAVA PEACE Foundation</strong> —
+        Your taps are funding the <strong style="color:var(--nv-t-bl,#6DD5F5);">NAVA PEACE Foundation</strong> —
         the first foundation created by the world population, in solidarity.
       </p>
-      <p data-i18n-html="peace_arch_desc" style="font-size:14px;letter-spacing:0.4px;color:rgba(255,255,255,0.55);
+      <p data-i18n-html="peace_arch_desc" style="font-size:14px;letter-spacing:calc(0.4px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.55);
                 line-height:1.8;margin:0 0 16px;text-align:center;">
-        We are building <strong style="color:#fff;">NAVA PEACE ARCH</strong> —
+        We are building <strong style="color:var(--nv-t-w,#fff);">NAVA PEACE ARCH</strong> —
         a ship transformed into a floating city of life.
         Hospital. 3D prosthetics lab. Reconstruction team. Floating farm. Kitchen.
         Volunteer quarters. Powered by hydrogen.
       </p>
-      <p data-i18n="peace_sail_in" style="font-family:'Nasalization',Arial,sans-serif;font-size:13px;letter-spacing:2px;
-                color:rgba(255,255,255,0.35);margin:0 0 16px;text-align:center;">
+      <p data-i18n="peace_sail_in" style="font-family:var(--nv-font,'Nasalization',Arial,sans-serif);font-size:13px;letter-spacing:calc(2px * var(--nv-ls,1));
+                color:rgba(var(--nv-t-w-rgb,255,255,255),0.35);margin:0 0 16px;text-align:center;">
         SAIL IN. REBUILD. MOVE ON. REPEAT.
       </p>
       <a href="about.html"
-         style="display:block;text-align:center;background:rgba(109,213,245,0.15);
-                border:1px solid rgba(109,213,245,0.4);border-radius:12px;
+         style="display:block;text-align:center;background:rgba(var(--nv-b-bl-rgb,109,213,245),0.15);
+                border:1px solid rgba(var(--nv-l-bl-rgb,109,213,245),0.4);border-radius:calc(12px * var(--nv-r,1));
                 padding:12px;text-decoration:none;
-                font-family:'Nasalization',Arial,sans-serif;font-size:13px;
-                letter-spacing:2px;color:#6DD5F5;"
+                font-family:var(--nv-font,'Nasalization',Arial,sans-serif);font-size:13px;
+                letter-spacing:calc(2px * var(--nv-ls,1));color:var(--nv-t-bl,#6DD5F5);"
          data-i18n="peace_discover_project">
         DISCOVER THE FULL PROJECT →
       </a>
@@ -826,9 +828,9 @@
 
   <!-- PARRAIN HINT (shown after voting if no referred_by) -->
   <div id="parrain-hint" style="display:none;position:fixed;bottom:72px;left:50%;transform:translateX(-50%);
-    background:rgba(20,20,35,0.92);border:1px solid rgba(255,255,255,0.15);border-radius:14px;
+    background:rgba(var(--nv-b-nv-rgb,20,20,35),0.92);border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.15);border-radius:calc(14px * var(--nv-r,1));
     padding:10px 18px;text-align:center;z-index:50;white-space:nowrap;
-    font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.75);
+    font-family:Arial,sans-serif;font-size:13px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.75);
     backdrop-filter:blur(10px);cursor:pointer;transition:opacity 0.3s;"
     onclick="window.location.href='profile.html#invite-card'">
     🕊 <span>Referred by a friend? Enter their code</span>
@@ -901,17 +903,17 @@
             var _blockedUid = uid;
             document.body.innerHTML =
               '<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;' +
-              'justify-content:center;background:radial-gradient(ellipse at 50% 20%,#6DD5F5,#1E8EC4);' +
-              'font-family:Nasalization,Arial,sans-serif;color:#fff;text-align:center;padding:40px;">' +
+              'justify-content:center;background:radial-gradient(ellipse at 50% 20%,var(--nv-g-bl,#6DD5F5),var(--nv-g-bd,#1E8EC4));' +
+              'font-family:var(--nv-font,Nasalization,Arial,sans-serif);color:var(--nv-t-w,#fff);text-align:center;padding:40px;">' +
               '<div style="font-size:48px;margin-bottom:24px;">🕊</div>' +
-              '<div style="font-size:14px;letter-spacing:5px;margin-bottom:12px;">ACCESS RESTRICTED</div>' +
-              '<div style="font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.6);margin-bottom:32px;">Your account has been suspended.<br>Contact support if you believe this is an error.</div>' +
+              '<div style="font-size:14px;letter-spacing:calc(5px * var(--nv-ls,1));margin-bottom:12px;">ACCESS RESTRICTED</div>' +
+              '<div style="font-size:13px;letter-spacing:calc(2px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.6);margin-bottom:32px;">Your account has been suspended.<br>Contact support if you believe this is an error.</div>' +
               // Zone de message
               '<div id="block-contact" style="width:100%;max-width:300px;">' +
               '<textarea id="block-msg" maxlength="400" placeholder="Write your message to the team…" ' +
-              'style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.3);' +
-              'border-radius:14px;padding:14px;font-family:Nasalization,Arial,sans-serif;font-size:13px;' +
-              'letter-spacing:1px;color:#fff;resize:none;height:100px;outline:none;margin-bottom:12px;"></textarea>' +
+              'style="width:100%;box-sizing:border-box;background:rgba(var(--nv-b-w-rgb,255,255,255),0.12);border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.3);' +
+              'border-radius:calc(14px * var(--nv-r,1));padding:14px;font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:13px;' +
+              'letter-spacing:calc(1px * var(--nv-ls,1));color:var(--nv-t-w,#fff);resize:none;height:100px;outline:none;margin-bottom:12px;"></textarea>' +
               '<button id="block-send" onclick="(function(){' +
               'var msg=document.getElementById(\'block-msg\').value.trim();' +
               'if(!msg)return;' +
@@ -923,9 +925,9 @@
               '\'<div style=\\\'font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.8);\\\'>🕊 Message sent. We will review your case.</div>\';})' +
               '.catch(function(){btn.disabled=false;btn.textContent=\'SEND\';});' +
               '})()" ' +
-              'style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.35);' +
-              'border-radius:50px;padding:12px 36px;font-family:Nasalization,Arial,sans-serif;' +
-              'font-size:14px;letter-spacing:4px;color:#fff;cursor:pointer;width:100%;">CONTACT TEAM</button>' +
+              'style="background:rgba(var(--nv-b-w-rgb,255,255,255),0.15);border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.35);' +
+              'border-radius:calc(50px * var(--nv-r,1));padding:12px 36px;font-family:var(--nv-font,Nasalization,Arial,sans-serif);' +
+              'font-size:14px;letter-spacing:calc(4px * var(--nv-ls,1));color:var(--nv-t-w,#fff);cursor:pointer;width:100%;">CONTACT TEAM</button>' +
               '</div>' +
               '</div>';
           }
@@ -977,7 +979,7 @@
           ' onclick="event.stopPropagation();window.location.href=\'map.html\'">' +
           '<span class="btn-next-label">' + (typeof t==='function'?t('next_action_in'):'NEXT ACTION IN') + '</span>' +
           '<span class="btn-next-timer" id="countdown">00:00:00</span>' +
-          '<span style="font-size:15px;letter-spacing:2px;font-family:\'Nasalization\',Arial,sans-serif;color:rgba(255,255,255,0.9);margin-top:4px;text-shadow:0 1px 4px rgba(0,40,100,0.8);">' + (typeof t==='function'?t('tap_to_see_map'):'TAP TO SEE\nTHE MAP').replace(/\n/g,'<br>') + '</span>' +
+          '<span style="font-size:15px;letter-spacing:calc(2px * var(--nv-ls,1));font-family:var(--nv-font,\'Nasalization\',Arial,sans-serif);color:rgba(var(--nv-t-w-rgb,255,255,255),0.9);margin-top:4px;text-shadow:0 1px 4px rgba(var(--nv-s-nv-rgb,0,40,100),0.8);">' + (typeof t==='function'?t('tap_to_see_map'):'TAP TO SEE\nTHE MAP').replace(/\n/g,'<br>') + '</span>' +
         '</div>';
 
       if (fresh) {
@@ -1072,7 +1074,7 @@
       const total = parseFloat(d.total_reward) || 0;
       if (total <= 0) return;
 
-      let inner = '<div style="font-size:16px;letter-spacing:1.5px">+' + total.toFixed(4) + ' NAVA</div>';
+      let inner = '<div style="font-size:16px;letter-spacing:calc(1.5px * var(--nv-ls,1))">+' + total.toFixed(4) + ' NAVA</div>';
       try {
         if (sb) {
           const uid   = localStorage.getItem('nava_peace_uid');
@@ -1093,7 +1095,7 @@
             if (streak > 0) parts.push('+' + streak.toFixed(4) + ' streak');
             if (ref > 0)    parts.push('+' + ref.toFixed(0) + ' ref');
             if (parts.length)
-              inner += '<div style="font-size:9px;letter-spacing:1.5px;color:rgba(255,255,255,0.8);margin-top:4px">⚡ ' +
+              inner += '<div style="font-size:9px;letter-spacing:calc(1.5px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.8);margin-top:4px">⚡ ' +
                        base.toFixed(4) + ' base · ' + parts.join(' · ') + '</div>';
           }
         }
@@ -1164,7 +1166,7 @@
 
       const btn = document.getElementById('peaceBtn');
       btn.disabled = true;
-      btn.innerHTML = '<span class="btn-status" style="color:#3AACDF;font-size:36px;">···</span>';
+      btn.innerHTML = '<span class="btn-status" style="color:var(--nv-t-bm,#3AACDF);font-size:36px;">···</span>';
 
       // Marquer localement AVANT l'insert pour bloquer tout autre onglet
       localStorage.setItem(PEACE_KEY, TODAY);
@@ -1805,10 +1807,10 @@
         // Show welcome toast (reuse discovery style)
         const _t = document.createElement('div');
         _t.style.cssText = 'position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:99999;'+
-          'background:linear-gradient(135deg,rgba(58,172,223,0.97),rgba(30,142,196,0.97));'+
-          'border:1px solid rgba(255,255,255,0.3);border-radius:50px;'+
-          'padding:10px 26px;font-family:Nasalization,Arial,sans-serif;'+
-          'font-size:13px;letter-spacing:3px;color:#fff;box-shadow:0 4px 24px rgba(58,172,223,0.4);pointer-events:none;';
+          'background:linear-gradient(135deg,rgba(var(--nv-b-bm-rgb,58,172,223),0.97),rgba(var(--nv-b-bd-rgb,30,142,196),0.97));'+
+          'border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.3);border-radius:calc(50px * var(--nv-r,1));'+
+          'padding:10px 26px;font-family:var(--nv-font,Nasalization,Arial,sans-serif);'+
+          'font-size:13px;letter-spacing:calc(3px * var(--nv-ls,1));color:var(--nv-t-w,#fff);box-shadow:0 4px 24px rgba(var(--nv-s-bm-rgb,58,172,223),0.4);pointer-events:none;';
         _t.textContent = '🕊  +1 WELCOME DOVE';
         document.body.appendChild(_t);
         setTimeout(() => { _t.style.opacity='0'; setTimeout(() => _t.remove(), 400); }, 3000);
@@ -1894,7 +1896,7 @@
                 alreadyClaimed.add(m.days);
                 // Toast discret
                 const t = document.createElement('div');
-                t.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(255,165,0,0.92);color:#fff;padding:10px 22px;border-radius:20px;font-size:14px;letter-spacing:2px;z-index:9999;pointer-events:none;';
+                t.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(var(--nv-b-gd-rgb,255,165,0),0.92);color:var(--nv-t-w,#fff);padding:10px 22px;border-radius:calc(20px * var(--nv-r,1));font-size:14px;letter-spacing:calc(2px * var(--nv-ls,1));z-index:9999;pointer-events:none;';
                 t.textContent = '🔥 STREAK DOVE +' + m.doves + ' (' + m.days + ' DAYS)';
                 document.body.appendChild(t);
                 setTimeout(() => t.remove(), 3500);

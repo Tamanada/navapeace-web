@@ -59,6 +59,10 @@ const NAVA_TRANSLATIONS = {
     dove_own_lbl:       'OWN\nACTIONS',
     dove_ref_lbl:       'REFERRAL\nDOVES',
     section_invite:     'INVITE FRIENDS',
+    theme_title:        "APPEARANCE", // nv-theme-hook
+    theme_sky_desc:     "Sky blue, the original look", // nv-theme-hook
+    theme_sanctuary_desc: "Dark and gold", // nv-theme-hook
+    theme_field_desc:   "Cream and forest green", // nv-theme-hook
     copy_btn:           'COPY',
     lbl_friends:        'FRIENDS',
     lbl_invited:        'INVITED',
@@ -190,8 +194,8 @@ const NAVA_TRANSLATIONS = {
     // Peace — Behind the tap
     peace_behind_tap:    'BEHIND THE TAP GAME',
     peace_every_tap_builds: 'EVERY TAP<br>BUILDS THIS',
-    peace_taps_funding:  'Your taps are funding the <strong style="color:#6DD5F5;">NAVA PEACE Foundation</strong> — the first foundation created by the world population, in solidarity.',
-    peace_arch_desc:     'We are building <strong style="color:#fff;">NAVA PEACE ARCH</strong> — a ship transformed into a floating city of life. Hospital. 3D prosthetics lab. Reconstruction team. Floating farm. Kitchen. Volunteer quarters. Powered by hydrogen.',
+    peace_taps_funding:  'Your taps are funding the <strong style="color:var(--nv-t-bl,#6DD5F5);">NAVA PEACE Foundation</strong> — the first foundation created by the world population, in solidarity.',
+    peace_arch_desc:     'We are building <strong style="color:var(--nv-t-w,#fff);">NAVA PEACE ARCH</strong> — a ship transformed into a floating city of life. Hospital. 3D prosthetics lab. Reconstruction team. Floating farm. Kitchen. Volunteer quarters. Powered by hydrogen.',
     peace_sail_in:       'SAIL IN. REBUILD. MOVE ON. REPEAT.',
     peace_discover_project: 'DISCOVER THE FULL PROJECT →',
     // Profile — Support the mission
@@ -256,6 +260,10 @@ const NAVA_TRANSLATIONS = {
     dove_own_lbl:       'MES\nACTIONS',
     dove_ref_lbl:       'COLOMBES\nPARRAINAGE',
     section_invite:     'INVITER DES AMIS',
+    theme_title:        "APPARENCE", // nv-theme-hook
+    theme_sky_desc:     "Bleu ciel, le thème d'origine", // nv-theme-hook
+    theme_sanctuary_desc: "Sombre et or", // nv-theme-hook
+    theme_field_desc:   "Crème et vert forêt", // nv-theme-hook
     copy_btn:           'COPIER',
     lbl_friends:        'AMIS',
     lbl_invited:        'INVITÉS',
@@ -383,8 +391,8 @@ const NAVA_TRANSLATIONS = {
     // Peace — Behind the tap
     peace_behind_tap:    'DERRIÈRE LE JEU DE TAPS',
     peace_every_tap_builds: 'CHAQUE TAP<br>CONSTRUIT CECI',
-    peace_taps_funding:  'Vos taps financent la <strong style="color:#6DD5F5;">Fondation NAVA PEACE</strong> — la première fondation créée par la population mondiale, en solidarité.',
-    peace_arch_desc:     'Nous construisons <strong style="color:#fff;">NAVA PEACE ARCH</strong> — un navire transformé en ville flottante de vie. Hôpital. Laboratoire de prothèses 3D. Équipe de reconstruction. Ferme flottante. Cuisine. Quartiers des bénévoles. Propulsé à l\'hydrogène.',
+    peace_taps_funding:  'Vos taps financent la <strong style="color:var(--nv-t-bl,#6DD5F5);">Fondation NAVA PEACE</strong> — la première fondation créée par la population mondiale, en solidarité.',
+    peace_arch_desc:     'Nous construisons <strong style="color:var(--nv-t-w,#fff);">NAVA PEACE ARCH</strong> — un navire transformé en ville flottante de vie. Hôpital. Laboratoire de prothèses 3D. Équipe de reconstruction. Ferme flottante. Cuisine. Quartiers des bénévoles. Propulsé à l\'hydrogène.',
     peace_sail_in:       'ARRIVER. RECONSTRUIRE. PARTIR. RECOMMENCER.',
     peace_discover_project: 'DÉCOUVRIR LE PROJET COMPLET →',
     // Profile — Support the mission
@@ -449,6 +457,10 @@ const NAVA_TRANSLATIONS = {
     dove_own_lbl:       'MIS\nACCIONES',
     dove_ref_lbl:       'PALOMAS\nDE REFERIDOS',
     section_invite:     'INVITAR AMIGOS',
+    theme_title:        "APARIENCIA", // nv-theme-hook
+    theme_sky_desc:     "Azul cielo, el tema original", // nv-theme-hook
+    theme_sanctuary_desc: "Oscuro y dorado", // nv-theme-hook
+    theme_field_desc:   "Crema y verde bosque", // nv-theme-hook
     copy_btn:           'COPIAR',
     lbl_friends:        'AMIGOS',
     lbl_invited:        'INVITADOS',
@@ -576,8 +588,8 @@ const NAVA_TRANSLATIONS = {
     // Peace — Behind the tap
     peace_behind_tap:    'DETRÁS DEL JUEGO DE TAPS',
     peace_every_tap_builds: 'CADA TAP<br>CONSTRUYE ESTO',
-    peace_taps_funding:  'Tus taps financian la <strong style="color:#6DD5F5;">Fundación NAVA PEACE</strong> — la primera fundación creada por la población mundial, en solidaridad.',
-    peace_arch_desc:     'Estamos construyendo <strong style="color:#fff;">NAVA PEACE ARCH</strong> — un barco transformado en una ciudad flotante de vida. Hospital. Laboratorio de prótesis 3D. Equipo de reconstrucción. Granja flotante. Cocina. Alojamiento para voluntarios. Propulsado por hidrógeno.',
+    peace_taps_funding:  'Tus taps financian la <strong style="color:var(--nv-t-bl,#6DD5F5);">Fundación NAVA PEACE</strong> — la primera fundación creada por la población mundial, en solidaridad.',
+    peace_arch_desc:     'Estamos construyendo <strong style="color:var(--nv-t-w,#fff);">NAVA PEACE ARCH</strong> — un barco transformado en una ciudad flotante de vida. Hospital. Laboratorio de prótesis 3D. Equipo de reconstrucción. Granja flotante. Cocina. Alojamiento para voluntarios. Propulsado por hidrógeno.',
     peace_sail_in:       'LLEGAR. RECONSTRUIR. PARTIR. REPETIR.',
     peace_discover_project: 'DESCUBRIR EL PROYECTO COMPLETO →',
     // Profile — Support the mission
@@ -642,6 +654,10 @@ const NAVA_TRANSLATIONS = {
     dove_own_lbl:       'MINHAS\nAÇÕES',
     dove_ref_lbl:       'POMBAS\nDE INDICAÇÃO',
     section_invite:     'CONVIDAR AMIGOS',
+    theme_title:        "APARÊNCIA", // nv-theme-hook
+    theme_sky_desc:     "Azul-céu, o tema original", // nv-theme-hook
+    theme_sanctuary_desc: "Escuro e dourado", // nv-theme-hook
+    theme_field_desc:   "Creme e verde-floresta", // nv-theme-hook
     copy_btn:           'COPIAR',
     lbl_friends:        'AMIGOS',
     lbl_invited:        'CONVIDADOS',
@@ -769,8 +785,8 @@ const NAVA_TRANSLATIONS = {
     // Peace — Behind the tap
     peace_behind_tap:    'POR TRÁS DO JOGO DE TAPS',
     peace_every_tap_builds: 'CADA TAP<br>CONSTRÓI ISSO',
-    peace_taps_funding:  'Seus taps financiam a <strong style="color:#6DD5F5;">Fundação NAVA PEACE</strong> — a primeira fundação criada pela população mundial, em solidariedade.',
-    peace_arch_desc:     'Estamos construindo <strong style="color:#fff;">NAVA PEACE ARCH</strong> — um navio transformado em uma cidade flutuante de vida. Hospital. Laboratório de próteses 3D. Equipe de reconstrução. Fazenda flutuante. Cozinha. Alojamento para voluntários. Movido a hidrogênio.',
+    peace_taps_funding:  'Seus taps financiam a <strong style="color:var(--nv-t-bl,#6DD5F5);">Fundação NAVA PEACE</strong> — a primeira fundação criada pela população mundial, em solidariedade.',
+    peace_arch_desc:     'Estamos construindo <strong style="color:var(--nv-t-w,#fff);">NAVA PEACE ARCH</strong> — um navio transformado em uma cidade flutuante de vida. Hospital. Laboratório de próteses 3D. Equipe de reconstrução. Fazenda flutuante. Cozinha. Alojamento para voluntários. Movido a hidrogênio.',
     peace_sail_in:       'CHEGAR. RECONSTRUIR. PARTIR. REPETIR.',
     peace_discover_project: 'DESCOBRIR O PROJETO COMPLETO →',
     // Profile — Support the mission
@@ -835,6 +851,10 @@ const NAVA_TRANSLATIONS = {
     dove_own_lbl:       'EIGENE\nAKTIONEN',
     dove_ref_lbl:       'TAUBEN\nEMPFEHLUNG',
     section_invite:     'FREUNDE EINLADEN',
+    theme_title:        "DARSTELLUNG", // nv-theme-hook
+    theme_sky_desc:     "Himmelblau, das Original", // nv-theme-hook
+    theme_sanctuary_desc: "Dunkel und Gold", // nv-theme-hook
+    theme_field_desc:   "Creme und Waldgrün", // nv-theme-hook
     copy_btn:           'KOPIEREN',
     lbl_friends:        'FREUNDE',
     lbl_invited:        'EINGELADEN',
@@ -962,8 +982,8 @@ const NAVA_TRANSLATIONS = {
     // Peace — Behind the tap
     peace_behind_tap:    'HINTER DEM TAP-SPIEL',
     peace_every_tap_builds: 'JEDER TAP<br>BAUT DAS HIER',
-    peace_taps_funding:  'Deine Taps finanzieren die <strong style="color:#6DD5F5;">NAVA PEACE Stiftung</strong> — die erste Stiftung, gegründet von der Weltbevölkerung, in Solidarität.',
-    peace_arch_desc:     'Wir bauen <strong style="color:#fff;">NAVA PEACE ARCH</strong> — ein Schiff, das in eine schwimmende Lebensstadt verwandelt wird. Krankenhaus. 3D-Prothesenlabor. Wiederaufbauteam. Schwimmende Farm. Küche. Freiwilligenquartiere. Betrieben mit Wasserstoff.',
+    peace_taps_funding:  'Deine Taps finanzieren die <strong style="color:var(--nv-t-bl,#6DD5F5);">NAVA PEACE Stiftung</strong> — die erste Stiftung, gegründet von der Weltbevölkerung, in Solidarität.',
+    peace_arch_desc:     'Wir bauen <strong style="color:var(--nv-t-w,#fff);">NAVA PEACE ARCH</strong> — ein Schiff, das in eine schwimmende Lebensstadt verwandelt wird. Krankenhaus. 3D-Prothesenlabor. Wiederaufbauteam. Schwimmende Farm. Küche. Freiwilligenquartiere. Betrieben mit Wasserstoff.',
     peace_sail_in:       'ANLEGEN. WIEDERAUFBAUEN. WEITERZIEHEN. WIEDERHOLEN.',
     peace_discover_project: 'GESAMTES PROJEKT ENTDECKEN →',
     // Profile — Support the mission
@@ -1028,6 +1048,10 @@ const NAVA_TRANSLATIONS = {
     dove_own_lbl:       'أفعالي',
     dove_ref_lbl:       'حمامات الإحالة',
     section_invite:     'دعوة الأصدقاء',
+    theme_title:        "المظهر", // nv-theme-hook
+    theme_sky_desc:     "أزرق سماوي، المظهر الأصلي", // nv-theme-hook
+    theme_sanctuary_desc: "داكن وذهبي", // nv-theme-hook
+    theme_field_desc:   "كريمي وأخضر غابي", // nv-theme-hook
     copy_btn:           'نسخ',
     lbl_friends:        'أصدقاء',
     lbl_invited:        'مدعوون',
@@ -1155,8 +1179,8 @@ const NAVA_TRANSLATIONS = {
     // Peace — Behind the tap
     peace_behind_tap:    'خلف لعبة النقرات',
     peace_every_tap_builds: 'كل نقرة<br>تبني هذا',
-    peace_taps_funding:  'نقراتك تموّل <strong style="color:#6DD5F5;">مؤسسة نافا بيس</strong> — أول مؤسسة أسسها سكان العالم، بروح التضامن.',
-    peace_arch_desc:     'نحن نبني <strong style="color:#fff;">نافا بيس آرش</strong> — سفينة تتحول إلى مدينة عائمة للحياة. مستشفى. مختبر أطراف اصطناعية ثلاثية الأبعاد. فريق إعادة الإعمار. مزرعة عائمة. مطبخ. أماكن للمتطوعين. يعمل بالهيدروجين.',
+    peace_taps_funding:  'نقراتك تموّل <strong style="color:var(--nv-t-bl,#6DD5F5);">مؤسسة نافا بيس</strong> — أول مؤسسة أسسها سكان العالم، بروح التضامن.',
+    peace_arch_desc:     'نحن نبني <strong style="color:var(--nv-t-w,#fff);">نافا بيس آرش</strong> — سفينة تتحول إلى مدينة عائمة للحياة. مستشفى. مختبر أطراف اصطناعية ثلاثية الأبعاد. فريق إعادة الإعمار. مزرعة عائمة. مطبخ. أماكن للمتطوعين. يعمل بالهيدروجين.',
     peace_sail_in:       'أبحر. أعِد البناء. انطلق. كرّر.',
     peace_discover_project: 'اكتشف المشروع الكامل ←',
     // Profile — Support the mission
@@ -1221,6 +1245,10 @@ const NAVA_TRANSLATIONS = {
     dove_own_lbl:       '我的\n行动',
     dove_ref_lbl:       '推荐\n鸽子',
     section_invite:     '邀请朋友',
+    theme_title:        "外观", // nv-theme-hook
+    theme_sky_desc:     "天蓝色，原始主题", // nv-theme-hook
+    theme_sanctuary_desc: "深色与金色", // nv-theme-hook
+    theme_field_desc:   "米色与森林绿", // nv-theme-hook
     copy_btn:           '复制',
     lbl_friends:        '朋友',
     lbl_invited:        '已邀请',
@@ -1348,8 +1376,8 @@ const NAVA_TRANSLATIONS = {
     // Peace — Behind the tap
     peace_behind_tap:    '点击游戏背后的故事',
     peace_every_tap_builds: '每次点击<br>都在建造这个',
-    peace_taps_funding:  '你的点击正在资助 <strong style="color:#6DD5F5;">NAVA PEACE 基金会</strong> — 这是由全球人口共同创建的第一个基金会，团结一心。',
-    peace_arch_desc:     '我们正在建造 <strong style="color:#fff;">NAVA PEACE ARCH</strong> — 一艘改造成浮动生命城市的船。医院。3D义肢实验室。重建队。浮动农场。厨房。志愿者宿舍。以氢气为动力。',
+    peace_taps_funding:  '你的点击正在资助 <strong style="color:var(--nv-t-bl,#6DD5F5);">NAVA PEACE 基金会</strong> — 这是由全球人口共同创建的第一个基金会，团结一心。',
+    peace_arch_desc:     '我们正在建造 <strong style="color:var(--nv-t-w,#fff);">NAVA PEACE ARCH</strong> — 一艘改造成浮动生命城市的船。医院。3D义肢实验室。重建队。浮动农场。厨房。志愿者宿舍。以氢气为动力。',
     peace_sail_in:       '驶入。重建。离开。重复。',
     peace_discover_project: '探索完整项目 →',
     // Profile — Support the mission
@@ -1414,6 +1442,10 @@ const NAVA_TRANSLATIONS = {
     dove_own_lbl:       'МОИ\nДЕЙСТВИЯ',
     dove_ref_lbl:       'ГОЛУБИ\nОТ ДРУЗЕЙ',
     section_invite:     'ПРИГЛАСИТЬ ДРУЗЕЙ',
+    theme_title:        "ОФОРМЛЕНИЕ", // nv-theme-hook
+    theme_sky_desc:     "Небесно-голубая, исходная тема", // nv-theme-hook
+    theme_sanctuary_desc: "Тёмная с золотом", // nv-theme-hook
+    theme_field_desc:   "Кремовая с лесным зелёным", // nv-theme-hook
     copy_btn:           'КОПИРОВАТЬ',
     lbl_friends:        'ДРУЗЬЯ',
     lbl_invited:        'ПРИГЛАШЕНЫ',
@@ -1541,8 +1573,8 @@ const NAVA_TRANSLATIONS = {
     // Peace — Behind the tap
     peace_behind_tap:    'ЗА ИГРОЙ В ТАПЫ',
     peace_every_tap_builds: 'КАЖДЫЙ ТАП<br>СТРОИТ ЭТО',
-    peace_taps_funding:  'Ваши тапы финансируют <strong style="color:#6DD5F5;">Фонд NAVA PEACE</strong> — первый фонд, созданный населением мира, в солидарности.',
-    peace_arch_desc:     'Мы строим <strong style="color:#fff;">NAVA PEACE ARCH</strong> — корабль, превращённый в плавучий город жизни. Больница. Лаборатория 3D-протезирования. Команда по восстановлению. Плавучая ферма. Кухня. Жилые помещения для волонтёров. Работает на водороде.',
+    peace_taps_funding:  'Ваши тапы финансируют <strong style="color:var(--nv-t-bl,#6DD5F5);">Фонд NAVA PEACE</strong> — первый фонд, созданный населением мира, в солидарности.',
+    peace_arch_desc:     'Мы строим <strong style="color:var(--nv-t-w,#fff);">NAVA PEACE ARCH</strong> — корабль, превращённый в плавучий город жизни. Больница. Лаборатория 3D-протезирования. Команда по восстановлению. Плавучая ферма. Кухня. Жилые помещения для волонтёров. Работает на водороде.',
     peace_sail_in:       'ПРИБЫТЬ. ВОССТАНОВИТЬ. УЙТИ. ПОВТОРИТЬ.',
     peace_discover_project: 'УЗНАТЬ О ПОЛНОМ ПРОЕКТЕ →',
     // Profile — Support the mission
@@ -1607,6 +1639,10 @@ const NAVA_TRANSLATIONS = {
     dove_own_lbl:       'การกระทำ\nของฉัน',
     dove_ref_lbl:       'นกพิราบ\nจากการแนะนำ',
     section_invite:     'เชิญเพื่อน',
+    theme_title:        "รูปลักษณ์", // nv-theme-hook
+    theme_sky_desc:     "ฟ้าสดใส ธีมดั้งเดิม", // nv-theme-hook
+    theme_sanctuary_desc: "โทนเข้มและทอง", // nv-theme-hook
+    theme_field_desc:   "ครีมและเขียวป่า", // nv-theme-hook
     copy_btn:           'คัดลอก',
     lbl_friends:        'เพื่อน',
     lbl_invited:        'ที่เชิญ',
@@ -1734,8 +1770,8 @@ const NAVA_TRANSLATIONS = {
     // Peace — Behind the tap
     peace_behind_tap:    'เบื้องหลังเกมการแตะ',
     peace_every_tap_builds: 'ทุกการแตะ<br>สร้างสิ่งนี้',
-    peace_taps_funding:  'การแตะของคุณสนับสนุน <strong style="color:#6DD5F5;">มูลนิธิ NAVA PEACE</strong> — มูลนิธิแรกที่สร้างโดยประชากรโลก ด้วยความสามัคคี',
-    peace_arch_desc:     'เรากำลังสร้าง <strong style="color:#fff;">NAVA PEACE ARCH</strong> — เรือที่แปลงเป็นเมืองลอยน้ำแห่งชีวิต โรงพยาบาล ห้องปฏิบัติการขาเทียม 3D ทีมฟื้นฟู ฟาร์มลอยน้ำ ห้องครัว ที่พักอาสาสมัคร ขับเคลื่อนด้วยไฮโดรเจน',
+    peace_taps_funding:  'การแตะของคุณสนับสนุน <strong style="color:var(--nv-t-bl,#6DD5F5);">มูลนิธิ NAVA PEACE</strong> — มูลนิธิแรกที่สร้างโดยประชากรโลก ด้วยความสามัคคี',
+    peace_arch_desc:     'เรากำลังสร้าง <strong style="color:var(--nv-t-w,#fff);">NAVA PEACE ARCH</strong> — เรือที่แปลงเป็นเมืองลอยน้ำแห่งชีวิต โรงพยาบาล ห้องปฏิบัติการขาเทียม 3D ทีมฟื้นฟู ฟาร์มลอยน้ำ ห้องครัว ที่พักอาสาสมัคร ขับเคลื่อนด้วยไฮโดรเจน',
     peace_sail_in:       'แล่นเข้า. ฟื้นฟู. เดินหน้า. ทำซ้ำ.',
     peace_discover_project: 'ค้นพบโครงการทั้งหมด →',
     // Profile — Support the mission
@@ -1800,6 +1836,10 @@ const NAVA_TRANSLATIONS = {
     dove_own_lbl:       '自分の\nアクション',
     dove_ref_lbl:       '紹介\nハト',
     section_invite:     '友達を招待する',
+    theme_title:        "外観", // nv-theme-hook
+    theme_sky_desc:     "スカイブルー、オリジナルのテーマ", // nv-theme-hook
+    theme_sanctuary_desc: "ダークとゴールド", // nv-theme-hook
+    theme_field_desc:   "クリームとフォレストグリーン", // nv-theme-hook
     copy_btn:           'コピー',
     lbl_friends:        '友達',
     lbl_invited:        '招待済み',
@@ -1927,8 +1967,8 @@ const NAVA_TRANSLATIONS = {
     // Peace — Behind the tap
     peace_behind_tap:    'タップゲームの裏側',
     peace_every_tap_builds: 'タップのたびに<br>これが建てられる',
-    peace_taps_funding:  'あなたのタップが <strong style="color:#6DD5F5;">NAVA PEACE 財団</strong> を支援しています — 世界の人々によって連帯のもとに作られた初めての財団です。',
-    peace_arch_desc:     '私たちは <strong style="color:#fff;">NAVA PEACE ARCH</strong> を建設しています — 命の浮かぶ都市に変貌した船。病院。3Dプロテーゼ研究室。復興チーム。浮かぶ農場。厨房。ボランティアの宿舎。水素で動く。',
+    peace_taps_funding:  'あなたのタップが <strong style="color:var(--nv-t-bl,#6DD5F5);">NAVA PEACE 財団</strong> を支援しています — 世界の人々によって連帯のもとに作られた初めての財団です。',
+    peace_arch_desc:     '私たちは <strong style="color:var(--nv-t-w,#fff);">NAVA PEACE ARCH</strong> を建設しています — 命の浮かぶ都市に変貌した船。病院。3Dプロテーゼ研究室。復興チーム。浮かぶ農場。厨房。ボランティアの宿舎。水素で動く。',
     peace_sail_in:       '入港。再建。出発。繰り返す。',
     peace_discover_project: 'プロジェクト全体を見る →',
     // Profile — Support the mission
@@ -1993,6 +2033,10 @@ const NAVA_TRANSLATIONS = {
     dove_own_lbl:       'ကိုယ်ပိုင်\nလုပ်ဆောင်မှုများ',
     dove_ref_lbl:       'ရည်ညွှန်းချက်\nချိုးများ',
     section_invite:     'သူငယ်ချင်းများကို ဖိတ်ခေါ်ပါ',
+    theme_title:        "အသွင်အပြင်", // nv-theme-hook
+    theme_sky_desc:     "ကောင်းကင်ပြာ၊ မူလအပြင်အဆင်", // nv-theme-hook
+    theme_sanctuary_desc: "အမှောင်နှင့် ရွှေရောင်", // nv-theme-hook
+    theme_field_desc:   "နို့နှစ်ရောင်နှင့် သစ်တောစိမ်း", // nv-theme-hook
     copy_btn:           'ကူးယူပါ',
     lbl_friends:        'သူငယ်ချင်းများ',
     lbl_invited:        'ဖိတ်ကြားပြီး',
@@ -2120,8 +2164,8 @@ const NAVA_TRANSLATIONS = {
     // Peace — Behind the tap
     peace_behind_tap:    'ထိချိန် ဂိမ်း၏ နောက်ကွယ်',
     peace_every_tap_builds: 'တစ်ချက်စီ<br>ဒါကို တည်ဆောက်သည်',
-    peace_taps_funding:  'သင်၏ ထိချိန်များသည် <strong style="color:#6DD5F5;">NAVA PEACE ဖောင်ဒေးရှင်း</strong> ကို ထောက်ပံ့သည် — ကမ္ဘာ့လူဦးရေမှ ညီညွတ်စွာ ဖန်တီးသော ပထမဆုံးသော ဖောင်ဒေးရှင်း',
-    peace_arch_desc:     'ကျွန်ုပ်တို့သည် <strong style="color:#fff;">NAVA PEACE ARCH</strong> ကို တည်ဆောက်နေသည် — သင်္ဘောတစ်စီး ကို ရေပေါ်မြို့တော်အဖြစ် ပြောင်းလဲသည်။ ဆေးရုံ။ 3D ဆင်ဖားပြုလုပ်ရာ ဓာတ်ခွဲခန်း။ ပြန်လည်တည်ဆောက်ရေး အဖွဲ့။ ရေပေါ် စိုက်ပျိုးရေး။ မီးဖိုချောင်။ စေတနာ့ဝန်ထမ်း တည်းခိုရာ။ ဟိုက်ဒရိုဂျင်ဖြင့် မောင်းနှင်သည်',
+    peace_taps_funding:  'သင်၏ ထိချိန်များသည် <strong style="color:var(--nv-t-bl,#6DD5F5);">NAVA PEACE ဖောင်ဒေးရှင်း</strong> ကို ထောက်ပံ့သည် — ကမ္ဘာ့လူဦးရေမှ ညီညွတ်စွာ ဖန်တီးသော ပထမဆုံးသော ဖောင်ဒေးရှင်း',
+    peace_arch_desc:     'ကျွန်ုပ်တို့သည် <strong style="color:var(--nv-t-w,#fff);">NAVA PEACE ARCH</strong> ကို တည်ဆောက်နေသည် — သင်္ဘောတစ်စီး ကို ရေပေါ်မြို့တော်အဖြစ် ပြောင်းလဲသည်။ ဆေးရုံ။ 3D ဆင်ဖားပြုလုပ်ရာ ဓာတ်ခွဲခန်း။ ပြန်လည်တည်ဆောက်ရေး အဖွဲ့။ ရေပေါ် စိုက်ပျိုးရေး။ မီးဖိုချောင်။ စေတနာ့ဝန်ထမ်း တည်းခိုရာ။ ဟိုက်ဒရိုဂျင်ဖြင့် မောင်းနှင်သည်',
     peace_sail_in:       'ရောက်ရှိ။ ပြန်တည်ဆောက်။ ထွက်ခွာ။ ထပ်လုပ်ဆောင်။',
     peace_discover_project: 'ပရောဂျက် အပြည့်အစုံကို ကြည့်ရှုပါ →',
     // Profile — Support the mission
@@ -2186,6 +2230,10 @@ const NAVA_TRANSLATIONS = {
     dove_own_lbl:       'अपनी\nकार्रवाइयाँ',
     dove_ref_lbl:       'रेफ़रल\nकबूतर',
     section_invite:     'दोस्तों को आमंत्रित करें',
+    theme_title:        "रूप-रंग", // nv-theme-hook
+    theme_sky_desc:     "आसमानी नीला, मूल थीम", // nv-theme-hook
+    theme_sanctuary_desc: "गहरा और सुनहरा", // nv-theme-hook
+    theme_field_desc:   "क्रीम और वन-हरा", // nv-theme-hook
     copy_btn:           'कॉपी करें',
     lbl_friends:        'दोस्त',
     lbl_invited:        'आमंत्रित',
@@ -2313,8 +2361,8 @@ const NAVA_TRANSLATIONS = {
     // Peace — Behind the tap
     peace_behind_tap:    'टैप गेम के पीछे',
     peace_every_tap_builds: 'हर टैप<br>यह बनाता है',
-    peace_taps_funding:  'आपके टैप <strong style="color:#6DD5F5;">NAVA PEACE फाउंडेशन</strong> को वित्त पोषित कर रहे हैं — विश्व की जनसंख्या द्वारा एकजुटता में बनाया गया पहला फाउंडेशन।',
-    peace_arch_desc:     'हम <strong style="color:#fff;">NAVA PEACE ARCH</strong> बना रहे हैं — एक जहाज जो जीवन के एक तैरते शहर में परिवर्तित हो रहा है। अस्पताल। 3D कृत्रिम अंग प्रयोगशाला। पुनर्निर्माण दल। तैरती खेती। रसोई। स्वयंसेवक आवास। हाइड्रोजन से संचालित।',
+    peace_taps_funding:  'आपके टैप <strong style="color:var(--nv-t-bl,#6DD5F5);">NAVA PEACE फाउंडेशन</strong> को वित्त पोषित कर रहे हैं — विश्व की जनसंख्या द्वारा एकजुटता में बनाया गया पहला फाउंडेशन।',
+    peace_arch_desc:     'हम <strong style="color:var(--nv-t-w,#fff);">NAVA PEACE ARCH</strong> बना रहे हैं — एक जहाज जो जीवन के एक तैरते शहर में परिवर्तित हो रहा है। अस्पताल। 3D कृत्रिम अंग प्रयोगशाला। पुनर्निर्माण दल। तैरती खेती। रसोई। स्वयंसेवक आवास। हाइड्रोजन से संचालित।',
     peace_sail_in:       'आओ। पुनर्निर्माण करो। आगे बढ़ो। दोहराओ।',
     peace_discover_project: 'पूरा प्रोजेक्ट देखें →',
     // Profile — Support the mission
@@ -2384,6 +2432,10 @@ const NAVA_TRANSLATIONS = {
     dove_own_lbl:       'ВЛАСНІ\nДІЇ',
     dove_ref_lbl:       'РЕФЕРАЛЬНІ\nГОЛУБИ',
     section_invite:     'ЗАПРОСИТИ ДРУЗІВ',
+    theme_title:        "ОФОРМЛЕННЯ", // nv-theme-hook
+    theme_sky_desc:     "Небесно-блакитна, початкова тема", // nv-theme-hook
+    theme_sanctuary_desc: "Темна із золотом", // nv-theme-hook
+    theme_field_desc:   "Кремова з лісовим зеленим", // nv-theme-hook
     copy_btn:           'КОПІЮВАТИ',
     lbl_friends:        'ДРУЗІ',
     lbl_invited:        'ЗАПРОШЕНІ',
@@ -2512,8 +2564,8 @@ const NAVA_TRANSLATIONS = {
     // Peace — Behind the tap
     peace_behind_tap:    'ЗА ГРЮ У ТАП',
     peace_every_tap_builds: 'КОЖЕН ТАП<br>БУДУЄ ЦЕ',
-    peace_taps_funding:  'Ваші тапи фінансують <strong style="color:#6DD5F5;">Фонд NAVA PEACE</strong> — перший фонд, створений населенням світу, в солідарності.',
-    peace_arch_desc:     'Ми будуємо <strong style="color:#fff;">NAVA PEACE ARCH</strong> — корабель, перетворений на плавуче місто життя. Лікарня. Лабораторія 3D-протезування. Команда з відновлення. Плавуча ферма. Кухня. Житло для волонтерів. Працює на водні.',
+    peace_taps_funding:  'Ваші тапи фінансують <strong style="color:var(--nv-t-bl,#6DD5F5);">Фонд NAVA PEACE</strong> — перший фонд, створений населенням світу, в солідарності.',
+    peace_arch_desc:     'Ми будуємо <strong style="color:var(--nv-t-w,#fff);">NAVA PEACE ARCH</strong> — корабель, перетворений на плавуче місто життя. Лікарня. Лабораторія 3D-протезування. Команда з відновлення. Плавуча ферма. Кухня. Житло для волонтерів. Працює на водні.',
     peace_sail_in:       'ПРИБУТИ. ВІДНОВИТИ. РУШИТИ. ПОВТОРИТИ.',
     peace_discover_project: 'ДІЗНАТИСЯ ПРО ПОВНИЙ ПРОЕКТ →',
     // Profile — Support the mission

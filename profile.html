@@ -17,6 +17,8 @@
   <meta charset="UTF-8" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.amcharts.com https://telegram.org https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://static.cloudflareinsights.com; frame-ancestors 'none';" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="theme.css?v=1" /><!-- nv-theme-hook -->
+  <script src="theme.js?v=1"></script><!-- nv-theme-hook -->
   <title>NAVA PEACE – Profile</title>
   <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
@@ -38,7 +40,7 @@
   <meta name="twitter:image" content="https://nava-peace.app/og-image.png" />
   <style>
     @font-face {
-      font-family: 'Nasalization';
+      font-family: var(--nv-font,'Nasalization');
       font-style: normal;
       font-weight: 400;
       font-display: swap;
@@ -55,18 +57,18 @@
   <style>
     *, *::before, *::after {
       box-sizing: border-box; margin: 0; padding: 0;
-      font-family: 'Nasalization', Arial, sans-serif;
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
     }
 
     body {
-      font-family: 'Nasalization', Arial, sans-serif;
-      background: radial-gradient(ellipse at 50% 30%, #6DD5F5 0%, #3AACDF 45%, #1E8EC4 100%);
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
+      background: radial-gradient(ellipse at 50% 30%, var(--nv-g-bl,#6DD5F5) 0%, var(--nv-g-bm,#3AACDF) 45%, var(--nv-g-bd,#1E8EC4) 100%);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: 20px 16px 110px;
-      color: #fff;
+      color: var(--nv-t-w,#fff);
     }
 
     /* ── HEADER ── */
@@ -82,23 +84,23 @@
     .header img {
       width: 60px; height: 60px;
       object-fit: contain;
-      filter: drop-shadow(0 3px 10px rgba(255,255,255,0.4));
+      filter: drop-shadow(0 3px 10px rgba(var(--nv-s-w-rgb,255,255,255),0.4));
       margin-bottom: 6px;
     }
 
     .header h1 {
       font-size: 28px;
       font-weight: 400;
-      letter-spacing: 7px;
+      letter-spacing: calc(7px * var(--nv-ls,1));
       padding-left: 7px; /* compensate trailing letter-spacing for visual centering */
       text-align: center;
-      text-shadow: 0 1px 16px rgba(255,255,255,0.4);
+      text-shadow: 0 1px 16px rgba(var(--nv-s-w-rgb,255,255,255),0.4);
     }
 
     .header .tagline {
       font-size: 14px;
-      letter-spacing: 3.5px;
-      color: #F0EDE4;
+      letter-spacing: calc(3.5px * var(--nv-ls,1));
+      color: var(--nv-t-w,#F0EDE4);
       opacity: 0.8;
       margin-top: 4px;
     }
@@ -107,21 +109,21 @@
     .card {
       width: 100%;
       max-width: 600px;
-      background: rgba(247,247,241,0.12);
-      border: 1.5px solid rgba(255,255,255,0.35);
-      border-radius: 20px;
+      background: rgba(var(--nv-b-w-rgb,247,247,241),0.12);
+      border: 1.5px solid rgba(var(--nv-l-w-rgb,255,255,255),0.35);
+      border-radius: calc(20px * var(--nv-r,1));
       padding: 13px 20px;
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
-      box-shadow: 0 8px 40px rgba(20,80,130,0.2);
+      box-shadow: 0 8px 40px rgba(var(--nv-s-bd-rgb,20,80,130),0.2);
       margin-bottom: 14px;
     }
 
     .section-title {
       font-size: 16px;
-      letter-spacing: 3px;
+      letter-spacing: calc(3px * var(--nv-ls,1));
       text-transform: uppercase;
-      color: #fff;
+      color: var(--nv-t-w,#fff);
       margin-bottom: 12px;
       text-align: center;
       font-weight: 600;
@@ -137,9 +139,9 @@
 
     .bar-label {
       font-size: 14px;
-      letter-spacing: 1.5px;
+      letter-spacing: calc(1.5px * var(--nv-ls,1));
       text-transform: uppercase;
-      color: rgba(255,255,255,0.75);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.75);
       width: 70px;
       flex-shrink: 0;
       text-align: right;
@@ -148,23 +150,23 @@
     .bar-track {
       flex: 1;
       height: 18px;
-      background: rgba(255,255,255,0.1);
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.1);
       border-radius: 11px;
       overflow: hidden;
     }
 
     .bar-fill {
       height: 100%;
-      background: rgba(255,255,255,0.75);
-      border-radius: 11px;
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.75);
+      border-radius: calc(11px * var(--nv-r,1));
       transition: width 1s ease;
       width: 0%;
     }
 
     .bar-count {
       font-size: 14px;
-      letter-spacing: 1px;
-      color: #fff;
+      letter-spacing: calc(1px * var(--nv-ls,1));
+      color: var(--nv-t-w,#fff);
       width: 36px;
       flex-shrink: 0;
       text-align: left;
@@ -183,24 +185,24 @@
       flex-direction: column;
       align-items: center;
       gap: 4px;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.3);
-      border-radius: 14px;
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.12);
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.3);
+      border-radius: calc(14px * var(--nv-r,1));
       padding: 10px 16px;
       min-width: 100px;
     }
 
     .gender-pill .pct {
       font-size: 24px;
-      letter-spacing: 1px;
-      color: #fff;
+      letter-spacing: calc(1px * var(--nv-ls,1));
+      color: var(--nv-t-w,#fff);
     }
 
     .gender-pill .lbl {
       font-size: 14px;
-      letter-spacing: 1.5px;
+      letter-spacing: calc(1.5px * var(--nv-ls,1));
       text-transform: uppercase;
-      color: rgba(255,255,255,0.6);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.6);
     }
 
     /* ── DOVE COUNTER ── */
@@ -214,23 +216,23 @@
     .dove-icon {
       font-size: 32px;
       line-height: 1;
-      filter: brightness(0) invert(1) drop-shadow(0 0 14px rgba(255,255,255,0.5));
+      filter: brightness(0) invert(var(--nv-inv,1)) drop-shadow(0 0 14px rgba(var(--nv-s-w-rgb,255,255,255),0.5));
       margin-bottom: 2px;
     }
 
     .dove-total {
       font-size: 52px;
-      letter-spacing: 2px;
-      color: #fff;
-      text-shadow: 0 0 30px rgba(255,255,255,0.5);
+      letter-spacing: calc(2px * var(--nv-ls,1));
+      color: var(--nv-t-w,#fff);
+      text-shadow: 0 0 30px rgba(var(--nv-s-w-rgb,255,255,255),0.5);
       line-height: 1;
     }
 
     .dove-label {
       font-size: 14px;
-      letter-spacing: 3px;
+      letter-spacing: calc(3px * var(--nv-ls,1));
       text-transform: uppercase;
-      color: rgba(255,255,255,0.8);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.8);
       margin-bottom: 10px;
     }
 
@@ -240,7 +242,7 @@
       justify-content: center;
       align-items: center;
       width: 100%;
-      border-top: 1px solid rgba(255,255,255,0.15);
+      border-top: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.15);
       padding-top: 10px;
     }
 
@@ -254,22 +256,22 @@
 
     .dove-part .num {
       font-size: 18px;
-      letter-spacing: 1px;
-      color: rgba(255,255,255,0.9);
+      letter-spacing: calc(1px * var(--nv-ls,1));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.9);
     }
 
     .dove-part .lbl {
       font-size: 13px;
-      letter-spacing: 1px;
+      letter-spacing: calc(1px * var(--nv-ls,1));
       text-transform: uppercase;
-      color: rgba(255,255,255,0.7);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.7);
       text-align: center;
     }
 
     .dove-divider {
       width: 1px;
       height: 34px;
-      background: rgba(255,255,255,0.18);
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.18);
       flex-shrink: 0;
       margin: 0 10px;
     }
@@ -283,32 +285,32 @@
     }
 
     .my-badge {
-      background: rgba(255,255,255,0.15);
-      border: 1.5px solid rgba(255,255,255,0.4);
-      border-radius: 12px;
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.15);
+      border: 1.5px solid rgba(var(--nv-l-w-rgb,255,255,255),0.4);
+      border-radius: calc(12px * var(--nv-r,1));
       padding: 8px 16px;
       text-align: center;
     }
 
     .my-badge .val {
       font-size: 20px;
-      letter-spacing: 1px;
-      color: #fff;
+      letter-spacing: calc(1px * var(--nv-ls,1));
+      color: var(--nv-t-w,#fff);
     }
 
     .my-badge .key {
       font-size: 13px;
-      letter-spacing: 2px;
+      letter-spacing: calc(2px * var(--nv-ls,1));
       text-transform: uppercase;
-      color: rgba(255,255,255,0.8);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.8);
       margin-top: 4px;
     }
 
     .no-data {
       text-align: center;
       font-size: 13px;
-      letter-spacing: 2px;
-      color: rgba(255,255,255,0.7);
+      letter-spacing: calc(2px * var(--nv-ls,1));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.7);
       padding: 10px 0;
     }
 
@@ -324,27 +326,27 @@
     .card-header .section-title { margin-bottom: 0; }
 
     .edit-btn {
-      background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.35);
-      border-radius: 20px;
-      color: rgba(255,255,255,0.75);
-      font-family: 'Nasalization', Arial, sans-serif;
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.15);
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.35);
+      border-radius: calc(20px * var(--nv-r,1));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.75);
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
       font-size: 13px;
-      letter-spacing: 2px;
+      letter-spacing: calc(2px * var(--nv-ls,1));
       text-transform: uppercase;
       padding: 5px 14px;
       cursor: pointer;
       transition: background 0.2s;
     }
 
-    .edit-btn:hover { background: rgba(255,255,255,0.25); }
+    .edit-btn:hover { background: rgba(var(--nv-b-w-rgb,255,255,255),0.25); }
 
     .edit-form {
       display: none;
       flex-direction: column;
       gap: 14px;
       margin-top: 20px;
-      border-top: 1px solid rgba(255,255,255,0.2);
+      border-top: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.2);
       padding-top: 20px;
     }
     .edit-row-2col {
@@ -361,20 +363,20 @@
 
     .edit-field label {
       font-size: 13px;
-      letter-spacing: 2.5px;
+      letter-spacing: calc(2.5px * var(--nv-ls,1));
       text-transform: uppercase;
-      color: rgba(255,255,255,0.5);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.5);
     }
 
     .edit-field input,
     .edit-field select {
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.3);
-      border-radius: 10px;
-      color: #fff;
-      font-family: 'Nasalization', Arial, sans-serif;
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.12);
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.3);
+      border-radius: calc(10px * var(--nv-r,1));
+      color: var(--nv-t-w,#fff);
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
       font-size: 15px;
-      letter-spacing: 2px;
+      letter-spacing: calc(2px * var(--nv-ls,1));
       text-transform: uppercase;
       padding: 10px 14px;
       outline: none;
@@ -382,23 +384,23 @@
       transition: border-color 0.2s;
     }
 
-    .edit-field input::placeholder { color: rgba(255,255,255,0.3); }
+    .edit-field input::placeholder { color: rgba(var(--nv-t-w-rgb,255,255,255),0.3); }
     .edit-field input:focus,
-    .edit-field select:focus { border-color: rgba(255,255,255,0.65); }
+    .edit-field select:focus { border-color: rgba(var(--nv-l-w-rgb,255,255,255),0.65); }
 
     .edit-field select option {
-      background: #1E8EC4;
-      color: #fff;
+      background: var(--nv-b-bd,#1E8EC4);
+      color: var(--nv-on-bd,#fff);
     }
 
     .save-btn {
-      background: rgba(255,255,255,0.9);
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.9);
       border: none;
-      border-radius: 12px;
-      color: #1A6E96;
-      font-family: 'Nasalization', Arial, sans-serif;
+      border-radius: calc(12px * var(--nv-r,1));
+      color: var(--nv-t-bd,#1A6E96);
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
       font-size: 13px;
-      letter-spacing: 3px;
+      letter-spacing: calc(3px * var(--nv-ls,1));
       text-transform: uppercase;
       padding: 12px;
       cursor: pointer;
@@ -412,9 +414,9 @@
 
     /* Code brut — partage communauté */
     .ref-code-block {
-      background: rgba(58,172,223,0.12);
-      border: 1.5px solid rgba(109,213,245,0.45);
-      border-radius: 16px;
+      background: rgba(var(--nv-b-bm-rgb,58,172,223),0.12);
+      border: 1.5px solid rgba(var(--nv-l-bl-rgb,109,213,245),0.45);
+      border-radius: calc(16px * var(--nv-r,1));
       padding: 16px 18px 12px;
       margin-bottom: 16px;
       text-align: center;
@@ -422,8 +424,8 @@
     .ref-code-label {
       display: block;
       font-size: 10px;
-      letter-spacing: 2.5px;
-      color: rgba(255,255,255,0.45);
+      letter-spacing: calc(2.5px * var(--nv-ls,1));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.45);
       margin-bottom: 10px;
       text-transform: uppercase;
     }
@@ -436,15 +438,15 @@
     .ref-code-text {
       font-size: 30px;
       font-weight: 900;
-      letter-spacing: 5px;
-      color: #6DD5F5;
+      letter-spacing: calc(5px * var(--nv-ls,1));
+      color: var(--nv-t-bl,#6DD5F5);
       font-family: 'Courier New', monospace;
     }
     .ref-code-hint {
       display: block;
       font-size: 11px;
-      letter-spacing: 1px;
-      color: rgba(255,255,255,0.35);
+      letter-spacing: calc(1px * var(--nv-ls,1));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.35);
       margin-top: 10px;
       line-height: 1.5;
     }
@@ -453,9 +455,9 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.25);
-      border-radius: 12px;
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.1);
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.25);
+      border-radius: calc(12px * var(--nv-r,1));
       padding: 10px 14px;
       margin-bottom: 20px;
     }
@@ -463,21 +465,21 @@
     .invite-link-row span {
       flex: 1;
       font-size: 14px;
-      letter-spacing: 1.5px;
-      color: rgba(255,255,255,0.85);
+      letter-spacing: calc(1.5px * var(--nv-ls,1));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.85);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
     .copy-btn {
-      background: rgba(255,255,255,0.9);
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.9);
       border: none;
-      border-radius: 8px;
-      color: #1A6E96;
-      font-family: 'Nasalization', Arial, sans-serif;
+      border-radius: calc(8px * var(--nv-r,1));
+      color: var(--nv-t-bd,#1A6E96);
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
       font-size: 13px;
-      letter-spacing: 2px;
+      letter-spacing: calc(2px * var(--nv-ls,1));
       text-transform: uppercase;
       padding: 6px 12px;
       cursor: pointer;
@@ -495,20 +497,20 @@
     }
 
     .qr-wrap > div {
-      border-radius: 16px;
+      border-radius: calc(16px * var(--nv-r,1));
       overflow: hidden;
       padding: 10px;
       min-width: 222px;
       min-height: 222px;
       box-sizing: border-box;
-      background: #fff;
+      background: var(--nv-b-w,#fff);
     }
 
     /* ── Custom invite message ── */
     .invite-msg-wrap {
-      background: rgba(255,255,255,0.07);
-      border: 1px solid rgba(255,255,255,0.18);
-      border-radius: 14px;
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.07);
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.18);
+      border-radius: calc(14px * var(--nv-r,1));
       padding: 14px;
       margin-bottom: 16px;
     }
@@ -521,19 +523,19 @@
 
     .invite-msg-header > span {
       font-size: 13px;
-      letter-spacing: 2.5px;
-      color: rgba(255,255,255,0.7);
+      letter-spacing: calc(2.5px * var(--nv-ls,1));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.7);
       text-transform: uppercase;
     }
 
     .random-msg-btn {
-      background: rgba(255,255,255,0.18);
-      border: 1.5px solid rgba(255,255,255,0.55);
-      border-radius: 20px;
-      color: #fff;
-      font-family: 'Nasalization', Arial, sans-serif;
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.18);
+      border: 1.5px solid rgba(var(--nv-l-w-rgb,255,255,255),0.55);
+      border-radius: calc(20px * var(--nv-r,1));
+      color: var(--nv-t-w,#fff);
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
       font-size: 13px;
-      letter-spacing: 2px;
+      letter-spacing: calc(2px * var(--nv-ls,1));
       padding: 8px 16px;
       cursor: pointer;
       transition: background 0.2s, transform 0.15s;
@@ -541,18 +543,18 @@
       flex-shrink: 0;
     }
 
-    .random-msg-btn:hover { background: rgba(255,255,255,0.3); transform: scale(1.04); }
+    .random-msg-btn:hover { background: rgba(var(--nv-b-w-rgb,255,255,255),0.3); transform: scale(1.04); }
     .random-msg-btn:active { transform: scale(0.97); }
 
     .invite-msg-textarea {
       width: 100%;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 10px;
-      color: #fff;
-      font-family: 'Nasalization', Arial, sans-serif;
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.06);
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.15);
+      border-radius: calc(10px * var(--nv-r,1));
+      color: var(--nv-t-w,#fff);
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
       font-size: 14px;
-      letter-spacing: 1px;
+      letter-spacing: calc(1px * var(--nv-ls,1));
       padding: 10px 12px;
       resize: none;
       min-height: 68px;
@@ -561,36 +563,36 @@
       transition: border-color 0.2s;
     }
 
-    .invite-msg-textarea:focus { border-color: rgba(58,172,223,0.6); }
-    .invite-msg-textarea::placeholder { color: rgba(255,255,255,0.28); }
+    .invite-msg-textarea:focus { border-color: rgba(var(--nv-l-bm-rgb,58,172,223),0.6); }
+    .invite-msg-textarea::placeholder { color: rgba(var(--nv-t-w-rgb,255,255,255),0.28); }
 
     /* ── Share card button ── */
     .share-card-btn {
       width: 100%;
       padding: 15px;
-      border-radius: 14px;
+      border-radius: calc(14px * var(--nv-r,1));
       border: none;
       cursor: pointer;
-      background: linear-gradient(135deg, #3AACDF, #1E6E9A);
-      color: #fff;
-      font-family: 'Nasalization', Arial, sans-serif;
+      background: linear-gradient(135deg, var(--nv-b-bm,#3AACDF), var(--nv-b-bm2,#1E6E9A));
+      color: var(--nv-on-bm,#fff);
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
       font-size: 14px;
-      letter-spacing: 3px;
+      letter-spacing: calc(3px * var(--nv-ls,1));
       margin-bottom: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
       position: relative;
-      box-shadow: 0 0 18px 4px rgba(58,172,223,0.45), 0 0 40px 10px rgba(58,172,223,0.18);
+      box-shadow: 0 0 18px 4px rgba(var(--nv-s-bm-rgb,58,172,223),0.45), 0 0 40px 10px rgba(var(--nv-s-bm-rgb,58,172,223),0.18);
       animation: halo-pulse 2.4s ease-in-out infinite;
       transition: opacity 0.2s;
     }
 
     @keyframes halo-pulse {
-      0%   { box-shadow: 0 0 14px 3px rgba(58,172,223,0.40), 0 0 32px 8px rgba(58,172,223,0.14); }
-      50%  { box-shadow: 0 0 26px 8px rgba(58,172,223,0.70), 0 0 55px 18px rgba(58,172,223,0.28); }
-      100% { box-shadow: 0 0 14px 3px rgba(58,172,223,0.40), 0 0 32px 8px rgba(58,172,223,0.14); }
+      0%   { box-shadow: 0 0 14px 3px rgba(var(--nv-s-bm-rgb,58,172,223),0.40), 0 0 32px 8px rgba(var(--nv-s-bm-rgb,58,172,223),0.14); }
+      50%  { box-shadow: 0 0 26px 8px rgba(var(--nv-s-bm-rgb,58,172,223),0.70), 0 0 55px 18px rgba(var(--nv-s-bm-rgb,58,172,223),0.28); }
+      100% { box-shadow: 0 0 14px 3px rgba(var(--nv-s-bm-rgb,58,172,223),0.40), 0 0 32px 8px rgba(var(--nv-s-bm-rgb,58,172,223),0.14); }
     }
 
     .share-card-btn:hover { opacity: 0.88; }
@@ -601,28 +603,28 @@
       flex-direction: column;
       align-items: center;
       gap: 4px;
-      border-top: 1px solid rgba(255,255,255,0.2);
+      border-top: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.2);
       padding-top: 18px;
     }
 
     .points-num {
       font-size: 48px;
-      letter-spacing: 2px;
-      color: #fff;
-      text-shadow: 0 0 20px rgba(255,255,255,0.4);
+      letter-spacing: calc(2px * var(--nv-ls,1));
+      color: var(--nv-t-w,#fff);
+      text-shadow: 0 0 20px rgba(var(--nv-s-w-rgb,255,255,255),0.4);
     }
 
     .points-lbl {
       font-size: 14px;
-      letter-spacing: 2px;
+      letter-spacing: calc(2px * var(--nv-ls,1));
       text-transform: uppercase;
-      color: rgba(255,255,255,0.55);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.55);
     }
 
     .referrals-lbl {
       font-size: 14px;
-      letter-spacing: 1.5px;
-      color: rgba(255,255,255,0.4);
+      letter-spacing: calc(1.5px * var(--nv-ls,1));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.4);
       margin-top: 2px;
     }
 
@@ -645,7 +647,7 @@
     .points-divider {
       width: 1px;
       height: 70px;
-      background: rgba(255,255,255,0.2);
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.2);
       flex-shrink: 0;
       margin: 0 12px;
     }
@@ -656,7 +658,7 @@
       position: fixed;
       inset: 0;
       z-index: 600;
-      background: rgba(10,50,90,0.4);
+      background: rgba(var(--nv-b-nv-rgb,10,50,90),0.4);
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
       align-items: center;
@@ -670,35 +672,35 @@
       to   { opacity: 1; }
     }
     .dove-popup {
-      background: rgba(30,100,160,0.92);
-      border: 1.5px solid rgba(255,255,255,0.45);
-      border-radius: 24px;
+      background: rgba(var(--nv-b-bd-rgb,30,100,160),0.92);
+      border: 1.5px solid rgba(var(--nv-l-w-rgb,255,255,255),0.45);
+      border-radius: calc(24px * var(--nv-r,1));
       padding: 28px 24px 24px;
       max-width: 310px;
       width: 100%;
       text-align: center;
-      box-shadow: 0 14px 55px rgba(10,40,100,0.55);
+      box-shadow: 0 14px 55px rgba(var(--nv-s-bd-rgb,10,40,100),0.55);
       animation: popInD 0.25s cubic-bezier(.34,1.56,.64,1) both;
     }
     @keyframes popInD {
       from { opacity: 0; transform: scale(0.85); }
       to   { opacity: 1; transform: scale(1); }
     }
-    .dove-popup-icon  { font-size: 40px; display: block; margin-bottom: 8px; filter: brightness(0) invert(1) drop-shadow(0 0 12px rgba(255,255,255,0.5)); }
-    .dove-popup-title { font-size: 14px; letter-spacing: 4px; color: rgba(255,255,255,0.5); text-transform: uppercase; margin-bottom: 4px; }
-    .dove-popup-total { font-size: 58px; letter-spacing: 2px; color: #fff; text-shadow: 0 0 28px rgba(255,255,255,0.5); display: block; line-height: 1; margin-bottom: 18px; }
+    .dove-popup-icon  { font-size: 40px; display: block; margin-bottom: 8px; filter: brightness(0) invert(var(--nv-inv,1)) drop-shadow(0 0 12px rgba(var(--nv-s-w-rgb,255,255,255),0.5)); }
+    .dove-popup-title { font-size: 14px; letter-spacing: calc(4px * var(--nv-ls,1)); color: rgba(var(--nv-t-w-rgb,255,255,255),0.5); text-transform: uppercase; margin-bottom: 4px; }
+    .dove-popup-total { font-size: 58px; letter-spacing: calc(2px * var(--nv-ls,1)); color: var(--nv-t-w,#fff); text-shadow: 0 0 28px rgba(var(--nv-s-w-rgb,255,255,255),0.5); display: block; line-height: 1; margin-bottom: 18px; }
 
     /* stacked bar */
     .dove-bar-wrap  { width: 100%; margin-bottom: 10px; }
-    .dove-bar-track { width: 100%; height: 14px; border-radius: 7px; background: rgba(255,255,255,0.1); overflow: hidden; display: flex; }
-    .dove-bar-own   { height: 100%; background: rgba(255,255,255,0.9); border-radius: 7px 0 0 7px; transition: width 0.8s ease; }
-    .dove-bar-ref   { height: 100%; background: rgba(255,255,255,0.4); border-radius: 0 7px 7px 0; transition: width 0.8s ease; }
+    .dove-bar-track { width: 100%; height: 14px; border-radius: 7px; background: rgba(var(--nv-b-w-rgb,255,255,255),0.1); overflow: hidden; display: flex; }
+    .dove-bar-own   { height: 100%; background: rgba(var(--nv-b-w-rgb,255,255,255),0.9); border-radius: calc(7px * var(--nv-r,1)) 0 0 calc(7px * var(--nv-r,1)); transition: width 0.8s ease; }
+    .dove-bar-ref   { height: 100%; background: rgba(var(--nv-b-w-rgb,255,255,255),0.4); border-radius: 0 calc(7px * var(--nv-r,1)) calc(7px * var(--nv-r,1)) 0; transition: width 0.8s ease; }
     .dove-bar-legend { display: flex; justify-content: space-between; margin-top: 8px; }
-    .dove-bar-legend span { font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.45); }
+    .dove-bar-legend span { font-size: 13px; letter-spacing: calc(1.5px * var(--nv-ls,1)); text-transform: uppercase; color: rgba(var(--nv-t-w-rgb,255,255,255),0.45); }
 
-    .dove-popup-desc { font-size: 14px; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); line-height: 1.9; text-transform: uppercase; margin-top: 14px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 14px; }
-    .dove-popup-close { display: block; margin: 18px auto 0; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; color: rgba(255,255,255,0.75); font-family: 'Nasalization', Arial, sans-serif; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; padding: 8px 22px; cursor: pointer; transition: background 0.2s; }
-    .dove-popup-close:hover { background: rgba(255,255,255,0.25); }
+    .dove-popup-desc { font-size: 14px; letter-spacing: calc(1.5px * var(--nv-ls,1)); color: rgba(var(--nv-t-w-rgb,255,255,255),0.75); line-height: 1.9; text-transform: uppercase; margin-top: 14px; border-top: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.15); padding-top: 14px; }
+    .dove-popup-close { display: block; margin: 18px auto 0; background: rgba(var(--nv-b-w-rgb,255,255,255),0.14); border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.3); border-radius: calc(20px * var(--nv-r,1)); color: rgba(var(--nv-t-w-rgb,255,255,255),0.75); font-family: var(--nv-font,'Nasalization', Arial, sans-serif); font-size: 13px; letter-spacing: calc(3px * var(--nv-ls,1)); text-transform: uppercase; padding: 8px 22px; cursor: pointer; transition: background 0.2s; }
+    .dove-popup-close:hover { background: rgba(var(--nv-b-w-rgb,255,255,255),0.25); }
 
     /* make dove card feel tappable */
     .dove-card-inner { cursor: pointer; -webkit-tap-highlight-color: transparent; }
@@ -711,10 +713,10 @@
       display: flex;
       justify-content: space-around;
       align-items: center;
-      background: rgba(20, 90, 140, 0.82);
+      background: rgba(var(--nv-b-bd-rgb,20, 90, 140), 0.82);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border-top: 1px solid rgba(255,255,255,0.2);
+      border-top: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.2);
       padding: 10px 0 24px;
       z-index: 200;
     }
@@ -725,14 +727,14 @@
       align-items: center;
       gap: 4px;
       text-decoration: none;
-      color: rgba(255,255,255,0.45);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.45);
       font-size: 13px;
-      letter-spacing: 2px;
+      letter-spacing: calc(2px * var(--nv-ls,1));
       text-transform: uppercase;
       transition: color 0.2s;
     }
 
-    .nav-item.active { color: #fff; }
+    .nav-item.active { color: var(--nv-t-w,#fff); }
     .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
 
     /* ── IDENTITY CARD ── */
@@ -740,27 +742,27 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.25);
-      border-radius: 14px;
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.1);
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.25);
+      border-radius: calc(14px * var(--nv-r,1));
       padding: 14px 18px;
       margin-bottom: 14px;
     }
-    .pseudo-icon { font-size: 22px; line-height: 1; filter: brightness(0) invert(1); }
+    .pseudo-icon { font-size: 22px; line-height: 1; filter: brightness(0) invert(var(--nv-inv,1)); }
     .pseudo-name {
       font-size: 14px;
-      letter-spacing: 1.5px;
-      color: #fff;
+      letter-spacing: calc(1.5px * var(--nv-ls,1));
+      color: var(--nv-t-w,#fff);
       flex: 1;
       text-transform: uppercase;
       word-break: break-all;
     }
     .pseudo-tag {
       font-size: 13px;
-      letter-spacing: 2px;
-      color: rgba(255,255,255,0.4);
-      background: rgba(255,255,255,0.1);
-      border-radius: 8px;
+      letter-spacing: calc(2px * var(--nv-ls,1));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.4);
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.1);
+      border-radius: calc(8px * var(--nv-r,1));
       padding: 3px 8px;
       text-transform: uppercase;
       flex-shrink: 0;
@@ -768,13 +770,13 @@
     .pseudo-edit-area { margin-bottom: 10px; }
     .pseudo-input {
       width: 100%;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.3);
-      border-radius: 12px;
-      color: #fff;
-      font-family: 'Nasalization', Arial, sans-serif;
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.12);
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.3);
+      border-radius: calc(12px * var(--nv-r,1));
+      color: var(--nv-t-w,#fff);
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
       font-size: 14px;
-      letter-spacing: 2px;
+      letter-spacing: calc(2px * var(--nv-ls,1));
       text-transform: uppercase;
       padding: 10px 14px;
       outline: none;
@@ -782,8 +784,8 @@
       transition: border-color 0.2s;
       box-sizing: border-box;
     }
-    .pseudo-input::placeholder { color: rgba(255,255,255,0.3); text-transform: none; }
-    .pseudo-input:focus { border-color: rgba(255,255,255,0.6); }
+    .pseudo-input::placeholder { color: rgba(var(--nv-t-w-rgb,255,255,255),0.3); text-transform: none; }
+    .pseudo-input:focus { border-color: rgba(var(--nv-l-w-rgb,255,255,255),0.6); }
     .pseudo-btn-row { display: flex; gap: 10px; }
     .pseudo-btn-row .save-btn { flex: 1; margin: 0; }
     .pseudo-btn-row .edit-btn { padding: 12px 16px; }
@@ -803,7 +805,7 @@
     .card-tap-header .section-title { margin-bottom: 0; }
     .card-chevron {
       position: absolute; right: 0;
-      font-size: 16px; color: rgba(255,255,255,0.5);
+      font-size: 16px; color: rgba(var(--nv-t-w-rgb,255,255,255),0.5);
       transition: transform 0.25s ease; user-select: none;
     }
     .card-collapse.open .card-chevron { transform: rotate(180deg); }
@@ -811,7 +813,7 @@
     /* ── CARD TITLE ICON ── */
     .title-icon {
       width: 16px; height: 16px;
-      fill: rgba(255,255,255,0.85);
+      fill: rgba(var(--nv-t-w-rgb,255,255,255),0.85);
       vertical-align: middle;
       margin-right: 8px;
       flex-shrink: 0;
@@ -825,14 +827,14 @@
       left: 0;
       background: none;
       border: none;
-      color: rgba(255,255,255,0.85);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.85);
       font-size: 18px;
       cursor: pointer;
       padding: 4px;
       line-height: 1;
       transition: color 0.2s;
     }
-    .id-info-btn:hover { color: #fff; }
+    .id-info-btn:hover { color: var(--nv-t-w,#fff); }
     #id-info-overlay {
       display: none;
       position: fixed;
@@ -845,9 +847,9 @@
     }
     #id-info-overlay.open { display: flex; }
     #id-info-card {
-      background: linear-gradient(145deg, rgba(20,55,100,0.98), rgba(10,30,65,0.98));
-      border: 1px solid rgba(109,213,245,0.25);
-      border-radius: 20px;
+      background: linear-gradient(145deg, rgba(var(--nv-b-bd-rgb,20,55,100),0.98), rgba(var(--nv-b-nv-rgb,10,30,65),0.98));
+      border: 1px solid rgba(var(--nv-l-bl-rgb,109,213,245),0.25);
+      border-radius: calc(20px * var(--nv-r,1));
       padding: 28px 24px;
       max-width: 340px;
       width: 100%;
@@ -867,14 +869,14 @@
     }
     .id-info-text p:first-child {
       font-size: 13px;
-      letter-spacing: 2.5px;
-      color: #6DD5F5;
+      letter-spacing: calc(2.5px * var(--nv-ls,1));
+      color: var(--nv-t-bl,#6DD5F5);
       margin: 0 0 4px;
       font-weight: 700;
     }
     .id-info-text p:last-child {
       font-size: 14px;
-      color: rgba(255,255,255,0.75);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.75);
       margin: 0;
       line-height: 1.55;
     }
@@ -884,14 +886,14 @@
       display: inline-flex; align-items: center; gap: 5px;
       margin-top: 10px;
       padding: 5px 14px;
-      border-radius: 20px;
+      border-radius: calc(20px * var(--nv-r,1));
       border: 1px solid;
-      font-family: 'Nasalization', Arial, sans-serif;
-      font-size: 14px; letter-spacing: 2px;
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
+      font-size: 14px; letter-spacing: calc(2px * var(--nv-ls,1));
       text-transform: uppercase; font-weight: 700;
     }
-    .admin-badge.super { background: rgba(255,200,50,0.15); border-color: rgba(255,200,50,0.5); color: #ffc832; }
-    .admin-badge.admin { background: rgba(100,160,255,0.15); border-color: rgba(100,160,255,0.4); color: #7ab4ff; }
+    .admin-badge.super { background: rgba(var(--nv-b-gd-rgb,255,200,50),0.15); border-color: rgba(var(--nv-l-gd-rgb,255,200,50),0.5); color: var(--nv-t-gd,#ffc832); }
+    .admin-badge.admin { background: rgba(var(--nv-b-bl-rgb,100,160,255),0.15); border-color: rgba(var(--nv-l-bl-rgb,100,160,255),0.4); color: var(--nv-t-bl,#7ab4ff); }
 
     /* ── EMAIL CARD ── */
     .email-status-row {
@@ -906,25 +908,25 @@
       align-items: center;
       gap: 6px;
       padding: 5px 14px;
-      border-radius: 20px;
+      border-radius: calc(20px * var(--nv-r,1));
       font-size: 13px;
-      letter-spacing: 2px;
+      letter-spacing: calc(2px * var(--nv-ls,1));
       font-weight: 700;
     }
     .email-status-badge.linked {
-      background: rgba(80,220,120,0.15);
-      border: 1px solid rgba(80,220,120,0.45);
-      color: #5fdf8f;
+      background: rgba(var(--nv-b-gr-rgb,80,220,120),0.15);
+      border: 1px solid rgba(var(--nv-l-gr-rgb,80,220,120),0.45);
+      color: var(--nv-t-gr,#5fdf8f);
     }
     .email-status-badge.not-linked {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.2);
-      color: rgba(255,255,255,0.45);
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.08);
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.2);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.45);
     }
     .email-address-display {
       font-size: 14px;
-      letter-spacing: 1.5px;
-      color: rgba(255,255,255,0.9);
+      letter-spacing: calc(1.5px * var(--nv-ls,1));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.9);
       margin-top: 8px;
       word-break: break-all;
     }
@@ -936,24 +938,24 @@
     }
     .email-input {
       width: 100%;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.3);
-      border-radius: 14px;
-      color: #fff;
-      font-family: 'Nasalization', Arial, sans-serif;
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.1);
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.3);
+      border-radius: calc(14px * var(--nv-r,1));
+      color: var(--nv-t-w,#fff);
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
       font-size: 14px;
-      letter-spacing: 1px;
+      letter-spacing: calc(1px * var(--nv-ls,1));
       padding: 12px 16px;
       outline: none;
       box-sizing: border-box;
       transition: border-color 0.2s;
     }
-    .email-input::placeholder { color: rgba(255,255,255,0.3); }
-    .email-input:focus { border-color: rgba(255,255,255,0.6); }
+    .email-input::placeholder { color: rgba(var(--nv-t-w-rgb,255,255,255),0.3); }
+    .email-input:focus { border-color: rgba(var(--nv-l-w-rgb,255,255,255),0.6); }
     .email-hint {
       font-size: 12px;
-      color: rgba(255,255,255,0.4);
-      letter-spacing: 1.5px;
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.4);
+      letter-spacing: calc(1.5px * var(--nv-ls,1));
       line-height: 1.5;
       text-align: center;
       font-family: Arial, sans-serif;
@@ -961,24 +963,24 @@
 
     /* ── EMAIL REQUIRED MODAL ── */
     #emailRequiredOverlay .email-modal-box {
-      background: linear-gradient(160deg,#0a1628,#0d2240);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 20px;
+      background: linear-gradient(160deg,var(--nv-b-nv,#0a1628),var(--nv-b-nv2,#0d2240));
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.15);
+      border-radius: calc(20px * var(--nv-r,1));
       padding: 28px 24px;
       width: 88%;
       max-width: 360px;
       text-align: center;
     }
     #emailRequiredOverlay .email-modal-title {
-      font-family: 'Nasalization', Arial, sans-serif;
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
       font-size: 14px;
-      letter-spacing: 3px;
-      color: #fff;
+      letter-spacing: calc(3px * var(--nv-ls,1));
+      color: var(--nv-t-w,#fff);
       margin: 0 0 6px;
     }
     #emailRequiredOverlay .email-modal-desc {
       font-size: 14px;
-      color: rgba(255,255,255,0.5);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.5);
       font-family: Arial, sans-serif;
       line-height: 1.55;
       margin: 0 0 20px;
@@ -987,13 +989,13 @@
     /* ── PEACE MESSAGE CARD ── */
     .peace-textarea {
       width: 100%;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.3);
-      border-radius: 14px;
-      color: #fff;
-      font-family: 'Nasalization', Arial, sans-serif;
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.1);
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.3);
+      border-radius: calc(14px * var(--nv-r,1));
+      color: var(--nv-t-w,#fff);
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
       font-size: 13px;
-      letter-spacing: 1.5px;
+      letter-spacing: calc(1.5px * var(--nv-ls,1));
       padding: 14px 16px;
       resize: none;
       height: 100px;
@@ -1002,13 +1004,13 @@
       box-sizing: border-box;
       line-height: 1.7;
     }
-    .peace-textarea::placeholder { color: rgba(255,255,255,0.3); }
-    .peace-textarea:focus { border-color: rgba(255,255,255,0.6); }
+    .peace-textarea::placeholder { color: rgba(var(--nv-t-w-rgb,255,255,255),0.3); }
+    .peace-textarea:focus { border-color: rgba(var(--nv-l-w-rgb,255,255,255),0.6); }
     .char-count {
       text-align: right;
       font-size: 13px;
-      letter-spacing: 1.5px;
-      color: rgba(255,255,255,0.35);
+      letter-spacing: calc(1.5px * var(--nv-ls,1));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.35);
       margin: 4px 0 14px;
     }
     .share-row {
@@ -1020,9 +1022,9 @@
     }
     .share-lbl {
       font-size: 14px;
-      letter-spacing: 2px;
+      letter-spacing: calc(2px * var(--nv-ls,1));
       text-transform: uppercase;
-      color: rgba(255,255,255,0.65);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.65);
     }
     .toggle-switch {
       position: relative;
@@ -1036,9 +1038,9 @@
       position: absolute;
       cursor: pointer;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(255,255,255,0.2);
-      border: 1px solid rgba(255,255,255,0.3);
-      border-radius: 27px;
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.2);
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.3);
+      border-radius: calc(27px * var(--nv-r,1));
       transition: 0.3s;
     }
     .toggle-slider:before {
@@ -1046,48 +1048,48 @@
       position: absolute;
       height: 21px; width: 21px;
       left: 3px; bottom: 3px;
-      background: rgba(255,255,255,0.8);
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.8);
       border-radius: 50%;
       transition: 0.3s;
     }
     .toggle-switch input:checked + .toggle-slider {
-      background: rgba(80,210,130,0.55);
-      border-color: rgba(80,210,130,0.4);
+      background: rgba(var(--nv-b-gr-rgb,80,210,130),0.55);
+      border-color: rgba(var(--nv-l-gr-rgb,80,210,130),0.4);
     }
     .toggle-switch input:checked + .toggle-slider:before {
       transform: translateX(23px);
-      background: #fff;
+      background: var(--nv-b-w,#fff);
     }
 
     /* ── REFERRALS BUTTON ── */
     .ref-see-btn {
       display: block;
       margin: 16px auto 0;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.28);
-      border-radius: 20px;
-      color: rgba(255,255,255,0.65);
-      font-family: 'Nasalization', Arial, sans-serif;
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.12);
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.28);
+      border-radius: calc(20px * var(--nv-r,1));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.65);
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
       font-size: 13px;
-      letter-spacing: 2.5px;
+      letter-spacing: calc(2.5px * var(--nv-ls,1));
       text-transform: uppercase;
       padding: 7px 18px;
       cursor: pointer;
       transition: background 0.2s;
     }
-    .ref-see-btn:hover { background: rgba(255,255,255,0.22); }
+    .ref-see-btn:hover { background: rgba(var(--nv-b-w-rgb,255,255,255),0.22); }
 
     /* ── PARRAIN CODE INPUT ── */
     .parrain-entry {
       margin-top: 16px;
       padding-top: 16px;
-      border-top: 1px solid rgba(255,255,255,0.08);
+      border-top: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.08);
     }
     .parrain-entry-label {
-      font-family: Nasalization, Arial, sans-serif;
+      font-family: var(--nv-font,Nasalization, Arial, sans-serif);
       font-size: 11px;
-      letter-spacing: 1.5px;
-      color: rgba(255,255,255,0.4);
+      letter-spacing: calc(1.5px * var(--nv-ls,1));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.4);
       text-transform: uppercase;
       text-align: center;
       margin: 0 0 10px;
@@ -1099,36 +1101,36 @@
     }
     .parrain-entry-input {
       flex: 1;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.18);
-      border-radius: 10px;
-      color: #fff;
-      font-family: Nasalization, Arial, sans-serif;
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.08);
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.18);
+      border-radius: calc(10px * var(--nv-r,1));
+      color: var(--nv-t-w,#fff);
+      font-family: var(--nv-font,Nasalization, Arial, sans-serif);
       font-size: 14px;
-      letter-spacing: 2px;
+      letter-spacing: calc(2px * var(--nv-ls,1));
       text-transform: uppercase;
       padding: 10px 14px;
       text-align: center;
       outline: none;
       transition: border-color 0.2s;
     }
-    .parrain-entry-input:focus { border-color: rgba(255,255,255,0.4); }
-    .parrain-entry-input::placeholder { color: rgba(255,255,255,0.22); letter-spacing: 1px; font-size: 12px; }
+    .parrain-entry-input:focus { border-color: rgba(var(--nv-l-w-rgb,255,255,255),0.4); }
+    .parrain-entry-input::placeholder { color: rgba(var(--nv-t-w-rgb,255,255,255),0.22); letter-spacing: calc(1px * var(--nv-ls,1)); font-size: 12px; }
     .parrain-entry-btn {
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.3);
-      border-radius: 10px;
-      color: #fff;
-      font-family: Nasalization, Arial, sans-serif;
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.12);
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.3);
+      border-radius: calc(10px * var(--nv-r,1));
+      color: var(--nv-t-w,#fff);
+      font-family: var(--nv-font,Nasalization, Arial, sans-serif);
       font-size: 12px;
-      letter-spacing: 1px;
+      letter-spacing: calc(1px * var(--nv-ls,1));
       text-transform: uppercase;
       padding: 10px 16px;
       cursor: pointer;
       white-space: nowrap;
       transition: background 0.2s;
     }
-    .parrain-entry-btn:hover { background: rgba(255,255,255,0.22); }
+    .parrain-entry-btn:hover { background: rgba(var(--nv-b-w-rgb,255,255,255),0.22); }
     .parrain-entry-btn:disabled { opacity: 0.4; cursor: default; }
     .parrain-entry-status {
       font-family: Arial, sans-serif;
@@ -1136,18 +1138,18 @@
       text-align: center;
       margin-top: 8px;
       min-height: 18px;
-      color: rgba(255,255,255,0.5);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.5);
     }
-    .parrain-entry-status.ok { color: #7fe8b0; }
-    .parrain-entry-status.err { color: #ff7f7f; }
+    .parrain-entry-status.ok { color: var(--nv-t-gr,#7fe8b0); }
+    .parrain-entry-status.err { color: var(--nv-t-rd,#ff7f7f); }
     .parrain-locked {
       font-family: Arial, sans-serif;
       font-size: 13px;
       text-align: center;
-      color: rgba(255,255,255,0.4);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.4);
       margin-top: 16px;
       padding-top: 16px;
-      border-top: 1px solid rgba(255,255,255,0.08);
+      border-top: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.08);
       line-height: 1.5;
     }
 
@@ -1157,7 +1159,7 @@
       position: fixed;
       inset: 0;
       z-index: 600;
-      background: rgba(10,50,90,0.4);
+      background: rgba(var(--nv-b-nv-rgb,10,50,90),0.4);
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
       align-items: center;
@@ -1168,25 +1170,25 @@
     .ref-overlay.open { display: flex; }
 
     .ref-popup {
-      background: rgba(30,100,160,0.92);
-      border: 1.5px solid rgba(255,255,255,0.45);
-      border-radius: 24px;
+      background: rgba(var(--nv-b-bd-rgb,30,100,160),0.92);
+      border: 1.5px solid rgba(var(--nv-l-w-rgb,255,255,255),0.45);
+      border-radius: calc(24px * var(--nv-r,1));
       padding: 24px 20px 20px;
       max-width: 340px;
       width: 100%;
       text-align: center;
-      box-shadow: 0 14px 55px rgba(10,40,100,0.55);
+      box-shadow: 0 14px 55px rgba(var(--nv-s-bd-rgb,10,40,100),0.55);
       animation: popInD 0.25s cubic-bezier(.34,1.56,.64,1) both;
       display: flex;
       flex-direction: column;
       max-height: 80vh;
     }
 
-    .ref-popup-icon { font-size: 36px; display: block; margin-bottom: 6px; filter: brightness(0) invert(1); }
+    .ref-popup-icon { font-size: 36px; display: block; margin-bottom: 6px; filter: brightness(0) invert(var(--nv-inv,1)); }
     .ref-popup-title {
       font-size: 14px;
-      letter-spacing: 4px;
-      color: rgba(255,255,255,0.5);
+      letter-spacing: calc(4px * var(--nv-ls,1));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.5);
       text-transform: uppercase;
       margin-bottom: 16px;
     }
@@ -1204,66 +1206,66 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.18);
-      border-radius: 12px;
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.1);
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.18);
+      border-radius: calc(12px * var(--nv-r,1));
       padding: 10px 16px;
       gap: 10px;
     }
     .ref-row-country {
       font-size: 14px;
-      letter-spacing: 1.5px;
-      color: rgba(255,255,255,0.85);
+      letter-spacing: calc(1.5px * var(--nv-ls,1));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.85);
       text-transform: uppercase;
       flex: 1;
       text-align: left;
     }
     .ref-row-doves {
       font-size: 14px;
-      letter-spacing: 1px;
-      color: rgba(255,255,255,0.55);
+      letter-spacing: calc(1px * var(--nv-ls,1));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.55);
       flex-shrink: 0;
     }
     .ref-empty {
       font-size: 14px;
-      letter-spacing: 1.5px;
-      color: rgba(255,255,255,0.4);
+      letter-spacing: calc(1.5px * var(--nv-ls,1));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.4);
       line-height: 2;
       padding: 20px 0;
     }
     .ref-remind-btn {
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.25);
-      border-radius: 8px;
-      color: rgba(255,255,255,0.75);
-      font-family: 'Nasalization', Arial, sans-serif;
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.12);
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.25);
+      border-radius: calc(8px * var(--nv-r,1));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.75);
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
       font-size: 13px;
-      letter-spacing: 1px;
+      letter-spacing: calc(1px * var(--nv-ls,1));
       padding: 5px 8px;
       cursor: pointer;
       flex-shrink: 0;
       transition: background 0.2s, color 0.2s;
       text-transform: uppercase;
     }
-    .ref-remind-btn:hover:not(:disabled) { background: rgba(255,255,255,0.22); }
+    .ref-remind-btn:hover:not(:disabled) { background: rgba(var(--nv-b-w-rgb,255,255,255),0.22); }
     .ref-remind-btn:disabled { opacity: 0.45; cursor: default; }
 
     /* ── STREAK PROGRESS ───────────────────────────────── */
     .streak-header { display:flex; align-items:baseline; gap:12px; margin-bottom:18px; }
-    .streak-num  { font-size:52px; font-weight:700; color:#fff; line-height:1; }
-    .streak-unit { font-size:13px; letter-spacing:3px; color:rgba(255,255,255,0.75); }
+    .streak-num  { font-size:52px; font-weight:700; color:var(--nv-t-w,#fff); line-height:1; }
+    .streak-unit { font-size:13px; letter-spacing:calc(3px * var(--nv-ls,1)); color:rgba(var(--nv-t-w-rgb,255,255,255),0.75); }
     .streak-bar-wrap { margin-bottom:20px; }
     .streak-bar-label {
       display:flex; justify-content:space-between;
-      font-size:14px; letter-spacing:2px; color:rgba(255,255,255,0.7);
+      font-size:14px; letter-spacing:calc(2px * var(--nv-ls,1)); color:rgba(var(--nv-t-w-rgb,255,255,255),0.7);
       margin-bottom:8px;
     }
     .streak-bar-track {
-      height:10px; background:rgba(255,255,255,0.15); border-radius:8px; overflow:hidden;
+      height:10px; background:rgba(var(--nv-b-w-rgb,255,255,255),0.15); border-radius:8px; overflow:hidden;
     }
     .streak-bar-fill {
-      height:100%; border-radius:8px;
-      background:linear-gradient(90deg,#6DD5F5,#fff);
+      height:100%; border-radius:calc(8px * var(--nv-r,1));
+      background:linear-gradient(90deg,var(--nv-b-bl,#6DD5F5),var(--nv-b-bl2,#fff));
       transition: width 1.2s cubic-bezier(.22,1,.36,1);
     }
     .streak-milestones {
@@ -1271,41 +1273,41 @@
     }
     .streak-milestone {
       flex:0 0 calc(33.33% - 5px); min-width:0; display:flex; flex-direction:column;
-      align-items:center; gap:4px; padding:10px 4px; border-radius:10px;
-      background:rgba(255,255,255,0.06);
-      border:1px solid rgba(255,255,255,0.15);
+      align-items:center; gap:4px; padding:10px 4px; border-radius:calc(10px * var(--nv-r,1));
+      background:rgba(var(--nv-b-w-rgb,255,255,255),0.06);
+      border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.15);
       transition: background 0.3s, border 0.3s;
       box-sizing:border-box;
     }
     .streak-milestone.done {
-      background:rgba(255,255,255,0.18);
-      border-color:rgba(255,255,255,0.4);
+      background:rgba(var(--nv-b-w-rgb,255,255,255),0.18);
+      border-color:rgba(var(--nv-l-w-rgb,255,255,255),0.4);
     }
     .streak-milestone.active {
-      background:rgba(109,213,245,0.22);
-      border-color:rgba(109,213,245,0.6);
-      box-shadow:0 0 14px rgba(109,213,245,0.25);
+      background:rgba(var(--nv-b-bl-rgb,109,213,245),0.22);
+      border-color:rgba(var(--nv-l-bl-rgb,109,213,245),0.6);
+      box-shadow:0 0 14px rgba(var(--nv-s-bl-rgb,109,213,245),0.25);
     }
-    .streak-milestone .ms-icon { font-size:18px; filter:brightness(0) invert(1); opacity:0.65; }
+    .streak-milestone .ms-icon { font-size:18px; filter:brightness(0) invert(var(--nv-inv,1)); opacity:0.65; }
     .streak-milestone.done .ms-icon,
     .streak-milestone.active .ms-icon { opacity:1; }
     .streak-milestone .ms-days {
-      font-size:20px; font-weight:700; color:rgba(255,255,255,0.65);
+      font-size:20px; font-weight:700; color:rgba(var(--nv-t-w-rgb,255,255,255),0.65);
       letter-spacing:0;
     }
     .streak-milestone.done .ms-days,
-    .streak-milestone.active .ms-days { color:#fff; }
+    .streak-milestone.active .ms-days { color:var(--nv-t-w,#fff); }
     .streak-milestone .ms-name {
-      font-size:9px; letter-spacing:1px; color:rgba(255,255,255,0.55);
+      font-size:9px; letter-spacing:calc(1px * var(--nv-ls,1)); color:rgba(var(--nv-t-w-rgb,255,255,255),0.55);
       text-align:center; line-height:1.3;
     }
-    .streak-milestone.done .ms-name { color:rgba(255,255,255,0.9); }
-    .streak-milestone.active .ms-name { color:#fff; }
+    .streak-milestone.done .ms-name { color:rgba(var(--nv-t-w-rgb,255,255,255),0.9); }
+    .streak-milestone.active .ms-name { color:var(--nv-t-w,#fff); }
     .streak-next-msg {
-      text-align:center; font-size:14px; letter-spacing:2px;
-      color:rgba(255,255,255,0.6); margin-top:16px; line-height:1.8;
+      text-align:center; font-size:14px; letter-spacing:calc(2px * var(--nv-ls,1));
+      color:rgba(var(--nv-t-w-rgb,255,255,255),0.6); margin-top:16px; line-height:1.8;
     }
-    .streak-next-msg strong { color:#fff; font-weight:700; }
+    .streak-next-msg strong { color:var(--nv-t-w,#fff); font-weight:700; }
 
     /* ── STREAK CELEBRATION ── */
     @keyframes streakParticle {
@@ -1333,9 +1335,9 @@
 
     /* ── STARS DONATION ──────────────────────────────────────── */
     .donation-tier {
-      background: rgba(255,255,255,0.14);
-      border: 1.5px solid rgba(255,255,255,0.35);
-      border-radius: 16px;
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.14);
+      border: 1.5px solid rgba(var(--nv-l-w-rgb,255,255,255),0.35);
+      border-radius: calc(16px * var(--nv-r,1));
       padding: 18px 18px;
       display: flex;
       align-items: center;
@@ -1345,10 +1347,10 @@
       position: relative;
       overflow: hidden;
     }
-    .donation-tier:active { background: rgba(255,255,255,0.22); }
+    .donation-tier:active { background: rgba(var(--nv-b-w-rgb,255,255,255),0.22); }
     .donation-tier.done {
-      border-color: rgba(255,215,0,0.7);
-      background: rgba(255,215,0,0.12);
+      border-color: rgba(var(--nv-l-gd-rgb,255,215,0),0.7);
+      background: rgba(var(--nv-b-gd-rgb,255,215,0),0.12);
       cursor: default;
     }
     .donation-tier-icon {
@@ -1359,26 +1361,26 @@
     }
     .donation-tier-info { flex: 1; }
     .donation-tier-title {
-      font-family: Nasalization, Arial, sans-serif;
+      font-family: var(--nv-font,Nasalization, Arial, sans-serif);
       font-size: 14px;
-      letter-spacing: 2px;
-      color: #fff;
+      letter-spacing: calc(2px * var(--nv-ls,1));
+      color: var(--nv-t-w,#fff);
       margin-bottom: 6px;
       text-shadow: 0 1px 4px rgba(0,0,0,0.3);
     }
     .donation-tier-desc {
       font-size: 13px;
-      color: rgba(255,255,255,0.8);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.8);
       font-family: Arial, sans-serif;
       line-height: 1.5;
     }
     .donation-tier-price {
-      font-family: Nasalization, Arial, sans-serif;
+      font-family: var(--nv-font,Nasalization, Arial, sans-serif);
       font-size: 15px;
-      color: #FFD700;
+      color: var(--nv-t-gd,#FFD700);
       white-space: nowrap;
       flex-shrink: 0;
-      text-shadow: 0 0 12px rgba(255,215,0,0.5);
+      text-shadow: 0 0 12px rgba(var(--nv-s-gd-rgb,255,215,0),0.5);
     }
     .donation-tier-done-badge {
       font-size: 22px;
@@ -1398,7 +1400,7 @@
     <img src="logo.png" alt="NAVA PEACE" />
     <h1>NAVA PEACE</h1>
     </a>
-    <p class="tagline" id="daily-quote" style="font-family:'Nasalization',Arial,sans-serif;font-size:13px;font-weight:bold;letter-spacing:2px;line-height:1.6;max-width:320px;text-align:center;opacity:1;color:#fff;text-transform:uppercase;text-wrap:balance;"></p>
+    <p class="tagline" id="daily-quote" style="font-family:var(--nv-font,'Nasalization',Arial,sans-serif);font-size:13px;font-weight:bold;letter-spacing:calc(2px * var(--nv-ls,1));line-height:1.6;max-width:320px;text-align:center;opacity:1;color:var(--nv-t-w,#fff);text-transform:uppercase;text-wrap:balance;"></p>
     <div id="lang-switcher" class="in-header"></div>
   </div>
 
@@ -1574,7 +1576,7 @@
       <p class="section-title"><svg class="title-icon" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg><span data-i18n="section_message">MY PEACE MESSAGE</span></p>
       <span class="card-chevron">▾</span>
     </div>
-    <p class="card-preview" id="msg-preview" style="font-size:13px;letter-spacing:1.5px;color:#fff;line-height:1.6;word-break:break-word;text-align:center;"></p>
+    <p class="card-preview" id="msg-preview" style="font-size:13px;letter-spacing:calc(1.5px * var(--nv-ls,1));color:var(--nv-t-w,#fff);line-height:1.6;word-break:break-word;text-align:center;"></p>
     <div class="card-expanded" id="msg-expanded">
       <textarea id="peace-message-input" class="peace-textarea" maxlength="200"
                 data-i18n-ph="msg_placeholder"
@@ -1639,35 +1641,35 @@
     </div>
     <div class="card-body">
       <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 0 8px;">
-        <span style="font-size:11px;letter-spacing:4px;color:rgba(255,200,60,0.55);font-family:'Nasalization',Arial,sans-serif;">MY BALANCE</span>
-        <span id="nava-profile-balance" style="font-family:'Nasalization',Arial,sans-serif;font-size:42px;font-weight:700;color:#FFD740;letter-spacing:1px;text-shadow:0 0 30px rgba(255,215,64,0.45);">—</span>
-        <span style="font-size:13px;letter-spacing:4px;color:rgba(255,200,60,0.5);font-family:'Nasalization',Arial,sans-serif;margin-bottom:6px;">NAVA</span>
+        <span style="font-size:11px;letter-spacing:calc(4px * var(--nv-ls,1));color:rgba(var(--nv-t-gd-rgb,255,200,60),0.55);font-family:var(--nv-font,'Nasalization',Arial,sans-serif);">MY BALANCE</span>
+        <span id="nava-profile-balance" style="font-family:var(--nv-font,'Nasalization',Arial,sans-serif);font-size:42px;font-weight:700;color:var(--nv-t-gd,#FFD740);letter-spacing:calc(1px * var(--nv-ls,1));text-shadow:0 0 30px rgba(var(--nv-s-gd-rgb,255,215,64),0.45);">—</span>
+        <span style="font-size:13px;letter-spacing:calc(4px * var(--nv-ls,1));color:rgba(var(--nv-t-gd-rgb,255,200,60),0.5);font-family:var(--nv-font,'Nasalization',Arial,sans-serif);margin-bottom:6px;">NAVA</span>
         <div style="display:flex;gap:24px;margin-top:4px;">
           <div style="text-align:center;">
-            <span id="nava-profile-phase" style="font-size:22px;font-weight:700;color:#FFD740;display:block;font-family:'Nasalization',Arial,sans-serif;">—</span>
-            <span style="font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.4);font-family:'Nasalization',Arial,sans-serif;">PHASE</span>
+            <span id="nava-profile-phase" style="font-size:22px;font-weight:700;color:var(--nv-t-gd,#FFD740);display:block;font-family:var(--nv-font,'Nasalization',Arial,sans-serif);">—</span>
+            <span style="font-size:10px;letter-spacing:calc(2px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.4);font-family:var(--nv-font,'Nasalization',Arial,sans-serif);">PHASE</span>
           </div>
-          <div style="width:1px;background:rgba(255,255,255,0.12);"></div>
+          <div style="width:1px;background:rgba(var(--nv-b-w-rgb,255,255,255),0.12);"></div>
           <div style="text-align:center;">
-            <span id="nava-profile-claims" style="font-size:22px;font-weight:700;color:rgba(255,200,60,0.8);display:block;font-family:'Nasalization',Arial,sans-serif;">—</span>
-            <span style="font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.4);font-family:'Nasalization',Arial,sans-serif;">DAYS MINED</span>
+            <span id="nava-profile-claims" style="font-size:22px;font-weight:700;color:rgba(var(--nv-t-gd-rgb,255,200,60),0.8);display:block;font-family:var(--nv-font,'Nasalization',Arial,sans-serif);">—</span>
+            <span style="font-size:10px;letter-spacing:calc(2px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.4);font-family:var(--nv-font,'Nasalization',Arial,sans-serif);">DAYS MINED</span>
           </div>
         </div>
-        <div id="nava-season-badge" style="display:none;margin-top:10px;padding:4px 16px;border-radius:20px;background:rgba(255,200,60,0.08);border:1px solid rgba(255,200,60,0.2);font-size:10px;letter-spacing:2px;color:rgba(255,200,60,0.55);font-family:'Nasalization',Arial,sans-serif;">
+        <div id="nava-season-badge" style="display:none;margin-top:10px;padding:4px 16px;border-radius:calc(20px * var(--nv-r,1));background:rgba(var(--nv-b-gd-rgb,255,200,60),0.08);border:1px solid rgba(var(--nv-l-gd-rgb,255,200,60),0.2);font-size:10px;letter-spacing:calc(2px * var(--nv-ls,1));color:rgba(var(--nv-t-gd-rgb,255,200,60),0.55);font-family:var(--nv-font,'Nasalization',Arial,sans-serif);">
           SEASON 1 · 180 DAYS
         </div>
       </div>
 
       <!-- NFT + Wallet quick stats (populated by loadNavaBalance) -->
       <div id="nava-extras" style="display:none;flex-direction:column;gap:7px;padding:0 4px 8px;">
-        <div style="height:1px;background:rgba(255,200,60,0.12);margin:2px 0 4px;"></div>
+        <div style="height:1px;background:rgba(var(--nv-b-gd-rgb,255,200,60),0.12);margin:2px 0 4px;"></div>
         <div id="nava-nft-row" style="display:none;flex-direction:row;justify-content:space-between;align-items:center;">
-          <span style="font-size:10px;letter-spacing:2px;color:rgba(255,200,60,0.45);font-family:'Nasalization',Arial,sans-serif;">MY NFT</span>
-          <span id="nava-nft-display" style="font-size:11px;font-weight:700;color:#FFD740;font-family:'Nasalization',Arial,sans-serif;"></span>
+          <span style="font-size:10px;letter-spacing:calc(2px * var(--nv-ls,1));color:rgba(var(--nv-t-gd-rgb,255,200,60),0.45);font-family:var(--nv-font,'Nasalization',Arial,sans-serif);">MY NFT</span>
+          <span id="nava-nft-display" style="font-size:11px;font-weight:700;color:var(--nv-t-gd,#FFD740);font-family:var(--nv-font,'Nasalization',Arial,sans-serif);"></span>
         </div>
         <div id="nava-wallet-row" style="display:none;flex-direction:row;justify-content:space-between;align-items:center;gap:8px;">
-          <span style="font-size:10px;letter-spacing:2px;color:rgba(255,200,60,0.45);font-family:'Nasalization',Arial,sans-serif;white-space:nowrap;">WALLET</span>
-          <span id="nava-wallet-display" style="font-size:11px;color:rgba(255,255,255,0.65);font-family:monospace;text-align:right;"></span>
+          <span style="font-size:10px;letter-spacing:calc(2px * var(--nv-ls,1));color:rgba(var(--nv-t-gd-rgb,255,200,60),0.45);font-family:var(--nv-font,'Nasalization',Arial,sans-serif);white-space:nowrap;">WALLET</span>
+          <span id="nava-wallet-display" style="font-size:11px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.65);font-family:monospace;text-align:right;"></span>
         </div>
       </div>
 
@@ -1763,6 +1765,21 @@
   </div>
 
 
+  <!-- APPEARANCE: theme picker --><!-- nv-theme-hook -->
+  <div class="card card-collapse" id="theme-card" onclick="toggleCard('theme-card')"><!-- nv-theme-hook -->
+    <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('theme-card',true)"><!-- nv-theme-hook -->
+      <p class="section-title"><svg class="title-icon" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16a5 5 0 0 0 5-5c0-4.42-4.03-8-9-8zm-5.5 9a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg><span data-i18n="theme_title">APPEARANCE</span></p><!-- nv-theme-hook -->
+      <span class="card-chevron">▾</span><!-- nv-theme-hook -->
+    </div><!-- nv-theme-hook -->
+    <div class="card-body"><!-- nv-theme-hook -->
+      <div class="nv-theme-list" role="radiogroup" aria-label="Theme"><!-- nv-theme-hook -->
+        <label class="nv-theme-opt"><span class="nv-theme-swatch nv-sky"></span><span class="nv-theme-txt"><span class="nv-theme-name">Sky</span><span class="nv-theme-desc" data-i18n="theme_sky_desc">Sky blue, the original look</span></span><input type="radio" name="nv-theme" value="sky" data-nv-theme /></label><!-- nv-theme-hook -->
+        <label class="nv-theme-opt"><span class="nv-theme-swatch nv-sanctuary"></span><span class="nv-theme-txt"><span class="nv-theme-name">Sanctuary</span><span class="nv-theme-desc" data-i18n="theme_sanctuary_desc">Dark and gold</span></span><input type="radio" name="nv-theme" value="sanctuary" data-nv-theme /></label><!-- nv-theme-hook -->
+        <label class="nv-theme-opt"><span class="nv-theme-swatch nv-field"></span><span class="nv-theme-txt"><span class="nv-theme-name">Field</span><span class="nv-theme-desc" data-i18n="theme_field_desc">Cream and forest green</span></span><input type="radio" name="nv-theme" value="field" data-nv-theme /></label><!-- nv-theme-hook -->
+      </div><!-- nv-theme-hook -->
+    </div><!-- nv-theme-hook -->
+  </div><!-- nv-theme-hook -->
+<!-- nv-theme-hook -->
   <!-- SUPPORT THE MISSION (Telegram Stars) -->
   <div class="card card-collapse" id="support-card" onclick="toggleCard('support-card')">
     <div class="card-tap-header" onclick="event.stopPropagation();toggleCard('support-card',true)">
@@ -1773,15 +1790,15 @@
       <span class="card-chevron">▾</span>
     </div>
     <div class="card-body">
-      <p data-i18n-html="support_mission_desc" style="font-family:Arial,sans-serif;font-size:15px;color:rgba(255,255,255,0.9);text-align:center;line-height:1.7;margin:0 0 18px;">
+      <p data-i18n-html="support_mission_desc" style="font-family:Arial,sans-serif;font-size:15px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.9);text-align:center;line-height:1.7;margin:0 0 18px;">
         NAVA PEACE is 100% independent.<br>
         If you believe in this mission, a coffee helps us keep building. ☕
       </p>
       <div id="support-tiers" style="display:flex;flex-direction:column;gap:10px;">
         <!-- rendered by initDonation() -->
-        <div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-family:Nasalization,Arial,sans-serif;font-size:13px;letter-spacing:2px;">LOADING…</div>
+        <div style="text-align:center;padding:20px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.3);font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:13px;letter-spacing:calc(2px * var(--nv-ls,1));">LOADING…</div>
       </div>
-      <p id="support-notg" data-i18n="support_stars_note" style="display:none;text-align:center;font-family:Arial,sans-serif;font-size:14px;color:rgba(255,255,255,0.35);margin-top:16px;line-height:1.5;">
+      <p id="support-notg" data-i18n="support_stars_note" style="display:none;text-align:center;font-family:Arial,sans-serif;font-size:14px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.35);margin-top:16px;line-height:1.5;">
         ⭐ Telegram Stars are only available inside the Telegram app.
       </p>
     </div>
@@ -1789,21 +1806,21 @@
 
   <!-- FEEDBACK BUTTON -->
   <div style="text-align:center;padding:18px 24px 28px;position:relative;">
-    <p id="feedbackInviteText" style="font-family:Nasalization,Arial,sans-serif;font-size:14px;letter-spacing:1.5px;color:rgba(255,255,255,0.65);text-transform:uppercase;margin:0 0 12px;">
+    <p id="feedbackInviteText" style="font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:14px;letter-spacing:calc(1.5px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.65);text-transform:uppercase;margin:0 0 12px;">
       🕊 A bug? A suggestion? We listen.
     </p>
     <div style="position:relative;display:inline-block;">
-      <button id="feedbackMainBtn" onclick="openFeedback()" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.35);border-radius:20px;color:rgba(255,255,255,0.9);font-family:Nasalization,Arial,sans-serif;font-size:14px;letter-spacing:2px;text-transform:uppercase;padding:12px 28px;cursor:pointer;transition:all 0.2s;">
+      <button id="feedbackMainBtn" onclick="openFeedback()" style="background:rgba(var(--nv-b-w-rgb,255,255,255),0.12);border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.35);border-radius:calc(20px * var(--nv-r,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.9);font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:14px;letter-spacing:calc(2px * var(--nv-ls,1));text-transform:uppercase;padding:12px 28px;cursor:pointer;transition:all 0.2s;">
         SEND FEEDBACK
       </button>
-      <span id="feedbackBadge" style="display:none;position:absolute;top:-6px;right:-6px;background:#ff5f5f;color:#fff;font-size:13px;font-weight:700;width:18px;height:18px;border-radius:50%;line-height:18px;text-align:center;">!</span>
+      <span id="feedbackBadge" style="display:none;position:absolute;top:-6px;right:-6px;background:var(--nv-b-rd,#ff5f5f);color:var(--nv-on-rd,#fff);font-size:13px;font-weight:700;width:18px;height:18px;border-radius:50%;line-height:18px;text-align:center;">!</span>
     </div>
   </div>
 
   <!-- EMAIL INFO POPUP -->
   <div id="email-info-overlay" onclick="closeEmailInfo()" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,0.72);align-items:center;justify-content:center;padding:24px;">
-    <div id="email-info-card" onclick="event.stopPropagation()" style="background:linear-gradient(145deg,rgba(20,55,100,0.98),rgba(10,30,65,0.98));border:1px solid rgba(109,213,245,0.25);border-radius:20px;padding:28px 24px;max-width:340px;width:100%;animation:celebPop 0.3s cubic-bezier(.22,1,.36,1) both;">
-      <p style="font-size:13px;letter-spacing:3px;color:#6DD5F5;margin:0 0 20px;text-align:center;">WHY LINK MY EMAIL?</p>
+    <div id="email-info-card" onclick="event.stopPropagation()" style="background:linear-gradient(145deg,rgba(var(--nv-b-bd-rgb,20,55,100),0.98),rgba(var(--nv-b-nv-rgb,10,30,65),0.98));border:1px solid rgba(var(--nv-l-bl-rgb,109,213,245),0.25);border-radius:calc(20px * var(--nv-r,1));padding:28px 24px;max-width:340px;width:100%;animation:celebPop 0.3s cubic-bezier(.22,1,.36,1) both;">
+      <p style="font-size:13px;letter-spacing:calc(3px * var(--nv-ls,1));color:var(--nv-t-bl,#6DD5F5);margin:0 0 20px;text-align:center;">WHY LINK MY EMAIL?</p>
 
       <div class="id-info-row">
         <div class="id-info-icon">🏅</div>
@@ -1837,7 +1854,7 @@
         </div>
       </div>
 
-      <button onclick="closeEmailInfo()" style="display:block;width:100%;margin-top:20px;background:rgba(109,213,245,0.12);border:1px solid rgba(109,213,245,0.35);border-radius:12px;color:#6DD5F5;font-family:Nasalization,Arial,sans-serif;font-size:13px;letter-spacing:2px;padding:12px;cursor:pointer;">GOT IT</button>
+      <button onclick="closeEmailInfo()" style="display:block;width:100%;margin-top:20px;background:rgba(var(--nv-b-bl-rgb,109,213,245),0.12);border:1px solid rgba(var(--nv-l-bl-rgb,109,213,245),0.35);border-radius:calc(12px * var(--nv-r,1));color:var(--nv-t-bl,#6DD5F5);font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:13px;letter-spacing:calc(2px * var(--nv-ls,1));padding:12px;cursor:pointer;">GOT IT</button>
     </div>
   </div>
 
@@ -1849,56 +1866,56 @@
       <input id="emailModal-input" type="email" class="email-input"
              placeholder="your@email.com" autocomplete="email" inputmode="email"
              style="margin-bottom:8px;" />
-      <p id="emailModal-status" style="font-size:13px;color:rgba(255,80,80,0.9);min-height:16px;margin:0 0 14px;font-family:Arial,sans-serif;letter-spacing:1px;"></p>
+      <p id="emailModal-status" style="font-size:13px;color:rgba(var(--nv-t-rd-rgb,255,80,80),0.9);min-height:16px;margin:0 0 14px;font-family:Arial,sans-serif;letter-spacing:calc(1px * var(--nv-ls,1));"></p>
       <div style="display:flex;gap:10px;justify-content:center;">
-        <button onclick="closeEmailModal()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;color:rgba(255,255,255,0.5);font-family:Nasalization,Arial,sans-serif;font-size:13px;letter-spacing:1.5px;padding:12px 20px;cursor:pointer;">CANCEL</button>
-        <button id="emailModal-save-btn" onclick="saveEmailFromModal()" style="background:rgba(100,160,255,0.2);border:1px solid rgba(100,160,255,0.4);border-radius:12px;color:#7ab4ff;font-family:Nasalization,Arial,sans-serif;font-size:13px;letter-spacing:1.5px;padding:12px 24px;cursor:pointer;">LINK & CONTINUE ›</button>
+        <button onclick="closeEmailModal()" style="background:rgba(var(--nv-b-w-rgb,255,255,255),0.08);border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.15);border-radius:calc(12px * var(--nv-r,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.5);font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:13px;letter-spacing:calc(1.5px * var(--nv-ls,1));padding:12px 20px;cursor:pointer;">CANCEL</button>
+        <button id="emailModal-save-btn" onclick="saveEmailFromModal()" style="background:rgba(var(--nv-b-bl-rgb,100,160,255),0.2);border:1px solid rgba(var(--nv-l-bl-rgb,100,160,255),0.4);border-radius:calc(12px * var(--nv-r,1));color:var(--nv-t-bl,#7ab4ff);font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:13px;letter-spacing:calc(1.5px * var(--nv-ls,1));padding:12px 24px;cursor:pointer;">LINK & CONTINUE ›</button>
       </div>
     </div>
   </div>
 
   <!-- RESTORE ACCOUNT MODAL -->
   <div id="restoreOverlay" onclick="closeRestore(event)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center;">
-    <div onclick="event.stopPropagation()" style="background:linear-gradient(160deg,#0a1628,#0d2240);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:28px 24px;width:88%;max-width:340px;text-align:center;">
-      <p style="font-family:Nasalization,Arial,sans-serif;font-size:14px;letter-spacing:3px;color:#fff;margin:0 0 6px;">RESTORE ACCOUNT</p>
-      <p style="font-size:14px;color:rgba(255,255,255,0.45);margin:0 0 20px;font-family:Arial,sans-serif;line-height:1.5;">Enter your personal invite code to reconnect your account on this device.</p>
+    <div onclick="event.stopPropagation()" style="background:linear-gradient(160deg,var(--nv-b-nv,#0a1628),var(--nv-b-nv2,#0d2240));border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.15);border-radius:calc(20px * var(--nv-r,1));padding:28px 24px;width:88%;max-width:340px;text-align:center;">
+      <p style="font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:14px;letter-spacing:calc(3px * var(--nv-ls,1));color:var(--nv-t-w,#fff);margin:0 0 6px;">RESTORE ACCOUNT</p>
+      <p style="font-size:14px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.45);margin:0 0 20px;font-family:Arial,sans-serif;line-height:1.5;">Enter your personal invite code to reconnect your account on this device.</p>
       <input id="restoreInput" type="text" placeholder="Your invite code (e.g. MOON-RZ)" maxlength="30"
-        style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.2);border-radius:12px;color:#fff;font-size:13px;padding:12px 16px;box-sizing:border-box;font-family:Arial,sans-serif;outline:none;text-transform:uppercase;text-align:center;letter-spacing:2px;"/>
-      <p id="restoreStatus" style="font-size:13px;color:rgba(255,255,255,0.4);margin:10px 0 16px;font-family:Arial,sans-serif;min-height:16px;"></p>
+        style="width:100%;background:rgba(var(--nv-b-w-rgb,255,255,255),0.07);border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.2);border-radius:calc(12px * var(--nv-r,1));color:var(--nv-t-w,#fff);font-size:13px;padding:12px 16px;box-sizing:border-box;font-family:Arial,sans-serif;outline:none;text-transform:uppercase;text-align:center;letter-spacing:calc(2px * var(--nv-ls,1));"/>
+      <p id="restoreStatus" style="font-size:13px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.4);margin:10px 0 16px;font-family:Arial,sans-serif;min-height:16px;"></p>
       <div style="display:flex;gap:10px;justify-content:center;">
-        <button onclick="submitRestore()" style="background:rgba(100,160,255,0.2);border:1px solid rgba(100,160,255,0.5);border-radius:12px;color:#7ab4ff;font-family:Nasalization,Arial,sans-serif;font-size:13px;letter-spacing:1.5px;padding:12px 24px;cursor:pointer;">RESTORE</button>
-        <button onclick="closeRestore()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:rgba(255,255,255,0.5);font-family:Nasalization,Arial,sans-serif;font-size:13px;letter-spacing:1.5px;padding:12px 24px;cursor:pointer;">CANCEL</button>
+        <button onclick="submitRestore()" style="background:rgba(var(--nv-b-bl-rgb,100,160,255),0.2);border:1px solid rgba(var(--nv-l-bl-rgb,100,160,255),0.5);border-radius:calc(12px * var(--nv-r,1));color:var(--nv-t-bl,#7ab4ff);font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:13px;letter-spacing:calc(1.5px * var(--nv-ls,1));padding:12px 24px;cursor:pointer;">RESTORE</button>
+        <button onclick="closeRestore()" style="background:rgba(var(--nv-b-w-rgb,255,255,255),0.06);border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.12);border-radius:calc(12px * var(--nv-r,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.5);font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:13px;letter-spacing:calc(1.5px * var(--nv-ls,1));padding:12px 24px;cursor:pointer;">CANCEL</button>
       </div>
     </div>
   </div>
 
   <!-- FEEDBACK MODAL -->
   <div id="feedbackOverlay" onclick="closeFeedback(event)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;align-items:center;justify-content:center;">
-    <div onclick="event.stopPropagation()" style="background:linear-gradient(160deg,#0a1628,#0d2240);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:28px 24px;width:88%;max-width:360px;text-align:center;max-height:85vh;overflow-y:auto;">
+    <div onclick="event.stopPropagation()" style="background:linear-gradient(160deg,var(--nv-b-nv,#0a1628),var(--nv-b-nv2,#0d2240));border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.15);border-radius:calc(20px * var(--nv-r,1));padding:28px 24px;width:88%;max-width:360px;text-align:center;max-height:85vh;overflow-y:auto;">
 
       <!-- VIEW: replies list -->
       <div id="fbViewReplies" style="display:none;">
-        <p style="font-family:Nasalization,Arial,sans-serif;font-size:14px;letter-spacing:3px;color:#fff;margin:0 0 4px;">MESSAGES</p>
-        <p style="font-size:13px;color:rgba(255,255,255,0.4);letter-spacing:1px;margin:0 0 18px;font-family:Nasalization,Arial,sans-serif;">YOUR FEEDBACK & REPLIES</p>
+        <p style="font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:14px;letter-spacing:calc(3px * var(--nv-ls,1));color:var(--nv-t-w,#fff);margin:0 0 4px;">MESSAGES</p>
+        <p style="font-size:13px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.4);letter-spacing:calc(1px * var(--nv-ls,1));margin:0 0 18px;font-family:var(--nv-font,Nasalization,Arial,sans-serif);">YOUR FEEDBACK & REPLIES</p>
         <div id="fbRepliesList" style="text-align:left;display:flex;flex-direction:column;gap:12px;margin-bottom:18px;"></div>
         <div style="display:flex;gap:10px;justify-content:center;">
-          <button onclick="showFbView('new')" style="background:rgba(100,160,255,0.15);border:1px solid rgba(100,160,255,0.4);border-radius:12px;color:#7ab4ff;font-family:Nasalization,Arial,sans-serif;font-size:14px;letter-spacing:1.5px;padding:10px 20px;cursor:pointer;">+ NEW MESSAGE</button>
-          <button onclick="closeFeedback()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;color:rgba(255,255,255,0.5);font-family:Nasalization,Arial,sans-serif;font-size:14px;letter-spacing:1.5px;padding:10px 20px;cursor:pointer;">CLOSE</button>
+          <button onclick="showFbView('new')" style="background:rgba(var(--nv-b-bl-rgb,100,160,255),0.15);border:1px solid rgba(var(--nv-l-bl-rgb,100,160,255),0.4);border-radius:calc(12px * var(--nv-r,1));color:var(--nv-t-bl,#7ab4ff);font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:14px;letter-spacing:calc(1.5px * var(--nv-ls,1));padding:10px 20px;cursor:pointer;">+ NEW MESSAGE</button>
+          <button onclick="closeFeedback()" style="background:rgba(var(--nv-b-w-rgb,255,255,255),0.08);border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.15);border-radius:calc(12px * var(--nv-r,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.5);font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:14px;letter-spacing:calc(1.5px * var(--nv-ls,1));padding:10px 20px;cursor:pointer;">CLOSE</button>
         </div>
       </div>
 
       <!-- VIEW: new message form -->
       <div id="fbViewNew">
-        <p style="font-family:Nasalization,Arial,sans-serif;font-size:14px;letter-spacing:3px;color:#fff;margin:0 0 6px;">FEEDBACK</p>
-        <p style="font-size:13px;color:rgba(255,255,255,0.45);letter-spacing:1px;margin:0 0 18px;font-family:Nasalization,Arial,sans-serif;">SHARE A PROBLEM OR SUGGESTION</p>
+        <p style="font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:14px;letter-spacing:calc(3px * var(--nv-ls,1));color:var(--nv-t-w,#fff);margin:0 0 6px;">FEEDBACK</p>
+        <p style="font-size:13px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.45);letter-spacing:calc(1px * var(--nv-ls,1));margin:0 0 18px;font-family:var(--nv-font,Nasalization,Arial,sans-serif);">SHARE A PROBLEM OR SUGGESTION</p>
         <textarea id="feedbackText" placeholder="Write your message here..." maxlength="500"
-          style="width:100%;height:120px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.2);border-radius:12px;color:#fff;font-size:14px;padding:12px;resize:none;box-sizing:border-box;font-family:Arial,sans-serif;outline:none;"></textarea>
-        <p id="feedbackCount" style="font-size:13px;color:rgba(255,255,255,0.3);text-align:right;margin:4px 0 16px;font-family:Nasalization,Arial,sans-serif;">0 / 500</p>
+          style="width:100%;height:120px;background:rgba(var(--nv-b-w-rgb,255,255,255),0.07);border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.2);border-radius:calc(12px * var(--nv-r,1));color:var(--nv-t-w,#fff);font-size:14px;padding:12px;resize:none;box-sizing:border-box;font-family:Arial,sans-serif;outline:none;"></textarea>
+        <p id="feedbackCount" style="font-size:13px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.3);text-align:right;margin:4px 0 16px;font-family:var(--nv-font,Nasalization,Arial,sans-serif);">0 / 500</p>
         <div style="display:flex;gap:10px;justify-content:center;">
-          <button onclick="closeFeedback()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;color:rgba(255,255,255,0.5);font-family:Nasalization,Arial,sans-serif;font-size:14px;letter-spacing:1.5px;padding:10px 20px;cursor:pointer;">CANCEL</button>
-          <button onclick="submitFeedback()" id="feedbackSendBtn" style="background:rgba(100,160,255,0.2);border:1px solid rgba(100,160,255,0.4);border-radius:12px;color:#7ab4ff;font-family:Nasalization,Arial,sans-serif;font-size:14px;letter-spacing:1.5px;padding:10px 24px;cursor:pointer;">SEND 🕊</button>
+          <button onclick="closeFeedback()" style="background:rgba(var(--nv-b-w-rgb,255,255,255),0.08);border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.15);border-radius:calc(12px * var(--nv-r,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.5);font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:14px;letter-spacing:calc(1.5px * var(--nv-ls,1));padding:10px 20px;cursor:pointer;">CANCEL</button>
+          <button onclick="submitFeedback()" id="feedbackSendBtn" style="background:rgba(var(--nv-b-bl-rgb,100,160,255),0.2);border:1px solid rgba(var(--nv-l-bl-rgb,100,160,255),0.4);border-radius:calc(12px * var(--nv-r,1));color:var(--nv-t-bl,#7ab4ff);font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:14px;letter-spacing:calc(1.5px * var(--nv-ls,1));padding:10px 24px;cursor:pointer;">SEND 🕊</button>
         </div>
-        <p id="feedbackStatus" style="font-size:13px;color:rgba(255,255,255,0.4);margin:12px 0 0;font-family:Nasalization,Arial,sans-serif;min-height:14px;"></p>
+        <p id="feedbackStatus" style="font-size:13px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.4);margin:12px 0 0;font-family:var(--nv-font,Nasalization,Arial,sans-serif);min-height:14px;"></p>
       </div>
 
     </div>
@@ -1913,35 +1930,35 @@
 
       <!-- 4 catégories de doves -->
       <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.08);border-radius:12px;padding:10px 16px;">
-          <span style="font-size:14px;letter-spacing:2px;color:rgba(255,255,255,0.7);">🕊 PERSONAL ACTIONS</span>
-          <span id="pop-cat-personal" style="font-size:18px;font-weight:700;color:#fff;">0</span>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(var(--nv-b-w-rgb,255,255,255),0.08);border-radius:calc(12px * var(--nv-r,1));padding:10px 16px;">
+          <span style="font-size:14px;letter-spacing:calc(2px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.7);">🕊 PERSONAL ACTIONS</span>
+          <span id="pop-cat-personal" style="font-size:18px;font-weight:700;color:var(--nv-t-w,#fff);">0</span>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.08);border-radius:12px;padding:10px 16px;">
-          <span style="font-size:14px;letter-spacing:2px;color:rgba(255,255,255,0.7);">🔍 DISCOVERY DOVES</span>
-          <span id="pop-cat-discovery" style="font-size:18px;font-weight:700;color:#3AACDF;">0</span>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(var(--nv-b-w-rgb,255,255,255),0.08);border-radius:calc(12px * var(--nv-r,1));padding:10px 16px;">
+          <span style="font-size:14px;letter-spacing:calc(2px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.7);">🔍 DISCOVERY DOVES</span>
+          <span id="pop-cat-discovery" style="font-size:18px;font-weight:700;color:var(--nv-t-bm,#3AACDF);">0</span>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.08);border-radius:12px;padding:10px 16px;">
-          <span style="font-size:14px;letter-spacing:2px;color:rgba(255,255,255,0.7);">🔥 STREAK DOVES</span>
-          <span id="pop-cat-streak" style="font-size:18px;font-weight:700;color:#FFA500;">0</span>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(var(--nv-b-w-rgb,255,255,255),0.08);border-radius:calc(12px * var(--nv-r,1));padding:10px 16px;">
+          <span style="font-size:14px;letter-spacing:calc(2px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.7);">🔥 STREAK DOVES</span>
+          <span id="pop-cat-streak" style="font-size:18px;font-weight:700;color:var(--nv-t-gd,#FFA500);">0</span>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.08);border-radius:12px;padding:10px 16px;">
-          <span style="font-size:14px;letter-spacing:2px;color:rgba(255,255,255,0.7);">👥 REFERRAL DOVES</span>
-          <span id="pop-cat-referral" style="font-size:18px;font-weight:700;color:#6DD5F5;">0</span>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(var(--nv-b-w-rgb,255,255,255),0.08);border-radius:calc(12px * var(--nv-r,1));padding:10px 16px;">
+          <span style="font-size:14px;letter-spacing:calc(2px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.7);">👥 REFERRAL DOVES</span>
+          <span id="pop-cat-referral" style="font-size:18px;font-weight:700;color:var(--nv-t-bl,#6DD5F5);">0</span>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(58,172,223,0.2);border:1px solid rgba(58,172,223,0.4);border-radius:12px;padding:12px 16px;margin-top:4px;">
-          <span style="font-size:14px;letter-spacing:3px;color:#fff;font-weight:700;">🕊 TOTAL GLOBAL</span>
-          <span id="pop-cat-total" style="font-size:22px;font-weight:700;color:#fff;">0</span>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(var(--nv-b-bm-rgb,58,172,223),0.2);border:1px solid rgba(var(--nv-l-bm-rgb,58,172,223),0.4);border-radius:calc(12px * var(--nv-r,1));padding:12px 16px;margin-top:4px;">
+          <span style="font-size:14px;letter-spacing:calc(3px * var(--nv-ls,1));color:var(--nv-t-w,#fff);font-weight:700;">🕊 TOTAL GLOBAL</span>
+          <span id="pop-cat-total" style="font-size:22px;font-weight:700;color:var(--nv-t-w,#fff);">0</span>
         </div>
       </div>
 
       <!-- Streak consécutif -->
       <div id="streak-row" style="display:none;align-items:center;justify-content:center;gap:10px;
-           background:rgba(255,165,0,0.15);border-radius:12px;padding:10px 20px;margin-bottom:14px;">
+           background:rgba(var(--nv-b-gd-rgb,255,165,0),0.15);border-radius:calc(12px * var(--nv-r,1));padding:10px 20px;margin-bottom:14px;">
         <span style="font-size:18px;">🔥</span>
-        <span style="font-size:14px;letter-spacing:2px;color:rgba(255,255,255,0.85);font-family:Nasalization,Arial,sans-serif;">
-          <span id="dove-streak" style="font-size:20px;font-weight:700;color:#FFA500;">0</span>
-          <span style="margin-left:6px;color:rgba(255,255,255,0.7);">DAYS IN A ROW</span>
+        <span style="font-size:14px;letter-spacing:calc(2px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.85);font-family:var(--nv-font,Nasalization,Arial,sans-serif);">
+          <span id="dove-streak" style="font-size:20px;font-weight:700;color:var(--nv-t-gd,#FFA500);">0</span>
+          <span style="margin-left:6px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.7);">DAYS IN A ROW</span>
         </span>
       </div>
 
@@ -1970,7 +1987,7 @@
   <!-- IDENTITY INFO POPUP -->
   <div id="id-info-overlay" onclick="closeIdentityInfo()">
     <div id="id-info-card" onclick="event.stopPropagation()">
-      <p style="font-size:13px;letter-spacing:3px;color:#6DD5F5;margin:0 0 20px;text-align:center;">YOUR IDENTITY</p>
+      <p style="font-size:13px;letter-spacing:calc(3px * var(--nv-ls,1));color:var(--nv-t-bl,#6DD5F5);margin:0 0 20px;text-align:center;">YOUR IDENTITY</p>
 
       <div class="id-info-row">
         <div class="id-info-icon">👁</div>
@@ -1996,24 +2013,24 @@
         </div>
       </div>
 
-      <button onclick="closeIdentityInfo()" style="margin-top:22px;width:100%;padding:13px;background:rgba(109,213,245,0.15);border:1px solid rgba(109,213,245,0.35);border-radius:12px;color:#6DD5F5;font-family:'Nasalization',Arial,sans-serif;font-size:13px;letter-spacing:2.5px;cursor:pointer;" data-i18n="close_btn">CLOSE</button>
+      <button onclick="closeIdentityInfo()" style="margin-top:22px;width:100%;padding:13px;background:rgba(var(--nv-b-bl-rgb,109,213,245),0.15);border:1px solid rgba(var(--nv-l-bl-rgb,109,213,245),0.35);border-radius:calc(12px * var(--nv-r,1));color:var(--nv-t-bl,#6DD5F5);font-family:var(--nv-font,'Nasalization',Arial,sans-serif);font-size:13px;letter-spacing:calc(2.5px * var(--nv-ls,1));cursor:pointer;" data-i18n="close_btn">CLOSE</button>
     </div>
   </div>
 
   <!-- STREAK CELEBRATION OVERLAY -->
   <div id="streakCelebOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,10,0.82);z-index:750;align-items:center;justify-content:center;">
-    <div id="streakCelebCard" style="background:linear-gradient(160deg,#0a1628,#0d2240);border:1px solid rgba(255,255,255,0.2);border-radius:24px;padding:36px 24px 28px;width:88%;max-width:340px;text-align:center;position:relative;overflow:hidden;">
+    <div id="streakCelebCard" style="background:linear-gradient(160deg,var(--nv-b-nv,#0a1628),var(--nv-b-nv2,#0d2240));border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.2);border-radius:calc(24px * var(--nv-r,1));padding:36px 24px 28px;width:88%;max-width:340px;text-align:center;position:relative;overflow:hidden;">
       <div id="streakParticles" style="position:absolute;inset:0;pointer-events:none;"></div>
       <div style="position:relative;z-index:1;">
-        <p style="font-family:Nasalization,Arial,sans-serif;font-size:13px;letter-spacing:3px;color:#6DD5F5;margin:0 0 10px;">✨ MILESTONE UNLOCKED</p>
+        <p style="font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:13px;letter-spacing:calc(3px * var(--nv-ls,1));color:var(--nv-t-bl,#6DD5F5);margin:0 0 10px;">✨ MILESTONE UNLOCKED</p>
         <div id="celebIcon" style="font-size:54px;line-height:1;margin-bottom:10px;">🏆</div>
-        <p id="celebName" style="font-family:Nasalization,Arial,sans-serif;font-size:20px;letter-spacing:4px;color:#fff;font-weight:700;margin:0 0 22px;">LEGEND</p>
-        <div style="background:rgba(109,213,245,0.1);border:1px solid rgba(109,213,245,0.3);border-radius:16px;padding:18px 16px;margin-bottom:22px;">
-          <p style="font-family:Nasalization,Arial,sans-serif;font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.55);margin:0 0 8px;">🕊 DOVES EARNED</p>
-          <p id="celebDoves" style="font-family:Nasalization,Arial,sans-serif;font-size:46px;font-weight:700;color:#fff;margin:0;line-height:1;">+30</p>
-          <p style="font-family:Nasalization,Arial,sans-serif;font-size:13px;letter-spacing:1.5px;color:rgba(255,255,255,0.4);margin:6px 0 0;">FOR YOUR PEACE JOURNEY</p>
+        <p id="celebName" style="font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:20px;letter-spacing:calc(4px * var(--nv-ls,1));color:var(--nv-t-w,#fff);font-weight:700;margin:0 0 22px;">LEGEND</p>
+        <div style="background:rgba(var(--nv-b-bl-rgb,109,213,245),0.1);border:1px solid rgba(var(--nv-l-bl-rgb,109,213,245),0.3);border-radius:calc(16px * var(--nv-r,1));padding:18px 16px;margin-bottom:22px;">
+          <p style="font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:13px;letter-spacing:calc(2px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.55);margin:0 0 8px;">🕊 DOVES EARNED</p>
+          <p id="celebDoves" style="font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:46px;font-weight:700;color:var(--nv-t-w,#fff);margin:0;line-height:1;">+30</p>
+          <p style="font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:13px;letter-spacing:calc(1.5px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.4);margin:6px 0 0;">FOR YOUR PEACE JOURNEY</p>
         </div>
-        <button onclick="collectStreakMilestone()" style="background:linear-gradient(135deg,#6DD5F5,#4ab8e8);border:none;border-radius:20px;color:#fff;font-family:Nasalization,Arial,sans-serif;font-size:14px;letter-spacing:3px;padding:14px 0;cursor:pointer;width:100%;font-weight:700;">COLLECT 🕊</button>
+        <button onclick="collectStreakMilestone()" style="background:linear-gradient(135deg,var(--nv-b-bl,#6DD5F5),var(--nv-b-bl2,#4ab8e8));border:none;border-radius:calc(20px * var(--nv-r,1));color:var(--nv-on-bl,#fff);font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:14px;letter-spacing:calc(3px * var(--nv-ls,1));padding:14px 0;cursor:pointer;width:100%;font-weight:700;">COLLECT 🕊</button>
       </div>
     </div>
   </div>
@@ -2216,7 +2233,7 @@
     const dayOfYear = Math.floor((Date.now() - start) / 86400000);
     const { q, a } = quotes[dayOfYear % quotes.length];
     const el = document.getElementById('daily-quote');
-    if (el) el.innerHTML = '\u201C' + q + '\u201D<br><span style="font-size:13px;letter-spacing:2px;opacity:0.6;font-style:normal;display:inline-block;margin-top:4px;">\u2014 ' + a + '</span>';
+    if (el) el.innerHTML = '\u201C' + q + '\u201D<br><span style="font-size:13px;letter-spacing:calc(2px * var(--nv-ls,1));opacity:0.6;font-style:normal;display:inline-block;margin-top:4px;">\u2014 ' + a + '</span>';
   }
   updateDailyQuote();
 
@@ -2298,7 +2315,7 @@
     var inp   = document.getElementById('email-input');
     var email = (inp ? inp.value : '').trim().toLowerCase();
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      if (inp) { inp.style.borderColor = 'rgba(255,80,80,0.7)'; setTimeout(function(){ inp.style.borderColor = ''; }, 1500); }
+      if (inp) { inp.style.borderColor = 'rgba(var(--nv-l-rd-rgb,255,80,80),0.7)'; setTimeout(function(){ inp.style.borderColor = ''; }, 1500); }
       return;
     }
     localStorage.setItem('nava_peace_email', email);
@@ -2629,9 +2646,9 @@
           const banner = document.createElement('div');
           banner.id = 'disabled-banner';
           banner.style.cssText =
-            'margin-top:12px;padding:10px 16px;border-radius:10px;' +
-            'background:rgba(255,80,80,0.15);border:1px solid rgba(255,80,80,0.35);' +
-            'font-size:13px;letter-spacing:2px;color:#ff8080;text-align:center;' +
+            'margin-top:12px;padding:10px 16px;border-radius:calc(10px * var(--nv-r,1));' +
+            'background:rgba(var(--nv-b-rd-rgb,255,80,80),0.15);border:1px solid rgba(var(--nv-l-rd-rgb,255,80,80),0.35);' +
+            'font-size:13px;letter-spacing:calc(2px * var(--nv-ls,1));color:var(--nv-t-rd,#ff8080);text-align:center;' +
             'text-transform:uppercase;';
           banner.textContent = '⊘ Account disabled by administrator';
           card.parentNode.insertBefore(banner, card.nextSibling);
@@ -3344,7 +3361,7 @@
       sheet.style.cssText =
         'position:fixed;inset:0;z-index:9990;display:flex;flex-direction:column;' +
         'align-items:center;justify-content:flex-end;' +
-        'background:rgba(0,10,25,0.75);backdrop-filter:blur(12px);' +
+        'background:rgba(var(--nv-b-nv-rgb,0,10,25),0.75);backdrop-filter:blur(12px);' +
         '-webkit-backdrop-filter:blur(12px);' +
         'opacity:0;transition:opacity 0.3s;';
 
@@ -3358,36 +3375,36 @@
       };
 
       function _appBtn(appKey, label) {
-        var icon = _svgs[appKey] || '<span style="font-size:22px;color:#fff;">?</span>';
+        var icon = _svgs[appKey] || '<span style="font-size:22px;color:var(--nv-t-w,#fff);">?</span>';
         return '<div style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;" data-css-app="' + appKey + '">' +
-          '<div style="width:54px;height:54px;border-radius:16px;display:flex;align-items:center;justify-content:center;' +
-          'background:rgba(255,255,255,0.09);border:1px solid rgba(255,255,255,0.15);">' + icon + '</div>' +
-          '<span style="font-family:Nasalization,Arial;font-size:6px;letter-spacing:1.2px;color:rgba(255,255,255,0.55);text-align:center;">' + label + '</span>' +
+          '<div style="width:54px;height:54px;border-radius:calc(16px * var(--nv-r,1));display:flex;align-items:center;justify-content:center;' +
+          'background:rgba(var(--nv-b-w-rgb,255,255,255),0.09);border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.15);">' + icon + '</div>' +
+          '<span style="font-family:var(--nv-font,Nasalization,Arial);font-size:6px;letter-spacing:calc(1.2px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.55);text-align:center;">' + label + '</span>' +
         '</div>';
       }
 
       sheet.innerHTML =
-        '<div style="background:linear-gradient(180deg,#0a2d4a,#050f1a);border-radius:24px 24px 0 0;' +
-        'width:100%;max-width:520px;padding:22px 20px 36px;font-family:Nasalization,Arial,sans-serif;">' +
+        '<div style="background:linear-gradient(180deg,var(--nv-b-nv,#0a2d4a),var(--nv-b-nv2,#050f1a));border-radius:calc(24px * var(--nv-r,1)) calc(24px * var(--nv-r,1)) 0 0;' +
+        'width:100%;max-width:520px;padding:22px 20px 36px;font-family:var(--nv-font,Nasalization,Arial,sans-serif);">' +
 
         // Header
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
-          '<span style="font-size:13px;letter-spacing:3.5px;color:rgba(255,255,255,0.45);">SHARE YOUR INVITE CARD</span>' +
-          '<button id="css-close" style="background:rgba(255,255,255,0.08);border:none;border-radius:50%;width:30px;height:30px;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>' +
+          '<span style="font-size:13px;letter-spacing:calc(3.5px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.45);">SHARE YOUR INVITE CARD</span>' +
+          '<button id="css-close" style="background:rgba(var(--nv-b-w-rgb,255,255,255),0.08);border:none;border-radius:50%;width:30px;height:30px;color:var(--nv-t-w,#fff);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>' +
         '</div>' +
 
         // Card preview
         '<div style="display:flex;flex-direction:column;align-items:center;margin-bottom:12px;">' +
-          '<img id="css-card-preview" src="' + imgURL + '" style="width:100%;max-width:300px;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.6);" />' +
+          '<img id="css-card-preview" src="' + imgURL + '" style="width:100%;max-width:300px;border-radius:calc(14px * var(--nv-r,1));box-shadow:0 8px 32px rgba(0,0,0,0.6);" />' +
         '</div>' +
 
         // SAVE button (primary action)
-        '<button id="css-save-btn" style="width:100%;padding:14px;border-radius:14px;border:none;margin-bottom:14px;' +
-        'background:linear-gradient(135deg,#3AACDF,#1E6E9A);color:#fff;' +
-        'font-family:Nasalization,Arial;font-size:13px;letter-spacing:2.5px;cursor:pointer;">💾 SAVE TO GALLERY</button>' +
+        '<button id="css-save-btn" style="width:100%;padding:14px;border-radius:calc(14px * var(--nv-r,1));border:none;margin-bottom:14px;' +
+        'background:linear-gradient(135deg,var(--nv-b-bm,#3AACDF),var(--nv-b-bm2,#1E6E9A));color:var(--nv-on-bm,#fff);' +
+        'font-family:var(--nv-font,Nasalization,Arial);font-size:13px;letter-spacing:calc(2.5px * var(--nv-ls,1));cursor:pointer;">💾 SAVE TO GALLERY</button>' +
 
         // Status message
-        '<p id="css-gallery-msg" style="text-align:center;font-size:14px;letter-spacing:1.5px;color:rgba(255,255,255,0.45);margin-bottom:16px;">' + galleryMsg + '</p>' +
+        '<p id="css-gallery-msg" style="text-align:center;font-size:14px;letter-spacing:calc(1.5px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.45);margin-bottom:16px;">' + galleryMsg + '</p>' +
 
         // App buttons (5 platforms)
         '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px;">' +
@@ -3399,9 +3416,9 @@
         '</div>' +
 
         // Close button (bottom, full-width, mobile-friendly)
-        '<button id="css-close-bottom" style="width:100%;padding:13px;border-radius:12px;border:1px solid rgba(255,255,255,0.13);' +
-        'background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);' +
-        'font-family:Nasalization,Arial;font-size:13px;letter-spacing:2.5px;cursor:pointer;">✕ FERMER</button>' +
+        '<button id="css-close-bottom" style="width:100%;padding:13px;border-radius:calc(12px * var(--nv-r,1));border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.13);' +
+        'background:rgba(var(--nv-b-w-rgb,255,255,255),0.06);color:rgba(var(--nv-t-w-rgb,255,255,255),0.5);' +
+        'font-family:var(--nv-font,Nasalization,Arial);font-size:13px;letter-spacing:calc(2.5px * var(--nv-ls,1));cursor:pointer;">✕ FERMER</button>' +
 
         '</div>';
 
@@ -3630,10 +3647,10 @@
         var ov = document.createElement('div');
         ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.94);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px;box-sizing:border-box;';
         ov.innerHTML =
-          '<p style="color:#fff;font:600 14px/1.6 sans-serif;text-align:center;margin:0">' +
-          '📱 Appuie <b style="color:#5DC8F0">longuement</b> sur l\'image<br>puis <b style="color:#5DC8F0">Enregistrer l\'image</b></p>' +
-          '<img src="' + imgURL + '" style="max-width:100%;max-height:70vh;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.6);display:block;">' +
-          '<button style="color:#fff;background:rgba(255,255,255,0.18);border:none;border-radius:24px;padding:11px 40px;font-size:15px;cursor:pointer;font-family:inherit;margin-top:4px">✕ Fermer</button>';
+          '<p style="color:var(--nv-t-w,#fff);font:600 14px/1.6 sans-serif;text-align:center;margin:0">' +
+          '📱 Appuie <b style="color:var(--nv-t-bl,#5DC8F0)">longuement</b> sur l\'image<br>puis <b style="color:var(--nv-t-bl,#5DC8F0)">Enregistrer l\'image</b></p>' +
+          '<img src="' + imgURL + '" style="max-width:100%;max-height:70vh;border-radius:calc(14px * var(--nv-r,1));box-shadow:0 8px 32px rgba(0,0,0,0.6);display:block;">' +
+          '<button style="color:var(--nv-t-w,#fff);background:rgba(var(--nv-b-w-rgb,255,255,255),0.18);border:none;border-radius:calc(24px * var(--nv-r,1));padding:11px 40px;font-size:15px;cursor:pointer;font-family:inherit;margin-top:4px">✕ Fermer</button>';
         ov.querySelector('button').onclick = function() { ov.remove(); };
         document.body.appendChild(ov);
       }
@@ -3709,7 +3726,7 @@
       overlay.id = 'share-panel-overlay';
       overlay.style.cssText =
         'position:fixed;inset:0;z-index:9980;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;' +
-        'background:rgba(0,15,30,0.7);backdrop-filter:blur(8px);' +
+        'background:rgba(var(--nv-b-nv-rgb,0,15,30),0.7);backdrop-filter:blur(8px);' +
         'opacity:0;transition:opacity 0.3s;';
 
       function renderPanel() {
@@ -3721,33 +3738,33 @@
         var encodedURL  = encodeURIComponent(inviteURL);
 
         overlay.innerHTML =
-          '<div style="background:linear-gradient(180deg,#0a2d4a,#050f1a);border-radius:24px 24px 0 0;' +
-          'width:100%;max-width:520px;padding:24px 20px 32px;font-family:Nasalization,Arial,sans-serif;">' +
+          '<div style="background:linear-gradient(180deg,var(--nv-b-nv,#0a2d4a),var(--nv-b-nv2,#050f1a));border-radius:calc(24px * var(--nv-r,1)) calc(24px * var(--nv-r,1)) 0 0;' +
+          'width:100%;max-width:520px;padding:24px 20px 32px;font-family:var(--nv-font,Nasalization,Arial,sans-serif);">' +
 
           // Header
           '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">' +
-            '<span style="font-size:13px;letter-spacing:4px;color:rgba(255,255,255,0.5);">SHARE</span>' +
-            '<button id="sp-close" style="background:rgba(255,255,255,0.08);border:none;border-radius:50%;width:30px;height:30px;color:#fff;font-size:16px;cursor:pointer;line-height:30px;">✕</button>' +
+            '<span style="font-size:13px;letter-spacing:calc(4px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.5);">SHARE</span>' +
+            '<button id="sp-close" style="background:rgba(var(--nv-b-w-rgb,255,255,255),0.08);border:none;border-radius:50%;width:30px;height:30px;color:var(--nv-t-w,#fff);font-size:16px;cursor:pointer;line-height:30px;">✕</button>' +
           '</div>' +
 
 
           // Language toggle (only if user has non-EN lang)
           (isNative ?
             '<div style="display:flex;gap:8px;margin-bottom:14px;">' +
-              '<button id="sp-lang-native" style="flex:1;padding:8px 0;border-radius:50px;font-family:Nasalization,Arial,sans-serif;font-size:14px;letter-spacing:2px;cursor:pointer;' +
-              'background:' + (activeLang!=='en'?'rgba(58,172,223,0.25)':'rgba(255,255,255,0.06)') + ';' +
-              'border:1px solid ' + (activeLang!=='en'?'rgba(58,172,223,0.6)':'rgba(255,255,255,0.12)') + ';color:#fff;">' +
+              '<button id="sp-lang-native" style="flex:1;padding:8px 0;border-radius:calc(50px * var(--nv-r,1));font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:14px;letter-spacing:calc(2px * var(--nv-ls,1));cursor:pointer;' +
+              'background:' + (activeLang!=='en'?'rgba(var(--nv-b-bm-rgb,58,172,223),0.25)':'rgba(var(--nv-b-w-rgb,255,255,255),0.06)') + ';' +
+              'border:1px solid ' + (activeLang!=='en'?'rgba(var(--nv-l-bm-rgb,58,172,223),0.6)':'rgba(var(--nv-l-w-rgb,255,255,255),0.12)') + ';color:var(--nv-t-w,#fff);">' +
               (userLang.toUpperCase()) + '</button>' +
-              '<button id="sp-lang-en" style="flex:1;padding:8px 0;border-radius:50px;font-family:Nasalization,Arial,sans-serif;font-size:14px;letter-spacing:2px;cursor:pointer;' +
-              'background:' + (activeLang==='en'?'rgba(58,172,223,0.25)':'rgba(255,255,255,0.06)') + ';' +
-              'border:1px solid ' + (activeLang==='en'?'rgba(58,172,223,0.6)':'rgba(255,255,255,0.12)') + ';color:#fff;">EN</button>' +
+              '<button id="sp-lang-en" style="flex:1;padding:8px 0;border-radius:calc(50px * var(--nv-r,1));font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:14px;letter-spacing:calc(2px * var(--nv-ls,1));cursor:pointer;' +
+              'background:' + (activeLang==='en'?'rgba(var(--nv-b-bm-rgb,58,172,223),0.25)':'rgba(var(--nv-b-w-rgb,255,255,255),0.06)') + ';' +
+              'border:1px solid ' + (activeLang==='en'?'rgba(var(--nv-l-bm-rgb,58,172,223),0.6)':'rgba(var(--nv-l-w-rgb,255,255,255),0.12)') + ';color:var(--nv-t-w,#fff);">EN</button>' +
             '</div>'
           : '') +
 
           // Share text preview
-          '<div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px;margin-bottom:16px;position:relative;">' +
-            '<div id="sp-text" style="font-size:13px;letter-spacing:1px;color:rgba(255,255,255,0.75);line-height:1.7;white-space:pre-wrap;word-break:break-all;">' + text + '</div>' +
-            '<button id="sp-copy" style="position:absolute;top:8px;right:8px;background:rgba(58,172,223,0.2);border:1px solid rgba(58,172,223,0.4);border-radius:8px;padding:4px 10px;font-family:Nasalization,Arial,sans-serif;font-size:14px;letter-spacing:2px;color:#3AACDF;cursor:pointer;">COPY</button>' +
+          '<div style="background:rgba(var(--nv-b-w-rgb,255,255,255),0.05);border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.1);border-radius:calc(12px * var(--nv-r,1));padding:12px;margin-bottom:16px;position:relative;">' +
+            '<div id="sp-text" style="font-size:13px;letter-spacing:calc(1px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.75);line-height:1.7;white-space:pre-wrap;word-break:break-all;">' + text + '</div>' +
+            '<button id="sp-copy" style="position:absolute;top:8px;right:8px;background:rgba(var(--nv-b-bm-rgb,58,172,223),0.2);border:1px solid rgba(var(--nv-l-bm-rgb,58,172,223),0.4);border-radius:calc(8px * var(--nv-r,1));padding:4px 10px;font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:14px;letter-spacing:calc(2px * var(--nv-ls,1));color:var(--nv-t-bm,#3AACDF);cursor:pointer;">COPY</button>' +
           '</div>' +
 
           // Platform buttons
@@ -3800,10 +3817,10 @@
 
       function _spBtn(id, icon, label, url) {
         return '<button data-sp-app="'+id+'" data-sp-url="'+url+'" style="' +
-          'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:14px;' +
+          'background:rgba(var(--nv-b-w-rgb,255,255,255),0.06);border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.12);border-radius:calc(14px * var(--nv-r,1));' +
           'padding:10px 0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;">' +
           '<span style="font-size:18px;">' + icon + '</span>' +
-          '<span style="font-family:Nasalization,Arial,sans-serif;font-size:6px;letter-spacing:1.5px;color:rgba(255,255,255,0.5);">' + label + '</span>' +
+          '<span style="font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:6px;letter-spacing:calc(1.5px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.5);">' + label + '</span>' +
         '</button>';
       }
 
@@ -4643,7 +4660,7 @@
   </script>
 
   <!-- TOAST -->
-  <div id="profile-toast" style="display:none;position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(10,22,40,0.95);border:1px solid rgba(100,160,255,0.4);border-radius:20px;color:#7ab4ff;font-family:Nasalization,Arial,sans-serif;font-size:13px;letter-spacing:1.5px;padding:12px 22px;z-index:9999;white-space:nowrap;text-align:center;"></div>
+  <div id="profile-toast" style="display:none;position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(var(--nv-b-nv-rgb,10,22,40),0.95);border:1px solid rgba(var(--nv-l-bl-rgb,100,160,255),0.4);border-radius:calc(20px * var(--nv-r,1));color:var(--nv-t-bl,#7ab4ff);font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:13px;letter-spacing:calc(1.5px * var(--nv-ls,1));padding:12px 22px;z-index:9999;white-space:nowrap;text-align:center;"></div>
   <script>
   function showToastMsg(msg) {
     var t = document.getElementById('profile-toast');
@@ -4673,9 +4690,9 @@
       if (data && data.length > 0) {
         document.getElementById('feedbackBadge').style.display = 'block';
         document.getElementById('feedbackInviteText').textContent = '💬 You have a reply from the team!';
-        document.getElementById('feedbackInviteText').style.color = '#7ab4ff';
-        document.getElementById('feedbackMainBtn').style.borderColor = '#7ab4ff';
-        document.getElementById('feedbackMainBtn').style.color = '#7ab4ff';
+        document.getElementById('feedbackInviteText').style.color = 'var(--nv-t-bl,#7ab4ff)';
+        document.getElementById('feedbackMainBtn').style.borderColor = 'var(--nv-l-bl,#7ab4ff)';
+        document.getElementById('feedbackMainBtn').style.color = 'var(--nv-t-bl,#7ab4ff)';
         document.getElementById('feedbackMainBtn').textContent = 'VIEW REPLY';
       }
     } catch(e) {}
@@ -4711,22 +4728,22 @@
           await _getSbF().from('feedback').update({ user_seen: true }).in('id', unseenIds);
           document.getElementById('feedbackBadge').style.display = 'none';
           document.getElementById('feedbackInviteText').textContent = '🕊 A bug? A suggestion? We listen.';
-          document.getElementById('feedbackInviteText').style.color = 'rgba(255,255,255,0.45)';
-          document.getElementById('feedbackMainBtn').style.borderColor = 'rgba(255,255,255,0.2)';
-          document.getElementById('feedbackMainBtn').style.color = 'rgba(255,255,255,0.7)';
+          document.getElementById('feedbackInviteText').style.color = 'rgba(var(--nv-t-w-rgb,255,255,255),0.45)';
+          document.getElementById('feedbackMainBtn').style.borderColor = 'rgba(var(--nv-l-w-rgb,255,255,255),0.2)';
+          document.getElementById('feedbackMainBtn').style.color = 'rgba(var(--nv-t-w-rgb,255,255,255),0.7)';
           document.getElementById('feedbackMainBtn').textContent = 'SEND FEEDBACK';
         }
         // Render messages
         document.getElementById('fbRepliesList').innerHTML = data.map(function(fb) {
           var d = new Date(fb.created_at).toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'2-digit' });
-          return '<div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:14px;margin-bottom:4px;">'
-            + '<p style="font-size:13px;color:rgba(255,255,255,0.35);margin:0 0 6px;font-family:Nasalization,Arial,sans-serif;">' + d + '</p>'
-            + '<p style="font-size:14px;color:rgba(255,255,255,0.85);margin:0 0 10px;line-height:1.5;">' + fb.message.replace(/</g,'&lt;') + '</p>'
-            + (fb.reply ? '<div style="background:rgba(100,160,255,0.1);border-left:2px solid #7ab4ff;padding:10px 12px;border-radius:0 8px 8px 0;">'
-                + '<p style="font-size:14px;color:#7ab4ff;letter-spacing:1px;margin:0 0 4px;font-family:Nasalization,Arial,sans-serif;">↩ NAVA TEAM</p>'
-                + '<p style="font-size:14px;color:#fff;margin:0;line-height:1.5;">' + fb.reply.replace(/</g,'&lt;') + '</p>'
+          return '<div style="background:rgba(var(--nv-b-w-rgb,255,255,255),0.05);border-radius:calc(12px * var(--nv-r,1));padding:14px;margin-bottom:4px;">'
+            + '<p style="font-size:13px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.35);margin:0 0 6px;font-family:var(--nv-font,Nasalization,Arial,sans-serif);">' + d + '</p>'
+            + '<p style="font-size:14px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.85);margin:0 0 10px;line-height:1.5;">' + fb.message.replace(/</g,'&lt;') + '</p>'
+            + (fb.reply ? '<div style="background:rgba(var(--nv-b-bl-rgb,100,160,255),0.1);border-left:2px solid var(--nv-l-bl,#7ab4ff);padding:10px 12px;border-radius:0 calc(8px * var(--nv-r,1)) calc(8px * var(--nv-r,1)) 0;">'
+                + '<p style="font-size:14px;color:var(--nv-t-bl,#7ab4ff);letter-spacing:calc(1px * var(--nv-ls,1));margin:0 0 4px;font-family:var(--nv-font,Nasalization,Arial,sans-serif);">↩ NAVA TEAM</p>'
+                + '<p style="font-size:14px;color:var(--nv-t-w,#fff);margin:0;line-height:1.5;">' + fb.reply.replace(/</g,'&lt;') + '</p>'
                 + '</div>'
-              : '<p style="font-size:13px;color:rgba(255,255,255,0.3);font-family:Nasalization,Arial,sans-serif;margin:0;">Awaiting reply···</p>')
+              : '<p style="font-size:13px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.3);font-family:var(--nv-font,Nasalization,Arial,sans-serif);margin:0;">Awaiting reply···</p>')
             + '</div>';
         }).join('');
         showFbView('replies');
@@ -4752,11 +4769,11 @@
       var { error } = await _getSbF().from('feedback').insert({ user_uid: uid, message: msg });
       if (error) throw error;
       document.getElementById('feedbackStatus').textContent = '🕊 Message sent. Thank you!';
-      document.getElementById('feedbackStatus').style.color = '#7ab4ff';
+      document.getElementById('feedbackStatus').style.color = 'var(--nv-t-bl,#7ab4ff)';
       setTimeout(function() { closeFeedback(); }, 2000);
     } catch(e) {
       document.getElementById('feedbackStatus').textContent = 'Error. Please try again.';
-      document.getElementById('feedbackStatus').style.color = '#ff7a7a';
+      document.getElementById('feedbackStatus').style.color = 'var(--nv-t-rd,#ff7a7a)';
       btn.disabled = false; btn.textContent = 'SEND 🕊';
     }
   }
@@ -4798,53 +4815,53 @@
       if (error) throw error;
       if (!data || !data.user_uid) {
         document.getElementById('restoreStatus').textContent = 'Code not found. Check and try again.';
-        document.getElementById('restoreStatus').style.color = '#ff7a7a';
+        document.getElementById('restoreStatus').style.color = 'var(--nv-t-rd,#ff7a7a)';
         return;
       }
       // Restore session
       localStorage.setItem('nava_peace_uid', data.user_uid);
       localStorage.setItem('nava_peace_ref_code', data.referral_code || code);
       document.getElementById('restoreStatus').textContent = '✓ Account restored! Reloading···';
-      document.getElementById('restoreStatus').style.color = '#7ab4ff';
+      document.getElementById('restoreStatus').style.color = 'var(--nv-t-bl,#7ab4ff)';
       setTimeout(function() { window.location.reload(); }, 1200);
     } catch(e) {
       document.getElementById('restoreStatus').textContent = 'Error. Please try again.';
-      document.getElementById('restoreStatus').style.color = '#ff7a7a';
+      document.getElementById('restoreStatus').style.color = 'var(--nv-t-rd,#ff7a7a)';
     }
   }
   </script>
 
 <!-- ── PWA / Home Screen Install Popup ─────────────────────────── -->
 <div id="pwa-popup" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.65);align-items:center;justify-content:center;padding:24px;">
-  <div id="pwa-popup-box" style="background:linear-gradient(160deg,#0d2a47,#1a5c8a);border:1px solid rgba(58,172,223,0.35);border-radius:24px;padding:32px 28px;max-width:340px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.5);">
+  <div id="pwa-popup-box" style="background:linear-gradient(160deg,var(--nv-b-nv,#0d2a47),var(--nv-b-nv2,#1a5c8a));border:1px solid rgba(var(--nv-l-bm-rgb,58,172,223),0.35);border-radius:calc(24px * var(--nv-r,1));padding:32px 28px;max-width:340px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.5);">
 
     <!-- Step 1: Ask -->
     <div id="pwa-step-ask">
       <div style="font-size:52px;margin-bottom:16px;">📲</div>
-      <div style="font-family:'Nasalization',sans-serif;font-size:16px;font-weight:700;color:#fff;letter-spacing:2px;margin-bottom:8px;">ADD TO HOME SCREEN</div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;margin-bottom:28px;">Install NAVA PEACE on your home screen for quick daily access.</div>
+      <div style="font-family:var(--nv-font,'Nasalization',sans-serif);font-size:16px;font-weight:700;color:var(--nv-t-w,#fff);letter-spacing:calc(2px * var(--nv-ls,1));margin-bottom:8px;">ADD TO HOME SCREEN</div>
+      <div style="font-size:13px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.65);line-height:1.6;margin-bottom:28px;">Install NAVA PEACE on your home screen for quick daily access.</div>
       <div style="display:flex;gap:12px;">
-        <button id="pwa-popup-no" style="flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;color:rgba(255,255,255,0.6);font-size:13px;font-weight:700;letter-spacing:1.5px;padding:14px;cursor:pointer;">NOT NOW</button>
-        <button id="pwa-popup-yes" style="flex:2;background:linear-gradient(135deg,#3AACDF,#1E8EC4);border:none;border-radius:12px;color:#fff;font-size:13px;font-weight:700;letter-spacing:1.5px;padding:14px;cursor:pointer;">YES, INSTALL ✓</button>
+        <button id="pwa-popup-no" style="flex:1;background:rgba(var(--nv-b-w-rgb,255,255,255),0.08);border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.15);border-radius:calc(12px * var(--nv-r,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.6);font-size:13px;font-weight:700;letter-spacing:calc(1.5px * var(--nv-ls,1));padding:14px;cursor:pointer;">NOT NOW</button>
+        <button id="pwa-popup-yes" style="flex:2;background:linear-gradient(135deg,var(--nv-b-bm,#3AACDF),var(--nv-b-bm2,#1E8EC4));border:none;border-radius:calc(12px * var(--nv-r,1));color:var(--nv-on-bm,#fff);font-size:13px;font-weight:700;letter-spacing:calc(1.5px * var(--nv-ls,1));padding:14px;cursor:pointer;">YES, INSTALL ✓</button>
       </div>
     </div>
 
     <!-- Step 2a: Telegram added it -->
     <div id="pwa-step-done" style="display:none;">
       <div style="font-size:52px;margin-bottom:16px;">✅</div>
-      <div style="font-family:'Nasalization',sans-serif;font-size:15px;font-weight:700;color:#fff;letter-spacing:2px;margin-bottom:10px;">ADDED!</div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;margin-bottom:24px;">NAVA PEACE is now on your home screen. See you tomorrow 🕊</div>
-      <button id="pwa-done-close" style="width:100%;background:linear-gradient(135deg,#3AACDF,#1E8EC4);border:none;border-radius:12px;color:#fff;font-size:13px;font-weight:700;letter-spacing:1.5px;padding:14px;cursor:pointer;">GREAT ✓</button>
+      <div style="font-family:var(--nv-font,'Nasalization',sans-serif);font-size:15px;font-weight:700;color:var(--nv-t-w,#fff);letter-spacing:calc(2px * var(--nv-ls,1));margin-bottom:10px;">ADDED!</div>
+      <div style="font-size:13px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.65);line-height:1.6;margin-bottom:24px;">NAVA PEACE is now on your home screen. See you tomorrow 🕊</div>
+      <button id="pwa-done-close" style="width:100%;background:linear-gradient(135deg,var(--nv-b-bm,#3AACDF),var(--nv-b-bm2,#1E8EC4));border:none;border-radius:calc(12px * var(--nv-r,1));color:var(--nv-on-bm,#fff);font-size:13px;font-weight:700;letter-spacing:calc(1.5px * var(--nv-ls,1));padding:14px;cursor:pointer;">GREAT ✓</button>
     </div>
 
     <!-- Step 2b: Telegram launched the prompt — check your home screen -->
     <div id="pwa-step-browser" style="display:none;">
       <div style="font-size:52px;margin-bottom:16px;">🕊</div>
-      <div style="font-family:'Nasalization',sans-serif;font-size:14px;font-weight:700;color:#fff;letter-spacing:2px;margin-bottom:12px;">CHECK YOUR SCREEN</div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.8;margin-bottom:24px;text-align:left;">
-        Telegram a lancé l'installation. Si l'icône n'apparaît pas, long-press sur le bot dans Telegram → <strong style="color:#3AACDF;">Add to Home Screen</strong>.
+      <div style="font-family:var(--nv-font,'Nasalization',sans-serif);font-size:14px;font-weight:700;color:var(--nv-t-w,#fff);letter-spacing:calc(2px * var(--nv-ls,1));margin-bottom:12px;">CHECK YOUR SCREEN</div>
+      <div style="font-size:13px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.65);line-height:1.8;margin-bottom:24px;text-align:left;">
+        Telegram a lancé l'installation. Si l'icône n'apparaît pas, long-press sur le bot dans Telegram → <strong style="color:var(--nv-t-bm,#3AACDF);">Add to Home Screen</strong>.
       </div>
-      <button id="pwa-browser-close" style="width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;color:rgba(255,255,255,0.5);font-size:12px;font-weight:700;letter-spacing:1.5px;padding:12px;cursor:pointer;">OK</button>
+      <button id="pwa-browser-close" style="width:100%;background:rgba(var(--nv-b-w-rgb,255,255,255),0.08);border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.15);border-radius:calc(12px * var(--nv-r,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.5);font-size:12px;font-weight:700;letter-spacing:calc(1.5px * var(--nv-ls,1));padding:12px;cursor:pointer;">OK</button>
     </div>
 
   </div>
