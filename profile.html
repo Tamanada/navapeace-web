@@ -1077,6 +1077,80 @@
     }
     .ref-see-btn:hover { background: rgba(255,255,255,0.22); }
 
+    /* ── PARRAIN CODE INPUT ── */
+    .parrain-entry {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .parrain-entry-label {
+      font-family: Nasalization, Arial, sans-serif;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      text-align: center;
+      margin: 0 0 10px;
+    }
+    .parrain-entry-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .parrain-entry-input {
+      flex: 1;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 10px;
+      color: #fff;
+      font-family: Nasalization, Arial, sans-serif;
+      font-size: 14px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 10px 14px;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .parrain-entry-input:focus { border-color: rgba(255,255,255,0.4); }
+    .parrain-entry-input::placeholder { color: rgba(255,255,255,0.22); letter-spacing: 1px; font-size: 12px; }
+    .parrain-entry-btn {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 10px;
+      color: #fff;
+      font-family: Nasalization, Arial, sans-serif;
+      font-size: 12px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 10px 16px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .parrain-entry-btn:hover { background: rgba(255,255,255,0.22); }
+    .parrain-entry-btn:disabled { opacity: 0.4; cursor: default; }
+    .parrain-entry-status {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      text-align: center;
+      margin-top: 8px;
+      min-height: 18px;
+      color: rgba(255,255,255,0.5);
+    }
+    .parrain-entry-status.ok { color: #7fe8b0; }
+    .parrain-entry-status.err { color: #ff7f7f; }
+    .parrain-locked {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      text-align: center;
+      color: rgba(255,255,255,0.4);
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      line-height: 1.5;
+    }
+
     /* ── REFERRALS POPUP ── */
     .ref-overlay {
       display: none;
@@ -1669,6 +1743,22 @@
       </div>
       <button class="ref-see-btn" onclick="openReferralsPopup()" data-i18n="referrals_see_btn">SEE REFERRALS</button>
     </div>
+
+    <!-- Enter a friend's referral code -->
+    <div class="parrain-entry" id="parrain-entry-block" style="display:none;">
+      <p class="parrain-entry-label">Referred by a friend? Enter their code</p>
+      <div class="parrain-entry-row">
+        <input id="parrain-code-input" class="parrain-entry-input" type="text" maxlength="12"
+          placeholder="FRIEND'S CODE" autocomplete="off" autocorrect="off" autocapitalize="characters"
+          spellcheck="false" onkeydown="if(event.key==='Enter')submitParrainCode()" />
+        <button class="parrain-entry-btn" id="parrain-submit-btn" onclick="submitParrainCode()">OK</button>
+      </div>
+      <p class="parrain-entry-status" id="parrain-entry-status"></p>
+    </div>
+    <div class="parrain-locked" id="parrain-locked-block" style="display:none;">
+      <span id="parrain-locked-text"></span>
+    </div>
+
     </div><!-- end card-body -->
   </div>
 
@@ -4038,6 +4128,123 @@
   }
 
   initInvite().catch(function(err) { console.error('initInvite failed:', err); });
+
+  // ── PARRAIN CODE ENTRY ─────────────────────────────────────────────
+  (async function initParrainSection() {
+    const uid     = localStorage.getItem('nava_peace_uid');
+    const ownCode = localStorage.getItem('nava_peace_ref_code');
+    if (!uid || typeof SUPABASE_URL === 'undefined') return;
+
+    const entryBlock  = document.getElementById('parrain-entry-block');
+    const lockedBlock = document.getElementById('parrain-locked-block');
+    const lockedText  = document.getElementById('parrain-locked-text');
+
+    try {
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      // Already credited ?
+      const { data: rpRow } = await sb.from('referral_points')
+        .select('referral_code').eq('user_uid', uid).limit(1).maybeSingle();
+      if (rpRow && rpRow.referral_code) {
+        if (lockedBlock) { lockedText.textContent = '🕊 Referred by: ' + rpRow.referral_code; lockedBlock.style.display = ''; }
+        return;
+      }
+
+      // referred_by already in a peace_vote but not yet credited (edge case)
+      const { data: pvRow } = await sb.from('peace_votes')
+        .select('referred_by').eq('user_uid', uid).not('referred_by', 'is', null).limit(1).maybeSingle();
+      if (pvRow && pvRow.referred_by) {
+        if (lockedBlock) { lockedText.textContent = '🕊 Referred by: ' + pvRow.referred_by + ' (pending next vote)'; lockedBlock.style.display = ''; }
+        return;
+      }
+
+      // Show input — pre-fill if localStorage already has a pending code
+      if (entryBlock) {
+        entryBlock.style.display = '';
+        const pending = localStorage.getItem('nava_peace_referred_by');
+        if (pending && pending !== ownCode) {
+          const inp = document.getElementById('parrain-code-input');
+          if (inp) { inp.value = pending; }
+          document.getElementById('parrain-entry-status').textContent = 'Code pending — will be credited on your next vote.';
+        }
+      }
+    } catch(e) {
+      if (entryBlock) entryBlock.style.display = '';
+    }
+  })();
+
+  async function submitParrainCode() {
+    const uid     = localStorage.getItem('nava_peace_uid');
+    const ownCode = localStorage.getItem('nava_peace_ref_code');
+    const input   = document.getElementById('parrain-code-input');
+    const status  = document.getElementById('parrain-entry-status');
+    const btn     = document.getElementById('parrain-submit-btn');
+    if (!input || !status || !uid) return;
+
+    const code = (input.value || '').trim().toUpperCase();
+    if (!code || code.length < 4) {
+      status.textContent = 'Enter a valid code (at least 4 characters).';
+      status.className = 'parrain-entry-status err'; return;
+    }
+    if (code === ownCode) {
+      status.textContent = "That's your own code — you can't refer yourself.";
+      status.className = 'parrain-entry-status err'; return;
+    }
+
+    btn.disabled = true;
+    status.textContent = 'Checking…';
+    status.className = 'parrain-entry-status';
+
+    try {
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      // Code exists ?
+      const { data: codeRow } = await sb.from('peace_votes')
+        .select('user_uid').eq('referral_code', code).limit(1).maybeSingle();
+      if (!codeRow) {
+        status.textContent = 'Code not found. Check with your friend.';
+        status.className = 'parrain-entry-status err';
+        btn.disabled = false; return;
+      }
+
+      // Already credited for anyone ?
+      const { data: rpExist } = await sb.from('referral_points')
+        .select('id').eq('user_uid', uid).limit(1).maybeSingle();
+      if (rpExist) {
+        status.textContent = "You've already been credited for a referral.";
+        status.className = 'parrain-entry-status err';
+        btn.disabled = false; return;
+      }
+
+      // Store in localStorage so the next vote picks it up
+      localStorage.setItem('nava_peace_referred_by', code);
+
+      // Try to credit immediately (if they already voted today, insert directly)
+      const today = new Date().toISOString().split('T')[0];
+      const { data: todayVote } = await sb.from('peace_votes')
+        .select('id').eq('user_uid', uid).gte('created_at', today).limit(1).maybeSingle();
+
+      let credited = false;
+      if (todayVote) {
+        const { error: insErr } = await sb.from('referral_points').insert({ referral_code: code, user_uid: uid });
+        if (!insErr) credited = true;
+      }
+
+      document.getElementById('parrain-entry-block').style.display = 'none';
+      const lockedBlock = document.getElementById('parrain-locked-block');
+      const lockedText  = document.getElementById('parrain-locked-text');
+      if (lockedBlock) {
+        lockedText.textContent = credited
+          ? '🕊 Referral credited! Thank you.'
+          : '🕊 Code saved! Credit will apply on your next vote.';
+        lockedBlock.style.display = '';
+      }
+    } catch(e) {
+      status.textContent = 'An error occurred. Please try again.';
+      status.className = 'parrain-entry-status err';
+      btn.disabled = false;
+    }
+  }
 
   function copyCode() {
     const code = localStorage.getItem('nava_peace_ref_code') || '';

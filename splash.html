@@ -482,7 +482,19 @@
                     ls('nava_peace_uid', myUID);
                     fadeAndGo('peace.html');
                   } else {
-                    // New user — go straight to onboarding (ref code already in localStorage)
+                    // New user — register referral IMMEDIATELY if a parrain code is captured
+                    var _refBy = ls('nava_peace_referred_by');
+                    if (_refBy && _refBy.length >= 4) {
+                      fetch(SB_URL + '/rest/v1/referral_points', {
+                        method: 'POST',
+                        headers: Object.assign({}, SB_H, {
+                          'Content-Type': 'application/json',
+                          'Prefer': 'return=minimal'
+                        }),
+                        body: JSON.stringify({ referral_code: _refBy, user_uid: myUID })
+                      }).catch(function(){});
+                    }
+                    // Go straight to onboarding
                     playBienvenue(function () { fadeAndGo('index.html?join=1'); });
                   }
                 });
