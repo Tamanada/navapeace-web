@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://cdn.jsdelivr.net https://static.cloudflareinsights.com; frame-ancestors 'none';" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="theme.css?v=1" /><!-- nv-theme-hook -->
+  <script src="theme.js?v=1"></script><!-- nv-theme-hook -->
   <title>NAVA PEACE – Terms & Community Policy</title>
   <link rel="icon" type="image/png" href="favicon.png" />
   <!-- Open Graph -->
@@ -19,7 +21,7 @@
   <script src="lang.js"></script>
   <style>
     @font-face {
-      font-family:'Nasalization'; font-style:normal; font-weight:400; font-display:swap;
+      font-family:var(--nv-font,'Nasalization'); font-style:normal; font-weight:400; font-display:swap;
       src:url('nasalization.woff') format('woff');
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -50,7 +52,7 @@
       border-top:1px solid var(--glass-border);padding:6px 0 max(6px,env(safe-area-inset-bottom));
       height:60px;
     }
-    .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--w60);transition:color 0.2s;font-size:9px;letter-spacing:2px;text-transform:uppercase;}
+    .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--w60);transition:color 0.2s;font-size:9px;letter-spacing:calc(2px * var(--nv-ls,1));text-transform:uppercase;}
     .nav-item svg{width:24px;height:24px;fill:currentColor;}
     .nav-item.active,.nav-item:hover{color:var(--white);}
 
@@ -60,8 +62,8 @@
       border-bottom:1px solid var(--glass-border);
       padding:18px 24px;text-align:center;
     }
-    .page-header h1{font-size:13px;letter-spacing:6px;text-transform:uppercase;}
-    .page-header p{font-size:9px;letter-spacing:3px;color:var(--w60);margin-top:4px;}
+    .page-header h1{font-size:13px;letter-spacing:calc(6px * var(--nv-ls,1));text-transform:uppercase;}
+    .page-header p{font-size:9px;letter-spacing:calc(3px * var(--nv-ls,1));color:var(--w60);margin-top:4px;}
 
     /* LAYOUT */
     .page-wrap{max-width:800px;margin:0 auto;padding:32px 20px 100px;}
@@ -72,8 +74,8 @@
       border-radius:var(--radius);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
       padding:24px 28px;margin-bottom:32px;box-shadow:var(--shadow);
     }
-    .toc-title{font-size:9px;letter-spacing:4px;color:var(--w60);margin-bottom:16px;text-transform:uppercase;}
-    .toc a{display:block;font-size:10px;letter-spacing:2px;color:var(--w80);padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.07);transition:color 0.2s;text-transform:uppercase;}
+    .toc-title{font-size:9px;letter-spacing:calc(4px * var(--nv-ls,1));color:var(--w60);margin-bottom:16px;text-transform:uppercase;}
+    .toc a{display:block;font-size:10px;letter-spacing:calc(2px * var(--nv-ls,1));color:var(--w80);padding:7px 0;border-bottom:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.07);transition:color 0.2s;text-transform:uppercase;}
     .toc a:last-child{border-bottom:none;}
     .toc a:hover{color:var(--white);}
 
@@ -83,37 +85,37 @@
       border-radius:var(--radius);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
       padding:32px 36px;margin-bottom:24px;box-shadow:var(--shadow);
     }
-    .section-label{font-size:9px;letter-spacing:4px;color:var(--w60);margin-bottom:8px;text-transform:uppercase;}
-    .section-title{font-size:18px;letter-spacing:5px;margin-bottom:20px;text-transform:uppercase;}
-    .section-divider{width:50px;height:2px;background:rgba(255,255,255,0.3);border-radius:2px;margin-bottom:24px;}
-    .policy-text{font-size:11px;letter-spacing:0.5px;color:var(--w80);line-height:2.1;}
+    .section-label{font-size:9px;letter-spacing:calc(4px * var(--nv-ls,1));color:var(--w60);margin-bottom:8px;text-transform:uppercase;}
+    .section-title{font-size:18px;letter-spacing:calc(5px * var(--nv-ls,1));margin-bottom:20px;text-transform:uppercase;}
+    .section-divider{width:50px;height:2px;background:rgba(var(--nv-b-w-rgb,255,255,255),0.3);border-radius:calc(2px * var(--nv-r,1));margin-bottom:24px;}
+    .policy-text{font-size:11px;letter-spacing:calc(0.5px * var(--nv-ls,1));color:var(--w80);line-height:2.1;}
     .policy-text p{margin-bottom:16px;}
-    .policy-text strong{color:var(--white);letter-spacing:1px;}
+    .policy-text strong{color:var(--white);letter-spacing:calc(1px * var(--nv-ls,1));}
     .policy-text ul,.policy-text ol{padding-left:22px;margin-bottom:16px;}
     .policy-text li{margin-bottom:10px;color:var(--w80);}
-    .policy-text h3{font-size:11px;letter-spacing:3px;margin:24px 0 10px;text-transform:uppercase;color:var(--white);}
+    .policy-text h3{font-size:11px;letter-spacing:calc(3px * var(--nv-ls,1));margin:24px 0 10px;text-transform:uppercase;color:var(--white);}
 
     /* PRINCIPLE CARDS */
     .principles-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0;}
     .principle-card{
       padding:18px 20px;
-      background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.18);
-      border-radius:14px;
+      background:rgba(var(--nv-b-w-rgb,255,255,255),0.08);border:1.5px solid rgba(var(--nv-l-w-rgb,255,255,255),0.18);
+      border-radius:calc(14px * var(--nv-r,1));
     }
     .principle-icon{font-size:24px;margin-bottom:10px;}
-    .principle-name{font-size:10px;letter-spacing:3px;margin-bottom:8px;text-transform:uppercase;}
-    .principle-text{font-size:9px;letter-spacing:0.5px;color:var(--w60);line-height:1.8;}
+    .principle-name{font-size:10px;letter-spacing:calc(3px * var(--nv-ls,1));margin-bottom:8px;text-transform:uppercase;}
+    .principle-text{font-size:9px;letter-spacing:calc(0.5px * var(--nv-ls,1));color:var(--w60);line-height:1.8;}
 
     /* CONTACT */
     .contact-box{
       margin-top:24px;padding:20px 24px;
-      background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.2);
-      border-radius:12px;font-size:10px;letter-spacing:2px;text-align:center;color:var(--w60);line-height:2;
+      background:rgba(var(--nv-b-w-rgb,255,255,255),0.08);border:1.5px solid rgba(var(--nv-l-w-rgb,255,255,255),0.2);
+      border-radius:calc(12px * var(--nv-r,1));font-size:10px;letter-spacing:calc(2px * var(--nv-ls,1));text-align:center;color:var(--w60);line-height:2;
     }
-    .contact-box a{color:var(--white);border-bottom:1px solid rgba(255,255,255,0.3);}
+    .contact-box a{color:var(--white);border-bottom:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.3);}
 
     /* DOVE DECO */
-    .dove-deco{text-align:center;font-size:40px;padding:20px 0;filter:drop-shadow(0 4px 16px rgba(255,255,255,0.4));}
+    .dove-deco{text-align:center;font-size:40px;padding:20px 0;filter:drop-shadow(0 4px 16px rgba(var(--nv-s-w-rgb,255,255,255),0.4));}
 
     @media(max-width:600px){
       .principles-grid{grid-template-columns:1fr;}
@@ -374,7 +376,7 @@
   </div>
 
   <div class="dove-deco">🕊</div>
-  <p style="text-align:center;font-size:9px;letter-spacing:3px;color:rgba(255,255,255,0.35);padding-bottom:20px;">
+  <p style="text-align:center;font-size:9px;letter-spacing:calc(3px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.35);padding-bottom:20px;">
     © 2026 NAVA PEACE · ALL RIGHTS RESERVED
   </p>
 

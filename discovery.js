@@ -43,11 +43,11 @@
     el.id = 'disco-toast';
     el.style.cssText =
       'position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:99999;' +
-      'background:linear-gradient(135deg,rgba(58,172,223,0.97),rgba(30,142,196,0.97));' +
-      'border:1px solid rgba(255,255,255,0.3);border-radius:50px;' +
-      'padding:10px 26px;font-family:Nasalization,Arial,sans-serif;' +
-      'font-size:9px;letter-spacing:3px;color:#fff;white-space:nowrap;' +
-      'box-shadow:0 4px 24px rgba(58,172,223,0.4);' +
+      'background:linear-gradient(135deg,rgba(var(--nv-b-bm-rgb,58,172,223),0.97),rgba(var(--nv-b-bd-rgb,30,142,196),0.97));' +
+      'border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.3);border-radius:calc(50px * var(--nv-r,1));' +
+      'padding:10px 26px;font-family:var(--nv-font,Nasalization,Arial,sans-serif);' +
+      'font-size:9px;letter-spacing:calc(3px * var(--nv-ls,1));color:var(--nv-t-w,#fff);white-space:nowrap;' +
+      'box-shadow:0 4px 24px rgba(var(--nv-s-bm-rgb,58,172,223),0.4);' +
       'opacity:0;transition:opacity 0.4s ease,top 0.4s ease;pointer-events:none;';
     el.textContent = '🕊  +1 DISCOVERY DOVE';
     document.body.appendChild(el);
@@ -74,37 +74,37 @@
     overlay.id = 'disco-overlay';
     overlay.style.cssText =
       'position:fixed;inset:0;z-index:9990;display:flex;align-items:center;justify-content:center;' +
-      'background:rgba(0,20,40,0.4);backdrop-filter:blur(8px);' +
+      'background:rgba(var(--nv-b-nv-rgb,0,20,40),0.4);backdrop-filter:blur(8px);' +
       'opacity:0;transition:opacity 0.35s ease;';
 
     overlay.innerHTML =
       '<div id="disco-card" style="' +
-        'background:linear-gradient(160deg,rgba(58,172,223,0.88),rgba(26,110,150,0.92));' +
-        'border:1px solid rgba(255,255,255,0.3);border-radius:28px;' +
+        'background:linear-gradient(160deg,rgba(var(--nv-b-bm-rgb,58,172,223),0.88),rgba(var(--nv-b-bd-rgb,26,110,150),0.92));' +
+        'border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.3);border-radius:calc(28px * var(--nv-r,1));' +
         'padding:36px 28px 28px;max-width:300px;width:88%;text-align:center;' +
-        'font-family:Nasalization,Arial,sans-serif;' +
-        'box-shadow:0 20px 60px rgba(0,80,140,0.35),0 0 0 1px rgba(255,255,255,0.08);' +
+        'font-family:var(--nv-font,Nasalization,Arial,sans-serif);' +
+        'box-shadow:0 20px 60px rgba(var(--nv-s-bd-rgb,0,80,140),0.35),0 0 0 1px rgba(var(--nv-s-w-rgb,255,255,255),0.08);' +
         'transform:translateY(22px);transition:transform 0.38s ease;' +
       '">' +
         // Dove image (NAVA style)
         '<div style="margin-bottom:6px;">' +
-          '<img src="logo.png" style="width:52px;height:52px;object-fit:contain;opacity:0.9;filter:drop-shadow(0 0 8px rgba(255,255,255,0.5));" onerror="this.style.display=\'none\'" />' +
+          '<img src="logo.png" style="width:52px;height:52px;object-fit:contain;opacity:0.9;filter:drop-shadow(0 0 8px rgba(var(--nv-s-w-rgb,255,255,255),0.5));" onerror="this.style.display=\'none\'" />' +
         '</div>' +
-        '<div style="font-size:7px;letter-spacing:6px;color:rgba(255,255,255,0.55);margin-bottom:6px;text-transform:uppercase;">Section Unlocked</div>' +
-        '<div style="font-size:13px;letter-spacing:4px;color:#fff;margin-bottom:14px;text-transform:uppercase;">' + info.label + '</div>' +
-        '<div style="width:40px;height:1px;background:rgba(255,255,255,0.25);margin:0 auto 14px;"></div>' +
-        '<div style="font-size:9px;letter-spacing:1px;color:rgba(255,255,255,0.72);line-height:1.8;margin-bottom:22px;">' + info.msg + '</div>' +
+        '<div style="font-size:7px;letter-spacing:calc(6px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.55);margin-bottom:6px;text-transform:uppercase;">Section Unlocked</div>' +
+        '<div style="font-size:13px;letter-spacing:calc(4px * var(--nv-ls,1));color:var(--nv-t-w,#fff);margin-bottom:14px;text-transform:uppercase;">' + info.label + '</div>' +
+        '<div style="width:40px;height:1px;background:rgba(var(--nv-b-w-rgb,255,255,255),0.25);margin:0 auto 14px;"></div>' +
+        '<div style="font-size:9px;letter-spacing:calc(1px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.72);line-height:1.8;margin-bottom:22px;">' + info.msg + '</div>' +
         '<div style="display:flex;align-items:center;justify-content:center;gap:9px;' +
-          'background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.18);' +
-          'border-radius:50px;padding:9px 0;margin-bottom:20px;">' +
+          'background:rgba(var(--nv-b-w-rgb,255,255,255),0.12);border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.18);' +
+          'border-radius:calc(50px * var(--nv-r,1));padding:9px 0;margin-bottom:20px;">' +
           '<span style="font-size:15px;">🕊</span>' +
-          '<span style="font-size:9px;letter-spacing:3px;color:#fff;font-family:Nasalization,Arial,sans-serif;">+1 DISCOVERY DOVE</span>' +
+          '<span style="font-size:9px;letter-spacing:calc(3px * var(--nv-ls,1));color:var(--nv-t-w,#fff);font-family:var(--nv-font,Nasalization,Arial,sans-serif);">+1 DISCOVERY DOVE</span>' +
         '</div>' +
         '<button id="disco-btn" style="' +
-          'background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);' +
-          'border-radius:50px;padding:13px 0;width:100%;' +
-          'font-family:Nasalization,Arial,sans-serif;font-size:8px;letter-spacing:5px;' +
-          'color:#fff;cursor:pointer;transition:background 0.2s;' +
+          'background:rgba(var(--nv-b-w-rgb,255,255,255),0.18);border:1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.35);' +
+          'border-radius:calc(50px * var(--nv-r,1));padding:13px 0;width:100%;' +
+          'font-family:var(--nv-font,Nasalization,Arial,sans-serif);font-size:8px;letter-spacing:calc(5px * var(--nv-ls,1));' +
+          'color:var(--nv-t-w,#fff);cursor:pointer;transition:background 0.2s;' +
           'text-transform:uppercase;' +
         '">CLAIM DOVE</button>' +
       '</div>';

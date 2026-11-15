@@ -16,6 +16,8 @@
   <meta charset="UTF-8" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://static.cloudflareinsights.com; frame-ancestors 'none';" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="theme.css?v=1" /><!-- nv-theme-hook -->
+  <script src="theme.js?v=1"></script><!-- nv-theme-hook -->
   <title>NAVA PEACE – Wallet</title>
   <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
@@ -28,18 +30,18 @@
   <script src="lang.js?v=8"></script>
   <style>
     @font-face {
-      font-family: 'Nasalization';
+      font-family: var(--nv-font,'Nasalization');
       font-style: normal;
       font-weight: 400;
       font-display: swap;
       src: url('nasalization.woff') format('woff');
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Nasalization', Arial, sans-serif; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--nv-font,'Nasalization', Arial, sans-serif); }
 
     body {
-      background: radial-gradient(ellipse at 50% 0%, #0F3A5A 0%, #050F1A 60%);
+      background: radial-gradient(ellipse at 50% 0%, var(--nv-g-bd,#0F3A5A) 0%, var(--nv-g-nv,#050F1A) 60%);
       min-height: 100dvh;
-      color: #fff;
+      color: var(--nv-t-w,#fff);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -57,17 +59,17 @@
       padding: 20px 20px 12px;
       gap: 4px;
     }
-    .header img { width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 3px 14px rgba(255,255,255,0.3)); }
-    .header h1 { font-size: 26px; letter-spacing: 6px; padding-left: 6px; color: #fff; }
-    .header .tagline { font-size: 11px; letter-spacing: 4px; color: rgba(100,210,255,0.8); text-transform: uppercase; }
+    .header img { width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 3px 14px rgba(var(--nv-s-w-rgb,255,255,255),0.3)); }
+    .header h1 { font-size: 26px; letter-spacing: calc(6px * var(--nv-ls,1)); padding-left: 6px; color: var(--nv-t-w,#fff); }
+    .header .tagline { font-size: 11px; letter-spacing: calc(4px * var(--nv-ls,1)); color: rgba(var(--nv-t-bl-rgb,100,210,255),0.8); text-transform: uppercase; }
 
     /* ── SECTION HEADER ── */
     .section-hdr {
       width: calc(100% - 32px);
       max-width: 480px;
       font-size: 11px;
-      letter-spacing: 3px;
-      color: rgba(255,255,255,0.45);
+      letter-spacing: calc(3px * var(--nv-ls,1));
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.45);
       text-transform: uppercase;
       margin: 16px 0 8px;
       padding-left: 2px;
@@ -77,15 +79,15 @@
     .card {
       width: calc(100% - 32px);
       max-width: 480px;
-      background: linear-gradient(135deg, rgba(100,210,255,0.08), rgba(30,80,140,0.12));
-      border: 1px solid rgba(100,210,255,0.2);
-      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(var(--nv-b-bl-rgb,100,210,255),0.08), rgba(var(--nv-b-bd-rgb,30,80,140),0.12));
+      border: 1px solid rgba(var(--nv-l-bl-rgb,100,210,255),0.2);
+      border-radius: calc(16px * var(--nv-r,1));
       padding: 16px 18px;
       margin-bottom: 12px;
     }
-    .card.gold-border  { border-color: rgba(255,210,80,0.3);   background: linear-gradient(135deg, rgba(255,210,80,0.06), rgba(180,140,0,0.06)); }
-    .card.green-border { border-color: rgba(100,255,160,0.3); background: linear-gradient(135deg, rgba(100,255,160,0.06), rgba(20,80,50,0.06)); }
-    .card.dim-border   { border-color: rgba(255,255,255,0.07); background: rgba(255,255,255,0.03); }
+    .card.gold-border  { border-color: rgba(var(--nv-l-gd-rgb,255,210,80),0.3);   background: linear-gradient(135deg, rgba(var(--nv-b-gd-rgb,255,210,80),0.06), rgba(var(--nv-b-gd-rgb,180,140,0),0.06)); }
+    .card.green-border { border-color: rgba(var(--nv-l-gr-rgb,100,255,160),0.3); background: linear-gradient(135deg, rgba(var(--nv-b-gr-rgb,100,255,160),0.06), rgba(var(--nv-b-gr-rgb,20,80,50),0.06)); }
+    .card.dim-border   { border-color: rgba(var(--nv-l-w-rgb,255,255,255),0.07); background: rgba(var(--nv-b-w-rgb,255,255,255),0.03); }
 
     /* ── BALANCE BAR ── */
     .balance-row {
@@ -94,47 +96,47 @@
       align-items: center;
       margin-bottom: 6px;
     }
-    .balance-label { font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,0.4); }
-    .balance-value { font-size: 22px; letter-spacing: 1px; color: #64D2FF; }
+    .balance-label { font-size: 10px; letter-spacing: calc(2px * var(--nv-ls,1)); color: rgba(var(--nv-t-w-rgb,255,255,255),0.4); }
+    .balance-value { font-size: 22px; letter-spacing: calc(1px * var(--nv-ls,1)); color: var(--nv-t-bl,#64D2FF); }
 
     /* ── ADDRESS ── */
     .addr-box {
       background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 10px;
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.1);
+      border-radius: calc(10px * var(--nv-r,1));
       padding: 10px 14px;
       font-family: 'Courier New', monospace;
       font-size: 11px;
-      color: rgba(255,255,255,0.7);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.7);
       word-break: break-all;
       margin-bottom: 10px;
-      letter-spacing: 0.5px;
+      letter-spacing: calc(0.5px * var(--nv-ls,1));
       line-height: 1.5;
     }
 
     /* ── BUTTONS ── */
     .btn-primary {
       width: 100%; padding: 13px;
-      border: none; border-radius: 12px;
-      background: linear-gradient(135deg, #3AACDF, #1E6E9A);
-      color: #fff;
-      font-family: 'Nasalization', Arial, sans-serif;
-      font-size: 11px; letter-spacing: 2px;
+      border: none; border-radius: calc(12px * var(--nv-r,1));
+      background: linear-gradient(135deg, var(--nv-b-bm,#3AACDF), var(--nv-b-bm2,#1E6E9A));
+      color: var(--nv-on-bm,#fff);
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
+      font-size: 11px; letter-spacing: calc(2px * var(--nv-ls,1));
       cursor: pointer; transition: opacity 0.2s, transform 0.1s;
       margin-top: 4px;
     }
     .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
     .btn-primary:disabled { opacity: 0.45; cursor: default; }
-    .btn-primary.green { background: linear-gradient(135deg, #32CC80, #1E8050); color: #fff; }
-    .btn-primary.gold  { background: linear-gradient(135deg, #C4920A, #8B6508); }
+    .btn-primary.green { background: linear-gradient(135deg, var(--nv-b-gr,#32CC80), var(--nv-b-gr2,#1E8050)); color: var(--nv-on-gr,#fff); }
+    .btn-primary.gold  { background: linear-gradient(135deg, var(--nv-b-gd,#C4920A), var(--nv-b-gd2,#8B6508)); }
     .btn-secondary {
       width: 100%; padding: 11px;
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 12px;
-      background: rgba(255,255,255,0.05);
-      color: rgba(255,255,255,0.7);
-      font-family: 'Nasalization', Arial, sans-serif;
-      font-size: 10px; letter-spacing: 1.5px;
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.15);
+      border-radius: calc(12px * var(--nv-r,1));
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.05);
+      color: rgba(var(--nv-t-w-rgb,255,255,255),0.7);
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
+      font-size: 10px; letter-spacing: calc(1.5px * var(--nv-ls,1));
       cursor: pointer; transition: opacity 0.2s;
       margin-top: 8px;
     }
@@ -143,12 +145,12 @@
     /* ── PROGRESS BAR ── */
     .progress-wrap {
       height: 5px; border-radius: 3px;
-      background: rgba(255,255,255,0.08);
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.08);
       overflow: hidden; margin-top: 4px;
     }
     .progress-fill {
-      height: 100%; border-radius: 3px;
-      background: linear-gradient(90deg, #64D2FF, #3AACDF);
+      height: 100%; border-radius: calc(3px * var(--nv-r,1));
+      background: linear-gradient(90deg, var(--nv-b-bl,#64D2FF), var(--nv-b-bl2,#3AACDF));
       transition: width 0.6s ease;
     }
 
@@ -156,21 +158,21 @@
     .info-row {
       display: flex; justify-content: space-between; align-items: center;
       padding: 6px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      border-bottom: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.06);
       font-size: 12px;
     }
     .info-row:last-child { border-bottom: none; }
-    .info-row .lbl { color: rgba(255,255,255,0.45); letter-spacing: 0.5px; }
-    .info-row .val { color: #fff; font-weight: 600; letter-spacing: 0.5px; }
+    .info-row .lbl { color: rgba(var(--nv-t-w-rgb,255,255,255),0.45); letter-spacing: calc(0.5px * var(--nv-ls,1)); }
+    .info-row .val { color: var(--nv-t-w,#fff); font-weight: 600; letter-spacing: calc(0.5px * var(--nv-ls,1)); }
 
     /* ── BADGE ROW ── */
     .badge-chip {
       display: inline-block;
-      background: rgba(100,210,255,0.12);
-      border: 1px solid rgba(100,210,255,0.3);
-      border-radius: 20px;
+      background: rgba(var(--nv-b-bl-rgb,100,210,255),0.12);
+      border: 1px solid rgba(var(--nv-l-bl-rgb,100,210,255),0.3);
+      border-radius: calc(20px * var(--nv-r,1));
       padding: 4px 12px;
-      font-size: 9px; letter-spacing: 1.5px; color: #64D2FF;
+      font-size: 9px; letter-spacing: calc(1.5px * var(--nv-ls,1)); color: var(--nv-t-bl,#64D2FF);
       margin: 3px 3px 0 0;
     }
 
@@ -178,40 +180,40 @@
     .wallet-providers { display: flex; gap: 10px; margin-top: 10px; }
     .wallet-provider-btn {
       flex: 1; padding: 12px 8px;
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 12px;
-      background: rgba(255,255,255,0.04);
-      color: #fff;
-      font-family: 'Nasalization', Arial, sans-serif;
-      font-size: 9px; letter-spacing: 1.5px;
+      border: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.12);
+      border-radius: calc(12px * var(--nv-r,1));
+      background: rgba(var(--nv-b-w-rgb,255,255,255),0.04);
+      color: var(--nv-t-w,#fff);
+      font-family: var(--nv-font,'Nasalization', Arial, sans-serif);
+      font-size: 9px; letter-spacing: calc(1.5px * var(--nv-ls,1));
       cursor: pointer; transition: border-color 0.2s, background 0.2s;
       text-align: center;
     }
-    .wallet-provider-btn:hover { border-color: rgba(100,210,255,0.35); background: rgba(100,210,255,0.07); }
+    .wallet-provider-btn:hover { border-color: rgba(var(--nv-l-bl-rgb,100,210,255),0.35); background: rgba(var(--nv-b-bl-rgb,100,210,255),0.07); }
     .wallet-provider-btn .wp-icon { font-size: 22px; display: block; margin-bottom: 5px; }
 
     /* ── TOAST ── */
     .toast {
       position: fixed; top: 24px; left: 50%; transform: translateX(-50%);
-      z-index: 99999; background: rgba(20,80,140,0.97); border: 1px solid rgba(100,210,255,0.35);
-      border-radius: 50px; padding: 10px 24px;
-      font-size: 9px; letter-spacing: 2px; color: #fff; white-space: nowrap;
-      box-shadow: 0 4px 24px rgba(58,172,223,0.3);
+      z-index: 99999; background: rgba(var(--nv-b-bd-rgb,20,80,140),0.97); border: 1px solid rgba(var(--nv-l-bl-rgb,100,210,255),0.35);
+      border-radius: calc(50px * var(--nv-r,1)); padding: 10px 24px;
+      font-size: 9px; letter-spacing: calc(2px * var(--nv-ls,1)); color: var(--nv-t-w,#fff); white-space: nowrap;
+      box-shadow: 0 4px 24px rgba(var(--nv-s-bm-rgb,58,172,223),0.3);
       opacity: 0; transition: opacity 0.3s, top 0.3s;
     }
     .toast.show { opacity: 1; }
-    .toast.success { background: rgba(20,100,60,0.97); border-color: rgba(100,255,160,0.35); }
-    .toast.error   { background: rgba(120,20,20,0.97);  border-color: rgba(255,100,100,0.35); }
+    .toast.success { background: rgba(var(--nv-b-gr-rgb,20,100,60),0.97); border-color: rgba(var(--nv-l-gr-rgb,100,255,160),0.35); }
+    .toast.error   { background: rgba(var(--nv-b-rd-rgb,120,20,20),0.97);  border-color: rgba(var(--nv-l-rd-rgb,255,100,100),0.35); }
 
     /* ── BOTTOM NAV ── */
     .bottom-nav {
       position: fixed; bottom: 0; left: 0; right: 0; height: 62px;
-      background: rgba(5,15,26,0.97); backdrop-filter: blur(20px);
-      border-top: 1px solid rgba(255,255,255,0.07);
+      background: rgba(var(--nv-b-nv-rgb,5,15,26),0.97); backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(var(--nv-l-w-rgb,255,255,255),0.07);
       display: flex; align-items: center; justify-content: space-around; z-index: 100;
     }
-    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; color: rgba(255,255,255,0.35); text-decoration: none; font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; transition: color 0.2s; }
-    .nav-item.active { color: #64D2FF; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; color: rgba(var(--nv-t-w-rgb,255,255,255),0.35); text-decoration: none; font-size: 8px; letter-spacing: calc(1.5px * var(--nv-ls,1)); text-transform: uppercase; transition: color 0.2s; }
+    .nav-item.active { color: var(--nv-t-bl,#64D2FF); }
     .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
   </style>
 </head>
@@ -247,16 +249,16 @@
 
   <!-- TGE COUNTDOWN -->
   <div class="card gold-border">
-    <div style="font-size:11px;letter-spacing:2px;color:rgba(255,210,80,0.9);margin-bottom:6px;">⏳ TGE — DAY 180</div>
-    <div style="font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.55);line-height:1.6;margin-bottom:10px;">
+    <div style="font-size:11px;letter-spacing:calc(2px * var(--nv-ls,1));color:rgba(var(--nv-t-gd-rgb,255,210,80),0.9);margin-bottom:6px;">⏳ TGE — DAY 180</div>
+    <div style="font-family:Arial,sans-serif;font-size:12px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.55);line-height:1.6;margin-bottom:10px;">
       Tes Points NAVA seront convertis en tokens NAVA on-chain (1:1) au Jour 180.
       Total Supply = Points communauté × 5. Elastic — jamais de pre-mint.
     </div>
-    <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:4px;">
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.35);margin-bottom:4px;">
       <span>Jour <span id="tge-day-now">0</span></span><span>Jour 180</span>
     </div>
     <div class="progress-wrap">
-      <div class="progress-fill" id="tge-progress" style="width:0%;background:linear-gradient(90deg,#FFD040,#64D2FF);"></div>
+      <div class="progress-fill" id="tge-progress" style="width:0%;background:linear-gradient(90deg,var(--nv-b-gd,#FFD040),var(--nv-b-gd2,#64D2FF));"></div>
     </div>
   </div>
 
@@ -265,7 +267,7 @@
 
   <!-- State A: already registered -->
   <div class="card green-border" id="tge-claimed-card" style="display:none;">
-    <div style="font-size:10px;letter-spacing:2px;color:#64FFAA;margin-bottom:10px;">✓ CLAIM ENREGISTRÉE</div>
+    <div style="font-size:10px;letter-spacing:calc(2px * var(--nv-ls,1));color:var(--nv-t-gr,#64FFAA);margin-bottom:10px;">✓ CLAIM ENREGISTRÉE</div>
     <div class="info-row">
       <span class="lbl">MONTANT</span>
       <span class="val" id="claim-amount-text">—</span>
@@ -278,14 +280,14 @@
       <span class="lbl">TYPE</span>
       <span class="val" id="claim-type-text">—</span>
     </div>
-    <div style="font-family:Arial,sans-serif;font-size:11px;color:rgba(255,255,255,0.35);margin-top:10px;line-height:1.6;text-align:center;">
+    <div style="font-family:Arial,sans-serif;font-size:11px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.35);margin-top:10px;line-height:1.6;text-align:center;">
       Le mint on-chain sera exécuté au Jour 180 par la Foundation.<br>Ta position est sécurisée. 🕊
     </div>
   </div>
 
   <!-- State B: wallet linked, can register -->
   <div class="card gold-border" id="tge-claimable-card" style="display:none;">
-    <div style="font-size:11px;letter-spacing:2px;color:rgba(255,210,80,0.9);margin-bottom:10px;">🚀 PRÉ-ENREGISTREMENT TGE</div>
+    <div style="font-size:11px;letter-spacing:calc(2px * var(--nv-ls,1));color:rgba(var(--nv-t-gd-rgb,255,210,80),0.9);margin-bottom:10px;">🚀 PRÉ-ENREGISTREMENT TGE</div>
     <div class="info-row">
       <span class="lbl">TES POINTS</span>
       <span class="val" id="claim-preview-amount">—</span>
@@ -294,7 +296,7 @@
       <span class="lbl">DESTINATION</span>
       <span class="val" id="claim-preview-wallet" style="font-size:10px;font-family:'Courier New',monospace;letter-spacing:0;">—</span>
     </div>
-    <div style="font-family:Arial,sans-serif;font-size:11px;color:rgba(255,255,255,0.4);margin:10px 0;line-height:1.6;">
+    <div style="font-family:Arial,sans-serif;font-size:11px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.4);margin:10px 0;line-height:1.6;">
       Verrouille ton adresse de réception maintenant.<br>
       Mint batch 1:1 (Points → NAVA on-chain) au Jour 180.
     </div>
@@ -303,7 +305,7 @@
 
   <!-- State C: no wallet yet -->
   <div class="card dim-border" id="tge-no-wallet-card" style="display:none;">
-    <div style="font-family:Arial,sans-serif;font-size:12px;color:rgba(255,200,80,0.8);line-height:1.5;margin-bottom:12px;">
+    <div style="font-family:Arial,sans-serif;font-size:12px;color:rgba(var(--nv-t-gd-rgb,255,200,80),0.8);line-height:1.5;margin-bottom:12px;">
       ⚠️ Lie ton wallet Solana avant le TGE pour recevoir tes NAVA on-chain.
     </div>
     <button class="btn-secondary" onclick="document.getElementById('custodial-section').scrollIntoView({behavior:'smooth'})">
@@ -314,15 +316,15 @@
   <!-- CUSTODIAL WALLET (Telegram) -->
   <div class="section-hdr">WALLET CUSTODIAL</div>
   <div class="card" id="custodial-section">
-    <div style="font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:12px;line-height:1.5;">
+    <div style="font-family:Arial,sans-serif;font-size:12px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.5);margin-bottom:12px;line-height:1.5;">
       Ton wallet Solana géré par NAVA PEACE Foundation.<br>
-      Ta clé privée n'est <strong style="color:#fff;">jamais stockée</strong> — dérivée à la demande via HMAC-SHA256.
+      Ta clé privée n'est <strong style="color:var(--nv-t-w,#fff);">jamais stockée</strong> — dérivée à la demande via HMAC-SHA256.
     </div>
     <!-- State: no wallet -->
     <div id="custodial-empty" style="display:block;text-align:center;">
       <div style="font-size:36px;margin-bottom:12px;">💼</div>
       <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Pas encore de wallet</div>
-      <div style="font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:16px;">
+      <div style="font-family:Arial,sans-serif;font-size:12px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.45);margin-bottom:16px;">
         Crée ton wallet Solana pour recevoir tes NAVA au TGE.
       </div>
       <button class="btn-primary green" id="btn-create-wallet" onclick="createCustodialWallet()">
@@ -331,7 +333,7 @@
     </div>
     <!-- State: wallet exists -->
     <div id="custodial-addr" style="display:none;">
-      <div style="font-size:10px;letter-spacing:2px;color:rgba(100,255,160,0.8);margin-bottom:6px;">✓ ACTIF — SOLANA DEVNET</div>
+      <div style="font-size:10px;letter-spacing:calc(2px * var(--nv-ls,1));color:rgba(var(--nv-t-gr-rgb,100,255,160),0.8);margin-bottom:6px;">✓ ACTIF — SOLANA DEVNET</div>
       <div class="addr-box" id="custodial-addr-text">—</div>
       <button class="btn-primary" id="btn-copy-addr" onclick="copyAddr()">COPIER L'ADRESSE</button>
     </div>
@@ -340,7 +342,7 @@
   <!-- SELF-CUSTODY (Phantom / Backpack) -->
   <div class="section-hdr">SELF-CUSTODY — MIGRATION TGE</div>
   <div class="card dim-border">
-    <div style="font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:12px;line-height:1.6;">
+    <div style="font-family:Arial,sans-serif;font-size:12px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.55);margin-bottom:12px;line-height:1.6;">
       Connecte ton propre wallet pour recevoir tes NAVA directement au TGE.
       Ton wallet sera lié à ton compte — tu peux le changer avant le Jour 180.
     </div>
@@ -361,7 +363,7 @@
 
     <!-- Connected -->
     <div id="sc-connected" style="display:none;">
-      <div style="font-size:10px;letter-spacing:2px;color:rgba(100,255,160,0.8);margin-bottom:6px;">✓ <span id="sc-wallet-name">PHANTOM</span> CONNECTÉ</div>
+      <div style="font-size:10px;letter-spacing:calc(2px * var(--nv-ls,1));color:rgba(var(--nv-t-gr-rgb,100,255,160),0.8);margin-bottom:6px;">✓ <span id="sc-wallet-name">PHANTOM</span> CONNECTÉ</div>
       <div class="addr-box" id="sc-addr-text">—</div>
       <button class="btn-secondary" onclick="disconnectSelfCustody()">DÉCONNECTER</button>
       <button class="btn-primary" id="btn-link-wallet" onclick="linkWallet()">LIER CE WALLET AU TGE</button>
@@ -369,9 +371,9 @@
 
     <!-- Linked -->
     <div id="sc-linked" style="display:none;">
-      <div style="font-size:10px;letter-spacing:2px;color:rgba(255,210,80,0.9);margin-bottom:6px;">🔗 WALLET LIÉ POUR LE TGE</div>
+      <div style="font-size:10px;letter-spacing:calc(2px * var(--nv-ls,1));color:rgba(var(--nv-t-gd-rgb,255,210,80),0.9);margin-bottom:6px;">🔗 WALLET LIÉ POUR LE TGE</div>
       <div class="addr-box" id="sc-linked-addr">—</div>
-      <div style="font-family:Arial,sans-serif;font-size:11px;color:rgba(255,255,255,0.4);margin-top:8px;line-height:1.5;">
+      <div style="font-family:Arial,sans-serif;font-size:11px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.4);margin-top:8px;line-height:1.5;">
         Modifiable jusqu'au Jour 180. Lors du TGE, tes NAVA seront mintés directement à cette adresse.
       </div>
       <button class="btn-secondary" onclick="unlinkWallet()">CHANGER DE WALLET</button>
@@ -381,17 +383,17 @@
   <!-- NFT COLLECTION BADGE -->
   <div class="section-hdr">COLLECTION NFT</div>
   <div class="card dim-border">
-    <div style="font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:10px;">
+    <div style="font-family:Arial,sans-serif;font-size:12px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.5);margin-bottom:10px;">
       Tes NFT Accélérateurs (cNFT Solana via Metaplex Bubblegum).
     </div>
     <div id="nft-badges">
-      <span style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;">Chargement...</span>
+      <span style="font-size:11px;color:rgba(var(--nv-t-w-rgb,255,255,255),0.3);letter-spacing:calc(1px * var(--nv-ls,1));">Chargement...</span>
     </div>
   </div>
 
   <!-- EMISSION INFO -->
   <div class="card dim-border" style="margin-top:4px;">
-    <div style="font-size:10px;letter-spacing:1px;color:rgba(255,255,255,0.25);line-height:1.7;font-family:Arial,sans-serif;">
+    <div style="font-size:10px;letter-spacing:calc(1px * var(--nv-ls,1));color:rgba(var(--nv-t-w-rgb,255,255,255),0.25);line-height:1.7;font-family:Arial,sans-serif;">
       🔐 Wallet custodial géré par NAVA PEACE Foundation — clé privée jamais stockée.<br>
       🔗 Self-custody : lier ton propre wallet Solana pour la migration TGE.<br>
       🚀 NAVA on-chain : Devnet actif, Mainnet au Jour 180.

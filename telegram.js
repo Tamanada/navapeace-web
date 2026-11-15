@@ -33,8 +33,8 @@ var NAVA_TG = { isTelegram: false, user: null, startParam: null, uid: null };
 
       // Match app theme to NAVA PEACE
       try {
-        Telegram.WebApp.setHeaderColor('#43b4e4');
-        Telegram.WebApp.setBackgroundColor('#43b4e4');
+        Telegram.WebApp.setHeaderColor((window.NAVA_THEME && window.NAVA_THEME.chrome('#43b4e4')) || '#43b4e4'); // nv-theme-hook
+        Telegram.WebApp.setBackgroundColor((window.NAVA_THEME && window.NAVA_THEME.chrome('#43b4e4')) || '#43b4e4'); // nv-theme-hook
       } catch (e) { /* older Telegram versions may not support this */ }
     }
   } catch (e) {
